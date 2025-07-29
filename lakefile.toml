@@ -1,0 +1,21 @@
+name = "openvm-fv"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["OpenvmFv"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+# weak.linter.mathlibStandardSet = true
+# maxSynthPendingDepth = 3
+# linter.hashCommand = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+
+[[require]]
+name = "LeanZKCircuit"
+path = "../leanzkcircuit"
+
+[[lean_lib]]
+name = "OpenvmFv"
