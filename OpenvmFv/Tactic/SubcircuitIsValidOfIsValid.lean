@@ -59,7 +59,7 @@ def run_subcircuit_isValid_of_isValid (circuit:String) (col:ℕ) (member:String)
   Lean.Elab.Command.elabCommand
     (←`(
       @[openvm_encapsulation]
-      lemma $uniqueName [Field F] [Field ExtF]
+      lemma $uniqueName
         (c: $circuit_type_tstx) (h: c.isValid) :
         ($member_term_tstx).isValid := by
           exact $proof_tstx
