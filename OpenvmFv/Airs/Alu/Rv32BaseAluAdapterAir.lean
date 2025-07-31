@@ -1,5 +1,5 @@
 import LeanZKCircuit.OpenVM.Circuit
-import LeanZKCircuit.Tactics.Air.define_air
+import LeanZKCircuit.Command.Air.define_air
 
 import OpenvmFv.Airs.ExecutionState
 import OpenvmFv.Airs.Memory
