@@ -15,7 +15,8 @@ scope = "leanprover-community"
 
 [[require]]
 name = "LeanZKCircuit"
-path = "../leanzkcircuit"
+git = "https://github.com/NethermindEth/leanzkcircuit.git"
+rev = "Dom/openvm_prelude"
 
 [[lean_lib]]
 name = "OpenvmFv"
