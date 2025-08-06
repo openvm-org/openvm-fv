@@ -1,6 +1,4 @@
-import LeanZKCircuit.OpenVM.Circuit
 import LeanZKCircuit.Command.Air.define_air
-
 import OpenvmFv.Airs.Alu.BaseAluCoreAir
 import OpenvmFv.Airs.Alu.Rv32BaseAluAdapterAir
 

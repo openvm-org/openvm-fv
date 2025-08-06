@@ -1,7 +1,11 @@
-import Mathlib
-
+import Mathlib.Lean.Message
 import OpenvmFv.Tactic.SubcircuitIsValidOfIsValid
-import OpenvmFv.Tactic.RewriteColumnOfIsValid
+import LeanZKCircuit.Command.Air.Syntax.entry
+import LeanZKCircuit.Command.Air.valid_circuit
+
+/-
+REVIEW: `entry` already defined in the dependency.
+-/
 
 open Lean Parser
 set_option hygiene false in
@@ -10,19 +14,19 @@ elab "#assign_column" circuit:str col:num member:str : command => do
   -- logInfo m!"Circuit type: {circuit_type}"
   let .ok circuit_type_stx := runParserCategory (← getEnv) `term circuit_type
     | throwError "Failed to parse the circuit type"
-  let circuit_type_tstx : TSyntax `term := ⟨circuit_type_stx⟩
+  let circuit_type_tstx : Term := ⟨circuit_type_stx⟩
 
   let member_term : String := s!"c.{member.getString}"
   -- logInfo m!"Member term: {member_term}"
   let .ok member_term_stx := runParserCategory (← getEnv) `term member_term
     | throwError "Failed to parse the member term"
-  let member_term_tstx : TSyntax `term := ⟨member_term_stx⟩
+  let member_term_tstx : Term := ⟨member_term_stx⟩
 
   let col_num : String := s!"{col.getNat}"
   -- logInfo m!"Column number: {col_num}"
   let .ok col_num_stx := runParserCategory (← getEnv) `term col_num
     | throwError "Failed to parse the column number"
-  let col_num_tstx : TSyntax `term := ⟨col_num_stx⟩
+  let col_num_tstx : Term := ⟨col_num_stx⟩
 
   let uniqueName := mkIdent (Name.mkStr2 circuit.getString s!"col_{col.getNat}")
   -- logInfo m!"Registering: {uniqueName.getId}"
@@ -40,20 +44,18 @@ elab "#assign_column" circuit:str col:num member:str : command => do
 -- syntax subair := "SubAir[" str ":" str "width" ":=" num "]"
 -- syntax columnEntry := "Column[" str "]"
 
-syntax entry := orelse("Column[" str "]", "SubAir[" str ":" str "width" ":=" num "]")
+-- syntax entry := orelse("Column[" str "]", "SubAir[" str ":" str "width" ":=" num "]")
 
 -- def run_assign_column (circuitName: TSyntax `str) (head: TSyntax `column): Elab.Command.CommandElabM Unit := do
 --   match head with
 --     | `(column| [$col, $member]) => Lean.Elab.Command.elabCommand (←`(#assign_column $circuitName $col $member))
 --     | _ => throwError "Nooooooooooooooooooo"
 
-
-
-def isValid_subair (head: TSyntax `str): Elab.Command.CommandElabM (TSyntax `term) := do
+def isValid_subair (head: TSyntax `str): Elab.Command.CommandElabM (Term) := do
   let member_term : String := s!"c.{head.getString}.isValid"
   let .ok member_term_stx := runParserCategory (← getEnv) `term member_term
     | throwError "Failed to parse a subair for isValid"
-  let member_term_tstx : TSyntax `term := ⟨member_term_stx⟩
+  let member_term_tstx : Term := ⟨member_term_stx⟩
   pure (member_term_tstx)
 
 -- def run_rewrite_column_of_isValid (circuitName: TSyntax `str) (head: TSyntax `column): Elab.Command.CommandElabM Unit := do
@@ -61,6 +63,10 @@ def isValid_subair (head: TSyntax `str): Elab.Command.CommandElabM (TSyntax `ter
 --     | `(column| [$col, $member]) => Lean.Elab.Command.elabCommand (←`(#rewrite_column_of_isValid $circuitName $col $member))
 --     | _ => throwError "Nooooooooooooooooooo"
 
+/--
+REVIEW: Is there some 'easy extensibility for a human' reason as to why this isn't a single match?
+        LogInfo in here on purpose?
+-/
 def add_structure_field (struct_string: String) (subair: TSyntax `entry) : Elab.Command.CommandElabM String := do
   logInfo m!"{subair}"
   match subair with
@@ -75,6 +81,9 @@ def add_structure_field (struct_string: String) (subair: TSyntax `entry) : Elab.
 --     | `(subair| SubAir[$_ : $_ width := $w]) => return width + w.getNat
 --     | _ => throwError "failed to sum subair width"
 
+/--
+REVIEW: Is there some 'easy extensibility for a human' reason as to why this isn't a single match?
+-/
 def add_isValid_subair (subair: TSyntax `entry) (isValid_string: String) : Elab.Command.CommandElabM String := do
   match subair with
     | `(entry| SubAir[$name:str : $_:str width := $_:num]) => return s!"c.{name.getString}.isValid ∧ {isValid_string}"
@@ -87,6 +96,9 @@ def add_isValid_subair (subair: TSyntax `entry) (isValid_string: String) : Elab.
 --     | `(column| [$pos, $_]) => return s!"c.col_{pos.getNat} row rotation ∧ {isValid_string}"
 --     | _ => throwError "failed to add column to isValid"
 
+/--
+REVIEW: Is there some 'easy extensibility for a human' reason as to why this isn't a single match?
+-/
 def run_subcircuit_isValid_for_subair (circuit : String) (idx: ℕ) (subair: TSyntax `entry) : Elab.Command.CommandElabM Unit := do
   match subair with
     | `(entry| SubAir[$name:str : $_:str width := $_:num]) => run_subcircuit_isValid_of_isValid circuit idx name.getString
@@ -94,6 +106,9 @@ def run_subcircuit_isValid_for_subair (circuit : String) (idx: ℕ) (subair: TSy
       | `(entry| Column[$_]) => pure ()
       | _ => throwError "failed to run subcircuit_isValid_of_isValid for subair"
 
+/--
+REVIEW: LogInfo in here on purpose?
+-/
 def create_projection_lemma (circuit: String) (member: String) : Elab.Command.CommandElabM Unit := do
   let .ok lemma_stx := runParserCategory (← getEnv) `command s!"
     @[openvm_encapsulation] lemma {circuit}_{member}_project (c: {circuit} F ExtF) [Field F] [Field ExtF] :
@@ -105,6 +120,9 @@ def create_projection_lemma (circuit: String) (member: String) : Elab.Command.Co
 
   Lean.Elab.Command.elabCommand lemma_tstx
 
+/--
+REVIEW: LogInfo in here on purpose?
+-/
 def define_valid_circuit (circuit: String) : Elab.Command.CommandElabM Unit := do
   let .ok abbrev_stx := runParserCategory (← getEnv) `command
     s!"abbrev Valid_{circuit} (F : Type) (ExtF : Type) := {"{"} c: {circuit} F ExtF // c.isValid {"}"}"
@@ -114,6 +132,11 @@ def define_valid_circuit (circuit: String) : Elab.Command.CommandElabM Unit := d
 
   Lean.Elab.Command.elabCommand abbrev_tstx
 
+/--
+REVIEW: Might be worth abstracting the 'synth field and elab command' for this funnction, together
+        with `create_projection_lemma` and `create_projection_lemma`, etc.
+        This way it would be `["buses", "challenge", ...].mapM registerField` kind of deal.        
+-/
 def define_valid_circuit_members (circuit: String) : Elab.Command.CommandElabM Unit := do
   --buses
   let .ok abbrev_stx := runParserCategory (← getEnv) `command
@@ -164,6 +187,12 @@ def define_valid_circuit_members (circuit: String) : Elab.Command.CommandElabM U
   let abbrev_tstx: TSyntax `command := ⟨abbrev_stx⟩
   Lean.Elab.Command.elabCommand abbrev_tstx
 
+/--
+REVIEW: Is there some 'easy extensibility for a human' reason as to why this isn't a single match?
+
+        Once the same pattern for `registerField` as alluded to in the REVIEW: comment of
+        `define_valid_circuit_members`.
+-/
 def define_valid_circuit_subair (circuit: String) (subair: TSyntax `entry) : Elab.Command.CommandElabM Unit := do
   match subair with
     | `(entry| SubAir[$name:str : $typeName:str width := $_:num]) =>
@@ -183,7 +212,12 @@ def define_valid_circuit_subair (circuit: String) (subair: TSyntax `entry) : Ela
         Lean.Elab.Command.elabCommand def_tstx
       | _ => throwError "failed to run subcircuit_isValid_of_isValid for subair"
 
-def prove_valid_circuit_column_assignment (circuit: String) (pos: ℕ) (member: String) : Elab.Command.CommandElabM Unit := do
+/--
+REVIEW: `registerField` sort of deal again?
+        Oh, this is already defined in the dependency.
+        Which one do we want?
+-/
+def prove_valid_circuit_column_assignment' (circuit: String) (pos: ℕ) (member: String) : Elab.Command.CommandElabM Unit := do
     let index := transformIndex pos
     let .ok lemma_stx := runParserCategory (← getEnv) `command
       s!"@[openvm_encapsulation] lemma Valid_{circuit}.col_{pos} [Field F] [Field ExtF] (c : Valid_{circuit} F ExtF) (row rotation: ℕ) : c.main 0 {pos} row rotation = c.{member} row rotation := (c.2.2 row rotation){index}"
@@ -192,7 +226,12 @@ def prove_valid_circuit_column_assignment (circuit: String) (pos: ℕ) (member: 
     let lemma_tstx: TSyntax `command := ⟨lemma_stx⟩
     Lean.Elab.Command.elabCommand lemma_tstx
 
-def calculate_column_assignments (offset: ℕ) (entry : TSyntax `entry) : Elab.Command.CommandElabM (List (ℕ × String)) := do
+/--
+REVIEW: Single match?
+        Oh, this is already defined in the dependency.
+        Which one do we want?
+-/
+def calculate_column_assignments' (offset: ℕ) (entry : TSyntax `entry) : Elab.Command.CommandElabM (List (ℕ × String)) := do
   match entry with
     | `(entry| SubAir[$name:str : $_:str width := $w:num]) =>
       return (
@@ -203,9 +242,14 @@ def calculate_column_assignments (offset: ℕ) (entry : TSyntax `entry) : Elab.C
       return [(offset, name.getString)]
       | _ => throwError "failed to parse subair"
 
+/--
+REVIEW: Single match?
+        One type annotation too many in the body, but fair vOv.
+        `:= ←(X)` is `← X`.
+-/
 def calculate_all_column_assignments (entries: TSyntaxArray `entry) : Elab.Command.CommandElabM (List (ℕ × String)) := do
   let assignments: ℕ × List (ℕ × String) := ←(entries.foldlM (λ (acc: ℕ × List (ℕ × String)) (x: TSyntax `entry) => do
-    let assignments := ←(calculate_column_assignments acc.1 x)
+    let assignments ← (calculate_column_assignments' acc.1 x)
 
     match x with
       | `(entry| SubAir[$_:str : $_:str width := $w:num]) =>
@@ -220,9 +264,13 @@ def calculate_all_column_assignments (entries: TSyntaxArray `entry) : Elab.Comma
 
 open Lean Parser
 set_option hygiene false in
+/--
+REVIEW: `:= ←(X)` is `← X`.
+        More of this parse + elab pattern.
+-/
 elab "#assign_columns" circuitName: str subairs: entry* : command => do
 
-  let column_assignments : List (ℕ × String) := ←(calculate_all_column_assignments subairs)
+  let column_assignments : List (ℕ × String) ← (calculate_all_column_assignments subairs)
   logInfo m!"{column_assignments}"
 
   -- Create struct
@@ -236,7 +284,7 @@ elab "#assign_columns" circuitName: str subairs: entry* : command => do
         public_values: (index: ℕ) -> F
         last_row: ℕ"
 
-  let structure_string: String := ←(Array.foldlM add_structure_field base_structure_string subairs)
+  let structure_string: String ← (Array.foldlM add_structure_field base_structure_string subairs)
   logInfo m!"{structure_string}"
   let .ok structure_command_stx := runParserCategory (← getEnv) `command structure_string
     | throwError "Failed to parse structure creation commmand"
@@ -277,19 +325,19 @@ elab "#assign_columns" circuitName: str subairs: entry* : command => do
     logInfo m!"Circuit type: {circuit_type}"
     let .ok circuit_type_stx := runParserCategory (← getEnv) `term circuit_type
       | throwError "Failed to parse the circuit type"
-    let circuit_type_tstx : TSyntax `term := ⟨circuit_type_stx⟩
+    let circuit_type_tstx : Term := ⟨circuit_type_stx⟩
 
     let member_term : String := s!"c.{member}"
     logInfo m!"Member term: {member_term}"
     let .ok member_term_stx := runParserCategory (← getEnv) `term member_term
       | throwError "Failed to parse the member term"
-    let member_term_tstx : TSyntax `term := ⟨member_term_stx⟩
+    let member_term_tstx : Term := ⟨member_term_stx⟩
 
     let col_num : String := s!"{col}"
     logInfo m!"Column number: {col_num}"
     let .ok col_num_stx := runParserCategory (← getEnv) `term col_num
       | throwError "Failed to parse the column number"
-    let col_num_tstx : TSyntax `term := ⟨col_num_stx⟩
+    let col_num_tstx : Term := ⟨col_num_stx⟩
 
     let uniqueName := mkIdent (Name.mkStr2 circuitName.getString s!"col_{col}")
     logInfo m!"Registering: {uniqueName.getId}"
@@ -308,21 +356,21 @@ elab "#assign_columns" circuitName: str subairs: entry* : command => do
   logInfo m!"isValid_recursion: {isValid_recursion}"
   let .ok isValid_recursion_stx := runParserCategory (← getEnv) `term isValid_recursion
     | throwError "Failed to parse the isValid subair term"
-  let isValid_recursion_tstx : TSyntax `term := ⟨isValid_recursion_stx⟩
+  let isValid_recursion_tstx : Term := ⟨isValid_recursion_stx⟩
   logInfo m!"IsValid recursion term: {isValid_recursion_tstx}"
 
   let circuit_type : String := s!"{circuitName.getString} F ExtF"
   logInfo m!"Circuit type: {circuit_type}"
   let .ok circuit_type_stx := runParserCategory (← getEnv) `term circuit_type
     | throwError "Failed to parse the circuit type"
-  let circuit_type_tstx : TSyntax `term := ⟨circuit_type_stx⟩
+  let circuit_type_tstx : Term := ⟨circuit_type_stx⟩
 
   let column_assertions: String := --←(Array.foldrM add_isValid_column "true" columns)
     (List.range column_assignments.length).foldr (λ n acc => s!"c.col_{n} row rotation ∧ {acc}") "true"
   logInfo m!"column_assertions: {column_assertions}"
   let .ok column_assertions_stx := runParserCategory (← getEnv) `term column_assertions
     | throwError "Failed to create the isValid column assertions term"
-  let column_assertions_tstx : TSyntax `term := ⟨column_assertions_stx⟩
+  let column_assertions_tstx : Term := ⟨column_assertions_stx⟩
 
   let isValid_name := mkIdent (Name.mkStr2 circuitName.getString "isValid")
   Lean.Elab.Command.elabCommand
@@ -367,7 +415,7 @@ elab "#assign_columns" circuitName: str subairs: entry* : command => do
   logInfo m!"{instance_command_stx}"
   let instance_command_tstx : TSyntax `command := ⟨instance_command_stx⟩
   Lean.Elab.Command.elabCommand instance_command_tstx
-
+  -- REVIEW: I guess. This is just `["buses", "challenge", ...].mapM (create_projection_lemma s!"....")` kind of deal.
   create_projection_lemma s!"Valid_{circuitName.getString}" "buses"
   create_projection_lemma s!"Valid_{circuitName.getString}" "challenge"
   create_projection_lemma s!"Valid_{circuitName.getString}" "exposed"
@@ -377,4 +425,4 @@ elab "#assign_columns" circuitName: str subairs: entry* : command => do
   create_projection_lemma s!"Valid_{circuitName.getString}" "public_values"
   create_projection_lemma s!"Valid_{circuitName.getString}" "last_row"
 
-  discard (column_assignments.mapM λ x => prove_valid_circuit_column_assignment circuitName.getString x.1 x.2)
+  discard (column_assignments.mapM λ x => prove_valid_circuit_column_assignment' circuitName.getString x.1 x.2)

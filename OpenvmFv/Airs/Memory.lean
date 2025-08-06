@@ -1,6 +1,3 @@
-import LeanZKCircuit.OpenVM.Circuit
-import LeanZKCircuit.Command.Air.define_air
-
 import OpenvmFv.Airs.LessThanAuxCols
 
 set_option linter.unusedVariables false
