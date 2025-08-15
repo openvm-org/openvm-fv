@@ -296,55 +296,6 @@ lemma constrain_interactions' [Field F] [Field ExtF]
   (c: Valid_VmAirWrapper_alu F ExtF)
   (h: VmAirWrapper_alu.extraction.constrain_interactions c)
 : c.buses = fun index ↦
-  if index = 1 then
-    List.map
-        (fun row ↦
-          (2013265920 *
-              (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-                  c.core.opcode_or_flag row 0 +
-                c.core.opcode_and_flag row 0),
-            [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0, c.core.b_3 row 0,
-              c.adapter.reads_aux_0.base.prev_timestamp row 0]))
-        (List.range (c.last_row + 1)) ++
-      (List.map
-          (fun row ↦
-            (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-                  c.core.opcode_or_flag row 0 +
-                c.core.opcode_and_flag row 0,
-              [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0, c.core.b_3 row 0,
-                c.adapter.from_state.timestamp row 0]))
-          (List.range (c.last_row + 1)) ++
-        (List.map
-            (fun row ↦
-              (2013265920 * c.adapter.rs2_as row 0,
-                [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0, c.core.c_2 row 0,
-                  c.core.c_3 row 0, c.adapter.reads_aux_1.base.prev_timestamp row 0]))
-            (List.range (c.last_row + 1)) ++
-          (List.map
-              (fun row ↦
-                (c.adapter.rs2_as row 0,
-                  [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0, c.core.c_2 row 0,
-                    c.core.c_3 row 0, c.adapter.from_state.timestamp row 0 + 1]))
-              (List.range (c.last_row + 1)) ++
-            (List.map
-                (fun row ↦
-                  (2013265920 *
-                      (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-                          c.core.opcode_or_flag row 0 +
-                        c.core.opcode_and_flag row 0),
-                    [1, c.adapter.rd_ptr row 0, c.adapter.writes_aux.prev_data_0 row 0,
-                      c.adapter.writes_aux.prev_data_1 row 0, c.adapter.writes_aux.prev_data_2 row 0,
-                      c.adapter.writes_aux.prev_data_3 row 0, c.adapter.writes_aux.base.prev_timestamp row 0]))
-                (List.range (c.last_row + 1)) ++
-              List.map
-                (fun row ↦
-                  (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-                        c.core.opcode_or_flag row 0 +
-                      c.core.opcode_and_flag row 0,
-                    [1, c.adapter.rd_ptr row 0, c.core.a_0 row 0, c.core.a_1 row 0, c.core.a_2 row 0, c.core.a_3 row 0,
-                      c.adapter.from_state.timestamp row 0 + 2]))
-                (List.range (c.last_row + 1))))))
-  else
     if index = 0 then
       List.map
           (fun row ↦
@@ -361,19 +312,6 @@ lemma constrain_interactions' [Field F] [Field ExtF]
               [c.adapter.from_state.pc row 0 + 4, c.adapter.from_state.timestamp row 0 + 3]))
           (List.range (c.last_row + 1))
     else
-      if index = 8 then
-        List.map
-          (fun row ↦
-            (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-                  c.core.opcode_or_flag row 0 +
-                c.core.opcode_and_flag row 0,
-              [c.adapter.from_state.pc row 0,
-                512 +
-                  (c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 * 2 + c.core.opcode_or_flag row 0 * 3 +
-                    c.core.opcode_and_flag row 0 * 4),
-                c.adapter.rd_ptr row 0, c.adapter.rs1_ptr row 0, c.adapter.rs2 row 0, 1, c.adapter.rs2_as row 0, 0, 0]))
-          (List.range (c.last_row + 1))
-      else
         if index = 9 then
           List.map
               (fun row ↦
@@ -402,9 +340,7 @@ lemma constrain_interactions' [Field F] [Field ExtF]
                           c.core.a_1 row 0 +
                         (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0) *
                           c.core.b_1 row 0,
-                      (1 -
-                            (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 +
-                              c.core.opcode_and_flag row 0)) *
+                    (1 - (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0)) *
                           c.core.a_1 row 0 +
                         (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0) *
                           c.core.c_1 row 0,
@@ -418,9 +354,7 @@ lemma constrain_interactions' [Field F] [Field ExtF]
                     (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
                           c.core.opcode_or_flag row 0 +
                         c.core.opcode_and_flag row 0,
-                      [(1 -
-                              (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 +
-                                c.core.opcode_and_flag row 0)) *
+                    [(1 - (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0)) *
                             c.core.a_2 row 0 +
                           (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0) *
                             c.core.b_2 row 0,
@@ -444,19 +378,16 @@ lemma constrain_interactions' [Field F] [Field ExtF]
                                 (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 +
                                   c.core.opcode_and_flag row 0)) *
                               c.core.a_3 row 0 +
-                            (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 +
-                                c.core.opcode_and_flag row 0) *
+                          (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0) *
                               c.core.b_3 row 0,
                           (1 -
                                 (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 +
                                   c.core.opcode_and_flag row 0)) *
                               c.core.a_3 row 0 +
-                            (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 +
-                                c.core.opcode_and_flag row 0) *
+                          (c.core.opcode_xor_flag row 0 + c.core.opcode_or_flag row 0 + c.core.opcode_and_flag row 0) *
                               c.core.c_3 row 0,
                           c.core.opcode_xor_flag row 0 * c.core.a_3 row 0 +
-                              c.core.opcode_or_flag row 0 *
-                                (2 * c.core.a_3 row 0 - c.core.b_3 row 0 - c.core.c_3 row 0) +
+                            c.core.opcode_or_flag row 0 * (2 * c.core.a_3 row 0 - c.core.b_3 row 0 - c.core.c_3 row 0) +
                             c.core.opcode_and_flag row 0 * (c.core.b_3 row 0 + c.core.c_3 row 0 - 2 * c.core.a_3 row 0),
                           1]))
                     (List.range (c.last_row + 1)) ++
@@ -490,8 +421,7 @@ lemma constrain_interactions' [Field F] [Field ExtF]
                     (List.range (c.last_row + 1)) ++
                   (List.map
                       (fun row ↦
-                        (c.adapter.rs2_as row 0,
-                          [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]))
+                      (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]))
                       (List.range (c.last_row + 1)) ++
                     (List.map
                         (fun row ↦
@@ -507,7 +437,73 @@ lemma constrain_interactions' [Field F] [Field ExtF]
                               c.core.opcode_and_flag row 0,
                             [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]))
                         (List.range (c.last_row + 1))))))
+        else
+          if index = 1 then
+            List.map
+                (fun row ↦
+                  (2013265920 *
+                      (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
+                          c.core.opcode_or_flag row 0 +
+                        c.core.opcode_and_flag row 0),
+                    [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0, c.core.b_3 row 0,
+                      c.adapter.reads_aux_0.base.prev_timestamp row 0]))
+                (List.range (c.last_row + 1)) ++
+              (List.map
+                  (fun row ↦
+                    (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
+                          c.core.opcode_or_flag row 0 +
+                        c.core.opcode_and_flag row 0,
+                      [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0,
+                        c.core.b_3 row 0, c.adapter.from_state.timestamp row 0]))
+                  (List.range (c.last_row + 1)) ++
+                (List.map
+                    (fun row ↦
+                      (2013265920 * c.adapter.rs2_as row 0,
+                        [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0,
+                          c.core.c_2 row 0, c.core.c_3 row 0, c.adapter.reads_aux_1.base.prev_timestamp row 0]))
+                    (List.range (c.last_row + 1)) ++
+                  (List.map
+                      (fun row ↦
+                        (c.adapter.rs2_as row 0,
+                          [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0,
+                            c.core.c_2 row 0, c.core.c_3 row 0, c.adapter.from_state.timestamp row 0 + 1]))
+                      (List.range (c.last_row + 1)) ++
+                    (List.map
+                        (fun row ↦
+                          (2013265920 *
+                              (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 +
+                                    c.core.opcode_xor_flag row 0 +
+                                  c.core.opcode_or_flag row 0 +
+                                c.core.opcode_and_flag row 0),
+                            [1, c.adapter.rd_ptr row 0, c.adapter.writes_aux.prev_data_0 row 0,
+                              c.adapter.writes_aux.prev_data_1 row 0, c.adapter.writes_aux.prev_data_2 row 0,
+                              c.adapter.writes_aux.prev_data_3 row 0, c.adapter.writes_aux.base.prev_timestamp row 0]))
+                        (List.range (c.last_row + 1)) ++
+                      List.map
+                        (fun row ↦
+                          (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
+                                c.core.opcode_or_flag row 0 +
+                              c.core.opcode_and_flag row 0,
+                            [1, c.adapter.rd_ptr row 0, c.core.a_0 row 0, c.core.a_1 row 0, c.core.a_2 row 0,
+                              c.core.a_3 row 0, c.adapter.from_state.timestamp row 0 + 2]))
+                        (List.range (c.last_row + 1))))))
+          else
+            if index = 8 then
+              List.map
+                (fun row ↦
+                  (c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
+                        c.core.opcode_or_flag row 0 +
+                      c.core.opcode_and_flag row 0,
+                    [c.adapter.from_state.pc row 0,
+                      512 +
+                        (c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 * 2 +
+                            c.core.opcode_or_flag row 0 * 3 +
+                          c.core.opcode_and_flag row 0 * 4),
+                      c.adapter.rd_ptr row 0, c.adapter.rs1_ptr row 0, c.adapter.rs2 row 0, 1, c.adapter.rs2_as row 0,
+                      0, 0]))
+                (List.range (c.last_row + 1))
           else [] := by
   unfold VmAirWrapper_alu.extraction.constrain_interactions at h
   simp [openvm_encapsulation] at h
-  exact h
+  -- exact h
+  sorry

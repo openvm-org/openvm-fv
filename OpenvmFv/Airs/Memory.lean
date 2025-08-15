@@ -5,6 +5,10 @@ import OpenvmFv.Airs.LessThanAuxCols
 
 set_option linter.unusedVariables false
 
+#define_air "MemoryAddress" using "openvm_encapsulation" where
+  Column["address_space"]
+  Column["pointer"]
+
 #define_air "MemoryBaseAuxCols" using "openvm_encapsulation" where
   Column["prev_timestamp"]
   SubAir["timestamp_lt_aux": "LessThanAuxCols_2" width := 2]
