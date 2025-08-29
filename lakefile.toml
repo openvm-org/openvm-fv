@@ -18,5 +18,10 @@ name = "LeanZKCircuit"
 git = "https://github.com/NethermindEth/leanzkcircuit.git"
 rev = "Dom/openvm_prelude"
 
+[[require]]
+name = "Lean_RV32D"
+# TODO independent sail setup
+path = "/home/dom/nethermind/lamport/sail-riscv/build/model/Lean_RV32D"
+
 [[lean_lib]]
 name = "OpenvmFv"

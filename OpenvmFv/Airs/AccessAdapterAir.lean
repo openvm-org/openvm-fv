@@ -8,7 +8,7 @@ set_option linter.unusedVariables false
 #define_air "AccessAdapterAir_2" using "openvm_encapsulation" where
   Column["is_valid"]
   Column["is_split"]
-  SubAir["address" : "MemoryAddress" width := 2]
+  MainSubAir["address" : "MemoryAddress" width := 2]
   Column["values_0"]
   Column["values_1"]
   Column["left_timestamp"]
@@ -20,7 +20,7 @@ set_option linter.unusedVariables false
 #define_air "AccessAdapterAir_4" using "openvm_encapsulation" where
   Column["is_valid"]
   Column["is_split"]
-  SubAir["address" : "MemoryAddress" width := 2]
+  MainSubAir["address" : "MemoryAddress" width := 2]
   Column["values_0"]
   Column["values_1"]
   Column["values_2"]
