@@ -152,10 +152,7 @@ namespace VmAirWrapper_alu.constraints
   lemma constraint_18' [Field F] [Field ExtF]
     (c: Valid_VmAirWrapper_alu F ExtF) (row: ℕ)
     (h: VmAirWrapper_alu.extraction.constraint_18 c row)
-  : c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-          c.core.opcode_or_flag row 0 +
-        c.core.opcode_and_flag row 0 =
-      0 ∨
+  : c.core.is_valid row 0 = 0 ∨
     c.adapter.from_state.timestamp row 0 - c.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 -
         (c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 +
           c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072) =
@@ -187,10 +184,7 @@ namespace VmAirWrapper_alu.constraints
   lemma constraint_21' [Field F] [Field ExtF]
     (c: Valid_VmAirWrapper_alu F ExtF) (row: ℕ)
     (h: VmAirWrapper_alu.extraction.constraint_21 c row)
-  : c.core.opcode_add_flag row 0 + c.core.opcode_sub_flag row 0 + c.core.opcode_xor_flag row 0 +
-          c.core.opcode_or_flag row 0 +
-        c.core.opcode_and_flag row 0 =
-      0 ∨
+  : c.core.is_valid row 0 = 0 ∨
     c.adapter.from_state.timestamp row 0 + 2 - c.adapter.writes_aux.base.prev_timestamp row 0 - 1 -
         (c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 +
           c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072) =
