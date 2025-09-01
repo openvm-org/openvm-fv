@@ -15,7 +15,7 @@ lemma ext_iff {n : ℕ} {x y : BitVec n} : x = y ↔ ∀ i : Fin n, x[i] = y[i] 
 
 /-- Equality of `BitVec` concatenation, equal lengths -/
 @[simp, grind =]
-lemma append_eq_append_eql {m n : ℕ} {x1 y1: BitVec m} {x2 y2 : BitVec n} :
+lemma append_eq_append_eql {m n : ℕ} {x1 y1 : BitVec m} {x2 y2 : BitVec n} :
   (x1 ++ x2) = (y1 ++ y2) ↔ x1 = y1 ∧ x2 = y2 := by
   constructor <;> [ intro h_eq_bv; simp_all ]
   split_ands <;> rw [ext_iff] at h_eq_bv ⊢ <;> intro i

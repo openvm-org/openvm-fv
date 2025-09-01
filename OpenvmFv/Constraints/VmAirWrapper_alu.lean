@@ -173,7 +173,7 @@ namespace VmAirWrapper_alu.constraints
   : c.adapter.rs2_as row 0 = 0 ∨
   c.adapter.from_state.timestamp row 0 + 1 - c.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 =
     c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 +
-      c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072:= by
+      c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072 := by
     unfold VmAirWrapper_alu.extraction.constraint_20 at h
     simp [openvm_encapsulation, *] at h
     exact h
