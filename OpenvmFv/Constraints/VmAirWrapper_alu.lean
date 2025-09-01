@@ -1,3 +1,5 @@
+import OpenvmFv.Fundamentals.BabyBear
+
 import OpenvmFv.Airs.Alu.VmAirWrapper_alu
 import OpenvmFv.Extraction.VmAirWrapper_alu
 import OpenvmFv.Util
@@ -7,8 +9,8 @@ set_option maxHeartbeats 1_000_000_000
 namespace VmAirWrapper_alu.constraints
 
 def constraint_list
-  [Field F] [Field ExtF]
-  (c : Valid_VmAirWrapper_alu F ExtF)
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu (Fin BB) ExtF)
   (row : ℕ)
 : List Prop :=
   [
@@ -38,14 +40,14 @@ def constraint_list
 
 @[simp]
 def allHold
-  [Field F] [Field ExtF]
-  (c : Valid_VmAirWrapper_alu F ExtF)
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu (Fin BB) ExtF)
   (row : ℕ) : Prop :=
   List.Forall (fun x => x) (constraint_list c row)
 
 lemma allHold_constraints
-  [Field F] [Field ExtF]
-  (c : Valid_VmAirWrapper_alu F ExtF)
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu (Fin BB) ExtF)
   (row : ℕ)
 :
   allHold c row ↔
@@ -55,14 +57,14 @@ lemma allHold_constraints
     (c.core.opcode_or_flag row 0 = 0 ∨ c.core.opcode_or_flag row 0 = 1) ∧
     (c.core.opcode_and_flag row 0 = 0 ∨ c.core.opcode_and_flag row 0 = 1) ∧
     (c.core.is_valid row 0 = 0 ∨ c.core.is_valid row 0 = 1) ∧
-    (c.core.opcode_add_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.b_0 row 0 + c.core.c_0 row 0 = c.core.a_0 row 0) ∨ c.core.carry_add_0 row 0 = 1) ∧
-    (c.core.opcode_sub_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.a_0 row 0 + c.core.c_0 row 0 = c.core.b_0 row 0) ∨ c.core.carry_sub_0 row 0 = 1) ∧
-    (c.core.opcode_add_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.b_1 row 0 + c.core.c_1 row 0 - c.core.a_1 row 0 + c.core.carry_add_0 row 0 = 0) ∨ c.core.carry_add_1 row 0 = 1) ∧
-    (c.core.opcode_sub_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.a_1 row 0 + c.core.c_1 row 0 - c.core.b_1 row 0 + c.core.carry_sub_0 row 0 = 0) ∨ c.core.carry_sub_1 row 0 = 1) ∧
-    (c.core.opcode_add_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.b_2 row 0 + c.core.c_2 row 0 - c.core.a_2 row 0 + c.core.carry_add_1 row 0 = 0) ∨ c.core.carry_add_2 row 0 = 1) ∧
-    (c.core.opcode_sub_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.a_2 row 0 + c.core.c_2 row 0 - c.core.b_2 row 0 + c.core.carry_sub_1 row 0 = 0) ∨ c.core.carry_sub_2 row 0 = 1) ∧
-    (c.core.opcode_add_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.b_3 row 0 + c.core.c_3 row 0 - c.core.a_3 row 0 + c.core.carry_add_2 row 0 = 0) ∨ c.core.carry_add_3 row 0 = 1) ∧
-    (c.core.opcode_sub_flag row 0 = 0 ∨ ((2005401601 : F) = 0 ∨ c.core.a_3 row 0 + c.core.c_3 row 0 - c.core.b_3 row 0 + c.core.carry_sub_2 row 0 = 0) ∨ c.core.carry_sub_3 row 0 = 1) ∧
+    (c.core.opcode_add_flag row 0 = 0 ∨ (c.core.b_0 row 0 + c.core.c_0 row 0 = c.core.a_0 row 0) ∨ c.core.carry_add_0 row 0 = 1) ∧
+    (c.core.opcode_sub_flag row 0 = 0 ∨ (c.core.a_0 row 0 + c.core.c_0 row 0 = c.core.b_0 row 0) ∨ c.core.carry_sub_0 row 0 = 1) ∧
+    (c.core.opcode_add_flag row 0 = 0 ∨ (c.core.b_1 row 0 + c.core.c_1 row 0 - c.core.a_1 row 0 + c.core.carry_add_0 row 0 = 0) ∨ c.core.carry_add_1 row 0 = 1) ∧
+    (c.core.opcode_sub_flag row 0 = 0 ∨ (c.core.a_1 row 0 + c.core.c_1 row 0 - c.core.b_1 row 0 + c.core.carry_sub_0 row 0 = 0) ∨ c.core.carry_sub_1 row 0 = 1) ∧
+    (c.core.opcode_add_flag row 0 = 0 ∨ (c.core.b_2 row 0 + c.core.c_2 row 0 - c.core.a_2 row 0 + c.core.carry_add_1 row 0 = 0) ∨ c.core.carry_add_2 row 0 = 1) ∧
+    (c.core.opcode_sub_flag row 0 = 0 ∨ (c.core.a_2 row 0 + c.core.c_2 row 0 - c.core.b_2 row 0 + c.core.carry_sub_1 row 0 = 0) ∨ c.core.carry_sub_2 row 0 = 1) ∧
+    (c.core.opcode_add_flag row 0 = 0 ∨ (c.core.b_3 row 0 + c.core.c_3 row 0 - c.core.a_3 row 0 + c.core.carry_add_2 row 0 = 0) ∨ c.core.carry_add_3 row 0 = 1) ∧
+    (c.core.opcode_sub_flag row 0 = 0 ∨ (c.core.a_3 row 0 + c.core.c_3 row 0 - c.core.b_3 row 0 + c.core.carry_sub_2 row 0 = 0) ∨ c.core.carry_sub_3 row 0 = 1) ∧
     (c.adapter.rs2_as row 0 = 0 ∨ c.adapter.rs2_as row 0 = 1) ∧
     (c.adapter.rs2_as row 0 = 1 ∨ c.adapter.rs2 row 0 = c.rs2_imm row 0) ∧
     (c.adapter.rs2_as row 0 = 1 ∨ c.rs2_sign row 0 = c.rs2_limbs row 0 3) ∧
@@ -73,12 +75,12 @@ lemma allHold_constraints
 := by
   simp [constraint_list]
   simp_all [openvm_encapsulation]
-  repeat rw [eq_comm (a := (1 : F))]
-  repeat rw [eq_comm (a := (255 : F))]
+  repeat rw [eq_comm (a := (1 : Fin BB))]
+  repeat rw [eq_comm (a := (255 : Fin BB))]
   simp
 
-  lemma constrain_interactions' [Field F] [Field ExtF]
-    (c: Valid_VmAirWrapper_alu F ExtF)
+  lemma constrain_interactions' [Field ExtF]
+    (c: Valid_VmAirWrapper_alu (Fin BB) ExtF)
     (h: VmAirWrapper_alu.extraction.constrain_interactions c)
   : c.buses = fun index ↦
   if index = ExecutionBus then
