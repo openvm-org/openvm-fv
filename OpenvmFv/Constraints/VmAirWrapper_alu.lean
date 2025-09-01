@@ -1,5 +1,3 @@
-import OpenvmFv.Fundamentals.BabyBear
-
 import OpenvmFv.Airs.Alu.VmAirWrapper_alu
 import OpenvmFv.Extraction.VmAirWrapper_alu
 import OpenvmFv.Util
@@ -10,7 +8,7 @@ namespace VmAirWrapper_alu.constraints
 
 def constraint_list
   [Field ExtF]
-  (c : Valid_VmAirWrapper_alu (Fin BB) ExtF)
+  (c : Valid_VmAirWrapper_alu_BB ExtF)
   (row : ℕ)
 : List Prop :=
   [
@@ -41,13 +39,13 @@ def constraint_list
 @[simp]
 def allHold
   [Field ExtF]
-  (c : Valid_VmAirWrapper_alu (Fin BB) ExtF)
+  (c : Valid_VmAirWrapper_alu_BB ExtF)
   (row : ℕ) : Prop :=
   List.Forall (fun x => x) (constraint_list c row)
 
 lemma allHold_constraints
   [Field ExtF]
-  (c : Valid_VmAirWrapper_alu (Fin BB) ExtF)
+  (c : Valid_VmAirWrapper_alu_BB ExtF)
   (row : ℕ)
 :
   allHold c row ↔
@@ -80,7 +78,7 @@ lemma allHold_constraints
   simp
 
   lemma constrain_interactions' [Field ExtF]
-    (c: Valid_VmAirWrapper_alu (Fin BB) ExtF)
+    (c: Valid_VmAirWrapper_alu_BB ExtF)
     (h: VmAirWrapper_alu.extraction.constrain_interactions c)
   : c.buses = fun index ↦
   if index = ExecutionBus then

@@ -6,18 +6,15 @@ import OpenvmFv.Fundamentals.Execution
 
 import LeanZKCircuit.Interactions
 
-def all_constraints [Field F] [Field ExtF] (c : Valid_VmAirWrapper_alu F ExtF) (row: ℕ) : Prop :=
-  VmAirWrapper_alu.extraction.constraint_0 c row ∧
-  VmAirWrapper_alu.extraction.constraint_1 c row ∧
-  VmAirWrapper_alu.extraction.constraint_2 c row ∧
-  VmAirWrapper_alu.extraction.constraint_3 c row ∧
-  VmAirWrapper_alu.extraction.constraint_4 c row ∧
-  VmAirWrapper_alu.extraction.constraint_5 c row ∧
-  VmAirWrapper_alu.extraction.constrain_interactions c
-
-def field_to_nat [Field F] (f: F) : ℕ := sorry
-
-def in_range [Field F] (a: F) : Prop := sorry
+axiom constraints_MemoryBus
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu_BB ExtF) :
+  ∀ x ∈ c.buses MemoryBus,
+    x.1 = 1 →
+      x.2[2]!.val < 256 ∧
+      x.2[3]!.val < 256 ∧
+      x.2[4]!.val < 256 ∧
+      x.2[5]!.val < 256
 
 theorem spec
   [Field F] [Field ExtF]
