@@ -2,6 +2,7 @@ import Mathlib
 
 import LeanZKCircuit.OpenVM.Circuit
 import LeanZKCircuit.Command.Air.define_air
+import OpenvmFv.Airs.Alu.AdapterAirContext
 
 set_option linter.unusedVariables false
 
@@ -457,16 +458,6 @@ lemma BaseAluCoreAir.x_xor_y_3_def
    =
   c.x_xor_y_3 row rotation
 := rfl
-
-structure MinimalInstruction (F: Type) where
-  is_valid : F
-  opcode: F
-
-structure AdapterAirContext (F: Type) where
-  to_pc : Option F
-  reads : Fin 2 → Fin 4 → F
-  writes : Fin 4 → F
-  instruction : MinimalInstruction F
 
 def Valid_BaseAluCoreAir.class_offset
   [Field F]
