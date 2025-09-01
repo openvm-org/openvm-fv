@@ -5,7 +5,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "98237380301c3265633159a4d69c7eb7dbe4eb27",
+   "rev": "a613fc452050d3849daa68f23e69d9ca5ab63a8e",
    "name": "LeanRV",
    "manifestFile": "lake-manifest.json",
    "inputRev": "rv32d",

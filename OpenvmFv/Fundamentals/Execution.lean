@@ -1,5 +1,5 @@
 import LeanRV32D
-import OpenvmFv.Fundamentals.BitVec
+import OpenvmFv.Fundamentals.Datatypes
 import OpenvmFv.Fundamentals.U32
 
 open PreSail
@@ -104,6 +104,32 @@ lemma toNat_toInt_as_toNat_64 {r1 r2 : BitVec 32} :
     zify; simp_all [Int.toNat_add]
     ring_nf
     omega
+
+lemma div_overflow {x y : ℤ} :
+  -2147483648 ≤ x ∧ x < 2147483648 →
+    -2147483648 ≤ y ∧ y < 2147483648 →
+      (2147483648 ≤ x.tdiv y ↔ x = -2147483648 ∧ y = -1) := by
+  intro hx hy
+  constructor <;> intro hc
+  have : (x.tdiv y).sign = 1 := by rw [Int.sign_cases, if_neg (by omega), if_neg (by omega)]
+  rw [Int.sign_tdiv] at this
+  split_ifs at this with hyp <;> [ simp_all; clear hyp ]
+  . simp [Int.sign_cases] at this
+    split_ifs at this <;> simp_all
+    . suffices : -x = 2147483648 ∧ -y = 1
+      . omega
+      . have eq : x.tdiv y = (-x).tdiv (-y) := by simp
+        rw [eq, Int.tdiv_eq_ediv_of_nonneg (by omega)] at hc
+        by_cases yone : -y = 1
+        . simp_all; omega
+        . have := @Int.ediv_lt_self_of_pos_of_ne_one (-x) (-y) (by omega) (by omega)
+          omega
+    . rw [Int.tdiv_eq_ediv_of_nonneg (by omega)] at hc
+      by_cases yone : y = 1
+      . simp_all; omega
+      . have := @Int.ediv_lt_self_of_pos_of_ne_one x y (by omega) (by omega)
+        omega
+  . simp_all
 
 end auxiliaries
 
@@ -294,7 +320,7 @@ def execute_MUL' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (m : mop) : SailM E
   (wX_bits rd (execute_MUL_pure rs1_bits rs2_bits m))
   (pure RETIRE_SUCCESS)
 
-set_option maxHeartbeats 10000000 in
+set_option maxHeartbeats 100000000 in
 @[simp]
 lemma execute_MUL_eq_execute_MUL' :
   execute_MUL rs2 rs1 rd op = execute_MUL' rs2 rs1 rd (mop_of_mul_op op)
@@ -432,3 +458,114 @@ lemma execute_MUL_eq_execute_MUL' :
       apply toInt_toInt_as_toNat_64
 
 end MUL
+
+section DIV_REM
+
+/-- Multiplication opcodes -/
+inductive drop where | DRS | DRU
+  deriving BEq, DecidableEq, Inhabited, Repr
+
+def execute_DIV_REM_pure_int (op1 : BitVec 32) (op2 : BitVec 32) (op : drop) : ℤ × ℤ :=
+  match op with
+  | .DRS =>
+      let nop1 := BitVec.toInt op1
+      let nop2 := BitVec.toInt op2
+      let q := if nop2 = 0 then -1 else
+                 if nop1 = -2^31 && nop2 = -1 then -2^31 else
+                   Int.tdiv nop1 nop2
+      let r := Int.tmod nop1 nop2
+      ⟨ q, r ⟩
+  | .DRU =>
+      let nop1 : ℤ := BitVec.toNat op1
+      let nop2 : ℤ := BitVec.toNat op2
+      let q := if nop2 = 0 then 2^32 - 1 else Int.tdiv nop1 nop2
+      let r := Int.tmod nop1 nop2
+      ⟨ q, r ⟩
+
+def execute_DIV_REM_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : drop) : BitVec 64 × BitVec 64 :=
+  let ⟨ q, r ⟩ := execute_DIV_REM_pure_int op1 op2 op
+  match op with
+  | .DRS => ⟨ BitVec.ofInt 32 q, BitVec.ofInt 32 r ⟩
+  | .DRU => ⟨ BitVec.ofNat 32 q, BitVec.ofNat 32 r ⟩
+
+def execute_DIV' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (is_unsigned : Bool) : SailM ExecutionResult := do
+  let rs1_bits ← do (rX_bits rs1)
+  let rs2_bits ← do (rX_bits rs2)
+  let ⟨ result, _ ⟩ := execute_DIV_REM_pure rs1_bits rs2_bits (if is_unsigned then .DRU else .DRS)
+  (wX_bits rd result)
+  (pure RETIRE_SUCCESS)
+
+def execute_REM' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (is_unsigned : Bool) : SailM ExecutionResult := do
+  let rs1_bits ← do (rX_bits rs1)
+  let rs2_bits ← do (rX_bits rs2)
+  let ⟨ _, result ⟩ := execute_DIV_REM_pure rs1_bits rs2_bits (if is_unsigned then .DRU else .DRS)
+  (wX_bits rd result)
+  (pure RETIRE_SUCCESS)
+
+set_option maxHeartbeats 100000000 in
+@[simp]
+lemma execute_DIV'_eq_execute_DIV :
+  execute_DIV rs2 rs1 rd usgn = execute_DIV' rs2 rs1 rd usgn := by
+  simp_all [execute_DIV, execute_DIV']
+  refine bind_congr ?_; intro r1
+  refine bind_congr ?_; intro r2
+  ext s; simp; congr
+  have range_int_r1 : -2147483648 ≤ r1.toInt ∧ r1.toInt < 2147483648 := by constructor <;> [ apply BitVec.le_toInt; apply BitVec.toInt_lt ]
+  have range_int_r2 : -2147483648 ≤ r2.toInt ∧ r2.toInt < 2147483648 := by constructor <;> [ apply BitVec.le_toInt; apply BitVec.toInt_lt ]
+  have range_nat_r1 : 0 ≤ r1.toNat ∧ r1.toNat < 4294967296 := by omega
+  have range_nat_r2 : 0 ≤ r2.toNat ∧ r2.toNat < 4294967296 := by omega
+  by_cases usgn <;> simp_all [execute_DIV_REM_pure, execute_DIV_REM_pure_int, LeanRV32D.Functions.not, LeanRV32D.Functions.xlen, instHPowInt_leanRV32D] <;>
+  by_cases r2z : r2 = 0 <;> simp_all
+  . simp [to_bits_truncate, Sail.get_slice_int]
+  . repeat rw [ if_neg (by rw [← BitVec.toNat_inj] at r2z; simp_all) ]
+    rw [← BitVec.toNat_inj]
+    simp [to_bits_truncate, Sail.get_slice_int]
+    congr; rw [Int.emod_eq_of_lt]
+    . apply Int.zero_le_ofNat
+    . have := @Int.ediv_le_self r1.toNat r2.toNat (by omega)
+      omega
+  . simp [to_bits_truncate, Sail.get_slice_int]
+  . by_cases of : 2147483648 ≤ r1.toInt.tdiv r2.toInt <;>
+    have of' := div_overflow range_int_r1 range_int_r2 <;>
+    simp_all [to_bits_truncate, Sail.get_slice_int]
+    simp [BitVec.ofNat, BitVec.ofInt]
+    congr; simp [Fin.ext_iff]
+    omega
+
+@[simp]
+lemma execute_REM'_eq_execute_REM :
+  execute_REM rs2 rs1 rd usgn = execute_REM' rs2 rs1 rd usgn := by
+  simp_all [execute_REM, execute_REM']
+  refine bind_congr ?_; intro r1
+  refine bind_congr ?_; intro r2
+  ext s; simp_all; congr
+  have range_int_r1 : -2147483648 ≤ r1.toInt ∧ r1.toInt < 2147483648 := by constructor <;> [ apply BitVec.le_toInt; apply BitVec.toInt_lt ]
+  have range_int_r2 : -2147483648 ≤ r2.toInt ∧ r2.toInt < 2147483648 := by constructor <;> [ apply BitVec.le_toInt; apply BitVec.toInt_lt ]
+  have range_nat_r1 : 0 ≤ r1.toNat ∧ r1.toNat < 4294967296 := by omega
+  have range_nat_r2 : 0 ≤ r2.toNat ∧ r2.toNat < 4294967296 := by omega
+  by_cases usgn <;> simp_all [execute_DIV_REM_pure, execute_DIV_REM_pure_int] <;>
+  by_cases r2z : r2 = 0 <;> simp_all
+  . simp [to_bits_truncate, Sail.get_slice_int]
+    rw [Nat.mod_eq_of_lt (by omega)]; simp
+  . repeat rw [ if_neg (by rw [← BitVec.toNat_inj] at r2z; simp_all) ]
+    rw [← BitVec.toNat_inj]
+    simp [to_bits_truncate, Sail.get_slice_int]
+    congr; rw [Int.emod_eq_of_lt]
+    . apply Int.zero_le_ofNat
+    . rw [Int.tmod_eq_emod_of_nonneg (by omega)]
+      trans (r2.toNat : ℤ)
+      . simp [← BitVec.toNat_inj] at r2z
+        apply Int.emod_lt_of_pos r1.toNat (by omega)
+      . omega
+  . simp [to_bits_truncate, Sail.get_slice_int]
+    simp [← BitVec.toNat_inj]
+    have mod_33_to_32 : forall (a : ℤ), (a % 8589934592).toNat % 4294967296 = (a % 4294967296).toNat := by omega
+    simp [mod_33_to_32, BitVec.toInt]
+    split_ifs with hneg <;> [ skip; simp ] <;> rw [Int.emod_eq_of_lt (by omega)] <;> simp <;> omega
+  . repeat rw [ if_neg (by rw [← BitVec.toInt_inj] at r2z; simp_all) ]
+    simp_all [to_bits_truncate, Sail.get_slice_int]
+    simp [BitVec.ofNat, BitVec.ofInt]
+    congr; simp [Fin.ext_iff]
+    omega
+
+end DIV_REM
