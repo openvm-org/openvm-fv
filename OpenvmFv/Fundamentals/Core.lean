@@ -1,7 +1,29 @@
 import Mathlib
-import LeanRV32D
 
 namespace BitVec
+
+/-- `BitVec` extensionality as an iff -/
+lemma ext_iff {n : ℕ} {x y : BitVec n} : x = y ↔ ∀ i : Fin n, x[i] = y[i] := by
+  constructor <;> [ simp_all; intro heq ]
+  . ext j lt_j
+    exact heq ⟨ j, lt_j ⟩
+
+/-- `BitVec` extension, signed and unsigned -/
+def extend {m : ℕ} (bv : BitVec m) (n : ℕ) (sgn : Prop) [Decidable sgn] :=
+  (if sgn then signExtend else setWidth) n bv
+
+/-- Equality of `BitVec` concatenation, equal lengths -/
+@[simp, grind =]
+lemma append_eq_append_eql {m n : ℕ} {x1 y1 : BitVec m} {x2 y2 : BitVec n} :
+  (x1 ++ x2) = (y1 ++ y2) ↔ x1 = y1 ∧ x2 = y2 := by
+  constructor <;> [ intro h_eq_bv; simp_all ]
+  split_ands <;> rw [ext_iff] at h_eq_bv ⊢ <;> intro i
+  . specialize h_eq_bv ⟨i + n, by omega⟩; simp_all
+    iterate 2 rw [BitVec.getElem_append (by omega)] at h_eq_bv
+    simp_all
+  . specialize h_eq_bv ⟨i, by omega⟩; simp_all
+    iterate 2 rw [BitVec.getElem_append (by omega)] at h_eq_bv
+    simp_all
 
 /-- Reformulation of `sshiftRight` -/
 lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
@@ -9,10 +31,6 @@ lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
     BitVec.setWidth n
       (BitVec.extractLsb ((n - 1) + shift) shift (BitVec.signExtend (n + shift) bv))
     := by grind
-
-/-- `BitVec` extension, signed and unsigned -/
-def extend {m : ℕ} (bv : BitVec m) (n : ℕ) (sgn : Prop) [Decidable sgn] :=
-  (if sgn then signExtend else setWidth) n bv
 
 end BitVec
 
@@ -41,15 +59,6 @@ lemma split_nzp (a : ℤ) (P : Prop) :
     . apply an (by omega)
 
 end Int
-
-namespace LeanRV32D.Functions
-
-/-- Revisiting `bool_bits_forwards` in more reasoning-friendly terms -/
-@[simp]
-lemma bool_bits_forwards_to_if {b : Bool} :
-  bool_bits_forwards b = if b then 1#1 else 0#1 := by aesop
-
-end LeanRV32D.Functions
 
 section auxiliaries
 

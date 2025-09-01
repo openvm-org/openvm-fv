@@ -1,32 +1,9 @@
-import Mathlib
+import OpenvmFv.Fundamentals.Core
 
 @[simp] notation "LIMB_BITS" => 8
 @[simp] notation "NUM_LIMBS" => 4
 
 @[reducible] def U32 := Vector (BitVec LIMB_BITS) NUM_LIMBS
-
-namespace BitVec
-
-/-- `BitVec` extensionality as an iff -/
-lemma ext_iff {n : ℕ} {x y : BitVec n} : x = y ↔ ∀ i : Fin n, x[i] = y[i] := by
-  constructor <;> [ simp_all; intro heq ]
-  . ext j lt_j
-    exact heq ⟨ j, lt_j ⟩
-
-/-- Equality of `BitVec` concatenation, equal lengths -/
-@[simp, grind =]
-lemma append_eq_append_eql {m n : ℕ} {x1 y1 : BitVec m} {x2 y2 : BitVec n} :
-  (x1 ++ x2) = (y1 ++ y2) ↔ x1 = y1 ∧ x2 = y2 := by
-  constructor <;> [ intro h_eq_bv; simp_all ]
-  split_ands <;> rw [ext_iff] at h_eq_bv ⊢ <;> intro i
-  . specialize h_eq_bv ⟨i + n, by omega⟩; simp_all
-    iterate 2 rw [BitVec.getElem_append (by omega)] at h_eq_bv
-    simp_all
-  . specialize h_eq_bv ⟨i, by omega⟩; simp_all
-    iterate 2 rw [BitVec.getElem_append (by omega)] at h_eq_bv
-    simp_all
-
-end BitVec
 
 namespace U32
 

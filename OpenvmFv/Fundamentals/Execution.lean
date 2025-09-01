@@ -1,5 +1,6 @@
 import LeanRV32D
-import OpenvmFv.Fundamentals.Auxiliaries
+import OpenvmFv.Fundamentals.Core
+import OpenvmFv.Fundamentals.RV32D
 import OpenvmFv.Fundamentals.U32
 
 open PreSail
@@ -210,7 +211,7 @@ def execute_MUL' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (m : mop) : SailM E
   (wX_bits rd (execute_MUL_pure rs1_bits rs2_bits m))
   (pure RETIRE_SUCCESS)
 
-set_option maxHeartbeats 100000000 in
+set_option maxHeartbeats 10000000 in
 @[simp]
 lemma execute_MUL_eq_execute_MUL' :
   execute_MUL rs2 rs1 rd op = execute_MUL' rs2 rs1 rd (mop_of_mul_op op)
