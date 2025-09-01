@@ -1,6 +1,6 @@
--- import Mathlib
+import Mathlib
 
--- import LeanRV32D
+import LeanRV32D
 
 -- noncomputable def run_hart_active_1 (step_no : Nat) : SailM Step := do
 --   match (← (LeanRV32D.Functions.dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
@@ -61,8 +61,10 @@
 --   run_hart_active_1 =
 --   LeanRV32D.Functions.run_hart_active
 -- := by
+--   unfold LeanRV32D.Functions.run_hart_active
 --   funext
---   rfl
+--   unfold run_hart_active_1
+--   congr
 
 -- -- noncomputable def run_hart_active_2 (step_no : Nat) : SailM Step := do
 -- --   match (← (LeanRV32D.Functions.dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
@@ -146,21 +148,21 @@
 --           let r ← do (LeanRV32D.Functions.execute instruction)
 --           (pure (Step.Step_Execute (r, instbits)))))
 
--- lemma readReg_state
---   (h: state.regs.get? reg = .some reg_val)
--- :
---   Sail.readReg reg state = EStateM.Result.ok reg_val state
--- := by
---   unfold Sail.readReg PreSail.readReg
---   unfold bind Monad.toBind EStateM.instMonad EStateM.bind EStateM.pure
---   dsimp
---   obtain ⟨regs⟩ := state
---   unfold MonadState.get instMonadStateOfMonadStateOf
---   unfold getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get
---   dsimp
---   dsimp at h
---   rewrite [h]
---   dsimp
+lemma readReg_state
+  (h: state.regs.get? reg = .some reg_val)
+:
+  Sail.readReg reg state = EStateM.Result.ok reg_val state
+:= by
+  unfold Sail.readReg PreSail.readReg
+  unfold bind Monad.toBind EStateM.instMonad EStateM.bind EStateM.pure
+  dsimp
+  obtain ⟨regs⟩ := state
+  unfold MonadState.get instMonadStateOfMonadStateOf
+  unfold getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get
+  dsimp
+  dsimp at h
+  rewrite [h]
+  dsimp
 
 -- -- def is_pending_machine_interrupt
 -- --   (RegisterType: Register → Type)
@@ -179,54 +181,54 @@
 -- --               (cur_privilege_val == Privilege.Supervisor || cur_privilege_val == Privilege.User)) &&
 -- --             mip_val &&& (mie_val &&& ~~~mideleg_val) != 0#32
 
--- lemma dispatchInterrupt_none
---   (cur_privilege_val: Privilege)
---   (mideleg_val: RegisterType Register.mideleg)
---   (mie_val: RegisterType Register.mie)
---   (mip_val: RegisterType Register.mip)
---   (misa_val: RegisterType Register.misa)
---   (mstatus_val: RegisterType Register.mstatus)
---   (h_mideleg: state.regs.get? Register.mideleg = .some mideleg_val)
---   (h_mie: state.regs.get? Register.mie = .some mie_val)
---   (h_mip: state.regs.get? Register.mip = .some mip_val)
---   (h_misa: state.regs.get? Register.misa = .some misa_val)
---   (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
---   (h_assert: BitVec.extractLsb 18 18 misa_val = 1#1 ∨ mideleg_val = 0#32)
---   (h_machine_interrupt: ((
---     cur_privilege_val == Privilege.Machine && BitVec.extractLsb 3 3 mstatus_val == 1#1 ||
---     (cur_privilege_val == Privilege.Supervisor || cur_privilege_val == Privilege.User)
---   ) && mip_val &&& (mie_val &&& ~~~mideleg_val) != 0#32) = false)
---   (h_supervisor_interrupt: ((
---     cur_privilege_val == Privilege.Supervisor && BitVec.extractLsb 1 1 mstatus_val == 1#1 ||
---     cur_privilege_val == Privilege.User
---   ) && mip_val &&& (mie_val &&& mideleg_val) != 0#32) = false)
--- :
---   LeanRV32D.Functions.dispatchInterrupt cur_privilege_val state = EStateM.Result.ok none state
--- := by
---   simp only [
---     LeanRV32D.Functions.dispatchInterrupt,
---     LeanRV32D.Functions.getPendingSet,
---     LeanRV32D.Functions.currentlyEnabled,
---     LeanRV32D.Functions.hartSupports,
---     LeanRV32D.Functions._get_Misa_S,
---     LeanRV32D.Functions.zeros,
---     LeanRV32D.Functions._get_Mstatus_MIE,
---     LeanRV32D.Functions._get_Mstatus_SIE,
---     Sail.assert,
---     PreSail.assert,
---     Sail.BitVec.extractLsb
---   ]
+lemma dispatchInterrupt_none
+  (cur_privilege_val: Privilege)
+  (mideleg_val: RegisterType Register.mideleg)
+  (mie_val: RegisterType Register.mie)
+  (mip_val: RegisterType Register.mip)
+  (misa_val: RegisterType Register.misa)
+  (mstatus_val: RegisterType Register.mstatus)
+  (h_mideleg: state.regs.get? Register.mideleg = .some mideleg_val)
+  (h_mie: state.regs.get? Register.mie = .some mie_val)
+  (h_mip: state.regs.get? Register.mip = .some mip_val)
+  (h_misa: state.regs.get? Register.misa = .some misa_val)
+  (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
+  (h_assert: BitVec.extractLsb 18 18 misa_val = 1#1 ∨ mideleg_val = 0#32)
+  (h_machine_interrupt: ((
+    cur_privilege_val == Privilege.Machine && BitVec.extractLsb 3 3 mstatus_val == 1#1 ||
+    (cur_privilege_val == Privilege.Supervisor || cur_privilege_val == Privilege.User)
+  ) && mip_val &&& (mie_val &&& ~~~mideleg_val) != 0#32) = false)
+  (h_supervisor_interrupt: ((
+    cur_privilege_val == Privilege.Supervisor && BitVec.extractLsb 1 1 mstatus_val == 1#1 ||
+    cur_privilege_val == Privilege.User
+  ) && mip_val &&& (mie_val &&& mideleg_val) != 0#32) = false)
+:
+  LeanRV32D.Functions.dispatchInterrupt cur_privilege_val state = EStateM.Result.ok none state
+:= by
+  simp only [
+    LeanRV32D.Functions.dispatchInterrupt,
+    LeanRV32D.Functions.getPendingSet,
+    LeanRV32D.Functions.currentlyEnabled,
+    LeanRV32D.Functions.hartSupports,
+    LeanRV32D.Functions._get_Misa_S,
+    LeanRV32D.Functions.zeros,
+    LeanRV32D.Functions._get_Mstatus_MIE,
+    LeanRV32D.Functions._get_Mstatus_SIE,
+    Sail.assert,
+    PreSail.assert,
+    Sail.BitVec.extractLsb
+  ]
 
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
+  unfold bind Monad.toBind EStateM.instMonad
+  dsimp
+  unfold EStateM.bind EStateM.pure
+  dsimp
 
---   simp [readReg_state, *]
+  simp [readReg_state, *]
 
--- lemma instructionFetch_neq_false:
---   (@AccessType.InstructionFetch Unit () != AccessType.InstructionFetch ()) = false
--- := rfl
+lemma instructionFetch_neq_false:
+  (@AccessType.InstructionFetch Unit () != AccessType.InstructionFetch ()) = false
+:= rfl
 
 -- lemma ext_fetch_check_ok:
 --   LeanRV32D.Functions.ext_fetch_check_pc pc_val pc_val = Ext_FetchAddr_Check.Ext_FetchAddr_OK ⟨pc_val⟩
@@ -254,28 +256,28 @@
 --   pc_val
 -- := rfl
 
--- lemma effectivePrivilege_instructionFetch
--- :
---   LeanRV32D.Functions.effectivePrivilege (AccessType.InstructionFetch ()) mstatus_val cur_privilege_val state =
---   EStateM.Result.ok cur_privilege_val state
--- := by
---   unfold LeanRV32D.Functions.effectivePrivilege
---   simp [
---     instructionFetch_neq_false,
---     pure, EStateM.pure
---   ]
+lemma effectivePrivilege_instructionFetch
+:
+  LeanRV32D.Functions.effectivePrivilege (AccessType.InstructionFetch ()) mstatus_val cur_privilege_val state =
+  EStateM.Result.ok cur_privilege_val state
+:= by
+  unfold LeanRV32D.Functions.effectivePrivilege
+  simp [
+    instructionFetch_neq_false,
+    pure, EStateM.pure
+  ]
 
--- lemma architecture_backwards_mstatus_SXL
--- :
---   LeanRV32D.Functions.architecture_backwards (LeanRV32D.Functions.get_mstatus_SXL mstatus_val) state =
---   EStateM.Result.ok Architecture.RV32 state
--- := by
---   simp [
---     LeanRV32D.Functions.architecture_backwards,
---     LeanRV32D.Functions.get_mstatus_SXL,
---     LeanRV32D.Functions.architecture_forwards,
---     pure, EStateM.pure
---   ]
+lemma architecture_backwards_mstatus_SXL
+:
+  LeanRV32D.Functions.architecture_backwards (LeanRV32D.Functions.get_mstatus_SXL mstatus_val) state =
+  EStateM.Result.ok Architecture.RV32 state
+:= by
+  simp [
+    LeanRV32D.Functions.architecture_backwards,
+    LeanRV32D.Functions.get_mstatus_SXL,
+    LeanRV32D.Functions.architecture_forwards,
+    pure, EStateM.pure
+  ]
 
 -- -- example (b: BitVec 1) :
 -- --   0#3 ++ b = 0#4
@@ -284,64 +286,64 @@
 -- --     | 0#1 => rfl
 -- --     | 1#1 => rfl
 
--- lemma extract_all_satp
---   (satp_val: RegisterType Register.satp)
--- :
---   Sail.BitVec.extractLsb satp_val 31 0 = satp_val
--- := by
---   simp [
---     Sail.BitVec.extractLsb,
---     BitVec.extractLsb
---   ]
+lemma extract_all_satp
+  (satp_val: RegisterType Register.satp)
+:
+  Sail.BitVec.extractLsb satp_val 31 0 = satp_val
+:= by
+  simp [
+    Sail.BitVec.extractLsb,
+    BitVec.extractLsb
+  ]
 
--- lemma translationMode
---   (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
---   (h_satp: state.regs.get? Register.satp = .some satp_val)
--- :
---   LeanRV32D.Functions.translationMode cur_privilege_val state =
---   EStateM.Result.ok (
---     bif (cur_privilege_val == Privilege.Machine || Sail.BitVec.extractLsb satp_val 31 31 == 0#1)
---     then SATPMode.Bare
---     else SATPMode.Sv32
---   ) state
--- := by
---   unfold LeanRV32D.Functions.translationMode
+lemma translationMode
+  (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
+  (h_satp: state.regs.get? Register.satp = .some satp_val)
+:
+  LeanRV32D.Functions.translationMode cur_privilege_val state =
+  EStateM.Result.ok (
+    bif (cur_privilege_val == Privilege.Machine || Sail.BitVec.extractLsb satp_val 31 31 == 0#1)
+    then SATPMode.Bare
+    else SATPMode.Sv32
+  ) state
+:= by
+  unfold LeanRV32D.Functions.translationMode
 
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
+  unfold bind Monad.toBind EStateM.instMonad
+  dsimp
+  unfold EStateM.bind EStateM.pure
+  dsimp
 
---   by_cases h: cur_privilege_val == Privilege.Machine
---   . simp_all
---   . simp_all [
---       readReg_state, architecture_backwards_mstatus_SXL,
---       LeanRV32D.Functions.satpMode_of_bits,
---       LeanRV32D.Functions._get_Satp32_Mode,
---       LeanRV32D.Functions.Mk_Satp32,
---       extract_all_satp
---     ]
---     match (Sail.BitVec.extractLsb satp_val 31 31) with
---       | 0#1 => simp
---       | 1#1 => simp
+  by_cases h: cur_privilege_val == Privilege.Machine
+  . simp_all
+  . simp_all [
+      readReg_state, architecture_backwards_mstatus_SXL,
+      LeanRV32D.Functions.satpMode_of_bits,
+      LeanRV32D.Functions._get_Satp32_Mode,
+      LeanRV32D.Functions.Mk_Satp32,
+      extract_all_satp
+    ]
+    match (Sail.BitVec.extractLsb satp_val 31 31) with
+      | 0#1 => simp
+      | 1#1 => simp
 
--- lemma satp_mode_bare_eq: (SATPMode.Bare == SATPMode.Bare) = true := rfl
--- lemma satp_mode_sv32_neq_bare: (SATPMode.Sv32 == SATPMode.Bare) = false := rfl
+lemma satp_mode_bare_eq: (SATPMode.Bare == SATPMode.Bare) = true := rfl
+lemma satp_mode_sv32_neq_bare: (SATPMode.Sv32 == SATPMode.Bare) = false := rfl
 
--- lemma extract_all_pc (pc_val: xlenbits):
---   BitVec.extractLsb 31 0 pc_val = pc_val
--- := by
---   simp [BitVec.extractLsb]
+lemma extract_all_pc (pc_val: xlenbits):
+  BitVec.extractLsb 31 0 pc_val = pc_val
+:= by
+  simp [BitVec.extractLsb]
 
--- lemma sign_extend_extract_all_pc(pc_val: xlenbits):
---   LeanRV32D.Functions.sign_extend (Sail.BitVec.extractLsb pc_val 31 0) = pc_val
--- := by
---   simp [
---     Sail.BitVec.extractLsb,
---     BitVec.extractLsb,
---     LeanRV32D.Functions.sign_extend,
---     Sail.BitVec.signExtend
---   ]
+lemma sign_extend_extract_all_pc(pc_val: xlenbits):
+  LeanRV32D.Functions.sign_extend (Sail.BitVec.extractLsb pc_val 31 0) = pc_val
+:= by
+  simp [
+    Sail.BitVec.extractLsb,
+    BitVec.extractLsb,
+    LeanRV32D.Functions.sign_extend,
+    Sail.BitVec.signExtend
+  ]
 
 -- lemma translateAddr_instructionFetch
 --   (h_cur_privilege: state.regs.get? Register.cur_privilege = .some cur_privilege_val)
