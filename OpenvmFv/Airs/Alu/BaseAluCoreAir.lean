@@ -457,3 +457,73 @@ lemma BaseAluCoreAir.x_xor_y_3_def
    =
   c.x_xor_y_3 row rotation
 := rfl
+
+structure MinimalInstruction (F: Type) where
+  is_valid : F
+  opcode: F
+
+structure AdapterAirContext (F: Type) where
+  to_pc : Option F
+  reads : Fin 2 → Fin 4 → F
+  writes : Fin 4 → F
+  instruction : MinimalInstruction F
+
+def Valid_BaseAluCoreAir.class_offset
+  [Field F]
+  (c : Valid_BaseAluCoreAir F)
+: F :=
+  512
+
+def Valid_BaseAluCoreAir.ctx
+  [Field F]
+  (c : Valid_BaseAluCoreAir F)
+  (row rotation: ℕ)
+: AdapterAirContext F :=
+  AdapterAirContext.mk
+    .none --to_pc
+    λ x y => match x,y with -- reads
+      | 0, 0 => c.b_0 row rotation
+      | 0, 1 => c.b_1 row rotation
+      | 0, 2 => c.b_2 row rotation
+      | 0, 3 => c.b_3 row rotation
+      | 1, 0 => c.c_0 row rotation
+      | 1, 1 => c.c_1 row rotation
+      | 1, 2 => c.c_2 row rotation
+      | 1, 3 => c.c_3 row rotation
+    λ x => match x with --writes
+      | 0 => c.a_0 row rotation
+      | 1 => c.a_1 row rotation
+      | 2 => c.a_2 row rotation
+      | 3 => c.a_3 row rotation
+    (
+      MinimalInstruction.mk
+        (c.is_valid row rotation) --is_valid
+        (
+          c.class_offset + --opcode
+          (
+            c.opcode_add_flag row rotation * 0 +
+            c.opcode_sub_flag row rotation * 1 +
+            c.opcode_xor_flag row rotation * 2 +
+            c.opcode_or_flag row rotation * 3 +
+            c.opcode_and_flag row rotation * 4
+          )
+        )
+    )
+
+
+@[openvm_encapsulation]
+lemma BaseAluCoreAir.ctx.instruction.opcode_def
+  [Field F]
+  (c : Valid_BaseAluCoreAir F)
+  (row rotation: ℕ)
+: 512 +
+  (
+    c.opcode_sub_flag row rotation +
+    c.opcode_xor_flag row rotation * 2 +
+    c.opcode_or_flag row rotation * 3 +
+    c.opcode_and_flag row rotation * 4
+  ) =
+  (c.ctx row rotation).instruction.opcode
+:= by
+  unfold Valid_BaseAluCoreAir.ctx Valid_BaseAluCoreAir.class_offset
+  simp
