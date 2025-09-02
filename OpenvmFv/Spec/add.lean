@@ -59,10 +59,10 @@ def word_bytes_bitwiseBus_entries
   (val : U32)
 : List (BabyBear.F × List BabyBear.F) :=
   [
-    (-1, [↑(val[0].toNat % 256), ↑(val[0].toNat % 256), 0, 1]),
-    (-1, [↑(val[1].toNat % 256), ↑(val[1].toNat % 256), 0, 1]),
-    (-1, [↑(val[2].toNat % 256), ↑(val[2].toNat % 256), 0, 1]),
-    (-1, [↑(val[3].toNat % 256), ↑(val[3].toNat % 256), 0, 1]),
+    (-1, [↑(val[0].toNat), ↑(val[0].toNat), 0, 1]),
+    (-1, [↑(val[1].toNat), ↑(val[1].toNat), 0, 1]),
+    (-1, [↑(val[2].toNat), ↑(val[2].toNat), 0, 1]),
+    (-1, [↑(val[3].toNat), ↑(val[3].toNat), 0, 1]),
   ]
 
 def readInstruction_add
@@ -163,14 +163,6 @@ lemma eq_of_readInstruction_add_balanced
   . simp at h
     grind
 
-lemma byte_mod_256 (a : BitVec 8)
-:
-  @Nat.cast BabyBear.F _ (a.toNat % 256) =
-  ↑(a.toNat)
-:= by
-  rw [Nat.mod_eq_of_lt]
-  exact BitVec.toNat_lt_twoPow_of_le (by trivial)
-
 -- spec for non-intermediate version
 -- TODO
 -- - split a up into 4
@@ -197,7 +189,7 @@ theorem spec_add
   )
   (h_bitwise : Interaction.balanced_by
     (air.buses BitwiseBus)
-    (word_bytes_bitwiseBus_entries a)
+    (word_bytes_bitwiseBus_entries bitwise_word)
   )
   (h_read_instruction : Interaction.balanced_by
     (air.buses ReadInstructionBus)
@@ -257,7 +249,11 @@ theorem spec_add
   simp [*] at *
   simp [write_word_memoryBus_entry.eq_def, read_word_memoryBus_entry.eq_def] at h_memory
   unfold word_bytes_bitwiseBus_entries at h_bitwise
-  simp [byte_mod_256] at h_bitwise
+  -- TODO
+    -- show that x_0, x_1, ... = y_0, y_1, ... = a_0, a_1, ...
+    -- because all -1 mult elements of h_bitwise are < 256, all +1 mult elements of h_bitwise are < 256
+    -- this range checks a
+    -- then, case on memory bus entries pairing off correctly (started below)
   -- by_cases h_memory_matches :
   --   air.core.b_0 0 0 = ↑b[0].toNat ∧
   --   air.core.b_1 0 0 = ↑b[1].toNat ∧
