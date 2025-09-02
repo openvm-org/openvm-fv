@@ -169,4 +169,16 @@ lemma div_overflow {x y : ℤ} :
         omega
   . simp_all
 
+lemma List.forall_in_range
+  {n : ℕ}
+  {P : ℕ → Prop}
+  (m : ℕ)
+  (in_range : m < n)
+:
+  List.Forall (fun n => P n) (List.range n) → P m
+:= by
+  induction n generalizing m
+  case zero => simp_all
+  case succ n ih => simp [List.range_add]; grind
+
 end auxiliaries
