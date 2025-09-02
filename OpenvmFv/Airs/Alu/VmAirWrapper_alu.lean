@@ -69,4 +69,4 @@ lemma VmAirWrapper.rs2_sign_check
   (c.rs2_sign row rotation = 0 ∨ 255 - c.rs2_sign row rotation = 0)
 := rfl
 
-def Valid_VmAirWrapper_alu_BB := Valid_VmAirWrapper_alu (Fin BB)
+-- def Valid_VmAirWrapper_alu_BB := Valid_VmAirWrapper_alu (Fin BB)

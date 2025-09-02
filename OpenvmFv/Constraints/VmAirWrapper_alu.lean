@@ -8,7 +8,7 @@ namespace VmAirWrapper_alu.constraints
 
 def constraint_list
   [Field ExtF]
-  (c : Valid_VmAirWrapper_alu_BB ExtF)
+  (c : Valid_VmAirWrapper_alu BabyBear.F ExtF)
   (row : ℕ)
 : List Prop :=
   [
@@ -39,13 +39,13 @@ def constraint_list
 @[simp]
 def allHold
   [Field ExtF]
-  (c : Valid_VmAirWrapper_alu_BB ExtF)
+  (c : Valid_VmAirWrapper_alu BabyBear.F ExtF)
   (row : ℕ) : Prop :=
   List.Forall (fun x => x) (constraint_list c row)
 
 lemma allHold_constraints
   [Field ExtF]
-  (c : Valid_VmAirWrapper_alu_BB ExtF)
+  (c : Valid_VmAirWrapper_alu BabyBear.F ExtF)
   (row : ℕ)
 :
   allHold c row ↔
@@ -73,14 +73,14 @@ lemma allHold_constraints
 := by
   simp [constraint_list]
   simp_all [openvm_encapsulation]
-  repeat rw [eq_comm (a := (1 : Fin BB))]
-  repeat rw [eq_comm (a := (255 : Fin BB))]
-  simp
+  repeat rw [eq_comm (a := (1 : BabyBear.F))]
+  repeat rw [eq_comm (a := (255 : BabyBear.F))]
+  grind
 
-  lemma constrain_interactions' [Field ExtF]
-    (c: Valid_VmAirWrapper_alu_BB ExtF)
-    (h: VmAirWrapper_alu.extraction.constrain_interactions c)
-  : c.buses = fun index ↦
+lemma constrain_interactions' [Field ExtF]
+  (c: Valid_VmAirWrapper_alu BabyBear.F ExtF)
+  (h: VmAirWrapper_alu.extraction.constrain_interactions c)
+: c.buses = fun index ↦
   if index = ExecutionBus then
     List.map (fun row ↦ (-c.core.is_valid row 0, [c.adapter.from_state.pc row 0, c.adapter.from_state.timestamp row 0]))
         (List.range (c.last_row + 1)) ++
