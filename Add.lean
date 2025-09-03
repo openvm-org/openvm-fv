@@ -3,274 +3,63 @@ import Mathlib
 import OpenvmFv.Airs.Alu.VmAirWrapper_alu
 import OpenvmFv.Constraints.VmAirWrapper_alu
 import OpenvmFv.Fundamentals.Execution
+import OpenvmFv.Fundamentals.Interaction
 
 import LeanZKCircuit.Interactions
 
 variable (ExtF : Type)
 variable (air : Valid_VmAirWrapper_alu FBB ExtF)
 
-section bus_interpretation
-
-
-end bus_interpretation
-
-def read_word_memoryBus_entry
-  (x1 x2 x3 x4 ptr : FBB) (timestamp : FBB)
-: (FBB × List FBB) :=
-  (-1, [1, ptr, x1, x2, x3, x4, timestamp])
-
-def write_word_memoryBus_entry
-  (val : U32) (ptr : FBB) (timestamp : FBB)
-: (FBB × List FBB) :=
-  (1, [1, ptr, val[0], val[1], val[2], val[3], timestamp])
-
-def word_bytes_bitwiseBus_entries
-  (val : U32)
-: List (FBB × List FBB) :=
-  [
-    (-1, [val[0], val[0], 0, 1]),
-    (-1, [val[1], val[1], 0, 1]),
-    (-1, [val[2], val[2], 0, 1]),
-    (-1, [val[3], val[3], 0, 1]),
-  ]
-
-def readInstruction_add
-  (pc rd rs1 rs2 : FBB)
-: List (FBB × List FBB) :=
-  [(-1, [pc, 512, rd, rs1, rs2, 1, 1, 0, 0])]
-
-lemma get_multiplicity_cons
-  {x : F × List F}
-  {data : List F}
-  [Field F]
-  [BEq (List F)]
-:
-  Interaction.get_multiplicity (x::xs) data =
-  (if x.2 == data then x.1 else 0) + Interaction.get_multiplicity xs data
-:= by
-  unfold Interaction.get_multiplicity
-  grind
-
-
-
-lemma eq_of_readInstruction_add_balanced
-  (h: Interaction.balanced_by
-    [(1, [ x1, x2, x3, x4, x5, 1, x6, 0, 0 ])]
-    (readInstruction_add y1 y2 y3 y4)
-  )
-:
-  x1 = y1 ∧ x2 = 512 ∧ x3 = y2 ∧ x4 = y3 ∧ x5 = y4 ∧ x6 = 1
-:= by
-  unfold readInstruction_add Interaction.balanced_by at h
-  specialize h [y1, 512, y2, y3, y4, 1, 1, 0, 0]
-  unfold Interaction.get_multiplicity at h
-  by_contra h
-  grind
-
-lemma flag1_exclusive_of_is_valid_binary
-  {flag2 flag3 flag4 flag5 : FBB}
-  (h_flag2 : flag2 = 0 ∨ flag2 = 1)
-  (h_flag3 : flag3 = 0 ∨ flag3 = 1)
-  (h_flag4 : flag4 = 0 ∨ flag4 = 1)
-  (h_flag5 : flag5 = 0 ∨ flag5 = 1)
-  (h_sum :
-    1 + flag2 + flag3 + flag4 + flag5 = 0 ∨
-    1 + flag2 + flag3 + flag4 + flag5 = 1
-  )
-:
-  flag2 = 0 ∧ flag3 = 0 ∧ flag4 = 0 ∧ flag5 = 0
-:= by grind
-
-lemma flag2_exclusive_of_is_valid_binary
-  {flag2 flag3 flag4 flag5 : FBB}
-  (h_flag1 : flag1 = 0 ∨ flag1 = 1)
-  (h_flag3 : flag3 = 0 ∨ flag3 = 1)
-  (h_flag4 : flag4 = 0 ∨ flag4 = 1)
-  (h_flag5 : flag5 = 0 ∨ flag5 = 1)
-  (h_sum :
-    flag1 + 1 + flag3 + flag4 + flag5 = 0 ∨
-    flag1 + 1 + flag3 + flag4 + flag5 = 1
-  )
-:
-  flag1 = 0 ∧ flag3 = 0 ∧ flag4 = 0 ∧ flag5 = 0
-:= by grind
-
-lemma flags_of_opcode_512
-  {add_flag sub_flag xor_flag or_flag and_flag: FBB}
-  (h_add : add_flag = 0 ∨ add_flag = 1)
-  (h_sub : sub_flag = 0 ∨ sub_flag = 1)
-  (h_xor : xor_flag = 0 ∨ xor_flag = 1)
-  (h_or : or_flag = 0 ∨ or_flag = 1)
-  (h_and : and_flag = 0 ∨ and_flag = 1)
-  (h_sum :
-    add_flag + sub_flag + xor_flag + or_flag + and_flag = 1
-  )
-  (h_weighted_sum :
-    sub_flag + xor_flag * 2 + or_flag * 3 + and_flag * 4 = 0
-  )
-:
-  add_flag = 1 ∧ sub_flag = 0 ∧ xor_flag = 0 ∧ or_flag = 0 ∧ and_flag = 0
-:= by
-  match add_flag, sub_flag, xor_flag, or_flag, and_flag with
-    | 0, 0, 0, 0 , 0 => grind
-    | 0, 0, 0, 0 , 1 => grind
-    | 0, 0, 0, 1 , 0 => grind
-    | 0, 0, 0, 1 , 1 => grind
-    | 0, 0, 1, 0 , 0 => grind
-    | 0, 0, 1, 0 , 1 => grind
-    | 0, 0, 1, 1 , 0 => grind
-    | 0, 0, 1, 1 , 1 => grind
-    | 0, 1, 0, 0 , 0 => grind
-    | 0, 1, 0, 0 , 1 => grind
-    | 0, 1, 0, 1 , 0 => grind
-    | 0, 1, 0, 1 , 1 => grind
-    | 0, 1, 1, 0 , 0 => grind
-    | 0, 1, 1, 0 , 1 => grind
-    | 0, 1, 1, 1 , 0 => grind
-    | 0, 1, 1, 1 , 1 => grind
-    | 1, 0, 0, 0 , 0 => grind
-    | 1, 0, 0, 0 , 1 => grind
-    | 1, 0, 0, 1 , 0 => grind
-    | 1, 0, 0, 1 , 1 => grind
-    | 1, 0, 1, 0 , 0 => grind
-    | 1, 0, 1, 0 , 1 => grind
-    | 1, 0, 1, 1 , 0 => grind
-    | 1, 0, 1, 1 , 1 => grind
-    | 1, 1, 0, 0 , 0 => grind
-    | 1, 1, 0, 0 , 1 => grind
-    | 1, 1, 0, 1 , 0 => grind
-    | 1, 1, 0, 1 , 1 => grind
-    | 1, 1, 1, 0 , 0 => grind
-    | 1, 1, 1, 0 , 1 => grind
-    | 1, 1, 1, 1 , 0 => grind
-    | 1, 1, 1, 1 , 1 => grind
-
-namespace Interaction
-
-  def balanced_by_ordered [Field F] (l₁ l₂ : List (F × List F)) : Prop :=
-    match l₁, l₂ with
-      | [], [] => true
-      | _::_, [] => false
-      | [], _::_ => false
-      | a::as, b::bs =>
-        a.2 = b.2 ∧ a.1 + b.1 = 0 ∧ balanced_by_ordered as bs
-
-  lemma balanced_by_ordered_head_multiplicity
-    [Field F] {a b: (F × List F)}
-    (h: balanced_by_ordered (a::as) (b::bs))
-  : a.1 + b.1 = 0 := by
-    unfold balanced_by_ordered at h
-    grind
-
-  lemma balanced_by_ordered_head_data
-    [Field F] {a b: (F × List F)}
-    (h: balanced_by_ordered (a::as) (b::bs))
-  : a.2 = b.2 := by
-    unfold balanced_by_ordered at h
-    grind
-
-  lemma balanced_by_ordered_tail
-    [Field F] {a b: (F × List F)}
-    (h: balanced_by_ordered (a::as) (b::bs))
-  : balanced_by_ordered as bs := by
-    unfold balanced_by_ordered at h
-    grind
-
-end Interaction
-
-lemma range_of_eq_bitvec_8
-  (bv: BitVec 8) (x : FBB)
-  (h: ↑(bv.toNat) = x)
-: x.val < 256
-:= by
-  have : bv.toNat < 256 := by
-    convert BitVec.toNat_lt_twoPow_of_le (show 8 ≤ 8 by trivial)
-  rewrite [←h]
-  simp
-  omega
-
-def range_bus_entry
-  (val: Fin k) (_h: l = 2^x)
-: FBB × List FBB :=
-  (-1, [↑val.val, ↑x])
-
-abbrev two_pow_17 := 131072
-lemma two_pow_17_correct : two_pow_17 = 2^17 := by native_decide
-lemma val_mod_bb_lt_two_pow_17 (a: Fin two_pow_17)
-: a.val % BB_prime < two_pow_17
-:= by grind
-abbrev two_pow_12 := 4096
-lemma two_pow_12_correct : two_pow_12 = 2^12 := by native_decide
-lemma val_mod_bb_lt_two_pow_12 (a: Fin two_pow_12)
-: a.val % BB_prime < two_pow_12
-:= by grind
-
-lemma combine_range_check
-  (a b : FBB) (h_a : a.val < 2^17) (h_b : b.val < 2^12)
-: (a + b * two_pow_17).val < 2^29 := by
-  grind
-
-lemma diff_of_range_check
-  (a b: FBB) (h: (a - b - 1).val < 2^29)
-: a.val < BB_prime-2^29+1 → b.val < BB_prime-2^29 → b.val < a.val := by
-  grind
-
--- ADD
--- - split a up into 4
 set_option maxHeartbeats 0
 theorem spec_add
   [Field ExtF]
   (air : Valid_VmAirWrapper_alu FBB ExtF)
-  (a0 a1 a2 a3 b0 b1 b2 b3 c0 c1 c2 c3 : FBB)
-  (b c prev_data: U32)
-  (rs1 rs2 rd : FBB)
-  (pc next_pc : FBB)
-  (timestamp next_timestamp rs1_prev_timestamp rs2_prev_timestamp rd_prev_timestamp: FBB)
-  (range_val0 range_val2 range_val4 : Fin two_pow_17)
-  (range_val1 range_val3 range_val5 : Fin two_pow_12)
-  (bitwise_word : U32)
   (h_last_row : air.last_row = 0)
-  (h_constraints : VmAirWrapper_alu.constraints.allHold air 0 (by grind))
-  (h_execution : Interaction.balanced_by_ordered
+  (h_constraints : VmAirWrapper_alu.constraints.allHold air 0 (by simp))
+  (h_execution : InteractionList.balanced_by_ordered
     (air.buses ExecutionBus)
     [
-      (1, [pc, timestamp]),
-      (-1, [next_pc, next_timestamp])
+      Interaction.executionBus_entry mul00 pc00 t00,
+      Interaction.executionBus_entry mul01 pc01 t01,
     ]
   )
-  (h_memory : Interaction.balanced_by_ordered
+  (h_memory : InteractionList.balanced_by_ordered
     (air.buses MemoryBus)
     [
-      write_word_memoryBus_entry b rs1 rs1_prev_timestamp,
-      read_word_memoryBus_entry b0 b1 b2 b3 rs1 timestamp,
-      write_word_memoryBus_entry c rs2 rs2_prev_timestamp,
-      read_word_memoryBus_entry c0 c1 c2 c3 rs2 (timestamp + 1),
-      write_word_memoryBus_entry prev_data rd rd_prev_timestamp,
-      read_word_memoryBus_entry a0 a1 a2 a3 rd (timestamp + 2)
+      Interaction.memoryBus_write_entry mul10 as0 r0 b t0,
+      Interaction.memoryBus_read_entry mul11 as1 r1 b0 b1 b2 b3 t1,
+      Interaction.memoryBus_write_entry mul12 as2 r2 c t2,
+      Interaction.memoryBus_read_entry mul13 as3 r3 c0 c1 c2 c3 t3,
+      Interaction.memoryBus_write_entry mul14 as4 r3 d t4,
+      Interaction.memoryBus_read_entry mul15 as5 r5 a0 a1 a2 a3 t5
     ]
   )
-  (h_timestamp_range : timestamp.val < 2^29 - 1)
-  (h_rs1_prev_timestamp_range : rs1_prev_timestamp.val < 2^29)
-  (h_rs2_prev_timestamp_range : rs2_prev_timestamp.val < 2^29)
-  (h_rd_prev_timestamp_range : rd_prev_timestamp.val < 2^29)
-  (h_range_check : Interaction.balanced_by_ordered
+  (h_range_check : InteractionList.balanced_by_ordered
     (air.buses RangeCheckerBus)
     [
-      range_bus_entry range_val0 two_pow_17_correct,
-      range_bus_entry range_val1 two_pow_12_correct,
-      range_bus_entry range_val2 two_pow_17_correct,
-      range_bus_entry range_val3 two_pow_12_correct,
-      range_bus_entry range_val4 two_pow_17_correct,
-      range_bus_entry range_val5 two_pow_12_correct,
+      Interaction.rangeBus_entry mul20 17 r0l0,
+      Interaction.rangeBus_entry mul21 12 r0l1,
+      Interaction.rangeBus_entry mul22 17 r1l0,
+      Interaction.rangeBus_entry mul23 12 r1l1,
+      Interaction.rangeBus_entry mul24 17 bl0,
+      Interaction.rangeBus_entry mul25 12 bl1
     ]
   )
-  (h_read_instruction : Interaction.balanced_by_ordered
+  (h_read_instruction : InteractionList.balanced_by_ordered
     (air.buses ReadInstructionBus)
-    (readInstruction_add pc rd rs1 rs2)
+    [
+      Interaction.readInstructionBus_entry mul pc opcode rd rs1 rs2 unknown0 rs2_as unknown1 unknown2,
+    ]
   )
-  (h_bitwise : Interaction.balanced_by_ordered
+  (h_bitwise : InteractionList.balanced_by_ordered
     (air.buses BitwiseBus)
-    (word_bytes_bitwiseBus_entries bitwise_word)
+    [
+      Interaction.bitwiseBus_entry mul40 x0 y0 l0,
+      Interaction.bitwiseBus_entry mul41 x1 y1 l1,
+      Interaction.bitwiseBus_entry mul42 x2 y2 l2,
+      Interaction.bitwiseBus_entry mul43 x3 y3 l3,
+      Interaction.bitwiseBus_entry mul44 x4 y4 l4
+    ]
   )
 :
   U32.toBV #v[↑a0, ↑a1, ↑a2, ↑a3] = execute_RTYPE_pure_U32 b c .ADD ∧

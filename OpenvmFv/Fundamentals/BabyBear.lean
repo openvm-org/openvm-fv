@@ -57,4 +57,16 @@ def toU32 {bb0 bb1 bb2 bb3 : FBB}
 
 end U32
 
+section auxiliaries
+
+lemma lt_via_diff_and_range_check
+  (a b c d : FBB)
+  (h_c : c.val < 2^17)
+  (h_d : d.val < 2^12)
+  (h_diff : (a - b - 1).val < c + d * 131072)
+: b.val < BB_prime - 2^29 + 1 → b.val < a.val := by
+  grind
+
+end auxiliaries
+
 end BabyBear
