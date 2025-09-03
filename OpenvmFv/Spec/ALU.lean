@@ -163,9 +163,11 @@ lemma eq_a
 
   have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air 0 (by simp) constraints
   clear *- b_add b_sub b_xor b_or b_and is_valid ba0 ba1 ba2 ba3 sop0 sop1 sop2 sop3 sop4 eq_a0 eq_a1 eq_a2 eq_a3
+
   rcases b_add <;> [ skip; simp_all ]
   rcases b_sub <;> [ skip; simp_all ]
   rcases b_xor <;> rcases b_and <;> rcases b_or <;> simp_all
+
   all_goals
     simp [← BaseAluCoreAir.x_xor_y_0_def, ← BaseAluCoreAir.x_xor_y_1_def,
           ← BaseAluCoreAir.x_xor_y_2_def, ← BaseAluCoreAir.x_xor_y_3_def,
@@ -175,13 +177,17 @@ lemma eq_a
     obtain ⟨ ba10, ba11, ba12, ba13 ⟩ := ba1
     obtain ⟨ ba20, ba21, ba22, ba23 ⟩ := ba2
     obtain ⟨ ba30, ba31, ba32, ba33 ⟩ := ba3
-  . simp_all
-    sorry
-
-  . simp_all
-    sorry
-
-  . simp_all
+    simp_all
+  . have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba00 ba01 ba03
+    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba10 ba11 ba13
+    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba20 ba21 ba23
+    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba30 ba31 ba33
+    grind
+  . have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba00 ba01 ba03
+    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba10 ba11 ba13
+    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba20 ba21 ba23
+    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba30 ba31 ba33
+    grind
 
 lemma monotonic_timestamps : True := by sorry
   -- rs1_prev_timestamp.val < timestamp.val ∧
