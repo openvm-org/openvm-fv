@@ -128,20 +128,60 @@ lemma eq_b_and_c_non_imm
   simp_all [Vector.get]
   omega
 
-include constraints h_last_row balanced_execution balanced_memory in
+include constraints h_last_row balanced_execution balanced_memory balanced_bitwise in
 lemma eq_a
 :
   air.core.a_0 0 0 = a0 ∧
   air.core.a_1 0 0 = a1 ∧
   air.core.a_2 0 0 = a2 ∧
-  air.core.a_3 0 0 = a3
+  air.core.a_3 0 0 = a3 ∧
+  a0.val < 256 ∧ a1.val < 256 ∧ a2.val < 256 ∧ a3.val < 256
 := by
-  have ⟨ exec_bus, memory_bus, rest ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero (by exact ci ExtF air constraints) h_last_row
-  clear exec_bus rest
+  have ⟨ exec_bus, memory_bus, range_bus, readInstr_bus, bitwise_bus ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero (by exact ci ExtF air constraints) h_last_row
   have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (balanced_execution := balanced_execution)
-  rw [memory_bus] at balanced_memory
-  apply VmAirWrapper_alu.buses.memoryBus_balanced_row at balanced_memory
+  have constraints' := constraints
+  rw [VmAirWrapper_alu.constraints.allHold_constraints] at constraints'
+  obtain ⟨ b_add, b_sub, b_xor, b_or, b_and, b_is_valid, rest ⟩ := constraints'
+  clear rest
+
+  have ⟨ eq_a0, eq_a1, eq_a2, eq_a3 ⟩
+  :
+    air.core.a_0 0 0 = a0 ∧ air.core.a_1 0 0 = a1 ∧ air.core.a_2 0 0 = a2 ∧ air.core.a_3 0 0 = a3
+  := by
+    rw [memory_bus] at balanced_memory
+    apply VmAirWrapper_alu.buses.memoryBus_balanced_row at balanced_memory
+    simp_all
+
+  rw [bitwise_bus] at balanced_bitwise
+  apply VmAirWrapper_alu.buses.bitwiseBus_balanced_row at balanced_bitwise
+  simp [is_valid,
+          ← BaseAluCoreAir.x_0_def, ← BaseAluCoreAir.x_1_def,
+          ← BaseAluCoreAir.x_2_def, ← BaseAluCoreAir.x_3_def] at balanced_bitwise
+  obtain ⟨ ba0, ba1, ba2, ba3, ba4 ⟩ := balanced_bitwise
+
   simp_all
+
+  have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air 0 (by simp) constraints
+  clear *- b_add b_sub b_xor b_or b_and is_valid ba0 ba1 ba2 ba3 sop0 sop1 sop2 sop3 sop4 eq_a0 eq_a1 eq_a2 eq_a3
+  rcases b_add <;> [ skip; simp_all ]
+  rcases b_sub <;> [ skip; simp_all ]
+  rcases b_xor <;> rcases b_and <;> rcases b_or <;> simp_all
+  all_goals
+    simp [← BaseAluCoreAir.x_xor_y_0_def, ← BaseAluCoreAir.x_xor_y_1_def,
+          ← BaseAluCoreAir.x_xor_y_2_def, ← BaseAluCoreAir.x_xor_y_3_def,
+          ← BaseAluCoreAir.y_0_def, ← BaseAluCoreAir.y_1_def,
+          ← BaseAluCoreAir.y_2_def, ← BaseAluCoreAir.y_3_def] at ba0 ba1 ba2 ba3
+    obtain ⟨ ba00, ba01, ba02, ba03 ⟩ := ba0
+    obtain ⟨ ba10, ba11, ba12, ba13 ⟩ := ba1
+    obtain ⟨ ba20, ba21, ba22, ba23 ⟩ := ba2
+    obtain ⟨ ba30, ba31, ba32, ba33 ⟩ := ba3
+  . simp_all
+    sorry
+
+  . simp_all
+    sorry
+
+  . simp_all
 
 lemma monotonic_timestamps : True := by sorry
   -- rs1_prev_timestamp.val < timestamp.val ∧
@@ -155,7 +195,6 @@ theorem spec_add
   (h_add : opcode = 512)
   (h_not_imm : rs2_as = 1)
 :
-  BabyBear.isU32 a0 a1 a2 a3 ∧
   U32.toBV #v[↑a0, ↑a1, ↑a2, ↑a3] = execute_RTYPE_pure_U32 b c .ADD
 := by
   -- Get relevant previous info
@@ -228,9 +267,9 @@ theorem spec_add
 
   -- Now prove.
   trans U32.toBV #v[ ({ toFin := ⟨ a0.val, by omega ⟩} : BitVec 8),
-                      ({ toFin := ⟨ a1.val, by omega ⟩} : BitVec 8),
-                      ({ toFin := ⟨ a2.val, by omega ⟩} : BitVec 8),
-                      ({ toFin := ⟨ a3.val, by omega ⟩} : BitVec 8) ]
+                     ({ toFin := ⟨ a1.val, by omega ⟩} : BitVec 8),
+                     ({ toFin := ⟨ a2.val, by omega ⟩} : BitVec 8),
+                     ({ toFin := ⟨ a3.val, by omega ⟩} : BitVec 8) ]
   . congr <;> omega
   . simp [← BitVec.toNat_inj, U32.toBV_toNat, U32.toNat]
     simp [Vector.get] at *

@@ -35,7 +35,7 @@ section MemoryBus
 def memoryBus_read_entry
   (mul as ptr x1 x2 x3 x4 timestamp : FBB)
 : (FBB × List FBB) :=
-  (mul, [ as, ptr, x1, x2, x3, x4, timestamp])
+  (mul, [as, ptr, x1, x2, x3, x4, timestamp])
 
 /-- Constrained MemoryBus write entry -/
 def memoryBus_write_entry

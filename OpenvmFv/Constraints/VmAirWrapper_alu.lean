@@ -455,7 +455,6 @@ lemma bitwiseBus_balanced_row [Field ExtF]
     (f ac.is_valid = 1 → (f ac.x_2).val < 256 ∧ (f ac.y_2).val < 256 ∧ (f ac.x_xor_y_2).val < 256 ∧ (f ac.x_xor_y_2).val = (f ac.x_2).val ^^^ (f ac.y_2).val) ∧
     (f ac.is_valid = 1 → (f ac.x_3).val < 256 ∧ (f ac.y_3).val < 256 ∧ (f ac.x_xor_y_3).val < 256 ∧ (f ac.x_xor_y_3).val = (f ac.x_3).val ^^^ (f ac.y_3).val) ∧
     (f ac.is_valid - f aa.rs2_as = 1 → (f ac.c_0).val < 256 ∧ (f ac.c_1).val < 256 ∧ f ac.c_0 = f ac.c_1)
-
 := by
   simp [bitwiseBus_row, InteractionList.balanced_by_ordered]
   intro b0' b1' b2' b3' b4'
