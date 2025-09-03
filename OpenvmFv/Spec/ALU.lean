@@ -7,60 +7,75 @@ import OpenvmFv.Fundamentals.Interaction
 
 import LeanZKCircuit.Interactions
 
-variable (ExtF : Type)
+variable (ExtF : Type) [Field ExtF]
 variable (air : Valid_VmAirWrapper_alu FBB ExtF)
+variable (h_last_row : air.last_row = 0)
+variable (constraints : VmAirWrapper_alu.constraints.allHold air 0 (by simp))
+
+variable {mul00 pc00 t00 mul01 pc01 t01}
+         (balanced_execution :
+          InteractionList.balanced_by_ordered
+            (air.buses ExecutionBus)
+            [
+              Interaction.executionBus_entry mul00 pc00 t00,
+              Interaction.executionBus_entry mul01 pc01 t01,
+            ]
+         )
+
+variable {mul10 as0 r0 b t0 mul11 as1 r1 b0 b1 b2 b3 t1 mul12 as2 r2 c t2 mul13 as3 r3 c0 c1 c2 c3 t3 mul14 as4 d t4 mul15 as5 r5 a0 a1 a2 a3 t5}
+         (balanced_memory :
+          InteractionList.balanced_by_ordered
+            (air.buses MemoryBus)
+            [
+              Interaction.memoryBus_write_entry mul10 as0 r0 b t0,
+              Interaction.memoryBus_read_entry mul11 as1 r1 b0 b1 b2 b3 t1,
+              Interaction.memoryBus_write_entry mul12 as2 r2 c t2,
+              Interaction.memoryBus_read_entry mul13 as3 r3 c0 c1 c2 c3 t3,
+              Interaction.memoryBus_write_entry mul14 as4 r3 d t4,
+              Interaction.memoryBus_read_entry mul15 as5 r5 a0 a1 a2 a3 t5
+            ]
+          )
+
+variable {mul20 r0l0 mul21 r0l1 mul22 r1l0 mul23 r1l1 mul24 bl0 mul25 bl1}
+         (balanced_range :
+          InteractionList.balanced_by_ordered
+            (air.buses RangeCheckerBus)
+            [
+              Interaction.rangeBus_entry mul20 17 r0l0,
+              Interaction.rangeBus_entry mul21 12 r0l1,
+              Interaction.rangeBus_entry mul22 17 r1l0,
+              Interaction.rangeBus_entry mul23 12 r1l1,
+              Interaction.rangeBus_entry mul24 17 bl0,
+              Interaction.rangeBus_entry mul25 12 bl1
+            ]
+         )
+
+variable {mul pc opcode rd rs1 rs2 unknown0 rs2_as unknown1 unknown2}
+         (balanced_read :
+          InteractionList.balanced_by_ordered
+            (air.buses ReadInstructionBus)
+            [
+              Interaction.readInstructionBus_entry mul pc opcode rd rs1 rs2 unknown0 rs2_as unknown1 unknown2,
+            ]
+         )
+
+variable {mul40 x0 y0 l0 mul41 x1 y1 l1 mul42 x2 y2 l2 mul43 x3 y3 l3 mul44 x4 y4 l4}
+         (balanced_bitwise :
+          InteractionList.balanced_by_ordered
+            (air.buses BitwiseBus)
+            [
+              Interaction.bitwiseBus_entry mul40 x0 y0 l0,
+              Interaction.bitwiseBus_entry mul41 x1 y1 l1,
+              Interaction.bitwiseBus_entry mul42 x2 y2 l2,
+              Interaction.bitwiseBus_entry mul43 x3 y3 l3,
+              Interaction.bitwiseBus_entry mul44 x4 y4 l4
+            ]
+         )
 
 set_option maxHeartbeats 0
 theorem spec_add
-  [Field ExtF]
-  (air : Valid_VmAirWrapper_alu FBB ExtF)
-  (h_last_row : air.last_row = 0)
-  (h_constraints : VmAirWrapper_alu.constraints.allHold air 0 (by simp))
-  (h_execution : InteractionList.balanced_by_ordered
-    (air.buses ExecutionBus)
-    [
-      Interaction.executionBus_entry mul00 pc00 t00,
-      Interaction.executionBus_entry mul01 pc01 t01,
-    ]
-  )
-  (h_memory : InteractionList.balanced_by_ordered
-    (air.buses MemoryBus)
-    [
-      Interaction.memoryBus_write_entry mul10 as0 r0 b t0,
-      Interaction.memoryBus_read_entry mul11 as1 r1 b0 b1 b2 b3 t1,
-      Interaction.memoryBus_write_entry mul12 as2 r2 c t2,
-      Interaction.memoryBus_read_entry mul13 as3 r3 c0 c1 c2 c3 t3,
-      Interaction.memoryBus_write_entry mul14 as4 r3 d t4,
-      Interaction.memoryBus_read_entry mul15 as5 r5 a0 a1 a2 a3 t5
-    ]
-  )
-  (h_range_check : InteractionList.balanced_by_ordered
-    (air.buses RangeCheckerBus)
-    [
-      Interaction.rangeBus_entry mul20 17 r0l0,
-      Interaction.rangeBus_entry mul21 12 r0l1,
-      Interaction.rangeBus_entry mul22 17 r1l0,
-      Interaction.rangeBus_entry mul23 12 r1l1,
-      Interaction.rangeBus_entry mul24 17 bl0,
-      Interaction.rangeBus_entry mul25 12 bl1
-    ]
-  )
-  (h_read_instruction : InteractionList.balanced_by_ordered
-    (air.buses ReadInstructionBus)
-    [
-      Interaction.readInstructionBus_entry mul pc opcode rd rs1 rs2 unknown0 rs2_as unknown1 unknown2,
-    ]
-  )
-  (h_bitwise : InteractionList.balanced_by_ordered
-    (air.buses BitwiseBus)
-    [
-      Interaction.bitwiseBus_entry mul40 x0 y0 l0,
-      Interaction.bitwiseBus_entry mul41 x1 y1 l1,
-      Interaction.bitwiseBus_entry mul42 x2 y2 l2,
-      Interaction.bitwiseBus_entry mul43 x3 y3 l3,
-      Interaction.bitwiseBus_entry mul44 x4 y4 l4
-    ]
-  )
+
+
 :
   U32.toBV #v[↑a0, ↑a1, ↑a2, ↑a3] = execute_RTYPE_pure_U32 b c .ADD ∧
   b = #v[↑b0, ↑b1, ↑b2, ↑b3] ∧
