@@ -199,7 +199,7 @@ theorem spec_add
 := by
   -- Get relevant previous info
   have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (balanced_execution := balanced_execution)
-  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3 ⟩ := eq_a (constraints := constraints) (h_last_row := h_last_row) (balanced_execution := balanced_execution) (balanced_memory := balanced_memory)
+  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := eq_a (constraints := constraints) (h_last_row := h_last_row) (balanced_execution := balanced_execution) (balanced_memory := balanced_memory) (balanced_bitwise := balanced_bitwise)
   have eq_b_and_c_non_imm := eq_b_and_c_non_imm (constraints := constraints) (h_last_row := h_last_row) (balanced_execution := balanced_execution) (balanced_memory := balanced_memory)
 
   -- Isolate relevant constraints
@@ -236,25 +236,6 @@ theorem spec_add
 
   -- Recall that only one opcode can equal one
   have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air 0 (by simp) constraints
-
-  -- Use bitwise bus information to obtain constraints on the as
-  obtain ⟨ ub_a0, ub_a1, ub_a2, ub_a3 ⟩
-  :
-    a0.val < 256 ∧ a1.val < 256 ∧ a2.val < 256 ∧ a3.val < 256
-  := by
-    have ⟨ exec_bus, memory_bus, range_bus, readInstr_bus, bitwise_bus ⟩ :=
-      VmAirWrapper_alu.buses.buses_last_row_zero
-      (by exact ci ExtF air constraints)
-      h_last_row
-    rw [bitwise_bus] at balanced_bitwise
-    apply VmAirWrapper_alu.buses.bitwiseBus_balanced_row at balanced_bitwise
-    simp [is_valid,
-          ← BaseAluCoreAir.x_0_def,
-          ← BaseAluCoreAir.x_1_def,
-          ← BaseAluCoreAir.x_2_def,
-          ← BaseAluCoreAir.x_3_def] at balanced_bitwise
-    obtain ⟨ ba0, ba1, ba2, ba3, ba4 ⟩ := balanced_bitwise
-    simp_all
 
   -- Open the carries
   rw [← BaseAluCoreAir.carry_add_3_def,
