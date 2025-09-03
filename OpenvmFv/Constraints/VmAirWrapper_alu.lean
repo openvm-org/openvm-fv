@@ -291,17 +291,29 @@ lemma memoryBus_balanced_row [Field ExtF]
       Interaction.memoryBus_read_entry mul5 as5 r5 a0 a1 a2 a3 t5
     ]
   → (f ac.is_valid = 1 → (f ac.b_0).val < 256 ∧ (f ac.b_1).val < 256 ∧ (f ac.b_2).val < 256 ∧ (f ac.b_3).val < 256 ∧ b = #v[↑(f ac.b_0).val, ↑(f ac.b_1).val, ↑(f ac.b_2).val, ↑(f ac.b_3).val] ∧ (f aa.reads_aux_0.base.prev_timestamp).val = t0.val ∧ (f aa.reads_aux_0.base.prev_timestamp).val < 1073741824) ∧
+    (f ac.is_valid = 1 → f ac.b_0 = b0 ∧ f ac.b_1 = b1 ∧ f ac.b_2 = b2 ∧ f ac.b_3 = b3) ∧
     (f aa.rs2_as = 1 → (f ac.c_0).val < 256 ∧ (f ac.c_1).val < 256 ∧ (f ac.c_2).val < 256 ∧ (f ac.c_3).val < 256 ∧ c = #v[↑(f ac.c_0).val, ↑(f ac.c_1).val, ↑(f ac.c_2).val, ↑(f ac.c_3).val] ∧ (f aa.reads_aux_1.base.prev_timestamp).val = t2.val ∧ (f aa.reads_aux_1.base.prev_timestamp) < 1073741824) ∧
-    (f ac.is_valid = 1 → (f aw.prev_data_0).val < 256 ∧ (f aw.prev_data_1).val < 256 ∧ (f aw.prev_data_2).val < 256 ∧ (f aw.prev_data_3).val < 256 ∧ d = #v[↑(f aw.prev_data_0).val, ↑(f aw.prev_data_1).val, ↑(f aw.prev_data_2).val, ↑(f aw.prev_data_3).val]∧ (f aw.base.prev_timestamp).val = t4.val ∧ (f aw.base.prev_timestamp).val < 1073741824)
+    (f aa.rs2_as = 1 → f ac.c_0 = c0 ∧ f ac.c_1 = c1 ∧ f ac.c_2 = c2 ∧ f ac.c_3 = c3) ∧
+    (f ac.is_valid = 1 → (f aw.prev_data_0).val < 256 ∧ (f aw.prev_data_1).val < 256 ∧ (f aw.prev_data_2).val < 256 ∧ (f aw.prev_data_3).val < 256 ∧ d = #v[↑(f aw.prev_data_0).val, ↑(f aw.prev_data_1).val, ↑(f aw.prev_data_2).val, ↑(f aw.prev_data_3).val]∧ (f aw.base.prev_timestamp).val = t4.val ∧ (f aw.base.prev_timestamp).val < 1073741824) ∧
+    (f ac.is_valid = 1 → f ac.a_0 = a0 ∧ f ac.a_1 = a1 ∧ f ac.a_2 = a2 ∧ f ac.a_3 = a3)
 := by
   have := U32.destruct b; have := U32.destruct c; have := U32.destruct d
   simp [memoryBus_row, InteractionList.balanced_by_ordered]
   intro b0 b1 b2 b3 b4 b5
   apply Interaction.memoryBus_write_balances_facts at b0
+  apply Interaction.memoryBus_read_balances_facts at b1
   apply Interaction.memoryBus_write_balances_facts at b2
+  apply Interaction.memoryBus_read_balances_facts at b3
   apply Interaction.memoryBus_write_balances_facts at b4
+  apply Interaction.memoryBus_read_balances_facts at b5
   rw [@eq_comm (a := (1 : FBB))] at *
-  split_ands <;> intro heq <;> simp_all <;> omega
+  split_ands
+  all_goals
+    intro heq; simp [heq] at *
+    try (rw [@eq_comm (a := (1 : FBB))] at *)
+    simp_all
+  all_goals
+    omega
 
 end MemoryBus
 
