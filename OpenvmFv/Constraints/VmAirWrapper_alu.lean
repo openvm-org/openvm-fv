@@ -322,42 +322,40 @@ def memoryBus_row [Field ExtF]
     (ac.is_valid row 0, [1, aa.rd_ptr row 0, ac.a_0 row 0, ac.a_1 row 0, ac.a_2 row 0, ac.a_3 row 0, aa.from_state.timestamp row 0 + 2])
   ]
 
-lemma memoryBus_balanced_row [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  {row : ℕ}
-  (valid_row : row ≤ air.last_row)
-  (cstrs : allHold air row valid_row)
-  (is_valid :  air.core.is_valid row 0 = 1)
-  (a b c : U32)
-  (P : Prop)
-:
-  let aa := air.adapter
-  let ac := air.core
-  let f := fun (x : ℕ → ℕ → FBB) => x row 0
-  Interaction.balanced_by
-    (memoryBus_row air row)
-    [
-      memoryBus_wr_entry (f ac.is_valid) 1 (f aa.rs1_ptr) b (f aa.reads_aux_0.base.prev_timestamp),
-      memoryBus_rd_entry (2013265920 * f ac.is_valid) 1 (f aa.rs1_ptr) (f ac.b_0) (f ac.b_1) (f ac.b_2) (f ac.b_3) (f aa.from_state.timestamp),
-      -- write_word_memoryBus_entry c rs2 rs2_prev_timestamp,
-      -- memoryBus_read_entry c0 c1 c2 c3 rs2 (timestamp + 1),
-      -- write_word_memoryBus_entry prev_data rd rd_prev_timestamp,
-      -- memoryBus_read_entry a0 a1 a2 a3 rd (timestamp + 2)
-    ]
-  → f ac.b_0 = b[0] ∧ f ac.b_1 = b[1] ∧ f ac.b_1 = b[2] ∧ f ac.b_3 = b[3]
-:= by
-  simp [Interaction.balanced_by, memoryBus_row, memoryBus_rd_entry, memoryBus_wr_entry]
-  intro balance
-  rw [allHold_constraints] at cstrs
-  obtain ⟨ h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, rest ⟩ := cstrs
-  clear rest
-  simp_all
+-- lemma memoryBus_balanced_row [Field ExtF]
+--   {air : Valid_VmAirWrapper_alu FBB ExtF}
+--   {row : ℕ}
+--   (valid_row : row ≤ air.last_row)
+--   (cstrs : allHold air row valid_row)
+--   (is_valid :  air.core.is_valid row 0 = 1)
+--   (a b c : U32)
+--   (P : Prop)
+-- :
+--   let aa := air.adapter
+--   let ac := air.core
+--   let f := fun (x : ℕ → ℕ → FBB) => x row 0
+--   Interaction.balanced_by
+--     (memoryBus_row air row)
+--     [
+--       memoryBus_wr_entry (f ac.is_valid) 1 (f aa.rs1_ptr) b (f aa.reads_aux_0.base.prev_timestamp),
+--       memoryBus_rd_entry (2013265920 * f ac.is_valid) 1 (f aa.rs1_ptr) (f ac.b_0) (f ac.b_1) (f ac.b_2) (f ac.b_3) (f aa.from_state.timestamp),
+--       -- write_word_memoryBus_entry c rs2 rs2_prev_timestamp,
+--       -- memoryBus_read_entry c0 c1 c2 c3 rs2 (timestamp + 1),
+--       -- write_word_memoryBus_entry prev_data rd rd_prev_timestamp,
+--       -- memoryBus_read_entry a0 a1 a2 a3 rd (timestamp + 2)
+--     ]
+--   → f ac.b_0 = b[0] ∧ f ac.b_1 = b[1] ∧ f ac.b_1 = b[2] ∧ f ac.b_3 = b[3]
+-- := by
+--   simp [Interaction.balanced_by, memoryBus_row, memoryBus_rd_entry, memoryBus_wr_entry]
+--   intro balance
+--   rw [allHold_constraints] at cstrs
+--   obtain ⟨ h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20, h21, rest ⟩ := cstrs
+--   clear rest
+--   simp_all
 
-  have b1 := balance [1, air.adapter.rs1_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0, air.adapter.reads_aux_0.base.prev_timestamp row 0]
-  simp [Interaction.get_multiplicity_cons, Interaction.get_multiplicity_empty] at b1
-
-
-
+--   have b1 := balance [1, air.adapter.rs1_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0, air.adapter.reads_aux_0.base.prev_timestamp row 0]
+--   simp [Interaction.get_multiplicity_cons, Interaction.get_multiplicity_empty] at b1
+--   sorry
 
 
 
@@ -365,6 +363,8 @@ lemma memoryBus_balanced_row [Field ExtF]
 
 
 
-end buses
+
+
+end memory_bus
 
 end VmAirWrapper_alu.constraints
