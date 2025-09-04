@@ -181,4 +181,8 @@ lemma List.forall_in_range
   case zero => simp_all
   case succ n ih => simp [List.range_add]; grind
 
+@[simp low] lemma to_the_right_nat_0 : 0 = a ↔ a = 0 := by omega
+@[simp low] lemma to_the_right_nat_1 : 1 = a ↔ a = 1 := by omega
+@[simp low] lemma to_the_right_nat_255 : 255 = a ↔ a = 255 := by omega
+
 end auxiliaries

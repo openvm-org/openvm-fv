@@ -4,181 +4,91 @@ import LeanZKCircuit.Interactions
 
 namespace Interaction
 
-section ExecutionBus
-
--- TODO: Are there any constraints to be placed on the parameters?
-
-/-- Constrained ExecutionBus entry -/
+/-- ExecutionBus entry -/
+@[simp]
 def executionBus_entry
-  (mul pc : FBB) (timestamp : Fin 1073741824)
+  (mul pc timestamp : FBB)
 : (FBB × List FBB) :=
-  (mul, [ pc, ⟨timestamp.val, by omega⟩ ])
+  (mul, [ pc, timestamp ])
 
-/-- Useful equalities and entailments resulting from ExecutionBus balancing -/
-lemma executionBus_balances_facts
-  (h_balance : Interaction.balances
-                (mul, [pc, timestamp])
-                (executionBus_entry mul' pc' timestamp'))
-:
-  mul + mul' = 0 ∧
-    (¬ mul = 0 → pc = pc' ∧
-                 timestamp.val = timestamp'.val ∧
-                 timestamp.val < 1073741824)
-:= by
-  simp_all [balances, executionBus_entry]
+/-- Assumptions from execution bus entries -/
+def executionBus_assumptions
+  (mul _ timestamp : FBB)
+: Prop :=
+  ¬ mul = 0 →
+    -- appropriate ranges
+    timestamp < 2 ^ 29
 
-end ExecutionBus
-
-section MemoryBus
-
-/-- Constrained MemoryBus read entry -/
-def memoryBus_read_entry
-  (mul as ptr x1 x2 x3 x4 timestamp : FBB)
+/-- MemoryBus entry -/
+@[simp]
+def memoryBus_entry
+  (mul as ptr x0 x1 x2 x3 timestamp : FBB)
 : (FBB × List FBB) :=
-  (mul, [as, ptr, x1, x2, x3, x4, timestamp])
+  (mul, [as, ptr, x0, x1, x2, x3, timestamp])
 
-/-- Constrained MemoryBus write entry -/
-def memoryBus_write_entry
-  (mul as ptr : FBB) (val : U32) (timestamp : Fin 1073741824)
+/-- Assumptions from memory bus entries -/
+def memoryBus_assumptions
+  (mul as ptr x0 x1 x2 x3 _ : FBB)
+: Prop :=
+  ¬ mul = 0 →
+    -- appropriate ranges
+    as.val < 3 ∧
+    ptr.val < 2 ^ 29 ∧
+    x0.val < 256 ∧
+    x1.val < 256 ∧
+    x2.val < 256 ∧
+    x3.val < 256
+
+/-- RangeBus entry -/
+@[simp]
+def rangeCheckerBus_entry
+  (mul val deg : FBB)
 : (FBB × List FBB) :=
-  (mul, [ as, ptr, val[0], val[1], val[2], val[3], ⟨timestamp.val, by omega⟩ ])
+  (mul, [ val, deg ])
 
-/-- Useful equalities and entailments resulting from MemoryBus read balancing -/
-lemma memoryBus_read_balances_facts
-  (h_balance : Interaction.balances
-                (mul, [ as, ptr, x0, x1, x2, x3, timestamp ])
-                (memoryBus_read_entry mul' as' ptr' x0' x1' x2' x3' timestamp'))
-:
-  mul + mul' = 0 ∧
-    (¬ mul = 0 → as = as' ∧
-                 ptr = ptr' ∧
-                 x0 = x0' ∧
-                 x1 = x1' ∧
-                 x2 = x2' ∧
-                 x3 = x3' ∧
-                 timestamp = timestamp')
-:= by
-  simp_all [balances, memoryBus_read_entry]
+ /-- Assumptions from range-checker bus entries -/
+def rangeCheckerBus_assumptions
+  (mul val deg : FBB)
+: Prop :=
+  ¬ mul = 0 →
+    -- `deg` range
+    deg.val < 32 ∧
+    -- `val` range
+    val.val < 2 ^ deg.val
 
-/-- Useful equalities and entailments resulting from MemoryBus read balancing -/
-lemma memoryBus_write_balances_facts
-  (h_balance : Interaction.balances
-                (mul, [ as, ptr, x0, x1, x2, x3, timestamp ])
-                (memoryBus_write_entry mul' as' ptr' x' timestamp'))
-:
-  mul + mul' = 0 ∧
-    (¬ mul = 0 → as = as' ∧
-                 ptr = ptr' ∧
-                 x0 = x'[0] ∧
-                 x1 = x'[1] ∧
-                 x2 = x'[2] ∧
-                 x3 = x'[3] ∧
-                 timestamp.val = timestamp'.val ∧
-                 timestamp.val < 1073741824 ∧
-                 x0.val < 256 ∧
-                 x1.val < 256 ∧
-                 x2.val < 256 ∧
-                 x3.val < 256)
-:= by
-  simp_all [balances, memoryBus_write_entry]
-  omega
-
-end MemoryBus
-
-section RangeBus
-
-/-- Constrained RangeBus entry -/
-def rangeBus_entry
-  (mul : FBB) (deg : Fin 30) (val : Fin (2 ^ deg.val))
-: (FBB × List FBB) :=
-  (mul, [ ⟨ val.val, by trans 2 ^ deg.val <;> [ omega; skip ];
-                        apply lt_of_le_of_lt (b := 2 ^ 30) <;>
-                        [ apply pow_le_pow; simp ] <;> simp ⟩,
-          ⟨ deg.val, by omega ⟩ ])
-
-/-- Useful equalities and entailments resulting from RangeBus balancing -/
-lemma rangeBus_balances_facts
-  (h_balance : Interaction.balances
-                (mul, [val, deg])
-                (rangeBus_entry mul' deg' val'))
-:
-  mul + mul' = 0 ∧
-    (¬ mul = 0 → deg.val = deg'.val ∧
-                 val.val = val'.val ∧
-                 deg.val < 30 ∧ val.val < 2 ^ deg'.val)
-:= by
-  simp_all [balances, rangeBus_entry]
-
-end RangeBus
-
-section ReadInstructionBus
-
--- TODO: What do the three unknown parameters do?
--- TODO: Are there any constraints to be placed on the parameters?
-
-/-- Constrained ReadInstructionBus entry -/
+/-- ReadInstructionBus entry, with parameter
+    naming as per OpenVM documentation -/
+@[simp]
 def readInstructionBus_entry
-  (mul pc opcode rd rs1 rs2 unknown0 rs2_as unknown1 unknown2 : FBB)
+  (mul pc opcode xa xb xc xd xe xf xg : FBB)
 : (FBB × List FBB) :=
-  (mul, [ pc, opcode, rd, rs1, rs2, unknown0, rs2_as, unknown1, unknown2 ])
+  (mul, [ pc, opcode, xa, xb, xc, xd, xe, xf, xg ])
 
-/-- Useful equalities and entailments resulting from ReadInstructionBus balancing -/
-lemma readInstructionBus_balances_facts
-  (h_balance : Interaction.balances
-                (mul, [pc, opcode, rd, rs1, rs2, unknown0, rs2_as, unknown1, unknown2])
-                (readInstructionBus_entry mul' pc' opcode' rd' rs1' rs2' unknown0' rs2_as' unknown1' unknown2'))
-:
-  mul + mul' = 0 ∧
-    (¬ mul = 0 → pc = pc' ∧
-                 opcode = opcode' ∧
-                 rd = rd' ∧
-                 rs1 = rs1' ∧
-                 rs2 = rs2' ∧
-                 unknown0 = unknown0' ∧
-                 rs2_as = rs2_as' ∧
-                 unknown1 = unknown1' ∧
-                 unknown2 = unknown2')
-:= by
-  simp_all [balances, readInstructionBus_entry]
+/-- ReadInstructionBus entry -/
+def readInstructionBus_assumptions
+  (mul _ _ _ _ _ _ _ _ _ : FBB)
+: Prop :=
+  ¬ mul = 0 →
+    True
 
-end ReadInstructionBus
 
-section BitwiseBus
-
-/-- Constrained BitwiseBus entry -/
+/-- BitwiseBus entry -/
+@[simp]
 def bitwiseBus_entry
-  (mul : FBB) (a b : Fin 256) (is_xor : Fin 2)
+  (mul a b c is_xor : FBB)
 : (FBB × List FBB) :=
-  (mul, [ ⟨ a.val, by omega ⟩,
-          ⟨ b.val, by omega ⟩,
-          if is_xor.val = 1 then
-            -- xor_check
-            ⟨ a ^^^ b, by have := @Nat.xor_lt_two_pow a b 8 (by omega); omega ⟩
-            -- range check
-            else 0,
-          ⟨ is_xor.val, by omega ⟩ ])
+  (mul, [ a, b, c, is_xor ])
 
-/-- Useful equalities and entailments resulting from BitwiseBus balancing -/
-lemma bitwiseBus_balances_facts
-  (h_balance : Interaction.balances
-                (mul, [a, b, c, is_xor])
-                (bitwiseBus_entry mul' a' b' is_xor'))
-:
-  mul + mul' = 0 ∧
-    (¬ mul = 0 → a.val = a'.val ∧
-                 b.val = b'.val ∧
-                 (is_xor.val = 1 → c.val = a.val ^^^ b.val) ∧
-                 is_xor.val = is_xor'.val ∧
-                 a.val < 256 ∧
-                 b.val < 256 ∧
-                 c.val < 256 ∧
-                 (is_xor = 0 ∨ is_xor = 1))
-:= by
-  simp_all [balances, bitwiseBus_entry]
-  have := @Nat.xor_lt_two_pow a b 8 (by simp_all);
-  split_ifs <;> simp_all
-  omega
-
-end BitwiseBus
+ /-- Assumptions from bitwise bus entries -/
+def bitwiseBus_assumptions
+  (mul a b c is_xor : FBB)
+: Prop :=
+  ¬ mul = 0 →
+    -- operand range
+    a.val < 256 ∧ b.val < 256 ∧
+    -- xor indicator range
+    (is_xor = 0 ∨ is_xor = 1) ∧
+    -- xor or nothing
+    c.val = if is_xor = 0 then 0 else a.val ^^^ b.val
 
 end Interaction

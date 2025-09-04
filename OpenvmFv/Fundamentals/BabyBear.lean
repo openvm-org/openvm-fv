@@ -67,6 +67,13 @@ lemma lt_via_diff_and_range_check
 : b.val < BB_prime - 2^29 + 1 → b.val < a.val := by
   grind
 
+@[simp low] lemma to_the_right_FBB_0 : (0 : FBB) = a ↔ a = 0 := by omega
+@[simp low] lemma to_the_right_FBB_1 : (1 : FBB) = a ↔ a = 1 := by omega
+@[simp low] lemma to_the_right_FBB_255 : (255 : FBB) = a ↔ a = 255 := by omega
+
+@[simp low] lemma one_plus_eq_zero : (1 : FBB) + a = 0 ↔ a = 2013265920 := by omega
+@[simp low] lemma neg_one_plus_eq_zero : (2013265920 : FBB) + a = 0 ↔ a = 1 := by omega
+
 end auxiliaries
 
 end BabyBear

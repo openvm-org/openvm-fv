@@ -82,9 +82,6 @@ lemma allHold_constraints
 := by
   simp [constraint_list]
   simp [openvm_encapsulation]
-  repeat rw [eq_comm (a := (1 : FBB))]
-  repeat rw [eq_comm (a := (255 : FBB))]
-  grind
 
 lemma single_op
   [Field ExtF]
@@ -219,8 +216,9 @@ lemma buses_eq [Field ExtF]
           else [] := by
     simp_all [openvm_encapsulation]
 
-section ExecutionBus
+section BusRows
 
+@[simp]
 def executionBus_row [Field ExtF]
   (air : Valid_VmAirWrapper_alu FBB ExtF)
   (row : ℕ)
@@ -232,32 +230,7 @@ def executionBus_row [Field ExtF]
     (ac.is_valid row 0, [aa.from_state.pc row 0 + 4, aa.from_state.timestamp row 0 + 3])
   ]
 
-lemma executionBus_balanced_row [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  {row : ℕ}
-:
-  let aa := air.adapter
-  let ac := air.core
-  let f := fun (x : ℕ → ℕ → FBB) => x row 0
-  InteractionList.balanced_by_ordered
-    (executionBus_row air row)
-    [
-      Interaction.executionBus_entry mul0 pc0 t0,
-      Interaction.executionBus_entry mul1 pc1 t1,
-    ]
-  → (f ac.is_valid = 1 → f aa.from_state.pc = pc0 ∧ (f aa.from_state.timestamp).val = t0.val ∧ (f aa.from_state.timestamp).val < 1073741824) ∧
-    (f ac.is_valid = 1 → f aa.from_state.pc + 4 = pc1 ∧ (f aa.from_state.timestamp + 3).val = t1.val ∧ (f aa.from_state.timestamp + 3).val < 1073741824)
-:= by
-  simp [executionBus_row, InteractionList.balanced_by_ordered]
-  intro b0 b1
-  apply Interaction.executionBus_balances_facts at b0
-  apply Interaction.executionBus_balances_facts at b1
-  grind
-
-end ExecutionBus
-
-section MemoryBus
-
+@[simp]
 def memoryBus_row [Field ExtF]
   (air : Valid_VmAirWrapper_alu FBB ExtF)
   (row : ℕ)
@@ -273,53 +246,7 @@ def memoryBus_row [Field ExtF]
     (ac.is_valid row 0, [1, aa.rd_ptr row 0, ac.a_0 row 0, ac.a_1 row 0, ac.a_2 row 0, ac.a_3 row 0, aa.from_state.timestamp row 0 + 2])
   ]
 
-lemma memoryBus_balanced_row [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  {row : ℕ}
-:
-  let aa := air.adapter
-  let ac := air.core
-  let f := fun (x : ℕ → ℕ → FBB) => x row 0
-  let aw := aa.writes_aux
-  InteractionList.balanced_by_ordered
-    (memoryBus_row air row)
-    [
-      Interaction.memoryBus_write_entry mul0 as0 r0 b t0,
-      Interaction.memoryBus_read_entry mul1 as1 r1 b0 b1 b2 b3 t1,
-      Interaction.memoryBus_write_entry mul2 as2 r2 c t2,
-      Interaction.memoryBus_read_entry mul3 as3 r3 c0 c1 c2 c3 t3,
-      Interaction.memoryBus_write_entry mul4 as4 r3 d t4,
-      Interaction.memoryBus_read_entry mul5 as5 r5 a0 a1 a2 a3 t5
-    ]
-  → (f ac.is_valid = 1 → (f ac.b_0).val < 256 ∧ (f ac.b_1).val < 256 ∧ (f ac.b_2).val < 256 ∧ (f ac.b_3).val < 256 ∧ b = #v[↑(f ac.b_0).val, ↑(f ac.b_1).val, ↑(f ac.b_2).val, ↑(f ac.b_3).val] ∧ (f aa.reads_aux_0.base.prev_timestamp).val = t0.val ∧ (f aa.reads_aux_0.base.prev_timestamp).val < 1073741824) ∧
-    (f ac.is_valid = 1 → f ac.b_0 = b0 ∧ f ac.b_1 = b1 ∧ f ac.b_2 = b2 ∧ f ac.b_3 = b3) ∧
-    (f aa.rs2_as = 1 → (f ac.c_0).val < 256 ∧ (f ac.c_1).val < 256 ∧ (f ac.c_2).val < 256 ∧ (f ac.c_3).val < 256 ∧ c = #v[↑(f ac.c_0).val, ↑(f ac.c_1).val, ↑(f ac.c_2).val, ↑(f ac.c_3).val] ∧ (f aa.reads_aux_1.base.prev_timestamp).val = t2.val ∧ (f aa.reads_aux_1.base.prev_timestamp) < 1073741824) ∧
-    (f aa.rs2_as = 1 → f ac.c_0 = c0 ∧ f ac.c_1 = c1 ∧ f ac.c_2 = c2 ∧ f ac.c_3 = c3) ∧
-    (f ac.is_valid = 1 → (f aw.prev_data_0).val < 256 ∧ (f aw.prev_data_1).val < 256 ∧ (f aw.prev_data_2).val < 256 ∧ (f aw.prev_data_3).val < 256 ∧ d = #v[↑(f aw.prev_data_0).val, ↑(f aw.prev_data_1).val, ↑(f aw.prev_data_2).val, ↑(f aw.prev_data_3).val]∧ (f aw.base.prev_timestamp).val = t4.val ∧ (f aw.base.prev_timestamp).val < 1073741824) ∧
-    (f ac.is_valid = 1 → f ac.a_0 = a0 ∧ f ac.a_1 = a1 ∧ f ac.a_2 = a2 ∧ f ac.a_3 = a3)
-:= by
-  have := U32.destruct b; have := U32.destruct c; have := U32.destruct d
-  simp [memoryBus_row, InteractionList.balanced_by_ordered]
-  intro b0 b1 b2 b3 b4 b5
-  apply Interaction.memoryBus_write_balances_facts at b0
-  apply Interaction.memoryBus_read_balances_facts at b1
-  apply Interaction.memoryBus_write_balances_facts at b2
-  apply Interaction.memoryBus_read_balances_facts at b3
-  apply Interaction.memoryBus_write_balances_facts at b4
-  apply Interaction.memoryBus_read_balances_facts at b5
-  rw [@eq_comm (a := (1 : FBB))] at *
-  split_ands
-  all_goals
-    intro heq; simp [heq] at *
-    try (rw [@eq_comm (a := (1 : FBB))] at *)
-    simp_all
-  all_goals
-    omega
-
-end MemoryBus
-
-section RangeBus
-
+@[simp]
 def rangeBus_row [Field ExtF]
   (air : Valid_VmAirWrapper_alu FBB ExtF)
   (row : ℕ)
@@ -335,44 +262,7 @@ def rangeBus_row [Field ExtF]
     (ac.is_valid row 0, [aa.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
   ]
 
-lemma rangeBus_balanced_row [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  {row : ℕ}
-:
-  let aa := air.adapter
-  let ac := air.core
-  let f := fun (x : ℕ → ℕ → FBB) => x row 0
-  InteractionList.balanced_by_ordered
-    (rangeBus_row air row)
-    [
-      Interaction.rangeBus_entry mul0 17 r0l0,
-      Interaction.rangeBus_entry mul1 12 r0l1,
-      Interaction.rangeBus_entry mul2 17 r1l0,
-      Interaction.rangeBus_entry mul3 12 r1l1,
-      Interaction.rangeBus_entry mul4 17 bl0,
-      Interaction.rangeBus_entry mul5 12 bl1
-    ]
-  → (f ac.is_valid = 1 → (aa.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0).val < 2 ^ 17) ∧
-    (f ac.is_valid = 1 → (aa.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0).val < 2 ^ 12) ∧
-    (f aa.rs2_as = 1 → (aa.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0).val < 2 ^ 17) ∧
-    (f aa.rs2_as = 1 → (aa.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0).val < 2 ^ 12) ∧
-    (f ac.is_valid = 1 → (aa.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0).val < 2 ^ 17) ∧
-    (f ac.is_valid = 1 → (aa.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0).val < 2 ^ 12)
-:= by
-  simp [rangeBus_row, InteractionList.balanced_by_ordered]
-  intro b0 b1 b2 b3 b4 b5
-  apply Interaction.rangeBus_balances_facts at b0
-  apply Interaction.rangeBus_balances_facts at b1
-  apply Interaction.rangeBus_balances_facts at b2
-  apply Interaction.rangeBus_balances_facts at b3
-  apply Interaction.rangeBus_balances_facts at b4
-  apply Interaction.rangeBus_balances_facts at b5
-  simp_all
-
-end RangeBus
-
-section ReadInstructionBus
-
+@[simp]
 def readInstructionBus_row [Field ExtF]
   (air : Valid_VmAirWrapper_alu FBB ExtF)
   (row : ℕ)
@@ -391,37 +281,7 @@ def readInstructionBus_row [Field ExtF]
                          0])
   ]
 
-lemma readInstructionBus_balanced_row [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  {row : ℕ}
-:
-  let aa := air.adapter
-  let ac := air.core
-  let f := fun (x : ℕ → ℕ → FBB) => x row 0
-  InteractionList.balanced_by_ordered
-    (readInstructionBus_row air row)
-    [
-      Interaction.readInstructionBus_entry mul pc opcode rd rs1 rs2 unknown0 rs2_as unknown1 unknown2,
-    ]
-  → (f ac.is_valid = 1 → f aa.from_state.pc = pc ∧
-                         (ac.ctx row 0).instruction.opcode = opcode ∧
-                         f aa.rd_ptr = rd ∧
-                         f aa.rs1_ptr = rs1 ∧
-                         f aa.rs2 = rs2 ∧
-                         unknown0 = 1 ∧
-                         f aa.rs2_as = rs2_as ∧
-                         unknown1 = 0 ∧
-                         unknown2 = 0)
-:= by
-  simp [readInstructionBus_row, InteractionList.balanced_by_ordered]
-  intro b0
-  apply Interaction.readInstructionBus_balances_facts at b0
-  grind
-
-end ReadInstructionBus
-
-section BitwiseBus
-
+@[simp]
 def bitwiseBus_row [Field ExtF]
   (air : Valid_VmAirWrapper_alu FBB ExtF)
   (row : ℕ)
@@ -435,42 +295,6 @@ def bitwiseBus_row [Field ExtF]
     (ac.is_valid row 0, [ac.x_3 row 0, ac.y_3 row 0, ac.x_xor_y_3 row 0, 1]),
     (ac.is_valid row 0 - aa.rs2_as row 0, [ac.c_0 row 0, ac.c_1 row 0, 0, 0])
   ]
-
-lemma bitwiseBus_balanced_row [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  {row : ℕ}
-:
-  let aa := air.adapter
-  let ac := air.core
-  let f := fun (x : ℕ → ℕ → FBB) => x row 0
-  InteractionList.balanced_by_ordered
-    (bitwiseBus_row air row)
-    [
-      Interaction.bitwiseBus_entry mul0 a0 b0 l0,
-      Interaction.bitwiseBus_entry mul1 a1 b1 l1,
-      Interaction.bitwiseBus_entry mul2 a2 b2 l2,
-      Interaction.bitwiseBus_entry mul3 a3 b3 l3,
-      Interaction.bitwiseBus_entry mul4 a4 b4 l4
-    ]
-  → (f ac.is_valid = 1 → (f ac.x_0).val < 256 ∧ (f ac.y_0).val < 256 ∧ (f ac.x_xor_y_0).val < 256 ∧ (f ac.x_xor_y_0).val = (f ac.x_0).val ^^^ (f ac.y_0).val) ∧
-    (f ac.is_valid = 1 → (f ac.x_1).val < 256 ∧ (f ac.y_1).val < 256 ∧ (f ac.x_xor_y_1).val < 256 ∧ (f ac.x_xor_y_1).val = (f ac.x_1).val ^^^ (f ac.y_1).val) ∧
-    (f ac.is_valid = 1 → (f ac.x_2).val < 256 ∧ (f ac.y_2).val < 256 ∧ (f ac.x_xor_y_2).val < 256 ∧ (f ac.x_xor_y_2).val = (f ac.x_2).val ^^^ (f ac.y_2).val) ∧
-    (f ac.is_valid = 1 → (f ac.x_3).val < 256 ∧ (f ac.y_3).val < 256 ∧ (f ac.x_xor_y_3).val < 256 ∧ (f ac.x_xor_y_3).val = (f ac.x_3).val ^^^ (f ac.y_3).val) ∧
-    (f ac.is_valid - f aa.rs2_as = 1 → (f ac.c_0).val < 256 ∧ (f ac.c_1).val < 256)
-:= by
-  simp [bitwiseBus_row, InteractionList.balanced_by_ordered]
-  intro b0' b1' b2' b3' b4'
-  apply Interaction.bitwiseBus_balances_facts at b0'
-  apply Interaction.bitwiseBus_balances_facts at b1'
-  apply Interaction.bitwiseBus_balances_facts at b2'
-  apply Interaction.bitwiseBus_balances_facts at b3'
-  apply Interaction.bitwiseBus_balances_facts at b4'
-  simp [@eq_comm (a := 0)] at *; rw [@eq_comm (a := 1)] at *
-  grind (splits := 17)
-
-end BitwiseBus
-
-section last_row_zero
 
 lemma buses_last_row_zero [Field ExtF]
   {air : Valid_VmAirWrapper_alu FBB ExtF}
@@ -491,9 +315,31 @@ lemma buses_last_row_zero [Field ExtF]
         readInstructionBus_row,
         bitwiseBus_row]
 
-end last_row_zero
+end BusRows
 
 end VmAirWrapper_alu.buses
+
+namespace Interaction
+
+/-- ALU-related ReadInstruction bus assumptions -/
+def readInstructionBus_assumptions_ALU
+  (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
+: Prop :=
+  ¬ mul = 0 →
+    -- rd and rs1 boundaries
+    rd.val < 32 ∧ rs1.val < 32 ∧
+    -- non-immediate rs2
+    (rs2_as = 1 → rs2.val < 32) ∧
+    -- immediate rs2
+    (rs2_as = 0 →
+      -- immediate fits 24 bits
+      rs2.val < 2 ^ 24 ∧
+      -- immediate is a sign-extended 12-bit value
+      (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
+    -- unused parameters
+    xd = 1 ∧ xf = 0 ∧ xg = 0
+
+end Interaction
 
 namespace VmAirWrapper_alu.auxiliaries
 
