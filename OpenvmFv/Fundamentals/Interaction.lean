@@ -147,32 +147,36 @@ section BitwiseBus
 
 /-- Constrained BitwiseBus entry -/
 def bitwiseBus_entry
-  (mul : FBB) (a b : Fin 256) (is_lookup : Fin 2)
+  (mul : FBB) (a b : Fin 256) (is_xor : Fin 2)
 : (FBB × List FBB) :=
   (mul, [ ⟨ a.val, by omega ⟩,
           ⟨ b.val, by omega ⟩,
-          ⟨ a ^^^ b, by have := @Nat.xor_lt_two_pow a b 8 (by omega); omega ⟩ ,
-          ⟨ is_lookup.val, by omega ⟩ ])
+          if is_xor.val = 1 then
+            -- xor_check
+            ⟨ a ^^^ b, by have := @Nat.xor_lt_two_pow a b 8 (by omega); omega ⟩
+            -- range check
+            else 0,
+          ⟨ is_xor.val, by omega ⟩ ])
 
 /-- Useful equalities and entailments resulting from BitwiseBus balancing -/
 lemma bitwiseBus_balances_facts
   (h_balance : Interaction.balances
-                (mul, [a, b, c, is_lookup])
-                (bitwiseBus_entry mul' a' b' is_lookup'))
+                (mul, [a, b, c, is_xor])
+                (bitwiseBus_entry mul' a' b' is_xor'))
 :
   mul + mul' = 0 ∧
     (¬ mul = 0 → a.val = a'.val ∧
                  b.val = b'.val ∧
-                 c.val = a.val ^^^ b.val ∧
-                 is_lookup.val = is_lookup'.val ∧
+                 (is_xor.val = 1 → c.val = a.val ^^^ b.val) ∧
+                 is_xor.val = is_xor'.val ∧
                  a.val < 256 ∧
                  b.val < 256 ∧
                  c.val < 256 ∧
-                 (is_lookup = 0 ∨ is_lookup = 1))
+                 (is_xor = 0 ∨ is_xor = 1))
 := by
   simp_all [balances, bitwiseBus_entry]
   have := @Nat.xor_lt_two_pow a b 8 (by simp_all);
-  simp_all
+  split_ifs <;> simp_all
   omega
 
 end BitwiseBus

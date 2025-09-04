@@ -75,7 +75,8 @@ lemma allHold_constraints
     (c.adapter.rs2_as row 0 = 1 ∨ c.rs2_sign row 0 = c.rs2_limbs row 0 3) ∧
     (c.adapter.rs2_as row 0 = 1 ∨ c.core.c_2 row 0 = 0 ∨ c.core.c_2 row 0 = 255) ∧
     (c.core.is_valid row 0 = 0 ∨ c.adapter.from_state.timestamp row 0 - c.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 = c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 + c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072) ∧
-    (c.adapter.rs2_as row 0 = 0 ∨ c.core.is_valid row 0 = 1) ∧ (c.adapter.rs2_as row 0 = 0 ∨ c.adapter.from_state.timestamp row 0 + 1 - c.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 = c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 + c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072) ∧
+    (c.adapter.rs2_as row 0 = 0 ∨ c.core.is_valid row 0 = 1) ∧
+    (c.adapter.rs2_as row 0 = 0 ∨ c.adapter.from_state.timestamp row 0 + 1 - c.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 = c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 + c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072) ∧
     (c.core.is_valid row 0 = 0 ∨ c.adapter.from_state.timestamp row 0 + 2 - c.adapter.writes_aux.base.prev_timestamp row 0 - 1 = c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 + c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072) ∧
     VmAirWrapper_alu.extraction.constrain_interactions c
 := by
@@ -383,7 +384,8 @@ def readInstructionBus_row [Field ExtF]
                          (ac.ctx row 0).instruction.opcode,
                          aa.rd_ptr row 0,
                          aa.rs1_ptr row 0,
-                         aa.rs2 row 0, 1,
+                         aa.rs2 row 0,
+                         1,
                          aa.rs2_as row 0,
                          0,
                          0])
@@ -454,7 +456,7 @@ lemma bitwiseBus_balanced_row [Field ExtF]
     (f ac.is_valid = 1 → (f ac.x_1).val < 256 ∧ (f ac.y_1).val < 256 ∧ (f ac.x_xor_y_1).val < 256 ∧ (f ac.x_xor_y_1).val = (f ac.x_1).val ^^^ (f ac.y_1).val) ∧
     (f ac.is_valid = 1 → (f ac.x_2).val < 256 ∧ (f ac.y_2).val < 256 ∧ (f ac.x_xor_y_2).val < 256 ∧ (f ac.x_xor_y_2).val = (f ac.x_2).val ^^^ (f ac.y_2).val) ∧
     (f ac.is_valid = 1 → (f ac.x_3).val < 256 ∧ (f ac.y_3).val < 256 ∧ (f ac.x_xor_y_3).val < 256 ∧ (f ac.x_xor_y_3).val = (f ac.x_3).val ^^^ (f ac.y_3).val) ∧
-    (f ac.is_valid - f aa.rs2_as = 1 → (f ac.c_0).val < 256 ∧ (f ac.c_1).val < 256 ∧ f ac.c_0 = f ac.c_1)
+    (f ac.is_valid - f aa.rs2_as = 1 → (f ac.c_0).val < 256 ∧ (f ac.c_1).val < 256)
 := by
   simp [bitwiseBus_row, InteractionList.balanced_by_ordered]
   intro b0' b1' b2' b3' b4'
@@ -463,9 +465,8 @@ lemma bitwiseBus_balanced_row [Field ExtF]
   apply Interaction.bitwiseBus_balances_facts at b2'
   apply Interaction.bitwiseBus_balances_facts at b3'
   apply Interaction.bitwiseBus_balances_facts at b4'
-  rw [@Fin.ext_iff _ (air.core.c_0 row 0) (air.core.c_1 row 0), ← @Nat.xor_eq_zero (air.core.c_0 row 0).val (air.core.c_1 row 0)]
-  split_ands <;> [ grind; grind; grind; grind; skip ]
-  . intro heq; rw [heq] at b4'; grind
+  simp [@eq_comm (a := 0)] at *; rw [@eq_comm (a := 1)] at *
+  grind (splits := 17)
 
 end BitwiseBus
 
