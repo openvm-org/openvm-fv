@@ -11,20 +11,91 @@ set_option maxHeartbeats 1_000_000_000
 
 variable (ExtF : Type) [Field ExtF]
 variable (air : Valid_VmAirWrapper_alu FBB ExtF)
+variable (row : ℕ)
+variable (row_in_range : row ≤ air.last_row)
+variable (constraints : VmAirWrapper_alu.constraints.allHold air row row_in_range)
 
--- Table has only one row
-variable (h_last_row : air.last_row = 0)
--- All constraints hold
-variable (constraints : VmAirWrapper_alu.constraints.allHold air 0 (by simp))
+namespace InvalidRows
+
+variable (row_not_valid : air.core.is_valid row 0 = 0)
+
+include
+  row_in_range
+  row_not_valid
+in
+/-- Constraints that must hold on an invalid row -/
+lemma allHold_invalid_row
+:
+  VmAirWrapper_alu.constraints.allHold air row row_in_range ↔
+    air.core.opcode_add_flag row 0 = 0 ∧
+    air.core.opcode_sub_flag row 0 = 0 ∧
+    air.core.opcode_xor_flag row 0 = 0 ∧
+    air.core.opcode_or_flag row 0 = 0 ∧
+    air.core.opcode_and_flag row 0 = 0 ∧
+    air.adapter.rs2_as row 0 = 0 ∧
+    air.adapter.rs2 row 0 = air.core.c_0 row 0 + air.core.c_1 row 0 * 256 + air.core.c_2 row 0 * 65536 ∧
+    air.core.c_2 row 0 = air.core.c_3 row 0 ∧
+    (air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255) ∧
+    VmAirWrapper_alu.extraction.constrain_interactions air
+:= by
+  rw [VmAirWrapper_alu.constraints.allHold_constraints]
+  rw [← BaseAluCoreAir.is_valid_def,
+      ← VmAirWrapper.rs2_imm_def,
+      ← VmAirWrapper.rs2_sign_limbs] at *
+  constructor
+  . intro constraints
+    obtain ⟨ b_add, b_sub, b_xor, b_or, b_and, b_is_valid,
+             add_0, sub_0, add_1, sub_1, add_2, sub_2, add_3, sub_3,
+             b_rs2_as, rs2_as_imm, imm_sign, imm_sign_extend,
+             time0, rs2_as_is_valid, time1, time2,
+             constrain_interactions⟩ := constraints
+    clear *- row_not_valid
+             b_add b_sub b_xor b_or b_and b_is_valid
+             rs2_as_imm rs2_as_is_valid imm_sign imm_sign_extend
+             constrain_interactions
+    grind (splits := 10)
+  . intro ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, constrain_interactions ⟩
+    repeat rw [← and_assoc]
+    constructor
+    . clear constrain_interactions
+      simp_all
+    . assumption
+
+include
+  row_in_range
+  row_not_valid
+  constraints
+in
+/-- On invalid rows, all interactin multiplicities equal zero -/
+lemma invalid_row_all_interaction_multiplicities_zero
+:
+  forall entry,
+  entry ∈ VmAirWrapper_alu.buses.executionBus_row air row ++
+          VmAirWrapper_alu.buses.memoryBus_row air row ++
+          VmAirWrapper_alu.buses.rangeBus_row air row ++
+          VmAirWrapper_alu.buses.readInstructionBus_row air row ++
+          VmAirWrapper_alu.buses.bitwiseBus_row air row → entry.1 = 0
+:= by
+  let allHold_invalid_row := allHold_invalid_row (row_in_range := row_in_range) (row_not_valid := row_not_valid)
+  rw [allHold_invalid_row] at constraints
+  obtain ⟨ z0, z1, z2, z3, z4, z5, rest ⟩ := constraints
+  clear z0 z1 z2 z3 z4 rest
+  simp_all
+
+end InvalidRows
+
+namespace ValidRows
+
+variable (row_valid : air.core.is_valid row 0 = 1)
 
 -- Execution bus is balanced
 variable
   {start_pc start_timestamp mul00 mul01 end_pc end_timestamp}
   (exec_bus_balance :
   InteractionList.balanced_by_ordered
-    (air.buses ExecutionBus)
+    (VmAirWrapper_alu.buses.executionBus_row air row)
     [
-      Interaction.executionBus_entry 1 start_pc start_timestamp,
+      Interaction.executionBus_entry mul00 start_pc start_timestamp,
       Interaction.executionBus_entry mul01 end_pc end_timestamp,
     ]
   )
@@ -39,7 +110,7 @@ variable
   {mul10 as0 r0 b0' b1' b2' b3' t0 mul11 as1 r1 b0 b1 b2 b3 t1 mul12 as2 r2 c0' c1' c2' c3' t2 mul13 as3 r3 c0 c1 c2 c3 t3 mul14 as4 d0' d1' d2' d3' t4 mul15 as5 r5 a0 a1 a2 a3 t5}
   (memory_bus_balance :
   InteractionList.balanced_by_ordered
-    (air.buses MemoryBus)
+    (VmAirWrapper_alu.buses.memoryBus_row air row)
     [
       Interaction.memoryBus_entry mul10 as0 r0 b0' b1' b2' b3' t0,
       Interaction.memoryBus_entry mul11 as1 r1 b0  b1  b2  b3  t1,
@@ -62,7 +133,7 @@ variable
   {mul20 v0 deg0 mul21 v1 deg1 mul22 v2 deg2 mul23 v3 deg3 mul24 deg4 mul25 v4 deg5}
   (range_bus_balance :
   InteractionList.balanced_by_ordered
-    (air.buses RangeCheckerBus)
+    (VmAirWrapper_alu.buses.rangeBus_row air row)
     [
       Interaction.rangeCheckerBus_entry mul20 v0 deg0,
       Interaction.rangeCheckerBus_entry mul21 v1 deg1,
@@ -88,7 +159,7 @@ variable
   {mul pc opcode rd rs1 rs2 xd rs2_as xf xg}
   (read_bus_balance :
   InteractionList.balanced_by_ordered
-    (air.buses ReadInstructionBus)
+    (VmAirWrapper_alu.buses.readInstructionBus_row air row)
     [
       Interaction.readInstructionBus_entry mul pc opcode rd rs1 rs2 xd rs2_as xf xg,
     ]
@@ -104,7 +175,7 @@ variable
   {mul40 x0 y0 z0 xor0 mul41 x1 y1 z1 xor1 mul42 x2 y2 z2 xor2 mul43 x3 y3 z3 xor3 mul44 x4 y4 z4 xor4}
   (bitwise_bus_balance :
   InteractionList.balanced_by_ordered
-    (air.buses BitwiseBus)
+    (VmAirWrapper_alu.buses.bitwiseBus_row air row)
     [
       Interaction.bitwiseBus_entry mul40 x0 y0 z0 xor0,
       Interaction.bitwiseBus_entry mul41 x1 y1 z1 xor1,
@@ -123,7 +194,9 @@ variable
     Interaction.bitwiseBus_assumptions mul44 x4 y4 z4 xor4
   )
 
-include constraints in
+include
+  constraints
+in
 /-- Interactions are of the form enforced by constraints -/
 lemma constrain_interactions
 :
@@ -133,72 +206,39 @@ lemma constrain_interactions
   grind
 
 include
-  constraints
-  h_last_row
-  exec_bus_balance in
-/-- The row is valid -/
-lemma is_valid
-:
-  air.core.is_valid 0 0 = 1
-:= by
-  have ⟨ exec_bus, rest ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero
-                               (by exact constrain_interactions ExtF air constraints)
-                               h_last_row
-  rw [exec_bus] at exec_bus_balance
-  simp [VmAirWrapper_alu.buses.executionBus_row,
-        InteractionList.balanced_by_ordered,
-        Interaction.balances,
-        Interaction.executionBus_entry] at exec_bus_balance
-  grind
-
-include
-  constraints
-  h_last_row
-  exec_bus_balance in
+  row_valid
+  exec_bus_balance
+in
 /-- The `pc` and `timestamp` are as expected -/
 lemma pc_and_timestamp
 :
   end_pc = start_pc + 4 ∧
   end_timestamp = start_timestamp + 3
 := by
-  have ⟨ exec_bus, rest ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero (by exact constrain_interactions ExtF air constraints) h_last_row
-  have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
-  simp [exec_bus,
-        InteractionList.balanced_by_ordered,
+  simp [InteractionList.balanced_by_ordered,
         Interaction.balances] at exec_bus_balance
   omega
 
-/-- **TODO** The memory read-write timestamps are monotonic -/
-lemma monotonic_timestamps
-:
-  True
-:=
-  by sorry
-
 include
-  constraints
-  h_last_row
-  exec_bus_balance
+  row_valid
   memory_bus_balance
   memory_bus_assumptions in
 /-- The `b` operand is range-constrained by bus balancing -/
 lemma b_eq_and_range
 :
-  air.core.b_0 0 0 = b0 ∧ air.core.b_1 0 0 = b1 ∧ air.core.b_2 0 0 = b2 ∧ air.core.b_3 0 0 = b3 ∧
+  air.core.b_0 row 0 = b0 ∧ air.core.b_1 row 0 = b1 ∧ air.core.b_2 row 0 = b2 ∧ air.core.b_3 row 0 = b3 ∧
   b0.val < 256 ∧ b1.val < 256 ∧ b2.val < 256 ∧ b3.val < 256
 := by
-  have ⟨ exec_bus, memory_bus, rest ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero (by exact constrain_interactions ExtF air constraints) h_last_row
-  have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
-  simp [memory_bus,
-        InteractionList.balanced_by_ordered,
+  simp [InteractionList.balanced_by_ordered,
         Interaction.balances] at memory_bus_balance
   simp [Interaction.memoryBus_assumptions] at memory_bus_assumptions
+  obtain ⟨ m0, m1, m2 ⟩ := memory_bus_assumptions
+  simp_all
   grind
 
 include
   constraints
-  h_last_row
-  exec_bus_balance
+  row_valid
   memory_bus_balance
   memory_bus_assumptions
   bitwise_bus_balance
@@ -208,14 +248,11 @@ include
     - **TODO** for immediate opcodes -/
 lemma c_eq_and_range
 :
-  (air.core.c_0 0 0).val < 256 ∧ (air.core.c_1 0 0).val < 256 ∧ (air.core.c_2 0 0).val < 256 ∧ (air.core.c_3 0 0).val < 256 ∧
-  (air.adapter.rs2_as 0 0 = 1 →
-    air.core.c_0 0 0 = c0 ∧ air.core.c_1 0 0 = c1 ∧ air.core.c_2 0 0 = c2 ∧ air.core.c_3 0 0 = c3) ∧
-  (air.adapter.rs2_as 0 0 = 0 → True)
+  (air.core.c_0 row 0).val < 256 ∧ (air.core.c_1 row 0).val < 256 ∧ (air.core.c_2 row 0).val < 256 ∧ (air.core.c_3 row 0).val < 256 ∧
+  (air.adapter.rs2_as row 0 = 1 →
+    air.core.c_0 row 0 = c0 ∧ air.core.c_1 row 0 = c1 ∧ air.core.c_2 row 0 = c2 ∧ air.core.c_3 row 0 = c3) ∧
+  (air.adapter.rs2_as row 0 = 0 → True)
 := by
-  have ⟨ exec_bus, memory_bus, range_bus, readInstr_bus, bitwise_bus ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero (by exact constrain_interactions ExtF air constraints) h_last_row
-  have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
-
   have constraints' := constraints
   rw [VmAirWrapper_alu.constraints.allHold_constraints] at constraints'
   obtain ⟨ b_add, b_sub, b_xor, b_or, b_and, b_is_valid,
@@ -225,28 +262,29 @@ lemma c_eq_and_range
         add_0 sub_0 add_1 sub_1 add_2 sub_2 add_3 sub_3
         rest
 
-  simp [memory_bus,
-        InteractionList.balanced_by_ordered,
+  simp [InteractionList.balanced_by_ordered,
         Interaction.balances] at memory_bus_balance
   simp [Interaction.memoryBus_assumptions] at memory_bus_assumptions
+  obtain ⟨ mb0, mb1, mb2, mb3, mb4, mb5 ⟩ := memory_bus_balance
   obtain ⟨ m0, m1, m2 ⟩ :=  memory_bus_assumptions
+  clear mb0 mb1 mb4 mb5 m0 m2
 
-  simp [bitwise_bus,
-        InteractionList.balanced_by_ordered,
+  simp [InteractionList.balanced_by_ordered,
         Interaction.balances] at bitwise_bus_balance
   simp [Interaction.bitwiseBus_assumptions] at bitwise_bus_assumptions
 
-  simp [is_valid,
+  simp [row_valid,
           ← BaseAluCoreAir.x_0_def, ← BaseAluCoreAir.x_1_def,
           ← BaseAluCoreAir.x_2_def, ← BaseAluCoreAir.x_3_def]
     at bitwise_bus_balance bitwise_bus_assumptions
+  obtain ⟨ bb0, bb1, bb2, bb3, bb4 ⟩ := bitwise_bus_balance
   obtain ⟨ ba0, ba1, ba2, ba3, ba4 ⟩ := bitwise_bus_assumptions
   clear ba0 ba1 ba2 ba3
 
   have ⟨ ub_c0, ub_c1, ub_c2, ub_c3 ⟩
   :
-    (air.core.c_0 0 0).val < 256 ∧ (air.core.c_1 0 0).val < 256 ∧
-    (air.core.c_2 0 0).val < 256 ∧ (air.core.c_3 0 0).val < 256
+    (air.core.c_0 row 0).val < 256 ∧ (air.core.c_1 row 0).val < 256 ∧
+    (air.core.c_2 row 0).val < 256 ∧ (air.core.c_3 row 0).val < 256
   := by
     rcases b_rs2_as with eq_rs2_as_0 | eq_rs2_as_1 <;>
     (try rw [← VmAirWrapper.rs2_sign_limbs] at imm_sign) <;>
@@ -255,26 +293,24 @@ lemma c_eq_and_range
 
   rcases b_rs2_as with eq_rs2_as_0 | eq_rs2_as_1 <;>
   simp_all
-  omega
+
 
 include
   constraints
-  h_last_row
-  exec_bus_balance
+  row_in_range
+  row_valid
   memory_bus_balance
   bitwise_bus_balance
   bitwise_bus_assumptions in
 /-- The `a` operand is range-constrained by logic and bus balancing -/
 lemma a_eq_and_range
 :
-  air.core.a_0 0 0 = a0 ∧
-  air.core.a_1 0 0 = a1 ∧
-  air.core.a_2 0 0 = a2 ∧
-  air.core.a_3 0 0 = a3 ∧
+  air.core.a_0 row 0 = a0 ∧
+  air.core.a_1 row 0 = a1 ∧
+  air.core.a_2 row 0 = a2 ∧
+  air.core.a_3 row 0 = a3 ∧
   a0.val < 256 ∧ a1.val < 256 ∧ a2.val < 256 ∧ a3.val < 256
 := by
-  have ⟨ exec_bus, memory_bus, range_bus, readInstr_bus, bitwise_bus ⟩ := VmAirWrapper_alu.buses.buses_last_row_zero (by exact constrain_interactions ExtF air constraints) h_last_row
-  have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
   have constraints' := constraints
   rw [VmAirWrapper_alu.constraints.allHold_constraints] at constraints'
   obtain ⟨ b_add, b_sub, b_xor, b_or, b_and, b_is_valid, rest ⟩ := constraints'
@@ -282,19 +318,17 @@ lemma a_eq_and_range
 
   have ⟨ eq_a0, eq_a1, eq_a2, eq_a3 ⟩
   :
-    air.core.a_0 0 0 = a0 ∧ air.core.a_1 0 0 = a1 ∧ air.core.a_2 0 0 = a2 ∧ air.core.a_3 0 0 = a3
+    air.core.a_0 row 0 = a0 ∧ air.core.a_1 row 0 = a1 ∧ air.core.a_2 row 0 = a2 ∧ air.core.a_3 row 0 = a3
   := by
-      simp [memory_bus,
-        InteractionList.balanced_by_ordered,
-        Interaction.balances] at memory_bus_balance
+      simp [InteractionList.balanced_by_ordered,
+            Interaction.balances] at memory_bus_balance
       simp_all
 
-  simp [bitwise_bus,
-        InteractionList.balanced_by_ordered,
+  simp [InteractionList.balanced_by_ordered,
         Interaction.balances] at bitwise_bus_balance
   simp [Interaction.bitwiseBus_assumptions] at bitwise_bus_assumptions
 
-  simp [is_valid,
+  simp [row_valid,
           ← BaseAluCoreAir.x_0_def, ← BaseAluCoreAir.x_1_def,
           ← BaseAluCoreAir.x_2_def, ← BaseAluCoreAir.x_3_def] at bitwise_bus_balance bitwise_bus_assumptions
   obtain ⟨ bb0, bb1, bb2, bb3, bb4 ⟩ := bitwise_bus_balance
@@ -302,8 +336,8 @@ lemma a_eq_and_range
 
   simp_all
 
-  have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air 0 (by simp) constraints
-  clear *- b_add b_sub b_xor b_or b_and is_valid
+  have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air row row_in_range constraints
+  clear *- b_add b_sub b_xor b_or b_and row_valid
            bb0 bb1 bb2 bb3 bb3 ba0 ba1 ba2 ba3
            sop0 sop1 sop2 sop3 sop4
            eq_a0 eq_a1 eq_a2 eq_a3
@@ -357,8 +391,8 @@ def rop_of_alu_opcode (opcode : FBB) : rop :=
 
 include
   constraints
-  h_last_row
-  exec_bus_balance
+  row_in_range
+  row_valid
   memory_bus_balance
   memory_bus_assumptions
   read_bus_balance
@@ -376,23 +410,16 @@ theorem spec_base_ALU_non_imm
     (rop_of_alu_opcode opcode)
 := by
   -- Get relevant previous info
-  have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
-  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
-  have h_eq_b := b_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance)  (memory_bus_assumptions := memory_bus_assumptions)
-  have h_eq_c_non_imm := c_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
-
-  obtain ⟨ exec_bus, memory_bus, range_bus, readInstr_bus, bitwise_bus ⟩ :=
-    VmAirWrapper_alu.buses.buses_last_row_zero
-    (by exact constrain_interactions ExtF air constraints)
-    h_last_row
+  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (row_in_range := row_in_range) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
+  have h_eq_b := b_eq_and_range (row_valid := row_valid) (memory_bus_balance := memory_bus_balance)  (memory_bus_assumptions := memory_bus_assumptions)
+  have h_eq_c_non_imm := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
 
   -- Get more detailed b-related information
   obtain ⟨ eq_b0, eq_b1, eq_b2, eq_b3,
            ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := h_eq_b
 
   -- The operation is not immediate
-  obtain ⟨ non_imm, opcode_eq ⟩ : air.adapter.rs2_as 0 0 = 1 ∧ opcode = (air.core.ctx 0 0).instruction.opcode := by
-    rw [readInstr_bus] at read_bus_balance
+  obtain ⟨ non_imm, opcode_eq ⟩ : air.adapter.rs2_as row 0 = 1 ∧ opcode = (air.core.ctx row 0).instruction.opcode := by
     simp [VmAirWrapper_alu.buses.readInstructionBus_row,
           InteractionList.balanced_by_ordered,
           Interaction.balances,
@@ -406,9 +433,9 @@ theorem spec_base_ALU_non_imm
   simp [eq_c0, eq_c1, eq_c2, eq_c3] at ub_c0 ub_c1 ub_c2 ub_c3
 
   -- Get all opcode properties
-  obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air 0 (by simp) constraints
-  obtain ⟨ op0, op1, op2, op3, op4 ⟩ := VmAirWrapper_alu.constraints.op_from_opcode air 0 (by simp) constraints is_valid
-  have opcodes := VmAirWrapper_alu.constraints.opcode_bounds air 0 (by simp) constraints is_valid
+  obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air row row_in_range constraints
+  obtain ⟨ op0, op1, op2, op3, op4 ⟩ := VmAirWrapper_alu.constraints.op_from_opcode air row row_in_range constraints row_valid
+  have opcodes := VmAirWrapper_alu.constraints.opcode_bounds air row row_in_range constraints row_valid
 
   -- Clear up moduli using range information
   have ⟨ a_eq, b_eq, c_eq ⟩ :
@@ -436,8 +463,7 @@ theorem spec_base_ALU_non_imm
   clear rest
 
   -- Prepare bitwise_bus
-  simp [bitwise_bus,
-        InteractionList.balanced_by_ordered,
+  simp [InteractionList.balanced_by_ordered,
         Interaction.balances] at bitwise_bus_balance
   simp [Interaction.bitwiseBus_assumptions] at bitwise_bus_assumptions
   obtain ⟨ bb0, bb1, bb2, bb3, bb4 ⟩ := bitwise_bus_balance
@@ -478,7 +504,6 @@ theorem spec_base_ALU_non_imm
     simp_all <;> omega
 
   -- Bitwise
-
   all_goals
     simp [← BaseAluCoreAir.x_0_def, ← BaseAluCoreAir.x_1_def,
           ← BaseAluCoreAir.x_2_def, ← BaseAluCoreAir.x_3_def,
@@ -522,3 +547,5 @@ theorem spec_base_ALU_non_imm
     have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba20 ba21 ba22
     have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba30 ba31 ba32
     simp_all
+
+ end ValidRows

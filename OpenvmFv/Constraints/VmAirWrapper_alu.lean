@@ -199,11 +199,11 @@ lemma buses_eq [Field ExtF]
         List.flatMap
           (fun row ↦
             [(c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-              (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-              (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-              (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-              (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-              (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])])
+             (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+             (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+             (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+             (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+             (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])])
           (List.range (c.last_row + 1))
       else
         if index = ReadInstructionBus then
@@ -218,10 +218,10 @@ lemma buses_eq [Field ExtF]
             List.flatMap
               (fun row ↦
                 [(c.core.is_valid row 0, [c.core.x_0 row 0, c.core.y_0 row 0, c.core.x_xor_y_0 row 0, 1]),
-                  (c.core.is_valid row 0, [c.core.x_1 row 0, c.core.y_1 row 0, c.core.x_xor_y_1 row 0, 1]),
-                  (c.core.is_valid row 0, [c.core.x_2 row 0, c.core.y_2 row 0, c.core.x_xor_y_2 row 0, 1]),
-                  (c.core.is_valid row 0, [c.core.x_3 row 0, c.core.y_3 row 0, c.core.x_xor_y_3 row 0, 1]),
-                  (c.core.is_valid row 0 - c.adapter.rs2_as row 0, [c.core.c_0 row 0, c.core.c_1 row 0, 0, 0])])
+                 (c.core.is_valid row 0, [c.core.x_1 row 0, c.core.y_1 row 0, c.core.x_xor_y_1 row 0, 1]),
+                 (c.core.is_valid row 0, [c.core.x_2 row 0, c.core.y_2 row 0, c.core.x_xor_y_2 row 0, 1]),
+                 (c.core.is_valid row 0, [c.core.x_3 row 0, c.core.y_3 row 0, c.core.x_xor_y_3 row 0, 1]),
+                 (c.core.is_valid row 0 - c.adapter.rs2_as row 0, [c.core.c_0 row 0, c.core.c_1 row 0, 0, 0])])
               (List.range (c.last_row + 1))
           else [] := by
   -- unfold and simp specifically at h so that the simplified expression can be taken from the infoview
@@ -309,24 +309,39 @@ def bitwiseBus_row [Field ExtF]
     (ac.is_valid row 0 - aa.rs2_as row 0, [ac.c_0 row 0, ac.c_1 row 0, 0, 0])
   ]
 
-lemma buses_last_row_zero [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  (h_ci : VmAirWrapper_alu.extraction.constrain_interactions air)
-  (h_last_row : air.last_row = 0)
+lemma buses_eq_compact [Field ExtF]
+  (c : Valid_VmAirWrapper_alu FBB ExtF)
+  (h : VmAirWrapper_alu.extraction.constrain_interactions c)
 :
-  air.buses ExecutionBus = executionBus_row air 0 ∧
-  air.buses MemoryBus = memoryBus_row air 0 ∧
-  air.buses RangeCheckerBus = rangeBus_row air 0 ∧
-  air.buses ReadInstructionBus = readInstructionBus_row air 0 ∧
-  air.buses BitwiseBus = bitwiseBus_row air 0
+  c.buses =
+    fun index ↦
+      if index = ExecutionBus then
+        List.flatMap
+          (fun row ↦ executionBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = MemoryBus then
+        List.flatMap
+          (fun row ↦ memoryBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = RangeCheckerBus then
+        List.flatMap
+          (fun row ↦ rangeBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = ReadInstructionBus then
+        List.flatMap
+          (fun row ↦ readInstructionBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = BitwiseBus then
+        List.flatMap
+          (fun row ↦ bitwiseBus_row c row)
+          (List.range (c.last_row + 1))
+      else []
 := by
-  simp [h_last_row,
-        buses_eq air h_ci,
-        executionBus_row,
-        memoryBus_row,
-        rangeBus_row,
-        readInstructionBus_row,
-        bitwiseBus_row]
+  simp [buses_eq c h]
 
 end BusRows
 
