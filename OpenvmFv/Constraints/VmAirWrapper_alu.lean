@@ -107,6 +107,55 @@ lemma single_op
   clear rest
   grind (splits := 23)
 
+lemma op_from_opcode
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu FBB ExtF)
+  (row : ℕ)
+  (valid_row : row ≤ c.last_row)
+  (cstrs : allHold c row valid_row)
+  (is_valid : c.core.is_valid row 0 = 1)
+:
+  let is_add := c.core.opcode_add_flag row 0
+  let is_sub := c.core.opcode_sub_flag row 0
+  let is_xor := c.core.opcode_xor_flag row 0
+  let is_or := c.core.opcode_or_flag row 0
+  let is_and := c.core.opcode_and_flag row 0
+  ((c.core.ctx row 0).instruction.opcode = 512 → is_add = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 513 → is_sub = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 514 → is_xor = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 515 → is_or = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 516 → is_and = 1)
+:= by
+  rw [allHold_constraints c row valid_row] at cstrs
+  obtain ⟨ h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
+  rw [Valid_BaseAluCoreAir.is_valid] at h5
+  rw [← BaseAluCoreAir.is_valid_def] at is_valid
+  rw [← BaseAluCoreAir.ctx.instruction.opcode_def]
+  clear rest
+  grind
+
+lemma opcode_bounds
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu FBB ExtF)
+  (row : ℕ)
+  (valid_row : row ≤ c.last_row)
+  (cstrs : allHold c row valid_row)
+  (is_valid : c.core.is_valid row 0 = 1)
+:
+  (c.core.ctx row 0).instruction.opcode = 512 ∨
+  (c.core.ctx row 0).instruction.opcode = 513 ∨
+  (c.core.ctx row 0).instruction.opcode = 514 ∨
+  (c.core.ctx row 0).instruction.opcode = 515 ∨
+  (c.core.ctx row 0).instruction.opcode = 516
+:= by
+  have ⟨ sop1, sop2, sop3, sop4, sop5 ⟩ := single_op c row valid_row cstrs
+  rw [← BaseAluCoreAir.ctx.instruction.opcode_def]
+  rw [← BaseAluCoreAir.is_valid_def] at is_valid
+  rw [allHold_constraints c row valid_row] at cstrs
+  obtain ⟨ h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
+  clear rest
+  grind
+
 end VmAirWrapper_alu.constraints
 
 namespace VmAirWrapper_alu.buses
