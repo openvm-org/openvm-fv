@@ -1,5 +1,10 @@
 import Mathlib
 
+/-- A prime finite field has no zero divisors -/
+instance Fin.noZeroDivisors_of_prime (p : ℕ)
+    [hp : Fact (Nat.Prime (p + 1))] : NoZeroDivisors (Fin (p + 1)) := by
+  refine IsDomain.to_noZeroDivisors (ZMod (p + 1))
+
 namespace BitVec
 
 /-- `BitVec` extensionality as an iff -/
@@ -163,5 +168,21 @@ lemma div_overflow {x y : ℤ} :
       . have := @Int.ediv_lt_self_of_pos_of_ne_one x y (by omega) (by omega)
         omega
   . simp_all
+
+lemma List.forall_in_range
+  {n : ℕ}
+  {P : ℕ → Prop}
+  (m : ℕ)
+  (in_range : m < n)
+:
+  List.Forall (fun n => P n) (List.range n) → P m
+:= by
+  induction n generalizing m
+  case zero => simp_all
+  case succ n ih => simp [List.range_add]; grind
+
+@[simp low] lemma to_the_right_nat_0 : 0 = a ↔ a = 0 := by omega
+@[simp low] lemma to_the_right_nat_1 : 1 = a ↔ a = 1 := by omega
+@[simp low] lemma to_the_right_nat_255 : 255 = a ↔ a = 255 := by omega
 
 end auxiliaries
