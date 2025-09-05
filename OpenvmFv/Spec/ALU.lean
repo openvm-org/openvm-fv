@@ -249,7 +249,7 @@ lemma c_eq_and_range
     (air.core.c_2 0 0).val < 256 ∧ (air.core.c_3 0 0).val < 256
   := by
     rcases b_rs2_as with eq_rs2_as_0 | eq_rs2_as_1 <;>
-    try rw [← VmAirWrapper.rs2_sign_limbs] at imm_sign <;>
+    try rw [← VmAirWrapper_alu.rs2_sign_limbs] at imm_sign <;>
     simp_all;
     omega
 
