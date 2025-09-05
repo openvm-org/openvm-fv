@@ -65,7 +65,7 @@ lemma BaseAluCoreAir.carry_add_0_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.b_0 row rotation + c.c_0 row rotation - c.a_0 row rotation) =
   c.carry_add_0 row rotation
 := rfl
@@ -87,7 +87,7 @@ lemma BaseAluCoreAir.carry_add_1_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.b_1 row rotation + c.c_1 row rotation - c.a_1 row rotation + c.carry_add_0 row rotation) =
   c.carry_add_1 row rotation
 := rfl
@@ -109,7 +109,7 @@ lemma BaseAluCoreAir.carry_add_2_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.b_2 row rotation + c.c_2 row rotation - c.a_2 row rotation + c.carry_add_1 row rotation) =
   c.carry_add_2 row rotation
 := rfl
@@ -131,7 +131,7 @@ lemma BaseAluCoreAir.carry_add_3_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.b_3 row rotation + c.c_3 row rotation - c.a_3 row rotation + c.carry_add_2 row rotation) =
   c.carry_add_3 row rotation
 := rfl
@@ -148,7 +148,7 @@ lemma BaseAluCoreAir.carry_sub_0_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.a_0 row rotation + c.c_0 row rotation - c.b_0 row rotation) =
   c.carry_sub_0 row rotation
 := rfl
@@ -170,7 +170,7 @@ lemma BaseAluCoreAir.carry_sub_1_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.a_1 row rotation + c.c_1 row rotation - c.b_1 row rotation + c.carry_sub_0 row rotation) =
   c.carry_sub_1 row rotation
 := rfl
@@ -192,7 +192,7 @@ lemma BaseAluCoreAir.carry_sub_2_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.a_2 row rotation + c.c_2 row rotation - c.b_2 row rotation + c.carry_sub_1 row rotation) =
   c.carry_sub_2 row rotation
 := rfl
@@ -214,7 +214,7 @@ lemma BaseAluCoreAir.carry_sub_3_def
   [Field F]
   (c : Valid_BaseAluCoreAir F) (row rotation: ℕ)
 :
-  (2005401601: F) *
+  (2005401601 : F) *
   (c.a_3 row rotation + c.c_3 row rotation - c.b_3 row rotation + c.carry_sub_2 row rotation) =
   c.carry_sub_3 row rotation
 := rfl
@@ -384,7 +384,7 @@ def Valid_BaseAluCoreAir.x_xor_y_0
   (c : Valid_BaseAluCoreAir F) (row rotation : ℕ)
 : F :=
   c.opcode_xor_flag row rotation * c.a_0 row rotation +
-  c.opcode_or_flag row rotation * ((2: F) * c.a_0 row rotation - c.b_0 row rotation - c.c_0 row rotation) +
+  c.opcode_or_flag row rotation * ((2 : F) * c.a_0 row rotation - c.b_0 row rotation - c.c_0 row rotation) +
   c.opcode_and_flag row rotation * (c.b_0 row rotation + c.c_0 row rotation - (2 * c.a_0 row rotation))
 
 @[openvm_encapsulation]
@@ -404,7 +404,7 @@ def Valid_BaseAluCoreAir.x_xor_y_1
   (c : Valid_BaseAluCoreAir F) (row rotation : ℕ)
 : F :=
   c.opcode_xor_flag row rotation * c.a_1 row rotation +
-  c.opcode_or_flag row rotation * ((2: F) * c.a_1 row rotation - c.b_1 row rotation - c.c_1 row rotation) +
+  c.opcode_or_flag row rotation * ((2 : F) * c.a_1 row rotation - c.b_1 row rotation - c.c_1 row rotation) +
   c.opcode_and_flag row rotation * (c.b_1 row rotation + c.c_1 row rotation - (2 * c.a_1 row rotation))
 
 @[openvm_encapsulation]
@@ -424,7 +424,7 @@ def Valid_BaseAluCoreAir.x_xor_y_2
   (c : Valid_BaseAluCoreAir F) (row rotation : ℕ)
 : F :=
   c.opcode_xor_flag row rotation * c.a_2 row rotation +
-  c.opcode_or_flag row rotation * ((2: F) * c.a_2 row rotation - c.b_2 row rotation - c.c_2 row rotation) +
+  c.opcode_or_flag row rotation * ((2 : F) * c.a_2 row rotation - c.b_2 row rotation - c.c_2 row rotation) +
   c.opcode_and_flag row rotation * (c.b_2 row rotation + c.c_2 row rotation - (2 * c.a_2 row rotation))
 
 @[openvm_encapsulation]
@@ -444,7 +444,7 @@ def Valid_BaseAluCoreAir.x_xor_y_3
   (c : Valid_BaseAluCoreAir F) (row rotation : ℕ)
 : F :=
   c.opcode_xor_flag row rotation * c.a_3 row rotation +
-  c.opcode_or_flag row rotation * ((2: F) * c.a_3 row rotation - c.b_3 row rotation - c.c_3 row rotation) +
+  c.opcode_or_flag row rotation * ((2 : F) * c.a_3 row rotation - c.b_3 row rotation - c.c_3 row rotation) +
   c.opcode_and_flag row rotation * (c.b_3 row rotation + c.c_3 row rotation - (2 * c.a_3 row rotation))
 
 @[openvm_encapsulation]

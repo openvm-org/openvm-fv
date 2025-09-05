@@ -17,11 +17,11 @@ set_option linter.unusedVariables false
   SubAir["writes_aux": "MemoryWriteAuxCols_4" width := 7]
 
 
-def ExecutionBus : ℕ := 0
-def MemoryBus : ℕ := 1
-def RangeCheckerBus : ℕ := 4
-def ReadInstructionBus : ℕ := 8
-def BitwiseBus : ℕ := 9
+abbrev ExecutionBus : ℕ := 0
+abbrev MemoryBus : ℕ := 1
+abbrev RangeCheckerBus : ℕ := 4
+abbrev ReadInstructionBus : ℕ := 8
+abbrev BitwiseBus : ℕ := 9
 
 @[openvm_encapsulation]
 lemma Rv32BaseAluAdapterAir_execution_bus:

@@ -4,6 +4,8 @@ import LeanZKCircuit.Command.Air.define_air
 import OpenvmFv.Airs.Alu.BaseAluCoreAir
 import OpenvmFv.Airs.Alu.Rv32BaseAluAdapterAir
 
+import OpenvmFv.Fundamentals.BabyBear
+
 set_option linter.unusedVariables false
 
 #define_air "VmAirWrapper_alu" using "openvm_encapsulation" where
@@ -66,3 +68,5 @@ lemma VmAirWrapper_alu.rs2_sign_check
 : (c.core.c_2 row rotation = 0 ∨ 255 - c.core.c_2 row rotation = 0) =
   (c.rs2_sign row rotation = 0 ∨ 255 - c.rs2_sign row rotation = 0)
 := rfl
+
+-- def Valid_VmAirWrapper_alu_BB := Valid_VmAirWrapper_alu (Fin BB)

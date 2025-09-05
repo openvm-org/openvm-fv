@@ -17,7 +17,7 @@ rev = "v4.23.0-rc2"
 [[require]]
 name = "LeanZKCircuit"
 git = "https://github.com/NethermindEth/leanzkcircuit.git"
-rev = "Dom/openvm_prelude"
+rev = "main"
 
 [[require]]
 name = "LeanRV"
