@@ -351,7 +351,7 @@ namespace Interaction
 
 /-- ALU-related ReadInstruction bus assumptions -/
 def readInstructionBus_assumptions_ALU
-  (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
+  (mul _ opcode rd rs1 rs2 xd rs2_as xf xg : FBB)
 : Prop :=
   ¬ mul = 0 →
     -- rd and rs1 boundaries
@@ -360,6 +360,8 @@ def readInstructionBus_assumptions_ALU
     (rs2_as = 1 → rs2.val < 32) ∧
     -- immediate rs2
     (rs2_as = 0 →
+      -- opcode cannot be SUB
+      ¬ opcode = 513 ∧
       -- immediate fits 24 bits
       rs2.val < 2 ^ 24 ∧
       -- immediate is a sign-extended 12-bit value

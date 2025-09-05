@@ -241,17 +241,25 @@ include
   row_valid
   memory_bus_balance
   memory_bus_assumptions
+  read_bus_balance
+  read_bus_assumptions
   bitwise_bus_balance
   bitwise_bus_assumptions in
 /-- The `c` operand is:
-    - range-constrained by bus balancing for non-immediate opcodes
-    - **TODO** for immediate opcodes -/
+    - range-constrained by bus balancing for non-immediate opcodes;
+    - is read from memory for non-immediate opcodes; and
+    - is a sign-extension of a 12-bit immediate for immediate opcodes -/
 lemma c_eq_and_range
 :
   (air.core.c_0 row 0).val < 256 ∧ (air.core.c_1 row 0).val < 256 ∧ (air.core.c_2 row 0).val < 256 ∧ (air.core.c_3 row 0).val < 256 ∧
   (air.adapter.rs2_as row 0 = 1 →
     air.core.c_0 row 0 = c0 ∧ air.core.c_1 row 0 = c1 ∧ air.core.c_2 row 0 = c2 ∧ air.core.c_3 row 0 = c3) ∧
-  (air.adapter.rs2_as row 0 = 0 → True)
+  (air.adapter.rs2_as row 0 = 0 →
+    U32.toBV #v[air.core.c_0 row 0,
+                air.core.c_1 row 0,
+                air.core.c_2 row 0,
+                air.core.c_3 row 0]
+      = BitVec.signExtend 32 (BitVec.ofNat 12 (air.adapter.rs2 row 0).val))
 := by
   have constraints' := constraints
   rw [VmAirWrapper_alu.constraints.allHold_constraints] at constraints'
@@ -291,9 +299,51 @@ lemma c_eq_and_range
     simp_all
     omega
 
-  rcases b_rs2_as with eq_rs2_as_0 | eq_rs2_as_1 <;>
-  simp_all
+  rcases b_rs2_as with eq_rs2_as_0 | eq_rs2_as_1
+  . split_ands; rotate_right
+    . simp [row_valid,
+            VmAirWrapper_alu.buses.readInstructionBus_row,
+            InteractionList.balanced_by_ordered,
+            Interaction.balances,
+            Interaction.readInstructionBus_entry] at read_bus_balance
+      obtain ⟨ eq_mul, eq_pc, eq_opcode, eq_rd, eq_rs1, eq_rs2,
+              eq_xd, eq_rs2_as, eq_xf, eq_xg ⟩ := read_bus_balance
+      clear eq_pc eq_rd eq_rs1 eq_xd eq_xf eq_xg
+      simp [eq_rs2_as] at *
 
+      simp [Interaction.readInstructionBus_assumptions_ALU,
+            eq_mul, eq_rs2_as_0] at read_bus_assumptions
+      obtain ⟨ reg_rd, reg_rs1,
+              ⟨ neq_opcode, ub_rs2, sign_extend_rs2 ⟩,
+              eq_xd, eq_xf, eq_xg ⟩ := read_bus_assumptions
+      clear reg_rd reg_rs1 eq_xd eq_xf eq_xg bb4
+      simp [*, ← BitVec.toInt_inj]
+      trans (BitVec.signExtend 32 (BitVec.ofNat 24 ↑rs2)).toInt
+      . rw [BitVec.toInt_signExtend_of_le (by simp)]
+        simp [eq_rs2_as_0, eq_rs2] at *
+        rw [← VmAirWrapper.rs2_imm_def,
+            ← VmAirWrapper.rs2_sign_limbs] at *
+        simp [rs2_as_imm, Fin.val_add, Fin.val_mul]
+        rw [← imm_sign,
+            Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+        simp [U32.toInt, BitVec.toInt, U32.negative, U32.toNat]
+        rcases imm_sign_extend with h_pos | h_neg
+        . rw [h_pos]
+          rw [if_neg (by omega)]
+          rw [if_pos (by omega)]
+          omega
+        . rw [h_neg]
+          rw [if_pos (by omega)]
+          rw [if_neg (by omega)]
+          iterate 2 rw [Int.emod_eq_of_lt (by simp) (by omega)]
+          omega
+      . iterate 2 rw [BitVec.toInt_signExtend_of_le (by simp)]
+        assumption
+
+    all_goals
+      simp_all
+
+  . simp_all
 
 include
   constraints
@@ -382,6 +432,8 @@ lemma a_eq_and_range
       apply Nat.xor_lt_two_pow (n := 8) <;>
       omega
 
+section General
+
 /-- From ALU opcode to RISC-V opcode -/
 def rop_of_alu_opcode (opcode : FBB) : rop :=
   if opcode = 512 then .ADD else
@@ -396,30 +448,37 @@ include
   memory_bus_balance
   memory_bus_assumptions
   read_bus_balance
+  read_bus_assumptions
   bitwise_bus_balance
   bitwise_bus_assumptions in
-/-- The five base ALU opcodes are implemented as per the RISC-V spec -/
-theorem spec_base_ALU_non_imm
-  (h_not_imm : rs2_as = 1)
+/-- The constraints entail correct implementation of the
+    five base ALU opcodes for:
+    - the `b` operand read from memory; and
+    - the `c` operand as per the circuit
+--/
+theorem spec_base_ALU
 :
   U32.toBV #v[↑a0, ↑a1, ↑a2, ↑a3]
     =
-  execute_RTYPE_pure_U32
-    #v[↑b0, ↑b1, ↑b2, ↑b3]
-    #v[↑c0, ↑c1, ↑c2, ↑c3]
+  execute_RTYPE_pure
+    (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
+    (U32.toBV #v[↑(air.core.c_0 row 0),
+                 ↑(air.core.c_1 row 0),
+                 ↑(air.core.c_2 row 0),
+                 ↑(air.core.c_3 row 0)])
     (rop_of_alu_opcode opcode)
 := by
   -- Get relevant previous info
   obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (row_in_range := row_in_range) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
   have h_eq_b := b_eq_and_range (row_valid := row_valid) (memory_bus_balance := memory_bus_balance)  (memory_bus_assumptions := memory_bus_assumptions)
-  have h_eq_c_non_imm := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
+  have h_eq_c := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (read_bus_balance := read_bus_balance) (read_bus_assumptions := read_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
 
   -- Get more detailed b-related information
   obtain ⟨ eq_b0, eq_b1, eq_b2, eq_b3,
            ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := h_eq_b
 
   -- The operation is not immediate
-  obtain ⟨ non_imm, opcode_eq ⟩ : air.adapter.rs2_as row 0 = 1 ∧ opcode = (air.core.ctx row 0).instruction.opcode := by
+  obtain opcode_eq : opcode = (air.core.ctx row 0).instruction.opcode := by
     simp [VmAirWrapper_alu.buses.readInstructionBus_row,
           InteractionList.balanced_by_ordered,
           Interaction.balances,
@@ -427,10 +486,9 @@ theorem spec_base_ALU_non_imm
     grind
 
   -- Get more detailed c-related information
-  simp [non_imm] at h_eq_c_non_imm
   obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3,
-           eq_c0, eq_c1, eq_c2, eq_c3 ⟩ := h_eq_c_non_imm
-  simp [eq_c0, eq_c1, eq_c2, eq_c3] at ub_c0 ub_c1 ub_c2 ub_c3
+           h_not_imm, h_imm ⟩ := h_eq_c
+  clear h_not_imm h_imm
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := VmAirWrapper_alu.constraints.single_op air row row_in_range constraints
@@ -447,10 +505,11 @@ theorem spec_base_ALU_non_imm
                                  ({ toFin := ⟨ b1.val, by omega ⟩} : BitVec 8),
                                  ({ toFin := ⟨ b2.val, by omega ⟩} : BitVec 8),
                                  ({ toFin := ⟨ b3.val, by omega ⟩} : BitVec 8) ]∧
-    #v[↑c0, ↑c1, ↑c2, ↑c3] = #v[ ({ toFin := ⟨ c0.val, by omega ⟩} : BitVec 8),
-                                 ({ toFin := ⟨ c1.val, by omega ⟩} : BitVec 8),
-                                 ({ toFin := ⟨ c2.val, by omega ⟩} : BitVec 8),
-                                 ({ toFin := ⟨ c3.val, by omega ⟩} : BitVec 8) ]
+    #v[(↑(air.core.c_0 row 0)), ↑(air.core.c_1 row 0), ↑(air.core.c_2 row 0), ↑(air.core.c_3 row 0)]
+                           = #v[ ({ toFin := ⟨ (air.core.c_0 row 0).val, by omega ⟩} : BitVec 8),
+                                 ({ toFin := ⟨ (air.core.c_1 row 0).val, by omega ⟩} : BitVec 8),
+                                 ({ toFin := ⟨ (air.core.c_2 row 0).val, by omega ⟩} : BitVec 8),
+                                 ({ toFin := ⟨ (air.core.c_3 row 0).val, by omega ⟩} : BitVec 8) ]
   := by simp; omega
   rw [a_eq, b_eq, c_eq]
 
@@ -471,7 +530,7 @@ theorem spec_base_ALU_non_imm
 
   -- Branch on opcode
   rcases opcodes with is_add | is_sub | is_xor | is_or | is_and <;>
-  simp_all [rop_of_alu_opcode]
+  simp_all [execute_RTYPE_pure, rop_of_alu_opcode]
 
   -- ADD
   . -- Open the carries
@@ -548,4 +607,126 @@ theorem spec_base_ALU_non_imm
     have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba30 ba31 ba32
     simp_all
 
- end ValidRows
+end General
+
+section NonImmediate
+
+include
+  constraints
+  row_in_range
+  row_valid
+  memory_bus_balance
+  memory_bus_assumptions
+  read_bus_balance
+  read_bus_assumptions
+  bitwise_bus_balance
+  bitwise_bus_assumptions in
+/-- The non-immediate variants of the five base ALU opcodes
+    are implemented as per the RISC-V spec -/
+theorem spec_base_ALU_non_imm
+  (non_imm : rs2_as = 1)
+:
+  U32.toBV #v[↑a0, ↑a1, ↑a2, ↑a3]
+    =
+  execute_RTYPE_pure
+    (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
+    (U32.toBV #v[↑c0, ↑c1, ↑c2, ↑c3])
+    (rop_of_alu_opcode opcode)
+:= by
+  suffices eq_c : air.core.c_0 row 0 = c0 ∧
+                  air.core.c_1 row 0 = c1 ∧
+                  air.core.c_2 row 0 = c2 ∧
+                  air.core.c_3 row 0 = c3
+  . rw [← eq_c.1, ← eq_c.2.1, ← eq_c.2.2.1, ← eq_c.2.2.2]
+    apply spec_base_ALU <;> assumption
+
+  . obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3, h_not_imm, h_imm ⟩
+      := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (read_bus_balance := read_bus_balance) (read_bus_assumptions := read_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
+    apply h_not_imm
+    simp [row_valid,
+          VmAirWrapper_alu.buses.readInstructionBus_row,
+          InteractionList.balanced_by_ordered,
+          Interaction.balances,
+          Interaction.readInstructionBus_entry] at read_bus_balance
+    grind
+
+end NonImmediate
+
+section Immediate
+
+/-- From ALU opcode to RISC-V opcode -/
+def iop_of_alu_opcode (opcode : FBB) : iop :=
+  if opcode = 512 then .ADDI else
+  if opcode = 514 then .XORI else
+  if opcode = 515 then .ORI else .ANDI
+
+include
+  constraints
+  row_in_range
+  row_valid
+  memory_bus_balance
+  memory_bus_assumptions
+  read_bus_balance
+  read_bus_assumptions
+  bitwise_bus_balance
+  bitwise_bus_assumptions in
+/-- The immediate variants of the five base ALU opcodes
+    are implemented as per the RISC-V spec -/
+theorem spec_base_ALU_imm
+  (h_imm : rs2_as = 0)
+:
+  U32.toBV #v[↑a0, ↑a1, ↑a2, ↑a3]
+    =
+  execute_ITYPE_pure
+    (BitVec.ofNat 12 rs2)
+    (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
+    (iop_of_alu_opcode opcode)
+:= by
+  have read_bus_balance' := read_bus_balance
+  simp [row_valid,
+        VmAirWrapper_alu.buses.readInstructionBus_row,
+        InteractionList.balanced_by_ordered,
+        Interaction.balances,
+        Interaction.readInstructionBus_entry] at read_bus_balance'
+  obtain ⟨ eq_mul, eq_pc, eq_opcode, eq_rd, eq_rs1, eq_rs2,
+           eq_xd, eq_rs2_as, eq_xf, eq_xg ⟩ := read_bus_balance'
+  clear eq_pc eq_rd eq_rs1 eq_xd eq_xf eq_xg
+
+  have read_bus_assumptions' := read_bus_assumptions
+  simp [Interaction.readInstructionBus_assumptions_ALU,
+        eq_mul, h_imm] at read_bus_assumptions'
+  obtain ⟨ reg_rd, reg_rs1,
+           ⟨ neq_opcode, ub_rs2, sign_extend_rs2 ⟩,
+           eq_xd, eq_xf, eq_xg ⟩ := read_bus_assumptions'
+
+  have opcode_bounds := VmAirWrapper_alu.constraints.opcode_bounds air row row_in_range constraints row_valid
+  simp [eq_opcode] at opcode_bounds
+
+  suffices eq_c
+  :
+    U32.toBV #v[air.core.c_0 row 0,
+                air.core.c_1 row 0,
+                air.core.c_2 row 0,
+                air.core.c_3 row 0]
+      = BitVec.signExtend 32 (BitVec.ofNat 12 rs2.val)
+  . trans execute_RTYPE_pure
+            (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
+            (U32.toBV #v[↑(air.core.c_0 row 0),
+                         ↑(air.core.c_1 row 0),
+                         ↑(air.core.c_2 row 0),
+                         ↑(air.core.c_3 row 0)])
+            (rop_of_alu_opcode opcode)
+    . apply spec_base_ALU <;> assumption
+    . simp [execute_ITYPE_pure]
+      rw [← eq_c]; congr
+      clear *- opcode_bounds neq_opcode
+      simp [rop_of_alu_opcode, iop_of_alu_opcode]
+      grind
+  . obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3, h_not_imm, h_imm ⟩
+      := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (read_bus_balance := read_bus_balance) (read_bus_assumptions := read_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
+    simp [*] at h_imm
+    assumption
+
+end Immediate
+
+end ValidRows
