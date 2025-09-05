@@ -116,105 +116,69 @@ lemma buses_eq [Field ExtF]
   (h : VmAirWrapper_alu.extraction.constrain_interactions c)
 : c.buses = fun index ↦
   if index = ExecutionBus then
-    List.map (fun row ↦ (-c.core.is_valid row 0, [c.adapter.from_state.pc row 0, c.adapter.from_state.timestamp row 0]))
-        (List.range (c.last_row + 1)) ++
-      List.map
-        (fun row ↦
-          (c.core.is_valid row 0, [c.adapter.from_state.pc row 0 + 4, c.adapter.from_state.timestamp row 0 + 3]))
-        (List.range (c.last_row + 1))
+    List.flatMap
+      (fun row ↦
+        [(-c.core.is_valid row 0, [c.adapter.from_state.pc row 0, c.adapter.from_state.timestamp row 0]),
+          (c.core.is_valid row 0, [c.adapter.from_state.pc row 0 + 4, c.adapter.from_state.timestamp row 0 + 3])])
+      (List.range (c.last_row + 1))
   else
     if index = MemoryBus then
-      List.map
-          (fun row ↦
-            (2013265920 * c.core.is_valid row 0,
+      List.flatMap
+        (fun row ↦
+          [(2013265920 * c.core.is_valid row 0,
               [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0, c.core.b_3 row 0,
-                c.adapter.reads_aux_0.base.prev_timestamp row 0]))
-          (List.range (c.last_row + 1)) ++
-        (List.map
-            (fun row ↦
-              (c.core.is_valid row 0,
-                [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0, c.core.b_3 row 0,
-                  c.adapter.from_state.timestamp row 0]))
-            (List.range (c.last_row + 1)) ++
-          (List.map
-              (fun row ↦
-                (2013265920 * c.adapter.rs2_as row 0,
-                  [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0, c.core.c_2 row 0,
-                    c.core.c_3 row 0, c.adapter.reads_aux_1.base.prev_timestamp row 0]))
-              (List.range (c.last_row + 1)) ++
-            (List.map
-                (fun row ↦
-                  (c.adapter.rs2_as row 0,
-                    [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0, c.core.c_2 row 0,
-                      c.core.c_3 row 0, c.adapter.from_state.timestamp row 0 + 1]))
-                (List.range (c.last_row + 1)) ++
-              (List.map
-                  (fun row ↦
-                    (2013265920 * c.core.is_valid row 0,
-                      [1, c.adapter.rd_ptr row 0, c.adapter.writes_aux.prev_data_0 row 0,
-                        c.adapter.writes_aux.prev_data_1 row 0, c.adapter.writes_aux.prev_data_2 row 0,
-                        c.adapter.writes_aux.prev_data_3 row 0, c.adapter.writes_aux.base.prev_timestamp row 0]))
-                  (List.range (c.last_row + 1)) ++
-                List.map
-                  (fun row ↦
-                    (c.core.is_valid row 0,
-                      [1, c.adapter.rd_ptr row 0, c.core.a_0 row 0, c.core.a_1 row 0, c.core.a_2 row 0,
-                        c.core.a_3 row 0, c.adapter.from_state.timestamp row 0 + 2]))
-                  (List.range (c.last_row + 1))))))
+                c.adapter.reads_aux_0.base.prev_timestamp row 0]),
+            (c.core.is_valid row 0,
+              [1, c.adapter.rs1_ptr row 0, c.core.b_0 row 0, c.core.b_1 row 0, c.core.b_2 row 0, c.core.b_3 row 0,
+                c.adapter.from_state.timestamp row 0]),
+            (2013265920 * c.adapter.rs2_as row 0,
+              [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0, c.core.c_2 row 0,
+                c.core.c_3 row 0, c.adapter.reads_aux_1.base.prev_timestamp row 0]),
+            (c.adapter.rs2_as row 0,
+              [c.adapter.rs2_as row 0, c.adapter.rs2 row 0, c.core.c_0 row 0, c.core.c_1 row 0, c.core.c_2 row 0,
+                c.core.c_3 row 0, c.adapter.from_state.timestamp row 0 + 1]),
+            (2013265920 * c.core.is_valid row 0,
+              [1, c.adapter.rd_ptr row 0, c.adapter.writes_aux.prev_data_0 row 0,
+                c.adapter.writes_aux.prev_data_1 row 0, c.adapter.writes_aux.prev_data_2 row 0,
+                c.adapter.writes_aux.prev_data_3 row 0, c.adapter.writes_aux.base.prev_timestamp row 0]),
+            (c.core.is_valid row 0,
+              [1, c.adapter.rd_ptr row 0, c.core.a_0 row 0, c.core.a_1 row 0, c.core.a_2 row 0, c.core.a_3 row 0,
+                c.adapter.from_state.timestamp row 0 + 2])])
+        (List.range (c.last_row + 1))
     else
       if index = RangeCheckerBus then
-        List.map
-            (fun row ↦ (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]))
-            (List.range (c.last_row + 1)) ++
-          (List.map
-              (fun row ↦
-                (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]))
-              (List.range (c.last_row + 1)) ++
-            (List.map
-                (fun row ↦
-                  (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]))
-                (List.range (c.last_row + 1)) ++
-              (List.map
-                  (fun row ↦
-                    (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]))
-                  (List.range (c.last_row + 1)) ++
-                (List.map
-                    (fun row ↦
-                      (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]))
-                    (List.range (c.last_row + 1)) ++
-                  List.map
-                    (fun row ↦
-                      (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]))
-                    (List.range (c.last_row + 1))))))
+        List.flatMap
+          (fun row ↦
+            [(c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+              (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+              (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+              (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+              (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+              (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])])
+          (List.range (c.last_row + 1))
       else
         if index = ReadInstructionBus then
-          List.map
+          List.flatMap
             (fun row ↦
-              (c.core.is_valid row 0,
-                [c.adapter.from_state.pc row 0, (c.core.ctx row 0).instruction.opcode, c.adapter.rd_ptr row 0,
-                  c.adapter.rs1_ptr row 0, c.adapter.rs2 row 0, 1, c.adapter.rs2_as row 0, 0, 0]))
+              [(c.core.is_valid row 0,
+                  [c.adapter.from_state.pc row 0, (c.core.ctx row 0).instruction.opcode, c.adapter.rd_ptr row 0,
+                    c.adapter.rs1_ptr row 0, c.adapter.rs2 row 0, 1, c.adapter.rs2_as row 0, 0, 0])])
             (List.range (c.last_row + 1))
         else
           if index = BitwiseBus then
-            List.map
-                (fun row ↦ (c.core.is_valid row 0, [c.core.x_0 row 0, c.core.y_0 row 0, c.core.x_xor_y_0 row 0, 1]))
-                (List.range (c.last_row + 1)) ++
-              (List.map
-                  (fun row ↦ (c.core.is_valid row 0, [c.core.x_1 row 0, c.core.y_1 row 0, c.core.x_xor_y_1 row 0, 1]))
-                  (List.range (c.last_row + 1)) ++
-                (List.map
-                    (fun row ↦ (c.core.is_valid row 0, [c.core.x_2 row 0, c.core.y_2 row 0, c.core.x_xor_y_2 row 0, 1]))
-                    (List.range (c.last_row + 1)) ++
-                  (List.map
-                      (fun row ↦
-                        (c.core.is_valid row 0, [c.core.x_3 row 0, c.core.y_3 row 0, c.core.x_xor_y_3 row 0, 1]))
-                      (List.range (c.last_row + 1)) ++
-                    List.map
-                      (fun row ↦
-                        (c.core.is_valid row 0 - c.adapter.rs2_as row 0, [c.core.c_0 row 0, c.core.c_1 row 0, 0, 0]))
-                      (List.range (c.last_row + 1)))))
+            List.flatMap
+              (fun row ↦
+                [(c.core.is_valid row 0, [c.core.x_0 row 0, c.core.y_0 row 0, c.core.x_xor_y_0 row 0, 1]),
+                  (c.core.is_valid row 0, [c.core.x_1 row 0, c.core.y_1 row 0, c.core.x_xor_y_1 row 0, 1]),
+                  (c.core.is_valid row 0, [c.core.x_2 row 0, c.core.y_2 row 0, c.core.x_xor_y_2 row 0, 1]),
+                  (c.core.is_valid row 0, [c.core.x_3 row 0, c.core.y_3 row 0, c.core.x_xor_y_3 row 0, 1]),
+                  (c.core.is_valid row 0 - c.adapter.rs2_as row 0, [c.core.c_0 row 0, c.core.c_1 row 0, 0, 0])])
+              (List.range (c.last_row + 1))
           else [] := by
-    simp_all [openvm_encapsulation]
+  -- unfold and simp specifically at h so that the simplified expression can be taken from the infoview
+  unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+  simp [openvm_encapsulation] at h
+  exact h
 
 section BusRows
 
