@@ -15,7 +15,7 @@ variable (row : ℕ)
 variable (row_in_range : row ≤ air.last_row)
 variable (constraints : VmAirWrapper_alu.constraints.allHold air row row_in_range)
 
-namespace InvalidRows
+namespace NonValidRows
 
 variable (row_not_valid : air.core.is_valid row 0 = 0)
 
@@ -23,8 +23,8 @@ include
   row_in_range
   row_not_valid
 in
-/-- Constraints that must hold on an invalid row -/
-lemma allHold_invalid_row
+/-- Constraints that must hold on an non-valid row -/
+lemma allHold_non_valid_row
 :
   VmAirWrapper_alu.constraints.allHold air row row_in_range ↔
     air.core.opcode_add_flag row 0 = 0 ∧
@@ -66,8 +66,8 @@ include
   row_not_valid
   constraints
 in
-/-- On invalid rows, all interactin multiplicities equal zero -/
-lemma invalid_row_all_interaction_multiplicities_zero
+/-- On non-valid rows, all interactin multiplicities equal zero -/
+lemma non_valid_row_all_interaction_multiplicities_zero
 :
   forall entry,
   entry ∈ VmAirWrapper_alu.buses.executionBus_row air row ++
@@ -76,13 +76,13 @@ lemma invalid_row_all_interaction_multiplicities_zero
           VmAirWrapper_alu.buses.readInstructionBus_row air row ++
           VmAirWrapper_alu.buses.bitwiseBus_row air row → entry.1 = 0
 := by
-  let allHold_invalid_row := allHold_invalid_row (row_in_range := row_in_range) (row_not_valid := row_not_valid)
-  rw [allHold_invalid_row] at constraints
+  let allHold_non_valid_row := allHold_non_valid_row (row_in_range := row_in_range) (row_not_valid := row_not_valid)
+  rw [allHold_non_valid_row] at constraints
   obtain ⟨ z0, z1, z2, z3, z4, z5, rest ⟩ := constraints
   clear z0 z1 z2 z3 z4 rest
   simp_all
 
-end InvalidRows
+end NonValidRows
 
 namespace ValidRows
 
