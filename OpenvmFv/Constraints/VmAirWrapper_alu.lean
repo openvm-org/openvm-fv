@@ -107,6 +107,55 @@ lemma single_op
   clear rest
   grind (splits := 23)
 
+lemma op_from_opcode
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu FBB ExtF)
+  (row : ℕ)
+  (valid_row : row ≤ c.last_row)
+  (cstrs : allHold c row valid_row)
+  (is_valid : c.core.is_valid row 0 = 1)
+:
+  let is_add := c.core.opcode_add_flag row 0
+  let is_sub := c.core.opcode_sub_flag row 0
+  let is_xor := c.core.opcode_xor_flag row 0
+  let is_or := c.core.opcode_or_flag row 0
+  let is_and := c.core.opcode_and_flag row 0
+  ((c.core.ctx row 0).instruction.opcode = 512 → is_add = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 513 → is_sub = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 514 → is_xor = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 515 → is_or = 1) ∧
+  ((c.core.ctx row 0).instruction.opcode = 516 → is_and = 1)
+:= by
+  rw [allHold_constraints c row valid_row] at cstrs
+  obtain ⟨ h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
+  rw [Valid_BaseAluCoreAir.is_valid] at h5
+  rw [← BaseAluCoreAir.is_valid_def] at is_valid
+  rw [← BaseAluCoreAir.ctx.instruction.opcode_def]
+  clear rest
+  grind
+
+lemma opcode_bounds
+  [Field ExtF]
+  (c : Valid_VmAirWrapper_alu FBB ExtF)
+  (row : ℕ)
+  (valid_row : row ≤ c.last_row)
+  (cstrs : allHold c row valid_row)
+  (is_valid : c.core.is_valid row 0 = 1)
+:
+  (c.core.ctx row 0).instruction.opcode = 512 ∨
+  (c.core.ctx row 0).instruction.opcode = 513 ∨
+  (c.core.ctx row 0).instruction.opcode = 514 ∨
+  (c.core.ctx row 0).instruction.opcode = 515 ∨
+  (c.core.ctx row 0).instruction.opcode = 516
+:= by
+  have ⟨ sop1, sop2, sop3, sop4, sop5 ⟩ := single_op c row valid_row cstrs
+  rw [← BaseAluCoreAir.ctx.instruction.opcode_def]
+  rw [← BaseAluCoreAir.is_valid_def] at is_valid
+  rw [allHold_constraints c row valid_row] at cstrs
+  obtain ⟨ h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
+  clear rest
+  grind
+
 end VmAirWrapper_alu.constraints
 
 namespace VmAirWrapper_alu.buses
@@ -150,11 +199,11 @@ lemma buses_eq [Field ExtF]
         List.flatMap
           (fun row ↦
             [(c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-              (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-              (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-              (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-              (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-              (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])])
+             (c.core.is_valid row 0, [c.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+             (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+             (c.adapter.rs2_as row 0, [c.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+             (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+             (c.core.is_valid row 0, [c.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])])
           (List.range (c.last_row + 1))
       else
         if index = ReadInstructionBus then
@@ -169,10 +218,10 @@ lemma buses_eq [Field ExtF]
             List.flatMap
               (fun row ↦
                 [(c.core.is_valid row 0, [c.core.x_0 row 0, c.core.y_0 row 0, c.core.x_xor_y_0 row 0, 1]),
-                  (c.core.is_valid row 0, [c.core.x_1 row 0, c.core.y_1 row 0, c.core.x_xor_y_1 row 0, 1]),
-                  (c.core.is_valid row 0, [c.core.x_2 row 0, c.core.y_2 row 0, c.core.x_xor_y_2 row 0, 1]),
-                  (c.core.is_valid row 0, [c.core.x_3 row 0, c.core.y_3 row 0, c.core.x_xor_y_3 row 0, 1]),
-                  (c.core.is_valid row 0 - c.adapter.rs2_as row 0, [c.core.c_0 row 0, c.core.c_1 row 0, 0, 0])])
+                 (c.core.is_valid row 0, [c.core.x_1 row 0, c.core.y_1 row 0, c.core.x_xor_y_1 row 0, 1]),
+                 (c.core.is_valid row 0, [c.core.x_2 row 0, c.core.y_2 row 0, c.core.x_xor_y_2 row 0, 1]),
+                 (c.core.is_valid row 0, [c.core.x_3 row 0, c.core.y_3 row 0, c.core.x_xor_y_3 row 0, 1]),
+                 (c.core.is_valid row 0 - c.adapter.rs2_as row 0, [c.core.c_0 row 0, c.core.c_1 row 0, 0, 0])])
               (List.range (c.last_row + 1))
           else [] := by
   -- unfold and simp specifically at h so that the simplified expression can be taken from the infoview
@@ -260,24 +309,39 @@ def bitwiseBus_row [Field ExtF]
     (ac.is_valid row 0 - aa.rs2_as row 0, [ac.c_0 row 0, ac.c_1 row 0, 0, 0])
   ]
 
-lemma buses_last_row_zero [Field ExtF]
-  {air : Valid_VmAirWrapper_alu FBB ExtF}
-  (h_ci : VmAirWrapper_alu.extraction.constrain_interactions air)
-  (h_last_row : air.last_row = 0)
+lemma buses_eq_compact [Field ExtF]
+  (c : Valid_VmAirWrapper_alu FBB ExtF)
+  (h : VmAirWrapper_alu.extraction.constrain_interactions c)
 :
-  air.buses ExecutionBus = executionBus_row air 0 ∧
-  air.buses MemoryBus = memoryBus_row air 0 ∧
-  air.buses RangeCheckerBus = rangeBus_row air 0 ∧
-  air.buses ReadInstructionBus = readInstructionBus_row air 0 ∧
-  air.buses BitwiseBus = bitwiseBus_row air 0
+  c.buses =
+    fun index ↦
+      if index = ExecutionBus then
+        List.flatMap
+          (fun row ↦ executionBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = MemoryBus then
+        List.flatMap
+          (fun row ↦ memoryBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = RangeCheckerBus then
+        List.flatMap
+          (fun row ↦ rangeBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = ReadInstructionBus then
+        List.flatMap
+          (fun row ↦ readInstructionBus_row c row)
+          (List.range (c.last_row + 1))
+      else
+      if index = BitwiseBus then
+        List.flatMap
+          (fun row ↦ bitwiseBus_row c row)
+          (List.range (c.last_row + 1))
+      else []
 := by
-  simp [h_last_row,
-        buses_eq air h_ci,
-        executionBus_row,
-        memoryBus_row,
-        rangeBus_row,
-        readInstructionBus_row,
-        bitwiseBus_row]
+  simp [buses_eq c h]
 
 end BusRows
 
@@ -287,7 +351,7 @@ namespace Interaction
 
 /-- ALU-related ReadInstruction bus assumptions -/
 def readInstructionBus_assumptions_ALU
-  (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
+  (mul _ opcode rd rs1 rs2 xd rs2_as xf xg : FBB)
 : Prop :=
   ¬ mul = 0 →
     -- rd and rs1 boundaries
@@ -296,6 +360,8 @@ def readInstructionBus_assumptions_ALU
     (rs2_as = 1 → rs2.val < 32) ∧
     -- immediate rs2
     (rs2_as = 0 →
+      -- opcode cannot be SUB
+      ¬ opcode = 513 ∧
       -- immediate fits 24 bits
       rs2.val < 2 ^ 24 ∧
       -- immediate is a sign-extended 12-bit value

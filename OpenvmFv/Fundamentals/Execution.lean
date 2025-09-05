@@ -40,30 +40,6 @@ def execute_RTYPE_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : rop) :=
   | .SUB => op1 - op2
   | .SRA => shift_bits_right_arith op1 (Sail.BitVec.extractLsb op2 4 0)
 
-/-- Pure part of 32-bit `execute_RTYPE`, for `U32` arguments -/
-@[simp] def execute_RTYPE_pure_U32 (op1 : U32) (op2 : U32) (op : rop) :=
-match op with
-  | .ADD => op1.toBV + op2.toBV
-  | .SLT => if op1.toInt < op2.toInt then 1#64 else 0#64
-  | .SLTU => if op1.toNat < op2.toNat then 1#64 else 0#64
-  | .AND => op1.toBV &&& op2.toBV
-  | .OR => op1.toBV ||| op2.toBV
-  | .XOR => op1.toBV ^^^ op2.toBV
-  | .SLL => op1.toBV <<< (BitVec.setWidth 5 op2.toBV)
-  | .SRL => op1.toBV >>> (BitVec.setWidth 5 op2.toBV)
-  | .SUB => op1.toBV - op2.toBV
-  | .SRA => op1.toBV.sshiftRight (BitVec.setWidth 5 op2.toBV).toNat
-
-/-- Equivalence of `execute_RTYPE` pure part computation -/
-lemma execute_RTYPE_pure_equiv (op1 : U32) (op2 : U32) (op : rop) :
-  execute_RTYPE_pure op1.toBV op2.toBV op = execute_RTYPE_pure_U32 op1 op2 op := by
-  cases op <;> simp [execute_RTYPE_pure] <;> [ aesop; aesop; skip ]
-  . have toNat_31 : (31 + (op2.toNat : ℤ) % 32).toNat = 31 + op2.toNat % 32 := by omega
-    have toNat_32 : (32 + (op2.toNat : ℤ) % 32).toNat = 32 + op2.toNat % 32 := by omega
-    rw [U32.toBV_toNat, BitVec.toNat_ofNat]; simp
-    rw [toNat_31, toNat_32]
-    simp [BitVec.sshiftright_eq]
-
 /-- `execute_RTYPE` with isolated pure part -/
 def execute_RTYPE' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (op : rop) : SailM ExecutionResult := do
   let rs1_bits ← do (rX_bits rs1)
@@ -92,24 +68,14 @@ def rop_of_iop (op : iop) : rop :=
   | .ANDI => .AND
 
 /-- Pure part of 32-bit `execute_ITYPE` -/
-def execute_ITYPE_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : iop) :=
-  execute_RTYPE_pure op1 op2 (rop_of_iop op)
-
-/-- Pure part of 32-bit `execute_RTYPE`, for `U32` arguments -/
-def execute_ITYPE_pure_U32 (op1 : U32) (op2 : U32) (op : iop) :=
-  execute_RTYPE_pure_U32 op1 op2 (rop_of_iop op)
-
-/-- Equivalence of `execute_RTYPE` pure part computation -/
-lemma execute_ITYPE_pure_equiv (op1 : U32) (op2 : U32) (op : iop) :
-  execute_ITYPE_pure op1.toBV op2.toBV op = execute_ITYPE_pure_U32 op1 op2 op := by
-  simp [execute_ITYPE_pure]
-  cases op <;> simp <;> exact execute_RTYPE_pure_equiv _ _ _
+def execute_ITYPE_pure (imm : BitVec 12) (op1 : BitVec 32) (op : iop) :=
+  let immext := sign_extend (m := 32) imm
+  execute_RTYPE_pure op1 immext (rop_of_iop op)
 
 /-- `execute_ITYPE` with isolated pure part -/
 def execute_ITYPE' (imm : BitVec 12) (rs1 : regidx) (rd : regidx) (op : iop) : SailM ExecutionResult := do
-  let immext := sign_extend (m := 32) imm
   let rs1_bits ← do (rX_bits rs1)
-  (wX_bits rd (execute_ITYPE_pure rs1_bits immext op))
+  (wX_bits rd (execute_ITYPE_pure imm rs1_bits op))
   (pure RETIRE_SUCCESS)
 
 /-- Equivalence of `execute_RTYPE`s -/
@@ -133,21 +99,6 @@ def rop_of_sop (op : sop) : rop :=
 def execute_SHIFTIOP_pure (op1 : BitVec 32) (shamt : BitVec 6) (op : sop) :=
   let shamt32 : BitVec 32 := shamt
   execute_RTYPE_pure op1 shamt32 (rop_of_sop op)
-
-/-- Pure part of a 32-bit `execute_SHIFTIOP`, for `U32` arguments -/
-@[simp] def execute_SHIFTIOP_pure_U32 (op1 : U32) (shamt : BitVec 6) (op : sop) :=
-  let shamtBV : BitVec 8 := ⟨shamt.toNat, by omega⟩
-  execute_RTYPE_pure_U32 op1 #v[shamtBV, 0, 0, 0] (rop_of_sop op)
-
-/-- Equivalence of `exec_SHIFTIOP` pure part computation -/
-lemma execute_SHIFTIOP_pure_equiv (op1 : U32) (shamt : BitVec 6) (op : sop) :
-  execute_SHIFTIOP_pure op1.toBV shamt op = execute_SHIFTIOP_pure_U32 op1 shamt op := by
-  simp only [execute_SHIFTIOP_pure_U32, execute_SHIFTIOP_pure]
-  rw [← execute_RTYPE_pure_equiv]
-  suffices : (BitVec.setWidth 32 shamt) = U32.toBV #v[⟨shamt.toNat, by omega⟩, 0, 0, 0]
-  . rw [this]
-  . rw [← BitVec.toNat_inj]
-    simp [U32.toNat]; omega
 
 /-- `execute_SHIFTIOP` with isolated pure part -/
 def execute_SHIFTIOP' (shamt : BitVec 6) (rs1 : regidx) (rd : regidx) (op : sop) : SailM ExecutionResult := do
@@ -190,20 +141,6 @@ def execute_MUL_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : mop) : BitVec 64 
   (if (op = .MUL)
     then (Sail.BitVec.extractLsb result_wide 31 0)
     else (Sail.BitVec.extractLsb result_wide 63 32))
-
-/-- Pure part of 32-bit `execute_MUL`, for `U32` arguments -/
-def execute_MUL_pure_U32 (op1 : U32) (op2 : U32) (op : mop) : BitVec 32 :=
-  let op1_ext := op1.toBV.extend 64 (op = .MULH ∨ op = .MULHSU)
-  let op2_ext := op2.toBV.extend 64 (op = .MULH ∨ op = .MULHUS)
-  let result_wide := op1_ext * op2_ext
-  (if (op = .MUL)
-    then (Sail.BitVec.extractLsb result_wide 31 0)
-    else (Sail.BitVec.extractLsb result_wide 63 32))
-
-/-- Equivalence of `execute_MUL` pure part computation -/
-lemma execute_MUL_pure_equiv (op1 : U32) (op2 : U32) (op : mop) :
-  execute_MUL_pure op1.toBV op2.toBV op = execute_MUL_pure_U32 op1 op2 op := by
-  cases op <;> simp [execute_MUL_pure, execute_MUL_pure_U32]
 
 def execute_MUL' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (m : mop) : SailM ExecutionResult := do
   let rs1_bits ← do (rX_bits rs1)
