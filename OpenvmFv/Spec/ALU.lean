@@ -262,7 +262,6 @@ include
   h_last_row
   exec_bus_balance
   memory_bus_balance
-  memory_bus_assumptions
   bitwise_bus_balance
   bitwise_bus_assumptions in
 /-- The `a` operand is range-constrained by logic and bus balancing -/
@@ -288,7 +287,6 @@ lemma a_eq_and_range
       simp [memory_bus,
         InteractionList.balanced_by_ordered,
         Interaction.balances] at memory_bus_balance
-      simp [Interaction.memoryBus_assumptions] at memory_bus_assumptions
       simp_all
 
   simp [bitwise_bus,
@@ -375,7 +373,7 @@ theorem spec_add
 := by
   -- Get relevant previous info
   have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
-  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
+  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
   have h_eq_b := b_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance)  (memory_bus_assumptions := memory_bus_assumptions)
   have h_eq_c_non_imm := c_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
 
@@ -466,7 +464,7 @@ theorem spec_sub
 := by
   -- Get relevant previous info
   have is_valid := is_valid (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance)
-  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
+  obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
   have h_eq_b := b_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance)  (memory_bus_assumptions := memory_bus_assumptions)
   have h_eq_c_non_imm := c_eq_and_range (constraints := constraints) (h_last_row := h_last_row) (exec_bus_balance := exec_bus_balance) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
 

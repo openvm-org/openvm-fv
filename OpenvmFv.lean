@@ -10,3 +10,5 @@ import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
 import OpenvmFv.Constraints.VolatileBoundaryAir
+
+import OpenvmFv.Spec.ALU
