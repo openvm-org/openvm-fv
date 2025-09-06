@@ -68,5 +68,3 @@ lemma VmAirWrapper_alu.rs2_sign_check
 : (c.core.c_2 row rotation = 0 ∨ 255 - c.core.c_2 row rotation = 0) =
   (c.rs2_sign row rotation = 0 ∨ 255 - c.rs2_sign row rotation = 0)
 := rfl
-
--- def Valid_VmAirWrapper_alu_BB := Valid_VmAirWrapper_alu (Fin BB)

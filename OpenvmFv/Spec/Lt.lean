@@ -15,7 +15,7 @@ variable (row : ℕ)
 variable (row_in_range : row ≤ air.last_row)
 variable (constraints : VmAirWrapper_lt.constraints.allHold air row row_in_range)
 
-namespace NonValidRows
+namespace Lt.NonValidRows
 
 open VmAirWrapper_lt.constraints
 
@@ -25,7 +25,7 @@ include
   row_in_range
 in
 /-- Zeros required to form a non-valid row -/
-lemma non_valid_row_allZeros_allHold
+lemma non_valid_row_Lt_allZeros_allHold
 :
   constrain_interactions air ∧
   air.adapter.rs2 row 0 = 0 ∧
@@ -75,7 +75,7 @@ include
   constraints
 in
 /-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_all_interaction_multiplicities_zero
+lemma non_valid_row_Lt_all_interaction_multiplicities_zero
   -- TODO: What does it mean that these additional constraints have to be here?
   (_ : air.core.diff_marker_0 row 0 = 0)
   (_ : air.core.diff_marker_1 row 0 = 0)
@@ -102,11 +102,11 @@ lemma non_valid_row_all_interaction_multiplicities_zero
             ← LessThanCoreAir_4.prefix_sum_1_def,
             ← LessThanCoreAir_4.prefix_sum_2_def]
 
-end NonValidRows
+end Lt.NonValidRows
 
 open VmAirWrapper_lt.constraints
 
-namespace ValidRows
+namespace Lt.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
@@ -383,7 +383,7 @@ lemma a_eq_and_range
   grind
 
 /-- From ALU opcode to RISC-V opcode -/
-def rop_of_lt_opcode (opcode : FBB) : rop :=
+def rop_of_Lt_opcode (opcode : FBB) : rop :=
   if opcode = 520 then .SLT else .SLTU
 
 include
@@ -411,7 +411,7 @@ theorem spec_base_Lt
                  ↑(air.core.c_1 row 0),
                  ↑(air.core.c_2 row 0),
                  ↑(air.core.c_3 row 0)])
-    (rop_of_lt_opcode opcode)
+    (rop_of_Lt_opcode opcode)
 := by
   -- Get relevant previous info
   obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0 ⟩ := a_eq_and_range (constraints := constraints) (row_in_range := row_in_range) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
@@ -501,7 +501,7 @@ theorem spec_base_Lt
   -- Branch on opcode
   rcases opcodes with is_slt | is_sltu
   all_goals
-    simp_all [execute_RTYPE_pure, rop_of_lt_opcode]
+    simp_all [execute_RTYPE_pure, rop_of_Lt_opcode]
     simp [← BitVec.toNat_inj, U32.toNat]
 
   -- SLT
@@ -599,7 +599,7 @@ theorem spec_base_Lt_non_imm
   execute_RTYPE_pure
     (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
     (U32.toBV #v[↑c0, ↑c1, ↑c2, ↑c3])
-    (rop_of_lt_opcode opcode)
+    (rop_of_Lt_opcode opcode)
 := by
   suffices eq_c : air.core.c_0 row 0 = c0 ∧
                   air.core.c_1 row 0 = c1 ∧
@@ -623,7 +623,7 @@ end NonImmediate
 section Immediate
 
 /-- From ALU opcode to RISC-V opcode -/
-def iop_of_lt_opcode (opcode : FBB) : iop :=
+def iop_of_Lt_opcode (opcode : FBB) : iop :=
   if opcode = 520 then .SLTI else .SLTIU
 
 include
@@ -646,7 +646,7 @@ theorem spec_base_Lt_imm
   execute_ITYPE_pure
     (BitVec.ofNat 12 rs2)
     (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
-    (iop_of_lt_opcode opcode)
+    (iop_of_Lt_opcode opcode)
 := by
   have read_bus_balance' := read_bus_balance
   simp [row_valid,
@@ -681,12 +681,12 @@ theorem spec_base_Lt_imm
                          ↑(air.core.c_1 row 0),
                          ↑(air.core.c_2 row 0),
                          ↑(air.core.c_3 row 0)])
-            (rop_of_lt_opcode opcode)
+            (rop_of_Lt_opcode opcode)
     . apply spec_base_Lt (constraints := constraints) (row_in_range := row_in_range) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (read_bus_balance := read_bus_balance) (read_bus_assumptions := read_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
     . simp [execute_ITYPE_pure]
       rw [← eq_c]; congr
       clear *- opcode_bounds
-      simp [rop_of_lt_opcode, iop_of_lt_opcode]
+      simp [rop_of_Lt_opcode, iop_of_Lt_opcode]
       grind
   . obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3, h_not_imm, h_imm ⟩
       := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (read_bus_balance := read_bus_balance) (read_bus_assumptions := read_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
@@ -695,4 +695,4 @@ theorem spec_base_Lt_imm
 
 end Immediate
 
-end ValidRows
+end Lt.ValidRows

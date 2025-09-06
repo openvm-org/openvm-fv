@@ -15,7 +15,7 @@ variable (row : ℕ)
 variable (row_in_range : row ≤ air.last_row)
 variable (constraints : VmAirWrapper_alu.constraints.allHold air row row_in_range)
 
-namespace NonValidRows
+namespace ALU.NonValidRows
 
 open VmAirWrapper_alu.constraints
 
@@ -25,7 +25,7 @@ include
   row_in_range
 in
 /-- Zeros required to form a non-valid row -/
-lemma non_valid_row_allZeros_allHold
+lemma non_valid_row_ALU_allZeros_allHold
 :
   constrain_interactions air ∧
   air.adapter.rs2 row 0 = 0 ∧
@@ -57,7 +57,7 @@ include
   constraints
 in
 /-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_all_interaction_multiplicities_zero
+lemma non_valid_row_ALU_all_interaction_multiplicities_zero
 :
   forall entry,
   entry ∈ executionBus_row air row ++
@@ -76,11 +76,11 @@ lemma non_valid_row_all_interaction_multiplicities_zero
   clear constraints
   simp_all [VmAirWrapper_alu_constraint_and_interaction_simplification]
 
-end NonValidRows
+end ALU.NonValidRows
 
 open VmAirWrapper_alu.constraints
 
-namespace ValidRows
+namespace ALU.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
@@ -424,7 +424,7 @@ lemma a_eq_and_range
       omega
 
 /-- From ALU opcode to RISC-V opcode -/
-def rop_of_alu_opcode (opcode : FBB) : rop :=
+def rop_of_ALU_opcode (opcode : FBB) : rop :=
   if opcode = 512 then .ADD else
   if opcode = 513 then .SUB else
   if opcode = 514 then .XOR else
@@ -455,7 +455,7 @@ theorem spec_base_ALU
                  ↑(air.core.c_1 row 0),
                  ↑(air.core.c_2 row 0),
                  ↑(air.core.c_3 row 0)])
-    (rop_of_alu_opcode opcode)
+    (rop_of_ALU_opcode opcode)
 := by
   -- Get relevant previous info
   obtain ⟨ eq_a0, eq_a1, eq_a2, eq_a3, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := a_eq_and_range (constraints := constraints) (row_in_range := row_in_range) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
@@ -520,7 +520,7 @@ theorem spec_base_ALU
 
   -- Branch on opcode
   rcases opcodes with is_add | is_sub | is_xor | is_or | is_and <;>
-  simp_all [execute_RTYPE_pure, rop_of_alu_opcode]
+  simp_all [execute_RTYPE_pure, rop_of_ALU_opcode]
 
   -- ADD
   . -- Open the carries
@@ -621,7 +621,7 @@ theorem spec_base_ALU_non_imm
   execute_RTYPE_pure
     (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
     (U32.toBV #v[↑c0, ↑c1, ↑c2, ↑c3])
-    (rop_of_alu_opcode opcode)
+    (rop_of_ALU_opcode opcode)
 := by
   suffices eq_c : air.core.c_0 row 0 = c0 ∧
                   air.core.c_1 row 0 = c1 ∧
@@ -645,7 +645,7 @@ end NonImmediate
 section Immediate
 
 /-- From ALU opcode to RISC-V opcode -/
-def iop_of_alu_opcode (opcode : FBB) : iop :=
+def iop_of_ALU_opcode (opcode : FBB) : iop :=
   if opcode = 512 then .ADDI else
   if opcode = 514 then .XORI else
   if opcode = 515 then .ORI else .ANDI
@@ -670,7 +670,7 @@ theorem spec_base_ALU_imm
   execute_ITYPE_pure
     (BitVec.ofNat 12 rs2)
     (U32.toBV #v[↑b0, ↑b1, ↑b2, ↑b3])
-    (iop_of_alu_opcode opcode)
+    (iop_of_ALU_opcode opcode)
 := by
   have read_bus_balance' := read_bus_balance
   simp [row_valid,
@@ -705,12 +705,12 @@ theorem spec_base_ALU_imm
                          ↑(air.core.c_1 row 0),
                          ↑(air.core.c_2 row 0),
                          ↑(air.core.c_3 row 0)])
-            (rop_of_alu_opcode opcode)
+            (rop_of_ALU_opcode opcode)
     . apply spec_base_ALU <;> assumption
     . simp [execute_ITYPE_pure]
       rw [← eq_c]; congr
       clear *- opcode_bounds neq_opcode
-      simp [rop_of_alu_opcode, iop_of_alu_opcode]
+      simp [rop_of_ALU_opcode, iop_of_ALU_opcode]
       grind
   . obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3, h_not_imm, h_imm ⟩
       := c_eq_and_range (constraints := constraints) (row_valid := row_valid) (memory_bus_balance := memory_bus_balance) (memory_bus_assumptions := memory_bus_assumptions) (read_bus_balance := read_bus_balance) (read_bus_assumptions := read_bus_assumptions) (bitwise_bus_balance := bitwise_bus_balance) (bitwise_bus_assumptions := bitwise_bus_assumptions)
@@ -719,4 +719,4 @@ theorem spec_base_ALU_imm
 
 end Immediate
 
-end ValidRows
+end ALU.ValidRows
