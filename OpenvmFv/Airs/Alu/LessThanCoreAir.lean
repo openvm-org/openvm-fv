@@ -169,14 +169,13 @@ def Valid_LessThanCoreAir_4.ctx
         )
     )
 
-
--- @[openvm_encapsulation]
--- lemma LessThanCoreAir_4.ctx.instruction.opcode_def
---   [Field F]
---   (c : Valid_LessThanCoreAir_4 F)
---   (row rotation: ℕ)
--- : c.core.c_0 row 0 + c.core.c_1 row 0 * 256 + c.core.c_2 row 0 * 65536 =
---   (c.ctx row rotation).instruction.opcode
--- := by
---   unfold Valid_LessThanCoreAir_4.ctx Valid_LessThanCoreAir_4.class_offset
---   simp
+@[openvm_encapsulation]
+lemma LessThanCoreAir_4.ctx.instruction.opcode_def
+  [Field F]
+  (c : Valid_LessThanCoreAir_4 F)
+  (row rotation: ℕ)
+: 520 + c.opcode_sltu_flag row rotation =
+  (c.ctx row rotation).instruction.opcode
+:= by
+  unfold Valid_LessThanCoreAir_4.ctx Valid_LessThanCoreAir_4.class_offset
+  simp

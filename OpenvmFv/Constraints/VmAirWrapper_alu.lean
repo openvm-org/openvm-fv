@@ -222,7 +222,8 @@ namespace VmAirWrapper_alu.constraints
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def constraint_18 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
-        air.core.is_valid row 0 = 0 ∨ air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
+        air.core.is_valid row 0 = 0 ∨
+        air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_alu_air_simplification]
       lemma constraint_18_of_extraction
@@ -244,7 +245,8 @@ namespace VmAirWrapper_alu.constraints
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def constraint_20 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
-        air.adapter.rs2_as row 0 = 0 ∨ air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
+        air.adapter.rs2_as row 0 = 0 ∨
+        air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_alu_air_simplification]
       lemma constraint_20_of_extraction
@@ -255,7 +257,8 @@ namespace VmAirWrapper_alu.constraints
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def constraint_21 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
-        air.core.is_valid row 0 = 0 ∨ air.adapter.from_state.timestamp row 0 + 2 - air.adapter.writes_aux.base.prev_timestamp row 0 - 1 = air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
+        air.core.is_valid row 0 = 0 ∨
+        air.adapter.from_state.timestamp row 0 + 2 - air.adapter.writes_aux.base.prev_timestamp row 0 - 1 = air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_alu_air_simplification]
       lemma constraint_21_of_extraction
@@ -356,15 +359,17 @@ namespace VmAirWrapper_alu.constraints
         let aa := air.adapter
         let ac := air.core
         [
-          (ac.is_valid row 0, [aa.from_state.pc row 0,
-                              (ac.ctx row 0).instruction.opcode,
-                              aa.rd_ptr row 0,
-                              aa.rs1_ptr row 0,
-                              aa.rs2 row 0,
-                              1,
-                              aa.rs2_as row 0,
-                              0,
-                              0])
+          (ac.is_valid row 0, [
+                                aa.from_state.pc row 0,
+                                (ac.ctx row 0).instruction.opcode,
+                                aa.rd_ptr row 0,
+                                aa.rs1_ptr row 0,
+                                aa.rs2 row 0,
+                                1,
+                                aa.rs2_as row 0,
+                                0,
+                                0
+                              ])
         ]
 
       lemma constrain_readInstruction_interactions
