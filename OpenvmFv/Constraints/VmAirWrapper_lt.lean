@@ -8,17 +8,22 @@ import LeanZKCircuit.Interactions
 namespace VmAirWrapper_lt.constraints
 
   section constraint_simplification
-    -- air and row not included in here so that it still works with sorries during extraction
+
+    -- Note: `air` and `row` are not included as section variables
+    --       so that the file can still be used with `sorry`
+    --       during the extraction process
+
     variable [Field F] [Field ExtF]
 
     section row_constraints
+
       def constraint_0 (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_slt_flag row 0 = 0 ∨ air.core.opcode_slt_flag row 0 = 1
 
       @[VmAirWrapper_lt_simplification]
       lemma constraint_0_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_0 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_0 air row)
       : constraint_0 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_0 at h
         simp [openvm_encapsulation] at h
@@ -30,7 +35,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_1_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_1 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_1 air row)
       : constraint_1 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_1 at h
         simp [openvm_encapsulation] at h
@@ -42,7 +47,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_2_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_2 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_2 air row)
       : constraint_2 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_2 at h
         simp [openvm_encapsulation] at h
@@ -54,7 +59,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_3_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_3 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_3 air row)
       : constraint_3 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_3 at h
         simp [openvm_encapsulation] at h
@@ -66,7 +71,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_4_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_4 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_4 air row)
       : constraint_4 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_4 at h
         simp [openvm_encapsulation] at h
@@ -78,7 +83,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_5_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_5 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_5 air row)
       : constraint_5 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_5 at h
         simp [openvm_encapsulation] at h
@@ -90,7 +95,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_6_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_6 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_6 air row)
       : constraint_6 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_6 at h
         simp [openvm_encapsulation] at h
@@ -102,7 +107,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_7_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_7 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_7 air row)
       : constraint_7 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_7 at h
         simp [openvm_encapsulation] at h
@@ -114,7 +119,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_8_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_8 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_8 air row)
       : constraint_8 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_8 at h
         simp [openvm_encapsulation] at h
@@ -126,7 +131,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_9_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_9 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_9 air row)
       : constraint_9 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_9 at h
         simp [openvm_encapsulation] at h
@@ -138,7 +143,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_10_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_10 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_10 air row)
       : constraint_10 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_10 at h
         simp [openvm_encapsulation] at h
@@ -150,7 +155,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_11_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_11 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_11 air row)
       : constraint_11 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_11 at h
         simp [openvm_encapsulation] at h
@@ -162,7 +167,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_12_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_12 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_12 air row)
       : constraint_12 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_12 at h
         simp [openvm_encapsulation] at h
@@ -174,7 +179,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_13_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_13 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_13 air row)
       : constraint_13 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_13 at h
         simp [openvm_encapsulation] at h
@@ -186,7 +191,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_14_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_14 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_14 air row)
       : constraint_14 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_14 at h
         simp [openvm_encapsulation] at h
@@ -198,7 +203,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_15_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_15 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_15 air row)
       : constraint_15 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_15 at h
         simp [openvm_encapsulation] at h
@@ -210,7 +215,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_16_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_16 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_16 air row)
       : constraint_16 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_16 at h
         simp [openvm_encapsulation] at h
@@ -222,7 +227,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_17_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_17 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_17 air row)
       : constraint_17 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_17 at h
         simp [openvm_encapsulation] at h
@@ -234,7 +239,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_18_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_18 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_18 air row)
       : constraint_18 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_18 at h
         simp [openvm_encapsulation] at h
@@ -246,7 +251,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_19_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_19 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_19 air row)
       : constraint_19 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_19 at h
         simp [openvm_encapsulation] at h
@@ -258,7 +263,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_20_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_20 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_20 air row)
       : constraint_20 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_20 at h
         simp [openvm_encapsulation] at h
@@ -270,7 +275,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_21_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_21 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_21 air row)
       : constraint_21 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_21 at h
         simp [openvm_encapsulation] at h
@@ -282,7 +287,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_22_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_22 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_22 air row)
       : constraint_22 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_22 at h
         simp [openvm_encapsulation] at h
@@ -294,7 +299,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_23_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_23 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_23 air row)
       : constraint_23 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_23 at h
         simp [openvm_encapsulation] at h
@@ -309,7 +314,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_24_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_24 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_24 air row)
       : constraint_24 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_24 at h
         simp [openvm_encapsulation] at h
@@ -321,7 +326,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_25_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_25 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_25 air row)
       : constraint_25 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_25 at h
         simp [openvm_encapsulation] at h
@@ -336,7 +341,7 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_26_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_26 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_26 air row)
       : constraint_26 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_26 at h
         simp [openvm_encapsulation] at h
@@ -351,14 +356,19 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_simplification]
       lemma constraint_27_of_extraction
         (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ)
-        (h: VmAirWrapper_lt.extraction.constraint_27 air row)
+        (h : VmAirWrapper_lt.extraction.constraint_27 air row)
       : constraint_27 air row := by
         unfold VmAirWrapper_lt.extraction.constraint_27 at h
         simp [openvm_encapsulation] at h
         exact h
+
     end row_constraints
 
     section interactions
+
+      -- Note: use `congr; funext row` after `simp [h]; clear h` in
+      --       the lemmas below to get the expression in the infoview
+
       def executionBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
         [
           (-air.core.is_valid row 0, [air.adapter.from_state.pc row 0, air.adapter.from_state.timestamp row 0]),
@@ -374,8 +384,6 @@ namespace VmAirWrapper_lt.constraints
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
-        -- uncomment this during extraction to get the expression in infoview
-        -- congr; funext row
         rfl
 
       def memoryBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
@@ -409,8 +417,6 @@ namespace VmAirWrapper_lt.constraints
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
-        -- uncomment this during extraction to get the expression in infoview
-        -- congr; funext row
         rfl
 
       def rangeBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
@@ -430,8 +436,6 @@ namespace VmAirWrapper_lt.constraints
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
-        -- uncomment this during extraction to get the expression in infoview
-        -- congr; funext row
         rfl
 
       def readInstructionBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
@@ -448,8 +452,6 @@ namespace VmAirWrapper_lt.constraints
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
-        -- uncomment this during extraction to get the expression in infoview
-        -- congr; funext row
         rfl
 
       def bitwiseBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
@@ -468,8 +470,6 @@ namespace VmAirWrapper_lt.constraints
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
-        -- uncomment this during extraction to get the expression in infoview
-        -- congr; funext row
         rfl
 
       def constrain_interactions (air : Valid_VmAirWrapper_lt F ExtF) : Prop :=
@@ -489,8 +489,8 @@ namespace VmAirWrapper_lt.constraints
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         exact h
-    end interactions
 
+    end interactions
 
   end constraint_simplification
 
