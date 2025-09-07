@@ -382,7 +382,7 @@ lemma a_eq_and_range
 
   grind
 
-/-- From ALU opcode to RISC-V opcode -/
+/-- From Lt opcode to RISC-V opcode -/
 def rop_of_Lt_opcode (opcode : FBB) : rop :=
   if opcode = 520 then .SLT else .SLTU
 
@@ -397,7 +397,7 @@ include
   bitwise_bus_balance
   bitwise_bus_assumptions in
 /-- The constraints entail correct implementation of the
-    five base ALU opcodes for:
+    two base Lt opcodes for:
     - the `b` operand read from memory; and
     - the `c` operand as per the circuit
 --/
@@ -589,7 +589,7 @@ include
   read_bus_assumptions
   bitwise_bus_balance
   bitwise_bus_assumptions in
-/-- The non-immediate variants of the five base ALU opcodes
+/-- The non-immediate variants of the two base Lt opcodes
     are implemented as per the RISC-V spec -/
 theorem spec_base_Lt_non_imm
   (non_imm : rs2_as = 1)
@@ -622,7 +622,7 @@ end NonImmediate
 
 section Immediate
 
-/-- From ALU opcode to RISC-V opcode -/
+/-- From Lt opcode to RISC-V opcode -/
 def iop_of_Lt_opcode (opcode : FBB) : iop :=
   if opcode = 520 then .SLTI else .SLTIU
 
@@ -636,7 +636,7 @@ include
   read_bus_assumptions
   bitwise_bus_balance
   bitwise_bus_assumptions in
-/-- The immediate variants of the five base ALU opcodes
+/-- The immediate variants of the two base Lt opcodes
     are implemented as per the RISC-V spec -/
 theorem spec_base_Lt_imm
   (h_imm : rs2_as = 0)
