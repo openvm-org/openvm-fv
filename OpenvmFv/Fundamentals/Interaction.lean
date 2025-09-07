@@ -282,11 +282,9 @@ namespace InteractionList
       . suffices : ((0 : FBB) - bus''.length).val ≤ ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val ∨
                    ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val = 0
         . simp [Fin.neg_def] at this
-          rw [Nat.mod_eq_of_lt (a := bus''.length) (by omega)] at this
           by_cases h_len : bus''.length = 0
           . simp_all
-          . rw [Nat.mod_eq_of_lt (by omega)] at this
-            grind
+          . grind
         . clear h_balance
           induction bus''
           case this.nil => simp_all
