@@ -4,6 +4,9 @@ import LeanZKCircuit.Interactions
 
 set_option maxHeartbeats 1_000_000_000
 
+attribute [local simp]
+  List.filter_cons
+
 attribute [local grind]
   Fin.add_def
   Fin.neg_def
@@ -151,6 +154,34 @@ namespace InteractionList
     rw [List.perm_comm] at h_perm
     grind
 
+  /-- Buses with reversed data -/
+  def reverse
+    (bus : List (F × List F))
+  : List (F × List F) :=
+    List.map (fun (a, b) ↦ (a, b.reverse )) bus
+
+  /-- Invariance of `is_balanced` under permutation -/
+  lemma is_balanced_inv_reverse
+    [BEq F]
+    [LawfulBEq F]
+    [Field F]
+    {bus : List (F × List F)}
+  :
+    is_balanced bus ↔ is_balanced (reverse bus)
+  := by
+    simp [is_balanced, get_multiplicity, reverse] at *
+    constructor
+    all_goals
+      intro hyp data
+      specialize hyp data.reverse
+      rw [← hyp]; clear hyp
+      induction bus
+      case nil => simp
+      case cons hd tl ih =>
+        obtain ⟨ m, d ⟩ := hd; simp
+        split_ifs with h h' <;> simp_all
+        try simp [← h, List.reverse_reverse] at h'
+
   /-- Non-zero multiplicity filter -/
   def non_zero
     [BEq F]
@@ -290,7 +321,7 @@ namespace InteractionList
           case this.nil => simp_all
           case this.cons hd tl ih =>
             obtain ⟨ m', data' ⟩ := hd
-            simp_all [List.filter_cons]
+            simp_all
             specialize ih (by omega) (by grind)
             specialize split_bus'' m' data'; simp at split_bus''
             by_cases h_tl_len : tl.length = 0
@@ -307,41 +338,119 @@ namespace InteractionList
         . clear h_balance
           induction bus'' <;> grind
 
-  section executionBus
+  section timestamps
 
-    /-- Pairs emitted by the execution bus -/
-    def executionBus_entry_pair
-      (pcs pce ts te : FBB)
+    /-- Timestamped pairs -/
+    def timestamped_pair
+      (ts te : FBB) (pcs pce : List FBB)
       (_ : ts < te)
-    : List (FBB × List FBB):=
+    : List (FBB × List FBB) :=
       [
-        Interaction.executionBus_entry (-1) pcs ts,
-        Interaction.executionBus_entry 1 pce te
+        (-1, ts :: pcs),
+        ( 1, te :: pce)
       ]
 
-    /-- List of execution-bus pairs -/
-    def executionBus_entry_pair_list
-      (bus : List (FBB × List FBB))
-    : Prop :=
-      match bus with
-      | [] => True
-      | (-1, [_, ts]) :: (1, [_, te]) :: bus =>
-          ts < te ∧
-          executionBus_entry_pair_list bus
-      | _ => False
+    /-- Start timestamps -/
+    def start_timestamps
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    : List FBB :=
+      List.map (fun x ↦ x.1) bus_data
 
-    /-- Timestamps of execution-bus pairs -/
-    def executionBus_entry_pair_list_timestamps
-      (bus : List (FBB × List FBB))
-      (h_ep : executionBus_entry_pair_list bus)
-    : List FBB := by
-      unfold executionBus_entry_pair_list at h_ep
-      split at h_ep
-      case h_1 => exact []
-      case h_2 bus _ ts _ _ bus' =>
-        exact ts :: executionBus_entry_pair_list_timestamps bus' h_ep.2
-      nomatch h_ep
+    /-- End timestamps -/
+    def end_timestamps
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    : List FBB :=
+      List.map (fun x ↦ x.2.1) bus_data
 
-  end executionBus
+    /-- A bus consisting of timestamped pairs -/
+    def timestamped_pair_bus
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+    : List (FBB × List FBB) :=
+      List.flatten
+        (List.map
+          (fun (x : { y // y ∈ bus_data }) ↦
+            let ⟨ ⟨ ts, te, pcs, pce ⟩ , pf ⟩ := x
+            timestamped_pair ts te pcs pce (lt_proofs (ts, te, pcs, pce) pf)) bus_data.attach)
+
+    def sorted_timestamped_data
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    : List (FBB × FBB × List FBB × List FBB) :=
+      List.mergeSort bus_data (fun a b ↦ a.1 ≤ b.1)
+
+    instance : IsTotal (Fin 2013265921 × Fin 2013265921 × List (Fin 2013265921) × List (Fin 2013265921)) fun a b ↦ a.1 ≤ b.1
+    := by
+      apply IsTotal.mk
+      omega
+
+    instance : IsTrans (Fin 2013265921 × Fin 2013265921 × List (Fin 2013265921) × List (Fin 2013265921)) fun a b ↦ a.1 ≤ b.1
+    := by
+      apply IsTrans.mk
+      intro a b c hab hbc
+      trans b.1 <;> assumption
+
+    lemma sorted_timestamped_data_is_sorted
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    :
+      List.Sorted (fun a b ↦ a.1 ≤ b.1) (sorted_timestamped_data bus_data)
+    := by
+      apply List.sorted_mergeSort'
+
+    @[grind]
+    lemma sorted_timestamp_data_is_perm
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    :
+      bus_data.Perm (sorted_timestamped_data bus_data)
+    := by
+      unfold sorted_timestamped_data
+      rw [List.perm_comm]
+      apply List.mergeSort_perm
+
+    def lt_proofs_of_sorted
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+    :
+      ∀ entry ∈ sorted_timestamped_data bus_data, entry.1 < entry.2.1
+    := by grind
+
+    lemma sorted_timestamp_bus_is_perm
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+    :
+      List.Perm
+        (timestamped_pair_bus bus_data lt_proofs)
+        (timestamped_pair_bus (sorted_timestamped_data bus_data) (lt_proofs_of_sorted bus_data lt_proofs))
+    := by
+      have sorted_data_is_perm := sorted_timestamp_data_is_perm bus_data
+      unfold timestamped_pair_bus
+      apply List.Perm.flatten
+      iterate 2 rw [List.map_subtype
+                     (g := (fun (ts, te, pcs, pce) ↦ [ (-1, ts :: pcs), ( 1, te :: pce) ]))
+                     (by simp [timestamped_pair])]
+      . simp
+        rw [List.map_perm_map_iff (by unfold Function.Injective; grind)]
+        assumption
+
+
+
+    /- Pathway:
+       - if a list of BTPs is balanced by adding boundary conditions, then"
+         - starting timestamps are unique
+         -  1-balancer balances the minimum
+         - -1-balancer balances the maximum
+         - everything is one big timestamp-ordered sequence
+       -/
+
+    lemma oh_lord
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (lbal_data rbal_data : List FBB)
+      (h_balance : InteractionList.is_balanced ([((1 : FBB), lbal_data)] ++ (timestamped_pair_bus bus_data lt_proofs) ++ [((-1 : FBB), rbal_data)]))
+    :
+      List.Nodup (start_timestamps bus_data lt_proofs)
+    := by sorry
+
+
+  end timestamps
 
 end InteractionList
