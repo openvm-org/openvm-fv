@@ -4,6 +4,9 @@ import LeanZKCircuit.OpenVM.Circuit
 
 set_option linter.all false
 
+register_simp_attr VmAirWrapper_alu_air_simplification
+register_simp_attr VmAirWrapper_alu_constraint_and_interaction_simplification
+
 namespace VmAirWrapper_alu.extraction
 
 @[simp]
