@@ -7,6 +7,11 @@ set_option maxHeartbeats 1_000_000_000
 attribute [local simp]
   List.filter_cons
 
+attribute [-simp]
+  Fin.val_fin_le
+  exists_and_left
+  exists_and_right
+
 attribute [local grind]
   Fin.add_def
   Fin.neg_def
@@ -242,51 +247,68 @@ namespace InteractionList
         grind
 
   /-- Buses with only -1, 0, 1 multiplicities -/
-  def mult_max_one
+  def mult_n1_0_p1
     [Field F]
     (bus : List (F × List F))
   : Prop :=
     forall entry, entry ∈ bus → entry.1 = -1 ∨ entry.1 = 0 ∨ entry.1 = 1
 
-  /-- Invariance of only -1, 0, 1 under permutation -/
-  lemma mult_max_one_inv_perm
+  /-- Buses with only -1, 1 multiplicities -/
+  def mult_n1_p1
     [Field F]
-    {bus bus' : List (F × List F)}
-    (h_perm : bus.Perm bus')
-  :
-    mult_max_one bus ↔ mult_max_one bus'
-  := by
-    unfold mult_max_one
-    grind
+    (bus : List (F × List F))
+  : Prop :=
+    forall entry, entry ∈ bus → entry.1 = -1 ∨ entry.1 = 1
 
-  /-- Invariance of only -1, 0, 1 under non-zero filtering -/
-  lemma mult_max_one_inv_non_zero
+  /-- -1, 0, 1 under non-zero filtering becomes -1, 1 -/
+  lemma mult_n1_0_p1_non_zero
     [BEq F]
     [LawfulBEq F]
     [Field F]
     (bus : List (F × List F))
   :
-    mult_max_one bus ↔ mult_max_one (non_zero bus)
+    mult_n1_0_p1 bus → mult_n1_p1 (non_zero bus)
   := by
-    simp [mult_max_one, non_zero]
+    simp [mult_n1_0_p1, mult_n1_p1, non_zero]
     grind
+
+  /-- Invariance of only -1, 1 under permutation -/
+  lemma mult_n1_p1_inv_perm
+    [Field F]
+    {bus bus' : List (F × List F)}
+    (h_perm : bus.Perm bus')
+  :
+    mult_n1_p1 bus ↔ mult_n1_p1 bus'
+  := by
+    unfold mult_n1_p1
+    grind
+
+  /-- Compatibility of only -1, 1 under concatenation -/
+  lemma mult_n1_p1_append_iff
+    [Field F]
+    {bus bus' : List (F × List F)}
+  :
+    mult_n1_p1 (bus ++ bus') ↔ mult_n1_p1 bus ∧ mult_n1_p1 bus'
+  := by
+    unfold mult_n1_p1
+    simp; grind
 
   /-- Only zero equals its negation in BabyBear -/
   @[simp]
   lemma eq_neg_eq_zero (m : FBB) : -m = m ↔ m = 0 := by grind
 
   /-- Extraction of a balanced pair from a balanced -1/0/1 bus -/
-  lemma mult_max_one_extract
-    (bus : List (FBB × List FBB))
+  lemma mult_n1_p1_extract
+    {bus : List (FBB × List FBB)}
     (h_balance : is_balanced bus)
-    (h_mult_max_one : mult_max_one bus)
+    (h_mult_n1_p1 : mult_n1_p1 bus)
     (h_len_bus : bus.length < BB_prime)
     (data : List FBB)
     (h_in_neg : (m, data) ∈ bus)
-    (h_m_neq_zero : ¬m = 0)
   :
     ∃ bus', List.Perm bus (balanced_pair m data ++ bus')
   := by
+    have m_neq_z : ¬ m = 0 := by apply h_mult_n1_p1 at h_in_neg; grind
     rw [← List.singleton_sublist] at h_in_neg
     apply List.Sublist.exists_perm_append at h_in_neg
     obtain ⟨ bus'', h_eq ⟩ := h_in_neg
@@ -302,11 +324,11 @@ namespace InteractionList
       simp [get_multiplicity] at h_balance
       have h_len_bus'' : bus''.length < 2013265920
         := by simp [List.Perm.length_eq h_eq] at h_len_bus; omega
-      rw [mult_max_one_inv_perm h_eq] at h_mult_max_one
-      simp [mult_max_one] at h_mult_max_one
-      obtain ⟨ split_m, split_bus'' ⟩ := h_mult_max_one
+      rw [mult_n1_p1_inv_perm h_eq] at h_mult_n1_p1
+      simp [mult_n1_p1] at h_mult_n1_p1
+      obtain ⟨ split_m, split_bus'' ⟩ := h_mult_n1_p1
       simp_all
-      clear h_len_bus h_eq bus h_m_neq_zero
+      clear h_len_bus h_eq bus m_neq_z
       by_contra h_not_in
       replace h_balance : (List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum = -m := by grind
       rcases split_m with eq_m | eq_m <;> simp_all <;> clear eq_m
@@ -326,10 +348,9 @@ namespace InteractionList
             specialize split_bus'' m' data'; simp at split_bus''
             by_cases h_tl_len : tl.length = 0
             . split_ifs with h_data <;> simp_all
-              grind
             . rcases ih with ihl | ihr
               . left; split_ifs <;>
-                (try simp_all [-List.length_eq_zero_iff]) <;>
+                (try simp_all [-List.length_eq_zero_iff, Fin.neg_def, Fin.add_def]) <;>
                 grind
               . split_ifs <;> simp_all [-List.length_eq_zero_iff]; grind
       . suffices : ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val ≤ bus''.length ∨
@@ -350,20 +371,48 @@ namespace InteractionList
         ( 1, te :: pce)
       ]
 
-    /-- Start timestamps -/
-    def start_timestamps
+    /-- Receive timestamps -/
+    def recv_timestamps
       (bus_data : List (FBB × FBB × List FBB × List FBB))
     : List FBB :=
       List.map (fun x ↦ x.1) bus_data
 
-    /-- End timestamps -/
-    def end_timestamps
+    /-- Receive entries -/
+    def recv_entries
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    : List (FBB × List FBB) :=
+      List.map (fun x ↦ (x.1, x.2.2.1)) bus_data
+
+    /-- Send timestamps -/
+    def send_timestamps
       (bus_data : List (FBB × FBB × List FBB × List FBB))
     : List FBB :=
       List.map (fun x ↦ x.2.1) bus_data
 
+    /-- Send entries -/
+    def send_entries
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    : List (FBB × List FBB) :=
+      List.map (fun x ↦ (x.2.1, x.2.2.2)) bus_data
+
+    /-- Timestamps are in appropriate lists -/
+    lemma bus_data_in_timestamp_lists
+      {ts te : FBB} {pcs pce : List FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (h_in : (ts, te, pcs, pce) ∈ bus_data)
+    :
+      ts ∈ recv_timestamps bus_data ∧
+      te ∈ send_timestamps bus_data
+    := by
+      induction bus_data
+      case nil => simp_all
+      case cons hd tl ih =>
+        simp_all [recv_timestamps, send_timestamps]
+        grind
+
     /-- A bus consisting of timestamped pairs -/
-    def timestamped_pair_bus
+    @[grind]
+    def timestamp_bus
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
     : List (FBB × List FBB) :=
@@ -373,82 +422,256 @@ namespace InteractionList
             let ⟨ ⟨ ts, te, pcs, pce ⟩ , pf ⟩ := x
             timestamped_pair ts te pcs pce (lt_proofs (ts, te, pcs, pce) pf)) bus_data.attach)
 
-    def sorted_timestamped_data
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-    : List (FBB × FBB × List FBB × List FBB) :=
-      List.mergeSort bus_data (fun a b ↦ a.1 ≤ b.1)
-
-    instance : IsTotal (Fin 2013265921 × Fin 2013265921 × List (Fin 2013265921) × List (Fin 2013265921)) fun a b ↦ a.1 ≤ b.1
-    := by
-      apply IsTotal.mk
-      omega
-
-    instance : IsTrans (Fin 2013265921 × Fin 2013265921 × List (Fin 2013265921) × List (Fin 2013265921)) fun a b ↦ a.1 ≤ b.1
-    := by
-      apply IsTrans.mk
-      intro a b c hab hbc
-      trans b.1 <;> assumption
-
-    lemma sorted_timestamped_data_is_sorted
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
+    lemma bus_data_in_timestamp_bus
+      {ts te : FBB} {pcs pce : List FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (h_in : (ts, te, pcs, pce) ∈ bus_data)
     :
-      List.Sorted (fun a b ↦ a.1 ≤ b.1) (sorted_timestamped_data bus_data)
+      (-1, ts :: pcs) ∈ timestamp_bus bus_data lt_proofs ∧
+      ( 1, te :: pce) ∈ timestamp_bus bus_data lt_proofs
     := by
-      apply List.sorted_mergeSort'
+      induction bus_data
+      case nil => simp_all
+      case cons hd tl ih =>
+        simp_all [timestamp_bus, timestamped_pair]
+        grind
 
-    @[grind]
-    lemma sorted_timestamp_data_is_perm
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-    :
-      bus_data.Perm (sorted_timestamped_data bus_data)
-    := by
-      unfold sorted_timestamped_data
-      rw [List.perm_comm]
-      apply List.mergeSort_perm
-
-    def lt_proofs_of_sorted
+    lemma timestamp_bus_mult_n1_p1
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
     :
-      ∀ entry ∈ sorted_timestamped_data bus_data, entry.1 < entry.2.1
-    := by grind
+      mult_n1_p1 (timestamp_bus bus_data lt_proofs)
+    := by
+      induction bus_data
+      case nil => simp [mult_n1_p1, timestamp_bus]
+      case cons hd tl ih =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp_all [mult_n1_p1, timestamp_bus, timestamped_pair]
+        exact ih
 
-    lemma sorted_timestamp_bus_is_perm
+    lemma neg_ones_in_recv_timestamps
+      (ts : FBB) (pcs : List FBB)
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (h_in : (-1, ts :: pcs) ∈ timestamp_bus bus_data lt_proofs)
     :
-      List.Perm
-        (timestamped_pair_bus bus_data lt_proofs)
-        (timestamped_pair_bus (sorted_timestamped_data bus_data) (lt_proofs_of_sorted bus_data lt_proofs))
+      ts ∈ recv_timestamps bus_data
     := by
-      have sorted_data_is_perm := sorted_timestamp_data_is_perm bus_data
-      unfold timestamped_pair_bus
-      apply List.Perm.flatten
-      iterate 2 rw [List.map_subtype
-                     (g := (fun (ts, te, pcs, pce) ↦ [ (-1, ts :: pcs), ( 1, te :: pce) ]))
-                     (by simp [timestamped_pair])]
-      . simp
-        rw [List.map_perm_map_iff (by unfold Function.Injective; grind)]
-        assumption
+      induction bus_data
+      case nil => grind
+      case cons hd tl ihs =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp_all [recv_timestamps, timestamp_bus, timestamped_pair]
+        rcases h_in with _ | h_tl <;> [ simp_all; right ]
+        obtain ⟨ l, ⟨ ⟨ ts'', te'', pcs'', pce'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
+        specialize ihs l ts'' te'' pcs'' pce'' h_in'' eq_l
+        grind
 
+    lemma pos_ones_in_send_timestamps
+      {ts : FBB} {pcs : List FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (h_in : (1, ts :: pcs) ∈ timestamp_bus bus_data lt_proofs)
+    :
+      ts ∈ send_timestamps bus_data
+    := by
+      induction bus_data
+      case nil => grind
+      case cons hd tl ihs =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp_all [send_timestamps, timestamp_bus, timestamped_pair]
+        rcases h_in with _ | h_tl <;> [ simp_all; right ]
+        obtain ⟨ l, ⟨ ⟨ ts'', te'', pcs'', pce'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
+        specialize ihs l ts'' te'' pcs'' pce'' h_in'' eq_l
+        grind
 
+    lemma recv_timestamps_in_bus_data
+      {ts : FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (ts_in_recv : ts ∈ recv_timestamps bus_data)
+    :
+      ∃ (te : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
+    := by
+      induction bus_data
+      case nil => simp_all [recv_timestamps]
+      case cons hd tl ih =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp [recv_timestamps] at *
+        grind
 
-    /- Pathway:
-       - if a list of BTPs is balanced by adding boundary conditions, then"
-         - starting timestamps are unique
-         -  1-balancer balances the minimum
-         - -1-balancer balances the maximum
-         - everything is one big timestamp-ordered sequence
-       -/
+    lemma send_timestamps_in_bus_data
+      {te : FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (te_in_send : te ∈ send_timestamps bus_data)
+    :
+      ∃ (ts : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
+    := by
+      induction bus_data
+      case nil => simp_all [send_timestamps]
+      case cons hd tl ih =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp [send_timestamps] at *
+        grind
 
-    lemma oh_lord
+    /-- recv minimum less than all sends -/
+    lemma recv_min_lt_sends
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (h_not_empty : ¬ bus_data = [])
+    :
+      List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+        <
+      List.minimum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+    := by
+      set ts_min := List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      set te_min := List.minimum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      have ts_in_recv : ts_min ∈ recv_timestamps bus_data := by apply List.minimum_of_length_pos_mem
+      have te_in_send : te_min ∈ send_timestamps bus_data := by apply List.minimum_of_length_pos_mem
+      obtain ⟨ ts', pcs', pce', h_in ⟩ := send_timestamps_in_bus_data te_in_send
+      specialize lt_proofs _ h_in; simp at lt_proofs
+      have ⟨ h_in_ts, h_in_te ⟩ := bus_data_in_timestamp_lists h_in
+      apply List.minimum_of_length_pos_le_of_mem at h_in_ts
+      grind
+
+    /-- send maximum greater than all recvs -/
+    lemma send_max_gt_recvs
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (h_not_empty : ¬ bus_data = [])
+    :
+      List.maximum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+        <
+      List.maximum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+    := by
+      set ts_max := List.maximum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      set te_max := List.maximum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      have ts_in_recv : ts_max ∈ recv_timestamps bus_data := by apply List.maximum_of_length_pos_mem
+      have te_in_send : te_max ∈ send_timestamps bus_data := by apply List.maximum_of_length_pos_mem
+      obtain ⟨ te', pcs', pce', h_in ⟩ := recv_timestamps_in_bus_data ts_in_recv
+      specialize lt_proofs _ h_in; simp at lt_proofs
+      have ⟨ h_in_ts, h_in_te ⟩ := bus_data_in_timestamp_lists h_in
+      apply List.le_maximum_of_length_pos_of_mem at h_in_te
+      grind
+
+    lemma nonempty_timestamp_bus_not_balanced
+      (bus_data : List (FBB × FBB × List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+      (h_not_empty : ¬ bus_data = [])
+      (h_not_too_long : (timestamp_bus bus_data lt_proofs).length < BB_prime)
+    :
+      ¬ is_balanced (timestamp_bus bus_data lt_proofs)
+    := by
+      intro h_balanced
+      have := recv_min_lt_sends bus_data lt_proofs h_not_empty
+      set ts_min := List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      set te_min := List.minimum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      have ts_in_recv : ts_min ∈ recv_timestamps bus_data := by apply List.minimum_of_length_pos_mem
+      obtain ⟨ te', pcs', pce', h_in ⟩ := recv_timestamps_in_bus_data ts_in_recv
+      (have ⟨ ts_min_in, hb ⟩  := bus_data_in_timestamp_bus lt_proofs h_in); clear hb
+      have h_mult_n1_p1 := timestamp_bus_mult_n1_p1 bus_data lt_proofs
+      obtain ⟨ bus', h_perm ⟩  := @mult_n1_p1_extract (-1) _ h_balanced h_mult_n1_p1 h_not_too_long _ ts_min_in
+      simp [balanced_pair] at h_perm
+      obtain ts_min_in_send : ts_min ∈ send_timestamps bus_data := by
+        apply pos_ones_in_send_timestamps (pcs := pcs') (lt_proofs := lt_proofs)
+        simp [List.Perm.mem_iff h_perm]
+      obtain : te_min ≤ ts_min := by apply List.minimum_of_length_pos_le_of_mem ts_min_in_send
+      grind
+
+    lemma balancer_characterisation
+      {ldata rdata : List FBB}
+      {bus : List (FBB × List FBB)}
+      (h_mult_n1_p1 : mult_n1_p1 bus)
+      (h_len_bus : ([(1, ldata)] ++ bus ++ [(-1, rdata)]).length < BB_prime)
+      (h_balance : InteractionList.is_balanced ([((1 : FBB), ldata)] ++ bus ++ [((-1 : FBB), rdata)]))
+    :
+      (ldata = rdata → is_balanced bus) ∧
+      (¬ ldata = rdata →
+        exists bus',
+          bus.Perm ([((-1 : FBB), ldata)] ++ bus' ++ [((1 : FBB), rdata)]) ∧
+          is_balanced bus')
+    := by
+      constructor
+      . intro heq; simp_all
+        apply is_balanced_of_append_is_balanced (l₂ := [(1, rdata), (-1, rdata)])
+        . intro data
+          simp [get_multiplicity]
+          split_ifs <;> simp_all
+        . apply is_balanced_inv_perm h_balance
+          grind
+      . intro hneq
+        suffices h_in : (-1, ldata) ∈ bus ∧ (1, rdata) ∈ bus
+        . obtain ⟨ h_ld, h_rd ⟩ := h_in
+          rw [← List.singleton_sublist] at h_ld
+          apply List.Sublist.exists_perm_append at h_ld
+          obtain ⟨ bus'', h_perm'' ⟩ := h_ld
+          have h_rd' : (1, rdata) ∈ bus'' := by grind
+          rw [← List.singleton_sublist] at h_rd'
+          apply List.Sublist.exists_perm_append at h_rd'
+          obtain ⟨ bus', h_perm' ⟩ := h_rd'
+          have h_perm : bus.Perm ([(-1, ldata)] ++ bus' ++ [(1, rdata)]) := by grind
+          exists bus'; simp_all
+          have : List.Perm
+                    ((1, ldata) :: (bus ++ [(-1, rdata)]))
+                    ([(1, ldata), (-1, ldata)] ++ bus' ++ [(1, rdata), (-1, rdata)])
+            := by grind
+          apply is_balanced_of_append_is_balanced (l₂ := [(1, rdata), (-1, rdata)])
+          . intro data
+            simp [get_multiplicity]
+            split_ifs <;> simp_all
+          . apply is_balanced_of_append_is_balanced (l₂ := [(-1, ldata), (1, ldata)])
+            . intro data
+              simp [get_multiplicity]
+              split_ifs <;> simp_all
+            . apply is_balanced_inv_perm h_balance (by grind)
+        . have : mult_n1_p1 ([(1, ldata)] ++ bus ++ [(-1, rdata)]) := by
+            repeat rw [mult_n1_p1_append_iff]
+            simp_all; simp [mult_n1_p1]
+          have ⟨ bus_l, h_perm_l ⟩ := mult_n1_p1_extract (m := 1) (data := ldata) h_balance this h_len_bus (by grind)
+          have ⟨ bus_r, h_perm_r ⟩ := mult_n1_p1_extract (m := -1) (data := rdata) h_balance this h_len_bus (by grind)
+          simp [balanced_pair] at *
+          suffices : (-1, ldata) ∈ bus ++ [(-1, rdata)] ∧ (1, rdata) ∈ (1, ldata) :: (bus ++ [(-1, rdata)])
+          . grind
+          . grind
+
+#exit
+
+    lemma balanced_bus_balancer_characterisation
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
       (lbal_data rbal_data : List FBB)
-      (h_balance : InteractionList.is_balanced ([((1 : FBB), lbal_data)] ++ (timestamped_pair_bus bus_data lt_proofs) ++ [((-1 : FBB), rbal_data)]))
+      (bus : List (FBB × List FBB))
+      (h_perm : (timestamp_bus bus_data lt_proofs).Perm bus)
+      (h_balance : InteractionList.is_balanced ([((1 : FBB), lbal_data)] ++ bus ++ [((-1 : FBB), rbal_data)]))
+      (h_not_empty : ¬ bus_data = [])
     :
-      List.Nodup (start_timestamps bus_data lt_proofs)
-    := by sorry
+      let ts_min := List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      let te_max := List.maximum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      (∃ (pcs' pce' : List FBB),
+         lbal_data = (ts_min :: pcs') ∧
+         rbal_data = (te_max :: pce'))
+    := by
+
+
+      extract_lets ts_min te_max
+      obtain h_neq : ¬ lbal_data = rbal_data := by
+        have h_perm' := List.perm_append_comm_assoc [(1, lbal_data)] bus [(-1, rbal_data)]
+        intro h_eq <;> simp_all
+        have h_balance' := is_balanced_inv_perm h_balance h_perm'
+        obtain h_not_balanced : ¬ is_balanced bus := by
+          suffices : ¬ is_balanced (timestamp_bus bus_data lt_proofs)
+          . intro hyp; apply this
+            rw [List.perm_comm] at h_perm
+            exact is_balanced_inv_perm hyp h_perm
+        apply h_not_balanced
+        apply is_balanced_of_append_is_balanced (l₂ := [(1, rbal_data), (-1, rbal_data)])
+        . intro data
+          simp [get_multiplicity]
+          split_ifs <;> simp_all
+        . assumption
+      obtain ⟨ t', pcs', pce'', in_bus_data' ⟩ := @recv_timestamps_in_bus_data ts_min bus_data (by apply List.minimum_of_length_pos_mem)
+      obtain ⟨ t'', pcs'', pce', in_bus_data'' ⟩ := @send_timestamps_in_bus_data te_max bus_data (by apply List.maximum_of_length_pos_mem)
+      exists pcs', pce'
 
 
   end timestamps
