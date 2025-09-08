@@ -598,7 +598,7 @@ namespace InteractionList
       (ldata = rdata → is_balanced bus) ∧
       (¬ ldata = rdata →
         exists bus',
-          bus.Perm ([((1 : FBB), rdata)] ++ bus' ++ [((-1 : FBB), ldata)]) ∧
+          bus.Perm ([((-1 : FBB), ldata)] ++ bus' ++ [((1 : FBB), rdata)]) ∧
           is_balanced bus')
     := by
       constructor
@@ -619,15 +619,11 @@ namespace InteractionList
           rw [← List.singleton_sublist] at h_rd'
           apply List.Sublist.exists_perm_append at h_rd'
           obtain ⟨ bus', h_perm' ⟩ := h_rd'
-          have h_perm : bus.Perm ([(1, rdata)] ++ bus' ++ [(-1, ldata)]) := by grind
+          have h_perm : bus.Perm ([(-1, ldata)] ++ bus' ++ [(1, rdata)]) := by grind
           exists bus'; simp_all
           have : List.Perm
                     ((1, ldata) :: (bus ++ [(-1, rdata)]))
                     ([(1, ldata), (-1, ldata)] ++ bus' ++ [(1, rdata), (-1, rdata)])
-            := by grind
-          have : List.Perm
-                    ([(1, ldata), (-1, ldata)] ++ bus' ++ [(1, rdata), (-1, rdata)])
-                    ([(1, ldata), (1, rdata)] ++ bus' ++ [(-1, ldata), (-1, rdata)])
             := by grind
           apply is_balanced_of_append_is_balanced (l₂ := [(1, rdata), (-1, rdata)])
           . intro data
