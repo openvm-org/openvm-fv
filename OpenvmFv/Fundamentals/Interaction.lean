@@ -88,7 +88,6 @@ namespace Interaction
     ¬ mul = 0 →
       True
 
-
   /-- BitwiseBus entry -/
   @[simp]
   def bitwiseBus_entry
@@ -114,6 +113,7 @@ end Interaction
 
 namespace List
 
+/-- Strong induction on lists -/
 @[elab_as_elim]
 def strongInductionOn
   {P : List T → Prop}
@@ -127,11 +127,19 @@ def strongInductionOn
 
 end List
 
+namespace BabyBear
+
+  /-- Only zero equals its negation in BabyBear -/
+  @[simp]
+  lemma eq_neg_eq_zero (m : FBB) : -m = m ↔ m = 0 := by grind
+
+end BabyBear
+
 namespace InteractionList
 
   open InteractionList
 
-    /-- Balanced execution-bus pair -/
+    /-- Balanced arbitrary-multiplicity bus entry pair -/
     @[simp]
     def balanced_pair
       [Field F]
@@ -159,33 +167,41 @@ namespace InteractionList
     rw [List.perm_comm] at h_perm
     grind
 
-  /-- Buses with reversed data -/
-  def reverse
-    (bus : List (F × List F))
-  : List (F × List F) :=
-    List.map (fun (a, b) ↦ (a, b.reverse )) bus
-
-  /-- Invariance of `is_balanced` under permutation -/
-  lemma is_balanced_inv_reverse
+  /-- Invariance of `is_balanced` under bijective mapping.
+      Intended to be used with list reverse. -/
+  lemma is_balanced_inv_bijection
     [BEq F]
     [LawfulBEq F]
     [Field F]
     {bus : List (F × List F)}
+    (f : List F → List F)
+    {f_bi : Function.Bijective f}
   :
-    is_balanced bus ↔ is_balanced (reverse bus)
+    is_balanced bus ↔ is_balanced (bus.map (fun (m, data) ↦ (m, f data)))
   := by
-    simp [is_balanced, get_multiplicity, reverse] at *
+    simp [is_balanced, get_multiplicity,
+          Function.Bijective, Function.Injective, Function.Surjective] at *
+    obtain ⟨ f_inj, f_sur ⟩ := f_bi
     constructor
-    all_goals
-      intro hyp data
-      specialize hyp data.reverse
+    . intro hyp data
+      obtain ⟨ d', eq_d' ⟩ := f_sur data
+      specialize hyp d'
       rw [← hyp]; clear hyp
       induction bus
       case nil => simp
       case cons hd tl ih =>
         obtain ⟨ m, d ⟩ := hd; simp
         split_ifs with h h' <;> simp_all
-        try simp [← h, List.reverse_reverse] at h'
+        absurd h'; apply f_inj; grind
+    . intro hyp data
+      specialize hyp (f data)
+      rw [← hyp]; clear hyp
+      induction bus
+      case nil => simp
+      case cons hd tl ih =>
+        obtain ⟨ m, d ⟩ := hd; simp
+        split_ifs with h h' <;> simp_all
+        absurd h; apply f_inj; assumption
 
   /-- Non-zero multiplicity filter -/
   def non_zero
@@ -221,31 +237,6 @@ namespace InteractionList
     have := non_zero_inv_sum bus
     grind
 
-  /-- Prop variant of `non_zero` -/
-  def is_non_zero
-    [BEq F]
-    [Field F]
-    (bus : List (F × List F))
-  : Prop :=
-    ∀ entry ∈ bus, ¬ entry.1 = 0
-
-  /-- Relationship between `non_zero` and `is_non_zero` -/
-  lemma is_non_zero_as_non_zero
-    [BEq F]
-    [LawfulBEq F]
-    [Field F]
-    (bus : List (F × List F))
-  :
-    is_non_zero bus ↔ bus = non_zero bus
-  := by
-    induction bus <;> simp [is_non_zero, non_zero] at *
-    case cons hd tl ih =>
-      obtain ⟨ m, d ⟩ := hd
-      by_cases hm : m = 0 <;> simp_all
-      . intro hyp
-        have := List.length_filter_le (fun x ↦ !x.1 == 0) tl
-        grind
-
   /-- Buses with only -1, 0, 1 multiplicities -/
   def mult_n1_0_p1
     [Field F]
@@ -261,7 +252,7 @@ namespace InteractionList
     forall entry, entry ∈ bus → entry.1 = -1 ∨ entry.1 = 1
 
   /-- -1, 0, 1 under non-zero filtering becomes -1, 1 -/
-  lemma mult_n1_0_p1_non_zero
+  lemma mult_n1_0_p1_non_zero_is_n1_p1
     [BEq F]
     [LawfulBEq F]
     [Field F]
@@ -293,15 +284,13 @@ namespace InteractionList
     unfold mult_n1_p1
     simp; grind
 
-  /-- Only zero equals its negation in BabyBear -/
-  @[simp]
-  lemma eq_neg_eq_zero (m : FBB) : -m = m ↔ m = 0 := by grind
-
-  /-- Extraction of a balanced pair from a balanced -1/0/1 bus -/
+  /-- If a -1, 1 bus is balanced and does not exceed `BB_prime` in length,
+      and if we know an entry is on the bus, then we also know that
+      its individual balancer is on the bus. -/
   lemma mult_n1_p1_extract
     {bus : List (FBB × List FBB)}
-    (h_balance : is_balanced bus)
     (h_mult_n1_p1 : mult_n1_p1 bus)
+    (h_balance : is_balanced bus)
     (h_len_bus : bus.length < BB_prime)
     (data : List FBB)
     (h_in_neg : (m, data) ∈ bus)
@@ -359,10 +348,17 @@ namespace InteractionList
         . clear h_balance
           induction bus'' <;> grind
 
-  section timestamps
+  /- The idea is to now consider -1, 1 pairs whose
+     send data (the leading component of the `1`-entry) is
+     larger than their receive data (the leading comonent of
+     the `-1` entry). Because those will be used in this work
+     to represent timestamp-leading data, we refer to them
+     as `timestamp_pair`s.
+  -/
+  section timestamp_pairs
 
     /-- Timestamped pairs -/
-    def timestamped_pair
+    def timestamp_pair
       (ts te : FBB) (pcs pce : List FBB)
       (_ : ts < te)
     : List (FBB × List FBB) :=
@@ -395,6 +391,36 @@ namespace InteractionList
     : List (FBB × List FBB) :=
       List.map (fun x ↦ (x.2.1, x.2.2.2)) bus_data
 
+    /-- All receives are in the data -/
+    lemma recv_timestamps_in_bus_data
+      {ts : FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (ts_in_recv : ts ∈ recv_timestamps bus_data)
+    :
+      ∃ (te : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
+    := by
+      induction bus_data
+      case nil => simp_all [recv_timestamps]
+      case cons hd tl ih =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp [recv_timestamps] at *
+        grind
+
+    /-- All sends are in the data -/
+    lemma send_timestamps_in_bus_data
+      {te : FBB}
+      {bus_data : List (FBB × FBB × List FBB × List FBB)}
+      (te_in_send : te ∈ send_timestamps bus_data)
+    :
+      ∃ (ts : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
+    := by
+      induction bus_data
+      case nil => simp_all [send_timestamps]
+      case cons hd tl ih =>
+        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
+        simp [send_timestamps] at *
+        grind
+
     /-- Timestamps are in appropriate lists -/
     lemma bus_data_in_timestamp_lists
       {ts te : FBB} {pcs pce : List FBB}
@@ -410,7 +436,7 @@ namespace InteractionList
         simp_all [recv_timestamps, send_timestamps]
         grind
 
-    /-- A bus consisting of timestamped pairs -/
+    /-- A `timestamp_bus` is a bus consisting of timestamp pairs -/
     @[grind]
     def timestamp_bus
       (bus_data : List (FBB × FBB × List FBB × List FBB))
@@ -420,8 +446,9 @@ namespace InteractionList
         (List.map
           (fun (x : { y // y ∈ bus_data }) ↦
             let ⟨ ⟨ ts, te, pcs, pce ⟩ , pf ⟩ := x
-            timestamped_pair ts te pcs pce (lt_proofs (ts, te, pcs, pce) pf)) bus_data.attach)
+            timestamp_pair ts te pcs pce (lt_proofs (ts, te, pcs, pce) pf)) bus_data.attach)
 
+    /-- Receives and sends of timestamp bus data are on the timestamp bus -/
     lemma bus_data_in_timestamp_bus
       {ts te : FBB} {pcs pce : List FBB}
       {bus_data : List (FBB × FBB × List FBB × List FBB)}
@@ -434,9 +461,10 @@ namespace InteractionList
       induction bus_data
       case nil => simp_all
       case cons hd tl ih =>
-        simp_all [timestamp_bus, timestamped_pair]
+        simp_all [timestamp_bus, timestamp_pair]
         grind
 
+    /-- A timestamp bus is a -1, 1, bus -/
     lemma timestamp_bus_mult_n1_p1
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
@@ -447,9 +475,10 @@ namespace InteractionList
       case nil => simp [mult_n1_p1, timestamp_bus]
       case cons hd tl ih =>
         obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp_all [mult_n1_p1, timestamp_bus, timestamped_pair]
+        simp_all [mult_n1_p1, timestamp_bus, timestamp_pair]
         exact ih
 
+    /-- All negative entries in a timestamp bus are from the receives -/
     lemma neg_ones_in_recv_timestamps
       (ts : FBB) (pcs : List FBB)
       (bus_data : List (FBB × FBB × List FBB × List FBB))
@@ -462,12 +491,13 @@ namespace InteractionList
       case nil => grind
       case cons hd tl ihs =>
         obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp_all [recv_timestamps, timestamp_bus, timestamped_pair]
+        simp_all [recv_timestamps, timestamp_bus, timestamp_pair]
         rcases h_in with _ | h_tl <;> [ simp_all; right ]
         obtain ⟨ l, ⟨ ⟨ ts'', te'', pcs'', pce'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
         specialize ihs l ts'' te'' pcs'' pce'' h_in'' eq_l
         grind
 
+    /-- All positive entries in a timestamp bus are from the sends -/
     lemma pos_ones_in_send_timestamps
       {ts : FBB} {pcs : List FBB}
       {bus_data : List (FBB × FBB × List FBB × List FBB)}
@@ -480,41 +510,13 @@ namespace InteractionList
       case nil => grind
       case cons hd tl ihs =>
         obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp_all [send_timestamps, timestamp_bus, timestamped_pair]
+        simp_all [send_timestamps, timestamp_bus, timestamp_pair]
         rcases h_in with _ | h_tl <;> [ simp_all; right ]
         obtain ⟨ l, ⟨ ⟨ ts'', te'', pcs'', pce'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
         specialize ihs l ts'' te'' pcs'' pce'' h_in'' eq_l
         grind
 
-    lemma recv_timestamps_in_bus_data
-      {ts : FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (ts_in_recv : ts ∈ recv_timestamps bus_data)
-    :
-      ∃ (te : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
-    := by
-      induction bus_data
-      case nil => simp_all [recv_timestamps]
-      case cons hd tl ih =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp [recv_timestamps] at *
-        grind
-
-    lemma send_timestamps_in_bus_data
-      {te : FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (te_in_send : te ∈ send_timestamps bus_data)
-    :
-      ∃ (ts : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
-    := by
-      induction bus_data
-      case nil => simp_all [send_timestamps]
-      case cons hd tl ih =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp [send_timestamps] at *
-        grind
-
-    /-- recv minimum less than all sends -/
+    /-- The minimal receive timestamp is smaller than all the send timestamps -/
     lemma recv_min_lt_sends
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
@@ -534,7 +536,7 @@ namespace InteractionList
       apply List.minimum_of_length_pos_le_of_mem at h_in_ts
       grind
 
-    /-- send maximum greater than all recvs -/
+    /-- The maximal send timestamp is larger than all the receive timestamps -/
     lemma send_max_gt_recvs
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
@@ -554,6 +556,11 @@ namespace InteractionList
       apply List.le_maximum_of_length_pos_of_mem at h_in_te
       grind
 
+  end timestamp_pairs
+
+  section balancing
+
+    /-- A non-empty timestamp bus is never balanced -/
     lemma nonempty_timestamp_bus_not_balanced
       (bus_data : List (FBB × FBB × List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
@@ -570,7 +577,7 @@ namespace InteractionList
       obtain ⟨ te', pcs', pce', h_in ⟩ := recv_timestamps_in_bus_data ts_in_recv
       (have ⟨ ts_min_in, hb ⟩  := bus_data_in_timestamp_bus lt_proofs h_in); clear hb
       have h_mult_n1_p1 := timestamp_bus_mult_n1_p1 bus_data lt_proofs
-      obtain ⟨ bus', h_perm ⟩  := @mult_n1_p1_extract (-1) _ h_balanced h_mult_n1_p1 h_not_too_long _ ts_min_in
+      obtain ⟨ bus', h_perm ⟩  := @mult_n1_p1_extract (-1) _ h_mult_n1_p1 h_balanced h_not_too_long _ ts_min_in
       simp [balanced_pair] at h_perm
       obtain ts_min_in_send : ts_min ∈ send_timestamps bus_data := by
         apply pos_ones_in_send_timestamps (pcs := pcs') (lt_proofs := lt_proofs)
@@ -578,7 +585,10 @@ namespace InteractionList
       obtain : te_min ≤ ts_min := by apply List.minimum_of_length_pos_le_of_mem ts_min_in_send
       grind
 
-    lemma balancer_characterisation
+    /-- If a -1, 1 bus of length less than `BB_prime` is balanced
+        by a single send and a single receive, then it can be deconstructed
+        into the corresponding balancers and the rest -/
+    lemma single_balancer_decomposition
       {ldata rdata : List FBB}
       {bus : List (FBB × List FBB)}
       (h_mult_n1_p1 : mult_n1_p1 bus)
@@ -627,12 +637,14 @@ namespace InteractionList
         . have : mult_n1_p1 ([(1, ldata)] ++ bus ++ [(-1, rdata)]) := by
             repeat rw [mult_n1_p1_append_iff]
             simp_all; simp [mult_n1_p1]
-          have ⟨ bus_l, h_perm_l ⟩ := mult_n1_p1_extract (m := 1) (data := ldata) h_balance this h_len_bus (by grind)
-          have ⟨ bus_r, h_perm_r ⟩ := mult_n1_p1_extract (m := -1) (data := rdata) h_balance this h_len_bus (by grind)
+          have ⟨ bus_l, h_perm_l ⟩ := mult_n1_p1_extract (m := 1) (data := ldata) this h_balance h_len_bus (by grind)
+          have ⟨ bus_r, h_perm_r ⟩ := mult_n1_p1_extract (m := -1) (data := rdata) this h_balance h_len_bus (by grind)
           simp [balanced_pair] at *
           suffices : (-1, ldata) ∈ bus ++ [(-1, rdata)] ∧ (1, rdata) ∈ (1, ldata) :: (bus ++ [(-1, rdata)])
           . grind
           . grind
+
+  end balancing
 
 #exit
 
