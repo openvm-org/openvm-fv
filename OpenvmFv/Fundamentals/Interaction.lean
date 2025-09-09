@@ -11,6 +11,8 @@ attribute [-simp]
   Fin.val_fin_le
   exists_and_left
   exists_and_right
+  List.minimum_of_length_pos_le_iff
+  List.le_maximum_of_length_pos_iff
 
 attribute [local grind]
   Fin.add_def
@@ -130,7 +132,7 @@ end List
 namespace BabyBear
 
   /-- Only zero equals its negation in BabyBear -/
-  @[simp]
+  @[simp, grind]
   lemma eq_neg_eq_zero (m : FBB) : -m = m ↔ m = 0 := by grind
 
 end BabyBear
@@ -147,7 +149,7 @@ namespace InteractionList
       (data : List F)
     : List (F × List F) :=
       [
-        (m, data),
+        ( m, data),
         (-m, data),
       ]
 
@@ -167,8 +169,7 @@ namespace InteractionList
     rw [List.perm_comm] at h_perm
     grind
 
-  /-- Invariance of `is_balanced` under bijective mapping.
-      Intended to be used with list reverse. -/
+  /-- Invariance of `is_balanced` under bijective mapping. -/
   lemma is_balanced_inv_bijection
     [BEq F]
     [LawfulBEq F]
@@ -348,241 +349,283 @@ namespace InteractionList
         . clear h_balance
           induction bus'' <;> grind
 
-  /- The idea is to now consider -1, 1 pairs whose
-     send data (the leading component of the `1`-entry) is
-     larger than their receive data (the leading comonent of
-     the `-1` entry). Because those will be used in this work
-     to represent timestamp-leading data, we refer to them
-     as `timestamp_pair`s.
-  -/
-  section timestamp_pairs
+  section rising_pairs
 
-    /-- Timestamped pairs -/
-    def timestamp_pair
-      (ts te : FBB) (pcs pce : List FBB)
-      (_ : ts < te)
-    : List (FBB × List FBB) :=
+    variable
+      -- Measure on bus data
+      (μ : List FBB → FBB)
+
+    /-- Rising pairs are pairs whose send data
+        is greater than their receive data
+        according to some measure `mu` -/
+    def rising_pair
+      [Field F]
+      (dr ds : List FBB)
+      (_ : μ dr < μ ds)
+    : List (F × List F) :=
       [
-        (-1, ts :: pcs),
-        ( 1, te :: pce)
+        (-1, dr),
+        ( 1, ds)
       ]
 
-    /-- Receive timestamps -/
-    def recv_timestamps
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-    : List FBB :=
+    /-- Receive data -/
+    def recv_data
+      (bus_data : List (List FBB × List FBB))
+    : List (List FBB) :=
       List.map (fun x ↦ x.1) bus_data
 
-    /-- Receive entries -/
-    def recv_entries
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-    : List (FBB × List FBB) :=
-      List.map (fun x ↦ (x.1, x.2.2.1)) bus_data
-
-    /-- Send timestamps -/
-    def send_timestamps
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-    : List FBB :=
-      List.map (fun x ↦ x.2.1) bus_data
-
-    /-- Send entries -/
-    def send_entries
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-    : List (FBB × List FBB) :=
-      List.map (fun x ↦ (x.2.1, x.2.2.2)) bus_data
+    /-- Send data -/
+    def send_data
+      (bus_data : List (List FBB × List FBB))
+    : List (List FBB) :=
+      List.map (fun x ↦ x.2) bus_data
 
     /-- All receives are in the data -/
-    lemma recv_timestamps_in_bus_data
-      {ts : FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (ts_in_recv : ts ∈ recv_timestamps bus_data)
+    lemma recv_data_in_bus_data
+      {dr : List FBB}
+      {bus_data : List (List FBB × List FBB)}
+      (dr_in_recv : dr ∈ recv_data bus_data)
     :
-      ∃ (te : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
+      ∃ (ds : List FBB), (dr, ds) ∈ bus_data
     := by
       induction bus_data
-      case nil => simp_all [recv_timestamps]
+      case nil => simp_all [recv_data]
       case cons hd tl ih =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp [recv_timestamps] at *
+        obtain ⟨ dr', ds' ⟩ := hd
+        simp [recv_data] at *
         grind
 
     /-- All sends are in the data -/
-    lemma send_timestamps_in_bus_data
-      {te : FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (te_in_send : te ∈ send_timestamps bus_data)
+    lemma send_data_in_bus_data
+      {ds : List FBB}
+      {bus_data : List (List FBB × List FBB)}
+      (dr_in_recv : ds ∈ send_data bus_data)
     :
-      ∃ (ts : FBB) (pcs pce: List FBB), (ts, te, pcs, pce) ∈ bus_data
+      ∃ (dr : List FBB), (dr, ds) ∈ bus_data
     := by
       induction bus_data
-      case nil => simp_all [send_timestamps]
+      case nil => simp_all [send_data]
       case cons hd tl ih =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp [send_timestamps] at *
+        obtain ⟨ dr', ds' ⟩ := hd
+        simp [send_data] at *
         grind
 
-    /-- Timestamps are in appropriate lists -/
-    lemma bus_data_in_timestamp_lists
-      {ts te : FBB} {pcs pce : List FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (h_in : (ts, te, pcs, pce) ∈ bus_data)
+    /-- Bus data is in appropriate lists -/
+    lemma bus_data_in_recv_send_lists
+      {dr ds : List FBB}
+      {bus_data : List (List FBB × List FBB)}
+      (h_in : (dr, ds) ∈ bus_data)
     :
-      ts ∈ recv_timestamps bus_data ∧
-      te ∈ send_timestamps bus_data
+      dr ∈ recv_data bus_data ∧
+      ds ∈ send_data bus_data
     := by
       induction bus_data
       case nil => simp_all
       case cons hd tl ih =>
-        simp_all [recv_timestamps, send_timestamps]
+        simp_all [recv_data, send_data]
         grind
 
-    /-- A `timestamp_bus` is a bus consisting of timestamp pairs -/
+    /-- A `rising_bus` is a bus consisting of rising pairs -/
     @[grind]
-    def timestamp_bus
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+    def rising_bus
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
     : List (FBB × List FBB) :=
       List.flatten
         (List.map
           (fun (x : { y // y ∈ bus_data }) ↦
-            let ⟨ ⟨ ts, te, pcs, pce ⟩ , pf ⟩ := x
-            timestamp_pair ts te pcs pce (lt_proofs (ts, te, pcs, pce) pf)) bus_data.attach)
+            let ⟨ ⟨ dr, ds ⟩ , pf ⟩ := x
+            rising_pair μ dr ds (lt_proofs (dr, ds) pf )) bus_data.attach)
 
-    /-- Receives and sends of timestamp bus data are on the timestamp bus -/
-    lemma bus_data_in_timestamp_bus
-      {ts te : FBB} {pcs pce : List FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (h_in : (ts, te, pcs, pce) ∈ bus_data)
+    /-- Receives and sends of rising bus data are on the rising bus -/
+    lemma bus_data_in_rising_bus
+      {dr ds : List FBB}
+      {bus_data : List (List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_in : (dr, ds) ∈ bus_data)
     :
-      (-1, ts :: pcs) ∈ timestamp_bus bus_data lt_proofs ∧
-      ( 1, te :: pce) ∈ timestamp_bus bus_data lt_proofs
+      (-1, dr) ∈ rising_bus μ bus_data lt_proofs ∧
+      ( 1, ds) ∈ rising_bus μ bus_data lt_proofs
     := by
       induction bus_data
       case nil => simp_all
       case cons hd tl ih =>
-        simp_all [timestamp_bus, timestamp_pair]
+        simp_all [rising_bus, rising_pair]
         grind
 
-    /-- A timestamp bus is a -1, 1, bus -/
-    lemma timestamp_bus_mult_n1_p1
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
+    /-- A rising bus is a -1, 1, bus -/
+    lemma rising_bus_mult_n1_p1
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
     :
-      mult_n1_p1 (timestamp_bus bus_data lt_proofs)
+      mult_n1_p1 (rising_bus μ bus_data lt_proofs)
     := by
       induction bus_data
-      case nil => simp [mult_n1_p1, timestamp_bus]
+      case nil => simp [mult_n1_p1, rising_bus]
       case cons hd tl ih =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp_all [mult_n1_p1, timestamp_bus, timestamp_pair]
+        obtain ⟨ dr, ds ⟩ := hd
+        simp_all [mult_n1_p1, rising_bus, rising_pair]
         exact ih
 
-    /-- All negative entries in a timestamp bus are from the receives -/
-    lemma neg_ones_in_recv_timestamps
-      (ts : FBB) (pcs : List FBB)
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (h_in : (-1, ts :: pcs) ∈ timestamp_bus bus_data lt_proofs)
+    /-- All negative entries in a rising bus are from the receives -/
+    lemma neg_ones_in_recv_data
+      (dr : List FBB)
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_in : (-1, dr) ∈ rising_bus μ bus_data lt_proofs)
     :
-      ts ∈ recv_timestamps bus_data
+      dr ∈ recv_data bus_data
     := by
       induction bus_data
       case nil => grind
       case cons hd tl ihs =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp_all [recv_timestamps, timestamp_bus, timestamp_pair]
+        obtain ⟨ dr', ds' ⟩ := hd
+        simp_all [recv_data, rising_bus, rising_pair]
         rcases h_in with _ | h_tl <;> [ simp_all; right ]
-        obtain ⟨ l, ⟨ ⟨ ts'', te'', pcs'', pce'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
-        specialize ihs l ts'' te'' pcs'' pce'' h_in'' eq_l
+        obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
+        specialize ihs l dr'' ds'' h_in'' eq_l
         grind
 
     /-- All positive entries in a timestamp bus are from the sends -/
-    lemma pos_ones_in_send_timestamps
-      {ts : FBB} {pcs : List FBB}
-      {bus_data : List (FBB × FBB × List FBB × List FBB)}
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (h_in : (1, ts :: pcs) ∈ timestamp_bus bus_data lt_proofs)
+    lemma pos_ones_in_send_data
+      {ds : List FBB}
+      {bus_data : List (List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_in : (1, ds) ∈ rising_bus μ bus_data lt_proofs)
     :
-      ts ∈ send_timestamps bus_data
+      ds ∈ send_data bus_data
     := by
       induction bus_data
       case nil => grind
       case cons hd tl ihs =>
-        obtain ⟨ ts', te', pcs', pce' ⟩ := hd
-        simp_all [send_timestamps, timestamp_bus, timestamp_pair]
+        obtain ⟨ dr', ds' ⟩ := hd
+        simp_all [send_data, rising_bus, rising_pair]
         rcases h_in with _ | h_tl <;> [ simp_all; right ]
-        obtain ⟨ l, ⟨ ⟨ ts'', te'', pcs'', pce'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
-        specialize ihs l ts'' te'' pcs'' pce'' h_in'' eq_l
+        obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
+        specialize ihs l dr'' ds'' h_in'' eq_l
         grind
 
-    /-- The minimal receive timestamp is smaller than all the send timestamps -/
+    /-- Witness for minimal bus data -/
+    lemma minimum_witness
+      (data : List (List FBB))
+      (h_not_empty : 0 < data.length)
+    :
+      ∃ d_min ∈ data,
+      List.minimum_of_length_pos (l := List.map μ data) (by simpa) = μ d_min ∧
+      ∀ d ∈ data, μ d_min ≤ μ d
+    := by
+      let μ_min := List.minimum_of_length_pos (l := List.map μ data) (by simpa)
+      suffices : ∃ d_min ∈ data, μ d_min = μ_min
+      . obtain ⟨ d_min, in_d_min, eq_d_min ⟩ := this
+        exists d_min; simp_all [μ_min]
+        intro d in_d
+        have : μ d ∈ List.map μ data := by simp; tauto
+        apply List.minimum_of_length_pos_le_of_mem this (by simpa)
+      . have : μ_min ∈ List.map μ data := by apply List.minimum_of_length_pos_mem (by simpa)
+        grind
+
+    /-- Element is minimal -/
+    def is_minimum
+      (d : List FBB)
+      (data : List (List FBB))
+      (h_not_empty : 0 < data.length)
+    : Prop :=
+      μ d = List.minimum_of_length_pos (l := List.map μ data) (by simpa)
+
+    /-- Witness for maximal bus data -/
+    lemma maximum_witness
+      (data : List (List FBB))
+      (h_not_empty : 0 < data.length)
+    :
+      ∃ d_max ∈ data,
+        List.maximum_of_length_pos (l := List.map μ data) (by simpa) = μ d_max ∧
+        ∀ d ∈ data, μ d ≤ μ d_max
+    := by
+      let μ_max := List.maximum_of_length_pos (l := List.map μ data) (by simpa)
+      suffices : ∃ d_max ∈ data, μ d_max = μ_max
+      . obtain ⟨ d_max, in_d_max, eq_d_max ⟩ := this
+        exists d_max; simp_all [μ_max]
+        intro d in_d
+        have : μ d ∈ List.map μ data := by simp; tauto
+        apply List.le_maximum_of_length_pos_of_mem this (by simpa)
+      . have : μ_max ∈ List.map μ data := by apply List.maximum_of_length_pos_mem (by simpa)
+        grind
+
+    /-- Element is maximal -/
+    def is_maximum
+      (d : List FBB)
+      (data : List (List FBB))
+      (h_not_empty : 0 < data.length)
+    : Prop :=
+      μ d = List.maximum_of_length_pos (l := List.map μ data) (by simpa)
+
+    /-- The minimal receive data is strictly smaller
+        in measure than all the send data -/
     lemma recv_min_lt_sends
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (h_not_empty : ¬ bus_data = [])
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_not_empty : 0 < bus_data.length)
     :
-      List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      List.minimum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
         <
-      List.minimum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      List.minimum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
     := by
-      set ts_min := List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      set te_min := List.minimum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      have ts_in_recv : ts_min ∈ recv_timestamps bus_data := by apply List.minimum_of_length_pos_mem
-      have te_in_send : te_min ∈ send_timestamps bus_data := by apply List.minimum_of_length_pos_mem
-      obtain ⟨ ts', pcs', pce', h_in ⟩ := send_timestamps_in_bus_data te_in_send
+      obtain ⟨ dr_min, in_dr_min, eq_dr_min, min_dr_min ⟩ := minimum_witness μ (recv_data bus_data) (by simp [recv_data]; omega)
+      obtain ⟨ ds_min, in_ds_min, eq_ds_min, min_ds_min ⟩ := minimum_witness μ (send_data bus_data) (by simp [send_data]; omega)
+      set r_min := List.minimum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+      set s_min := List.minimum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
+      obtain ⟨ dr', h_in ⟩ := send_data_in_bus_data in_ds_min
       specialize lt_proofs _ h_in; simp at lt_proofs
-      have ⟨ h_in_ts, h_in_te ⟩ := bus_data_in_timestamp_lists h_in
-      apply List.minimum_of_length_pos_le_of_mem at h_in_ts
+      have ⟨ h_in_dr, h_in_ds ⟩ := bus_data_in_recv_send_lists h_in
       grind
 
-    /-- The maximal send timestamp is larger than all the receive timestamps -/
+    /-- The maximal send data is strictly larger
+        in measure than all the receive data -/
     lemma send_max_gt_recvs
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (h_not_empty : ¬ bus_data = [])
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_not_empty : 0 < bus_data.length)
     :
-      List.maximum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      List.maximum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
         <
-      List.maximum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
+      List.maximum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
     := by
-      set ts_max := List.maximum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      set te_max := List.maximum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      have ts_in_recv : ts_max ∈ recv_timestamps bus_data := by apply List.maximum_of_length_pos_mem
-      have te_in_send : te_max ∈ send_timestamps bus_data := by apply List.maximum_of_length_pos_mem
-      obtain ⟨ te', pcs', pce', h_in ⟩ := recv_timestamps_in_bus_data ts_in_recv
+      obtain ⟨ dr_max, in_dr_max, eq_dr_max, max_dr_max ⟩ := maximum_witness μ (recv_data bus_data) (by simp [recv_data]; omega)
+      obtain ⟨ ds_max, in_ds_max, eq_ds_max, max_ds_max ⟩ := maximum_witness μ (send_data bus_data) (by simp [send_data]; omega)
+      set r_max := List.maximum_of_length_pos (l := recv_data bus_data) (by simp [recv_data]; omega)
+      set s_max := List.maximum_of_length_pos (l := send_data bus_data) (by simp [send_data]; omega)
+      obtain ⟨ ds', h_in ⟩ := recv_data_in_bus_data in_dr_max
       specialize lt_proofs _ h_in; simp at lt_proofs
-      have ⟨ h_in_ts, h_in_te ⟩ := bus_data_in_timestamp_lists h_in
-      apply List.le_maximum_of_length_pos_of_mem at h_in_te
+      have ⟨ h_in_dr, h_in_ds ⟩ := bus_data_in_recv_send_lists h_in
       grind
 
-  end timestamp_pairs
+  end rising_pairs
 
   section balancing
 
     /-- A non-empty timestamp bus is never balanced -/
-    lemma nonempty_timestamp_bus_not_balanced
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (h_not_empty : ¬ bus_data = [])
-      (h_not_too_long : (timestamp_bus bus_data lt_proofs).length < BB_prime)
+    lemma nonempty_rising_bus_not_balanced
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_not_empty : 0 < bus_data.length)
+      (h_not_too_long : (rising_bus μ bus_data lt_proofs).length < BB_prime)
     :
-      ¬ is_balanced (timestamp_bus bus_data lt_proofs)
+      ¬ is_balanced (rising_bus μ bus_data lt_proofs)
     := by
       intro h_balanced
-      have := recv_min_lt_sends bus_data lt_proofs h_not_empty
-      set ts_min := List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      set te_min := List.minimum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      have ts_in_recv : ts_min ∈ recv_timestamps bus_data := by apply List.minimum_of_length_pos_mem
-      obtain ⟨ te', pcs', pce', h_in ⟩ := recv_timestamps_in_bus_data ts_in_recv
-      (have ⟨ ts_min_in, hb ⟩  := bus_data_in_timestamp_bus lt_proofs h_in); clear hb
-      have h_mult_n1_p1 := timestamp_bus_mult_n1_p1 bus_data lt_proofs
-      obtain ⟨ bus', h_perm ⟩  := @mult_n1_p1_extract (-1) _ h_mult_n1_p1 h_balanced h_not_too_long _ ts_min_in
+      have := recv_min_lt_sends μ bus_data lt_proofs h_not_empty
+      obtain ⟨ dr_min, in_dr_min, eq_dr_min, min_dr_min ⟩ := minimum_witness μ (recv_data bus_data) (by simp [recv_data]; omega)
+      obtain ⟨ ds_min, in_ds_min, eq_ds_min, min_ds_min ⟩ := minimum_witness μ (send_data bus_data) (by simp [send_data]; omega)
+      set r_min := List.minimum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+      set s_min := List.minimum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
+      obtain ⟨ ds', h_in ⟩ := recv_data_in_bus_data in_dr_min
+      (have ⟨ dr_min_in, hb ⟩  := bus_data_in_rising_bus μ lt_proofs h_in); clear hb
+      have h_mult_n1_p1 := rising_bus_mult_n1_p1 μ bus_data lt_proofs
+      obtain ⟨ bus', h_perm ⟩  := @mult_n1_p1_extract (-1) _ h_mult_n1_p1 h_balanced h_not_too_long _ dr_min_in
       simp [balanced_pair] at h_perm
-      obtain ts_min_in_send : ts_min ∈ send_timestamps bus_data := by
-        apply pos_ones_in_send_timestamps (pcs := pcs') (lt_proofs := lt_proofs)
+      obtain dr_min_in_send : dr_min ∈ send_data bus_data := by
+        apply pos_ones_in_send_data (lt_proofs := lt_proofs)
         simp [List.Perm.mem_iff h_perm]
-      obtain : te_min ≤ ts_min := by apply List.minimum_of_length_pos_le_of_mem ts_min_in_send
       grind
 
     /-- If a -1, 1 bus of length less than `BB_prime` is balanced
@@ -644,48 +687,21 @@ namespace InteractionList
           . grind
           . grind
 
+    /-- For a non-empty rising bus, this also means that:
+        - `ldata` is the minimal receive entry and `rdata` is the maximal send entry -/
+    lemma single_balancer_decomposition_rising
+      {ldata rdata : List FBB}
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_not_empty : 0 < bus_data.length)
+      (h_len_bus : ([(1, ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [(-1, rdata)]).length < BB_prime)
+      (h_balance : InteractionList.is_balanced ([((1 : FBB), ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [((-1 : FBB), rdata)]))
+    :
+      ldata < rdata ∧
+      is_minimum μ ldata (recv_data bus_data) (by simp [recv_data]; omega) ∧
+      is_maximum μ rdata (send_data bus_data) (by simp [send_data]; omega)
+    :=
+
   end balancing
 
 #exit
-
-    lemma balanced_bus_balancer_characterisation
-      (bus_data : List (FBB × FBB × List FBB × List FBB))
-      (lt_proofs : ∀ entry ∈ bus_data, entry.1 < entry.2.1)
-      (lbal_data rbal_data : List FBB)
-      (bus : List (FBB × List FBB))
-      (h_perm : (timestamp_bus bus_data lt_proofs).Perm bus)
-      (h_balance : InteractionList.is_balanced ([((1 : FBB), lbal_data)] ++ bus ++ [((-1 : FBB), rbal_data)]))
-      (h_not_empty : ¬ bus_data = [])
-    :
-      let ts_min := List.minimum_of_length_pos (l := recv_timestamps bus_data) (by simp [recv_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      let te_max := List.maximum_of_length_pos (l := send_timestamps bus_data) (by simp [send_timestamps]; rw [← List.length_eq_zero_iff] at h_not_empty; omega)
-      (∃ (pcs' pce' : List FBB),
-         lbal_data = (ts_min :: pcs') ∧
-         rbal_data = (te_max :: pce'))
-    := by
-
-
-      extract_lets ts_min te_max
-      obtain h_neq : ¬ lbal_data = rbal_data := by
-        have h_perm' := List.perm_append_comm_assoc [(1, lbal_data)] bus [(-1, rbal_data)]
-        intro h_eq <;> simp_all
-        have h_balance' := is_balanced_inv_perm h_balance h_perm'
-        obtain h_not_balanced : ¬ is_balanced bus := by
-          suffices : ¬ is_balanced (timestamp_bus bus_data lt_proofs)
-          . intro hyp; apply this
-            rw [List.perm_comm] at h_perm
-            exact is_balanced_inv_perm hyp h_perm
-        apply h_not_balanced
-        apply is_balanced_of_append_is_balanced (l₂ := [(1, rbal_data), (-1, rbal_data)])
-        . intro data
-          simp [get_multiplicity]
-          split_ifs <;> simp_all
-        . assumption
-      obtain ⟨ t', pcs', pce'', in_bus_data' ⟩ := @recv_timestamps_in_bus_data ts_min bus_data (by apply List.minimum_of_length_pos_mem)
-      obtain ⟨ t'', pcs'', pce', in_bus_data'' ⟩ := @send_timestamps_in_bus_data te_max bus_data (by apply List.maximum_of_length_pos_mem)
-      exists pcs', pce'
-
-
-  end timestamps
-
-end InteractionList
