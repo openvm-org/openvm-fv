@@ -127,6 +127,16 @@ def strongInductionOn
   (ih l) fun l' _ => strongInductionOn l' ih
   termination_by (List.length l)
 
+/-- Take is idempotent if it is of at least equal length -/
+lemma take_eq_self
+  {l : List T}
+  {n : ℕ}
+  (h_len : l.length ≤ n)
+:
+  l.take n = l
+:= by
+  simpa [List.take_eq_self_iff]
+
 end List
 
 namespace BabyBear
@@ -134,6 +144,29 @@ namespace BabyBear
   /-- Only zero equals its negation in BabyBear -/
   @[simp, grind]
   lemma eq_neg_eq_zero (m : FBB) : -m = m ↔ m = 0 := by grind
+
+  /-- Minimal duplicated element of a list -/
+  lemma no_dup_exists_min_dup
+    {l : List (List FBB)}
+    (μ : List FBB → FBB)
+    (h_dup : ¬ l.Nodup)
+  :
+    exists d, [d, d].Sublist l ∧ ∀ d' ∈ l, [d', d'].Sublist l → μ d ≤ μ d'
+  := by
+    let dups := {d | [d, d].Sublist l}
+    let measures := μ '' dups
+    have non_empty : measures.Nonempty := by
+      rw [Set.nonempty_def]
+      simp [List.nodup_iff_sublist] at h_dup
+      obtain ⟨ x, h_sub_x ⟩ := h_dup
+      subst measures dups
+      simp [Set.image]
+      exists (μ x), x
+    have min_mem := WellFounded.min_mem (by exact wellFounded_lt) measures non_empty
+    have min_is_min := @WellFounded.not_lt_min _ _ (by exact wellFounded_lt) measures non_empty
+    subst measures dups; simp_all [Set.image]
+    obtain ⟨ d_min, hd ⟩ := min_mem
+    exists d_min; simp_all
 
 end BabyBear
 
@@ -290,10 +323,10 @@ namespace InteractionList
       its individual balancer is on the bus. -/
   lemma mult_n1_p1_extract
     {bus : List (FBB × List FBB)}
+    {m : FBB} {data : List FBB}
     (h_mult_n1_p1 : mult_n1_p1 bus)
     (h_balance : is_balanced bus)
     (h_len_bus : bus.length < BB_prime)
-    (data : List FBB)
     (h_in_neg : (m, data) ∈ bus)
   :
     ∃ bus', List.Perm bus (balanced_pair m data ++ bus')
@@ -348,6 +381,54 @@ namespace InteractionList
         . grind
         . clear h_balance
           induction bus'' <;> grind
+
+  /-- On a balanced -1, 1 bus, there has to be an equal
+      amount of sends and receives whose data abides by
+      an *arbitrary predicate* `P`. -/
+  lemma mult_n1_p1_balanced_equal_predicate_count
+    {bus : List (FBB × List FBB)}
+    (P : List FBB → Bool)
+    (μ : List FBB → FBB)
+    (h_mult_n1_p1 : mult_n1_p1 bus)
+    (h_balance : is_balanced bus)
+    (h_len_bus : bus.length < BB_prime)
+  :
+    let s : List (FBB × List FBB) := bus.filter (fun (m, d) => m = -1 ∧ P d )
+    let r : List (FBB × List FBB) := bus.filter (fun (m, d) => m =  1 ∧ P d )
+    s.length = r.length
+  := by
+    revert P h_len_bus h_balance h_mult_n1_p1 μ
+    refine List.strongInductionOn bus (fun bus ih => ?_)
+    by_cases h_non_empty : 0 < bus.length
+    . obtain ⟨ ⟨ m, data ⟩, h_in ⟩ := List.exists_mem_of_length_pos h_non_empty
+      intro P μ h_mult_n1_p1 h_balanced h_length
+      obtain ⟨ bus'', h_perm ⟩ := mult_n1_p1_extract h_mult_n1_p1 h_balanced h_length h_in
+      set bus' := balanced_pair m data ++ bus''
+      let s' : List (FBB × List FBB) := bus'.filter (fun (m, d) => m = -1 ∧ P d)
+      let r' : List (FBB × List FBB) := bus'.filter (fun (m, d) => m =  1 ∧ P d)
+      extract_lets s r
+      trans s'.length
+      . apply List.Perm.length_eq; grind
+      . trans r'.length
+        . subst bus' s' r'
+          simp_all [balanced_pair]
+          have h_lt : bus''.length < bus.length := by
+            apply List.Perm.length_eq at h_perm
+            grind
+          have h_mult_n1_p1'' : mult_n1_p1 bus'' := by
+            rw [mult_n1_p1_inv_perm h_perm] at h_mult_n1_p1
+            simp [mult_n1_p1] at h_mult_n1_p1 ⊢
+            grind
+          have h_balanced'' : is_balanced bus'' := by
+            have : is_balanced (bus'' ++ [(m, data), (-m, data)]) := by
+              grind [is_balanced_inv_perm]
+            apply is_balanced_of_append_is_balanced _ _ _ this
+            . simp [is_balanced, get_multiplicity]; grind
+          have h_length'' : bus''.length < 2013265921 := by grind [List.Perm.length_eq]
+          specialize ih bus'' h_lt P h_mult_n1_p1'' h_balanced'' h_length''
+          grind
+        . apply List.Perm.length_eq; grind
+    . simp_all
 
   section rising_pairs
 
@@ -425,6 +506,14 @@ namespace InteractionList
         simp_all [recv_data, send_data]
         grind
 
+    /-- Bus data is -/
+    lemma bus_data_is_zip
+      (bus_data : List (List FBB × List FBB))
+    :
+      bus_data = List.zip (recv_data bus_data) (send_data bus_data)
+    := by
+      induction bus_data <;> simp [recv_data, send_data] at *; grind
+
     /-- A `rising_bus` is a bus consisting of rising pairs -/
     @[grind]
     def rising_bus
@@ -436,6 +525,24 @@ namespace InteractionList
           (fun (x : { y // y ∈ bus_data }) ↦
             let ⟨ ⟨ dr, ds ⟩ , pf ⟩ := x
             rising_pair μ dr ds (lt_proofs (dr, ds) pf )) bus_data.attach)
+
+    /-- Rising bus has `2 * |bus_data|` entries -/
+    lemma rising_bus_length
+      {bus_data : List (List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+    :
+      (rising_bus μ bus_data lt_proofs).length = 2 * bus_data.length
+    := by
+      induction bus_data
+      case nil => simp [rising_bus]
+      case cons hd tl ih =>
+        specialize ih (by grind)
+        simp only [rising_bus,
+                   List.attach_cons, List.map_cons, List.flatten_cons, List.length_cons,
+                   List.length_append] at *
+        conv => lhs; arg 1; simp [rising_pair]
+        simp +arith at *
+        rw [← ih]; congr
 
     /-- Receives and sends of rising bus data are on the rising bus -/
     lemma bus_data_in_rising_bus
@@ -469,8 +576,8 @@ namespace InteractionList
 
     /-- All negative entries in a rising bus are from the receives -/
     lemma neg_ones_in_recv_data
-      (dr : List FBB)
-      (bus_data : List (List FBB × List FBB))
+      {dr : List FBB}
+      {bus_data : List (List FBB × List FBB)}
       (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
       (h_in : (-1, dr) ∈ rising_bus μ bus_data lt_proofs)
     :
@@ -504,6 +611,80 @@ namespace InteractionList
         obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
         specialize ihs l dr'' ds'' h_in'' eq_l
         grind
+
+    /-- Decomposition of a rising bus -/
+    lemma rising_bus_decomposition
+      {bus_data : List (List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (n : ℕ)
+    :
+      ∃ lt_proofs₁ lt_proofs₂,
+        rising_bus μ bus_data lt_proofs =
+        rising_bus μ (bus_data.take n) lt_proofs₁ ++ rising_bus μ (bus_data.drop n) lt_proofs₂
+    := by
+      have lt₁ : ∀ entry ∈ List.take n bus_data, μ entry.1 < μ entry.2
+      := by
+        intro entry h_in; apply lt_proofs
+        rw [List.mem_take_iff_getElem] at h_in
+        grind
+      have lt₂ : ∀ entry ∈ List.drop n bus_data, μ entry.1 < μ entry.2
+      := by
+        intro entry h_in; apply lt_proofs
+        rw [List.mem_drop_iff_getElem] at h_in
+        grind
+      exists lt₁, lt₂
+      trans rising_bus μ (List.take n bus_data ++ List.drop n bus_data) (by grind)
+      . simp
+      . simp [rising_bus]
+        congr
+
+    lemma recv_sublist_in_rising_bus
+      {bus_data : List (List FBB × List FBB)}
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_sub : l.Sublist (recv_data bus_data))
+    :
+      (List.map (fun data ↦ (-1, data)) l).Sublist (rising_bus μ bus_data lt_proofs)
+    := by
+      induction l generalizing bus_data
+      case nil => simp
+      case cons d tl ih =>
+        simp_all
+        rw [List.cons_sublist_iff] at h_sub ⊢
+        obtain ⟨ rd₁, rd₂, h_eq_rd, h_d_in, h_sub_tl ⟩ := h_sub
+        have h_bus_len : bus_data.length = rd₁.length + rd₂.length := by
+          have : (recv_data bus_data).length = (rd₁ ++ rd₂).length := by grind
+          simp [recv_data] at *; assumption
+        exists (List.take (2 * rd₁.length) (rising_bus μ bus_data lt_proofs))
+        exists (List.drop (2 * rd₁.length) (rising_bus μ bus_data lt_proofs))
+        have : ∃ sd₁ sd₂, sd₁.length = rd₁.length ∧ send_data bus_data = sd₁ ++ sd₂
+        := by
+          exists (List.take rd₁.length (send_data bus_data))
+          exists (List.drop rd₁.length (send_data bus_data))
+          simp_all [recv_data, send_data]
+        obtain ⟨ sd₁, sd₂, h_eq_len, h_eq_sd ⟩ := this
+        obtain ⟨ lt₁, lt₂, decomp ⟩ := rising_bus_decomposition μ lt_proofs rd₁.length
+        have len₁ := rising_bus_length μ lt₁
+        have len₂ := rising_bus_length μ lt₂
+        simp [h_bus_len] at len₁ len₂
+        simp [decomp]
+        rw [List.take_append, len₁]; simp
+        rw [List.drop_append, len₁, List.drop_eq_nil_of_le (by omega)]; simp
+        constructor
+        . rw [List.take_eq_self (by omega)]
+          have eq_rd₁ : rd₁ = recv_data (List.take rd₁.length bus_data) := by
+            have := bus_data_is_zip bus_data
+            rw [this, h_eq_rd, h_eq_sd]
+            rw [List.zip_append (by omega)]
+            simp [List.length_zip, h_eq_len]
+            simp [recv_data]
+            rw [List.map_fst_zip (by omega)]
+          rw [eq_rd₁] at h_d_in
+          obtain ⟨ ds, in_bus ⟩ := recv_data_in_bus_data h_d_in
+          have := bus_data_in_rising_bus μ lt₁ in_bus
+          tauto
+        . apply ih (by grind)
+          simp [recv_data] at *
+          grind
 
     /-- Witness for minimal bus data -/
     lemma minimum_witness
@@ -621,7 +802,7 @@ namespace InteractionList
       obtain ⟨ ds', h_in ⟩ := recv_data_in_bus_data in_dr_min
       (have ⟨ dr_min_in, hb ⟩  := bus_data_in_rising_bus μ lt_proofs h_in); clear hb
       have h_mult_n1_p1 := rising_bus_mult_n1_p1 μ bus_data lt_proofs
-      obtain ⟨ bus', h_perm ⟩  := @mult_n1_p1_extract (-1) _ h_mult_n1_p1 h_balanced h_not_too_long _ dr_min_in
+      obtain ⟨ bus', h_perm ⟩ := mult_n1_p1_extract h_mult_n1_p1 h_balanced h_not_too_long dr_min_in
       simp [balanced_pair] at h_perm
       obtain dr_min_in_send : dr_min ∈ send_data bus_data := by
         apply pos_ones_in_send_data (lt_proofs := lt_proofs)
@@ -688,8 +869,9 @@ namespace InteractionList
           . grind
 
     /-- For a non-empty rising bus, this also means that:
-        - `ldata` is the minimal receive entry and `rdata` is the maximal send entry -/
-    lemma single_balancer_decomposition_rising
+        - `ldata` is the minimal receive; and
+        - `rdata` is the maximal send -/
+    lemma single_balancer_decomposition_rising_bus_min_max
       {ldata rdata : List FBB}
       (bus_data : List (List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
@@ -697,11 +879,138 @@ namespace InteractionList
       (h_len_bus : ([(1, ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [(-1, rdata)]).length < BB_prime)
       (h_balance : InteractionList.is_balanced ([((1 : FBB), ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [((-1 : FBB), rdata)]))
     :
-      ldata < rdata ∧
-      is_minimum μ ldata (recv_data bus_data) (by simp [recv_data]; omega) ∧
-      is_maximum μ rdata (send_data bus_data) (by simp [send_data]; omega)
-    :=
+      μ ldata < μ rdata ∧
+      μ ldata = List.minimum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+        ∧
+      μ rdata = List.maximum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
+    := by
+      have bus_not_balanced := nonempty_rising_bus_not_balanced bus_data lt_proofs h_not_empty (by simp_all; omega)
+      have ⟨ h_data_neq, h_decomposition ⟩ := single_balancer_decomposition (rising_bus_mult_n1_p1 μ bus_data lt_proofs) h_len_bus h_balance
+      have min_rel := recv_min_lt_sends μ bus_data lt_proofs h_not_empty
+      have max_rel := send_max_gt_recvs μ bus_data lt_proofs h_not_empty
+      simp_all
+      obtain ⟨ bus', h_perm, h_balance' ⟩ := h_decomposition
+      obtain ⟨ dr_min, in_dr_min, eq_dr_min, min_dr_min ⟩ := minimum_witness μ (recv_data bus_data) (by simp [recv_data]; omega)
+      obtain ⟨ ds_max, in_ds_max, eq_ds_max, max_ds_max ⟩ := maximum_witness μ (send_data bus_data) (by simp [send_data]; omega)
+      have min_recv_mem := @List.minimum_of_length_pos_le_of_mem (l := List.map μ (recv_data bus_data))
+      have max_recv_mem := @List.le_maximum_of_length_pos_of_mem (l := List.map μ (recv_data bus_data))
+      have min_send_mem := @List.minimum_of_length_pos_le_of_mem (l := List.map μ (send_data bus_data))
+      have max_send_mem := @List.le_maximum_of_length_pos_of_mem (l := List.map μ (send_data bus_data))
+      set r_min := List.minimum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+      set r_max := List.maximum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+      set s_min := List.minimum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
+      set s_max := List.maximum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
+      suffices : μ ldata = r_min ∧ μ rdata = s_max
+      . grind
+      . simp_all
+        have h_mult_n1_p1 : mult_n1_p1 ((1, ldata) :: (rising_bus μ bus_data lt_proofs ++ [(-1, rdata)]))
+        := by
+          have := rising_bus_mult_n1_p1 μ bus_data lt_proofs
+          grind [mult_n1_p1]
+        have h_pos_in : (1, dr_min) ∈ (1, ldata) :: (rising_bus μ bus_data lt_proofs ++ [(-1, rdata)])
+        := by
+          obtain ⟨ ds', h_in ⟩ := recv_data_in_bus_data in_dr_min
+          (have ⟨ dr_min_in, hb ⟩ := bus_data_in_rising_bus μ lt_proofs h_in); clear hb
+          have dr_min_in' : (-1, dr_min) ∈ (1, ldata) :: (rising_bus μ bus_data lt_proofs ++ [(-1, rdata)]) := by grind
+          obtain ⟨ bus'', h_perm'' ⟩ := mult_n1_p1_extract h_mult_n1_p1 h_balance (by simp; exact h_len_bus) dr_min_in'
+          simp [balanced_pair] at h_perm''
+          grind
+        have h_pos_not_in : ¬ (1, dr_min) ∈ rising_bus μ bus_data lt_proofs
+        := by
+          intro h_pos_in'
+          have := pos_ones_in_send_data μ lt_proofs h_pos_in'
+          grind
+        have h_neg_in : (-1, ds_max) ∈ (1, ldata) :: (rising_bus μ bus_data lt_proofs ++ [(-1, rdata)])
+        := by
+          obtain ⟨ dr', h_in ⟩ := send_data_in_bus_data in_ds_max
+          (have ⟨ hb, ds_max_in ⟩ := bus_data_in_rising_bus μ lt_proofs h_in); clear hb
+          have ds_max_in' : (1, ds_max) ∈ (1, ldata) :: (rising_bus μ bus_data lt_proofs ++ [(-1, rdata)]) := by grind
+          obtain ⟨ bus'', h_perm'' ⟩ := mult_n1_p1_extract h_mult_n1_p1 h_balance (by simp; exact h_len_bus) ds_max_in'
+          simp [balanced_pair] at h_perm''
+          grind
+        have h_neg_not_in : ¬ (-1, ds_max) ∈ rising_bus μ bus_data lt_proofs
+        := by
+          intro h_neg_in'
+          have := neg_ones_in_recv_data μ lt_proofs h_neg_in'
+          grind
+        simp_all
+
+
+
+
+
+
+
+
+
+
+#exit
+
+    /-- For a non-empty rising bus, this also means that:
+        - receive entries all have different measures -/
+    lemma single_balancer_decomposition_rising_bus_no_dup_recv
+      {ldata rdata : List FBB}
+      (bus_data : List (List FBB × List FBB))
+      (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
+      (h_not_empty : 0 < bus_data.length)
+      (h_len_bus : ([(1, ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [(-1, rdata)]).length < BB_prime)
+      (h_balance : InteractionList.is_balanced ([((1 : FBB), ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [((-1 : FBB), rdata)]))
+    :
+      List.Nodup (recv_data bus_data)
+    := by
+      have bus_not_balanced := nonempty_rising_bus_not_balanced bus_data lt_proofs h_not_empty (by simp_all; omega)
+      have ⟨ h_data_neq, h_decomposition ⟩ := single_balancer_decomposition (rising_bus_mult_n1_p1 μ bus_data lt_proofs) h_len_bus h_balance
+      simp_all
+      obtain ⟨ bus', h_perm, h_balance' ⟩ := h_decomposition
+      by_contra h_dup
+      obtain ⟨ dr_min, dr_min_sub, dr_min_is_min ⟩ := BabyBear.no_dup_exists_min_dup μ h_dup
+      have dup_entry
+        : [(-1, dr_min), (-1, dr_min)].Sublist (rising_bus μ bus_data lt_proofs)
+        := recv_sublist_in_rising_bus μ lt_proofs dr_min_sub
+      have h_mult' : mult_n1_p1 bus' := by
+        have := rising_bus_mult_n1_p1 μ bus_data lt_proofs
+        rw [mult_n1_p1_inv_perm h_perm] at this
+        simp [mult_n1_p1] at this ⊢
+        grind
+      have h_len' : bus'.length < 2013265921 := by grind [List.Perm.length_eq]
+      have h_contra :=
+        @mult_n1_p1_balanced_equal_predicate_count
+          bus' (fun d ↦ μ d < μ dr_min) μ
+          h_mult' h_balance' h_len'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   end balancing
 
 #exit
+
+have := nonempty_rising_bus_not_balanced bus_data lt_proofs h_not_empty (by simp at h_len_bus; omega)
+      have ⟨ h_data_neq, h_decomposition ⟩ := single_balancer_decomposition (rising_bus_mult_n1_p1 μ bus_data lt_proofs) h_len_bus h_balance
+      have min_rel := recv_min_lt_sends μ bus_data lt_proofs h_not_empty
+      have max_rel := send_max_gt_recvs μ bus_data lt_proofs h_not_empty
+      simp_all
+      obtain ⟨ dr_min, in_dr_min, eq_dr_min, min_dr_min ⟩ := minimum_witness μ (recv_data bus_data) (by simp [recv_data]; omega)
+      obtain ⟨ ds_max, in_ds_max, eq_ds_max, max_ds_max ⟩ := maximum_witness μ (send_data bus_data) (by simp [send_data]; omega)
+      set r_min := List.minimum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+      set r_max := List.maximum_of_length_pos (l := List.map μ (recv_data bus_data)) (by simp [recv_data]; omega)
+      set s_min := List.minimum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
+      set s_max := List.maximum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
