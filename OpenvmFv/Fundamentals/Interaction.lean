@@ -1186,7 +1186,6 @@ namespace InteractionList
               rw [← List.cons_append, List.zip_append (by simp)] at bus_data_perm_ordered
               simp_all; grind
 
-
     /-- If a non-empty rising bus is balanced with single balancers,
         then the measure of the associated data is strictly increasing,
         and the receive-send pairs are such that there is no entry
