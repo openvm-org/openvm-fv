@@ -9,6 +9,9 @@ import OpenvmFv.Constraints.ExecutionDummyAir
 import OpenvmFv.Constraints.MemoryDummyAir_1
 import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
+import OpenvmFv.Constraints.VmAirWrapper_alu
+import OpenvmFv.Constraints.VmAirWrapper_lt
+import OpenvmFv.Constraints.VmAirWrapper_shift
 import OpenvmFv.Constraints.VolatileBoundaryAir
 
 import OpenvmFv.Spec.ALU

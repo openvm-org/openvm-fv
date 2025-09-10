@@ -1843,24 +1843,24 @@ namespace VmAirWrapper_shift.constraints
 
 end VmAirWrapper_shift.constraints
 
-namespace Interaction
+-- namespace Interaction
 
-/-- ALU-related ReadInstruction bus assumptions -/
-def readInstructionBus_assumptions_Lt
-  (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
-: Prop :=
-  ¬ mul = 0 →
-    -- rd and rs1 boundaries
-    rd.val < 32 ∧ rs1.val < 32 ∧
-    -- non-immediate rs2
-    (rs2_as = 1 → rs2.val < 32) ∧
-    -- immediate rs2
-    (rs2_as = 0 →
-      -- immediate fits 24 bits
-      rs2.val < 2 ^ 24 ∧
-      -- immediate is a sign-extended 12-bit value
-      (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
-    -- unused parameters
-    xd = 1 ∧ xf = 0 ∧ xg = 0
+-- /-- ALU-related ReadInstruction bus assumptions -/
+-- def readInstructionBus_assumptions_Lt
+--   (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
+-- : Prop :=
+--   ¬ mul = 0 →
+--     -- rd and rs1 boundaries
+--     rd.val < 32 ∧ rs1.val < 32 ∧
+--     -- non-immediate rs2
+--     (rs2_as = 1 → rs2.val < 32) ∧
+--     -- immediate rs2
+--     (rs2_as = 0 →
+--       -- immediate fits 24 bits
+--       rs2.val < 2 ^ 24 ∧
+--       -- immediate is a sign-extended 12-bit value
+--       (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
+--     -- unused parameters
+--     xd = 1 ∧ xf = 0 ∧ xg = 0
 
-end Interaction
+-- end Interaction
