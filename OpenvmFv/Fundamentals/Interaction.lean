@@ -313,7 +313,7 @@ namespace InteractionList
       (h_len_bus : bus.length < BB_prime)
       (h_in_neg : (m, data) ∈ bus)
     :
-      ∃ bus', List.Perm bus (balanced_pair m data ++ bus')
+      ∃ bus', bus.Perm (balanced_pair m data ++ bus')
     := by
       have m_neq_z : ¬ m = 0 := by apply h_unitary at h_in_neg; grind
       rw [← List.singleton_sublist] at h_in_neg
@@ -377,8 +377,8 @@ namespace InteractionList
       (h_balance : is_balanced bus)
       (h_len_bus : bus.length < BB_prime)
     :
-      let s : List (FBB × List FBB) := bus.filter (fun (m, d) => m = -1 ∧ P d )
-      let r : List (FBB × List FBB) := bus.filter (fun (m, d) => m =  1 ∧ P d )
+      let s : List (FBB × List FBB) := bus.filter (fun (m, d) => m = -1 ∧ P d)
+      let r : List (FBB × List FBB) := bus.filter (fun (m, d) => m =  1 ∧ P d)
       s.length = r.length
     := by
       revert P h_len_bus h_balance h_unitary μ
@@ -1283,5 +1283,76 @@ namespace InteractionList
       . apply rising_bus_with_matching_sorted_data_has_no_duplicates <;> try assumption
 
   end bus_balancing
+
+  section consistency
+
+    /-- A well formed chip with respect to a measure μ provides:
+      - the entries on the execution bus, in -1, 1 order
+      - the entries on the memory bus, in -1, 1 order
+      - the proof that the execution bus consists of a single entry
+      - a proof that the execution bus entries are rising
+      - a proof that the memory bus entries are rising -/
+    class WFConstraints (α : Type) (μ : List FBB → FBB) where
+      execution_bus_entries : List (List FBB × List FBB)
+      memory_bus_entries : List (List FBB × List FBB)
+      single_pair_on_execution_bus : execution_bus_entries.length = 1
+      rising_pairs_on_execution_bus : List.Forall (fun (recv, send) ↦ μ recv < μ send) execution_bus_entries
+      rising_pairs_on_memory_bus : List.Forall (fun (recv, send) ↦ μ recv < μ send) memory_bus_entries
+      execution_envelops_memory :
+        List.Forall
+          (fun (_, send) ↦ μ execution_bus_entries[0].1 ≤ μ send ∧
+                           μ send < μ execution_bus_entries[0].2
+          ) memory_bus_entries
+
+    /-- A general well-formed chip -/
+    structure WFChip (μ : List FBB → FBB) where
+      ChipType : Type
+      chip : ChipType
+      [inst_wf : WFConstraints ChipType μ]
+
+    instance {μ : List FBB → FBB} (c : WFChip μ) : WFConstraints c.ChipType μ := c.inst_wf
+
+    /-- The execution bus of a well-formed chip:
+      - `chips` denotes a collection of chips that can be called
+      - `next` is a function that selects what chip is next based on what is sent to the execution bus
+      - `n` is the length of the bus
+      - `i` is the chip to be run for this iteration -/
+    def execution_bus (chips : List (WFChip μ)) (next : List FBB → Fin (chips.length)) (n : Fin 2013265919) (i : Fin (chips.length))
+    :
+      List (List FBB × List FBB)
+    :=
+      let execution_entry := ((chips[i]).inst_wf.execution_bus_entries)[0]'(by have := chips[i].inst_wf.single_pair_on_execution_bus; grind)
+      if n = 0
+        then []
+        else execution_entry :: (execution_bus chips next (n - 1) (next execution_entry.1))
+
+    /-- The execution bus is a rising bus -/
+    lemma execution_bus_is_rising_bus
+      (chips : List (WFChip μ))
+      (next : List FBB → Fin (chips.length))
+      (n : Fin 2013265919)
+      (i : Fin (chips.length))
+    :
+      ∀ entry ∈ (execution_bus chips next n i), μ entry.1 < μ entry.2
+    := by
+      cases n
+      case mk n lt =>
+        induction n generalizing i
+        case zero => simp_all [execution_bus]
+        case succ n ih =>
+          . intro entry h_in
+            unfold execution_bus at h_in
+            rw [if_neg (by simp [Fin.ext_iff])] at h_in
+            simp at h_in
+            rcases h_in with main | with_ih
+            . have is_rising_pair := @WFConstraints.rising_pairs_on_execution_bus chips[i.val].ChipType μ (by exact chips[i.val].inst_wf)
+              rw [List.forall_iff_forall_mem] at is_rising_pair
+              grind
+            . have : (⟨ n + 1, lt ⟩ : Fin 2013265919) - 1 = ⟨ n, by omega ⟩
+                := by simp [Fin.ext_iff, Fin.sub_def]; omega
+              rw [this] at with_ih
+              grind
+
+  end consistency
 
 end InteractionList
