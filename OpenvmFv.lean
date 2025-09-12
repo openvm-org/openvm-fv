@@ -7,6 +7,7 @@ import OpenvmFv.Constraints.AccessAdapterAir_4
 import OpenvmFv.Constraints.BitwiseOperationLookupAir_8
 import OpenvmFv.Constraints.ExecutionDummyAir
 import OpenvmFv.Constraints.MemoryDummyAir_1
+import OpenvmFv.Constraints.PhantomAir
 import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
