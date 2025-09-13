@@ -4,8 +4,9 @@ import LeanZKCircuit.Interactions
 
 set_option maxHeartbeats 1_000_000_000
 
-attribute [local simp]
+attribute [simp]
   List.filter_cons
+  List.map_flatMap
 
 attribute [-simp]
   Fin.val_fin_le
@@ -23,91 +24,330 @@ namespace Interaction
 
   section buses
 
-  /-- ExecutionBus entry -/
-  @[simp]
-  def executionBus_entry
-    (mul pc timestamp : F)
-  : (F × List F) :=
-    (mul, [ pc, timestamp ])
+    variable
+      (F : Type)
+      [Field F]
 
-  /-- Assumptions from execution bus entries -/
-  def executionBus_assumptions
-    (mul _ timestamp : FBB)
-  : Prop :=
-    ¬ mul = 0 →
-      -- appropriate ranges
-      timestamp < 2 ^ 29
+    instance : Inhabited F := by exact Inhabited.mk 0
 
-  /-- MemoryBus entry -/
-  @[simp]
-  def memoryBus_entry
-    (mul as ptr x0 x1 x2 x3 timestamp : FBB)
-  : (FBB × List FBB) :=
-    (mul, [as, ptr, x0, x1, x2, x3, timestamp])
+    /-- Type class for generic bus entries -/
+    class BusEntry (α : Type*) where
+      multiplicity : α → F
 
-  /-- Assumptions from memory bus entries -/
-  def memoryBus_assumptions
-    (mul as ptr x0 x1 x2 x3 _ : FBB)
-  : Prop :=
-    ¬ mul = 0 →
-      -- appropriate ranges
-      as.val < 3 ∧
-      ptr.val < 2 ^ 29 ∧
-      x0.val < 256 ∧
-      x1.val < 256 ∧
-      x2.val < 256 ∧
-      x3.val < 256
+      data_length : ℕ
+      data : α → Vector F data_length
 
-  /-- RangeBus entry -/
-  @[simp]
-  def rangeCheckerBus_entry
-    (mul val deg : FBB)
-  : (FBB × List FBB) :=
-    (mul, [ val, deg ])
+      -- Unconditional assumptions on bus entries
+      assumptions : α → Prop
 
-  /-- Assumptions from range-checker bus entries -/
-  def rangeCheckerBus_assumptions
-    (mul val deg : FBB)
-  : Prop :=
-    ¬ mul = 0 →
-      -- `deg` range
-      deg.val < 32 ∧
-      -- `val` range
-      val.val < 2 ^ deg.val
+      -- Well-formedness properties of bus entries
+      wf_properties : α → Prop
+      -- Condition under which well-formedness properties are assumed
+      wf_assume_cond : α → Prop
+      -- Condition under which well-formedness properties need to be asserted
+      wf_assert_cond : α → Prop
+      -- Assuming and proving of well-formedness properties
+      assume (a : α) := wf_assume_cond a → wf_properties a
+      assert (a : α) := wf_assert_cond a → wf_properties a
 
-  /-- ReadInstructionBus entry, with parameter
-      naming as per OpenVM documentation -/
-  @[simp]
-  def readInstructionBus_entry
-    (mul pc opcode xa xb xc xd xe xf xg : FBB)
-  : (FBB × List FBB) :=
-    (mul, [ pc, opcode, xa, xb, xc, xd, xe, xf, xg ])
+      -- Serialization, deserialization, inverses
+      serialise (x : α) := (multiplicity x, data x)
+      serialiseToList (x : α) := (multiplicity x, (data x).toList)
+      deserialise : F × Vector F data_length → α
 
-  /-- ReadInstructionBus entry -/
-  def readInstructionBus_assumptions
-    (mul _ _ _ _ _ _ _ _ _ : FBB)
-  : Prop :=
-    ¬ mul = 0 →
-      True
+      inv_ser_deser (x : F × Vector F data_length) : serialise (deserialise x) = x
+      inv_deser_ser {x : α} : deserialise (serialise x) = x
 
-  /-- BitwiseBus entry -/
-  @[simp]
-  def bitwiseBus_entry
-    (mul a b c is_xor : FBB)
-  : (FBB × List FBB) :=
-    (mul, [ a, b, c, is_xor ])
+    section ExecutionBus
 
-  /-- Assumptions from bitwise bus entries -/
-  def bitwiseBus_assumptions
-    (mul a b c is_xor : FBB)
-  : Prop :=
-    ¬ mul = 0 →
-      -- operand range
-      a.val < 256 ∧ b.val < 256 ∧
-      -- xor indicator range
-      (is_xor = 0 ∨ is_xor = 1) ∧
-      -- xor or nothing
-      c.val = if is_xor = 0 then 0 else a.val ^^^ b.val
+      /-- Execution bus entry -/
+      structure ExecutionBusEntry where
+        multiplicity : F
+        pc : F
+        timestamp : F
+
+      @[simp, grind]
+      def ExecutionBusEntry.deserialise
+        (entry : F × Vector F 2)
+      : ExecutionBusEntry F :=
+        {
+            multiplicity := entry.1,
+            pc := entry.2[0],
+            timestamp := entry.2[1]
+        }
+
+      /-- Execution bus entry instance -/
+      @[simp, grind]
+      instance ExecutionBusEntryInstance
+      : BusEntry FBB (ExecutionBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.1,
+
+          data_length := 2,
+          data := fun ⟨_, pc, timestamp⟩ => #v[pc, timestamp],
+
+          -- Timestamps are always less than `2^29`
+          assumptions := fun ⟨multiplicity, _, timestamp⟩ =>
+                           ¬ multiplicity = 0 → timestamp < 2 ^ 29
+
+          -- An execution bus entry has no assume/prove properties
+          wf_properties := fun _ => True
+
+          wf_assume_cond := fun entry => entry.1 = -1,
+          wf_assert_cond :=  fun entry => entry.1 = 1,
+
+          deserialise := ExecutionBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp
+          inv_ser_deser := by
+            simp_all
+            intro b; cases b
+            simp_all; grind
+      }
+
+    end ExecutionBus
+
+    section MemoryBus
+
+      /-- Memory bus entry -/
+      structure MemoryBusEntry where
+        multiplicity : F
+        as : F
+        ptr : F
+        x0 : F
+        x1 : F
+        x2 : F
+        x3 : F
+        timestamp : F
+
+      @[simp, grind]
+      def MemoryBusEntry.deserialise
+        (entry : FBB × Vector FBB 7)
+      : MemoryBusEntry F :=
+        {
+          multiplicity := entry.1,
+          as := entry.2[0],
+          ptr := entry.2[1],
+          x0 := entry.2[2],
+          x1 := entry.2[3],
+          x2 := entry.2[4],
+          x3 := entry.2[5],
+          timestamp := entry.2[6]
+        }
+
+      /-- Memory bus entry instance -/
+      @[simp, grind]
+      instance MemoryBusEntryInstance
+      : BusEntry FBB (MemoryBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.1,
+
+          data_length := 7,
+          data := fun ⟨_, as, ptr, x0, x1, x2, x3, timestamp⟩ =>
+                    #v[as, ptr, x0, x1, x2, x3, timestamp],
+
+          -- Timestamps are always less than `2^29`
+          assumptions := fun ⟨multiplicity, _, _, _, _, _, _, timestamp⟩ =>
+                           ¬ multiplicity = 0 → timestamp < 2 ^ 29
+
+          -- Values already in memory are constrained in range
+          wf_properties :=
+            fun ⟨_, as, ptr, x0, x1, x2, x3, _⟩ =>
+              as.val < 3 ∧
+              ptr.val < 2 ^ 29 ∧
+              x0.val < 256 ∧ x1.val < 256 ∧
+              x2.val < 256 ∧ x3.val < 256
+
+          wf_assume_cond := fun entry => entry.1 = -1,
+          wf_assert_cond := fun entry => entry.1 = 1,
+
+          deserialise := MemoryBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp
+          inv_ser_deser := by
+            simp_all
+            intro b; cases b
+            simp_all; grind (splits := 15) (gen := 10)
+      }
+
+    end MemoryBus
+
+    section RangeCheckerBus
+
+      /-- Range-checking bus entry -/
+      structure RangeCheckerBusEntry where
+        multiplicity : F
+        val : F
+        deg : F
+
+      @[simp, grind]
+      def RangeCheckerBusEntry.deserialise
+        (entry : F × Vector F 2)
+      : RangeCheckerBusEntry F :=
+        {
+            multiplicity := entry.1,
+            val := entry.2[0],
+            deg := entry.2[1],
+        }
+
+      /-- Range-checking bus entry -/
+      @[simp, grind]
+      instance RangeCheckerBusEntryInstance
+      : BusEntry FBB (RangeCheckerBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.1,
+
+          data_length := 2,
+          data := fun ⟨_, val, deg⟩ => #v[val, deg],
+
+          -- No assumptions
+          assumptions := fun _ => True
+
+          -- The range checking bus checks that the
+          -- value is less than 2 to the degree
+          wf_properties :=
+            fun ⟨_, val, deg⟩ =>
+              -- `deg` range
+              deg.val < 31 ∧
+              -- `val` range
+              val.val < 2 ^ deg.val
+
+          wf_assume_cond := fun entry => entry.1 = 1,
+          wf_assert_cond := fun _ => False,
+
+          deserialise := RangeCheckerBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp
+          inv_ser_deser := by
+            simp_all
+            intro b; cases b
+            simp_all; grind
+      }
+
+    end RangeCheckerBus
+
+    section ReadInstructionBus
+
+      /-- Read-instruction bus entry -/
+      structure ReadInstructionBusEntry where
+        multiplicity : F
+        pc : F
+        opcode : F
+        xa : F
+        xb : F
+        xc : F
+        xd : F
+        xe : F
+        xf : F
+        xg : F
+
+      @[simp, grind]
+      def ReadInstructionBusEntry.deserialise
+        (entry : FBB × Vector FBB 9)
+      : ReadInstructionBusEntry F :=
+        {
+          multiplicity := entry.1,
+          pc := entry.2[0],
+          opcode := entry.2[1],
+          xa := entry.2[2],
+          xb := entry.2[3],
+          xc := entry.2[4],
+          xd := entry.2[5],
+          xe := entry.2[6],
+          xf := entry.2[7],
+          xg := entry.2[8]
+        }
+
+      /-- Read-instruction bus entry instance -/
+      @[simp, grind]
+      instance (priority := 999) ReadInstructionBusEntryInstance
+      : BusEntry FBB (ReadInstructionBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.1,
+
+          data_length := 9,
+          data := fun ⟨_, pc, opcode, xa, xb, xc, xd, xe, xf, xg⟩ =>
+                    #v[pc, opcode, xa, xb, xc, xd, xe, xf, xg],
+
+          -- No assumptions
+          assumptions := fun _ => True
+
+          -- No well-formedness properties imposed right now
+          wf_properties := fun _ => True
+
+          wf_assume_cond := fun entry => entry.1 = 1,
+          wf_assert_cond := fun _ => False,
+
+          deserialise := ReadInstructionBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp
+          inv_ser_deser := by
+            simp_all
+            intro b; cases b
+            simp_all; grind (splits := 18) (gen := 12) (ematch := 11)
+      }
+
+    end ReadInstructionBus
+
+    section BitwiseBus
+
+      /-- Bitwise bus entry -/
+      structure BitwiseBusEntry where
+        multiplicity : F
+        a : F
+        b : F
+        c : F
+        op : F
+
+      @[simp, grind]
+      def BitwiseBusEntry.deserialise
+        (entry : F × Vector F 4)
+      : BitwiseBusEntry F :=
+        {
+            multiplicity := entry.1,
+            a := entry.2[0],
+            b := entry.2[1],
+            c := entry.2[2],
+            op := entry.2[3]
+        }
+
+      /-- Bitwise bus entry instance -/
+      @[simp, grind]
+      instance BitwiseBusEntryInstance
+      : BusEntry FBB (BitwiseBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.1,
+
+          data_length := 4,
+          data := fun ⟨_, a, b, c, op⟩ => #v[a, b, c, op],
+
+          -- No assumptions
+          assumptions := fun _ => True
+
+          -- The bitwise bus range checks operands and
+          -- possibly performs a `xor`
+          wf_properties :=
+            fun ⟨_, a, b, c, op⟩ =>
+              -- operand range
+              a.val < 256 ∧ b.val < 256 ∧
+              -- xor indicator range
+              (op = 0 ∨ op = 1) ∧
+              -- xor or nothing
+              c.val = if op = 0 then 0 else a.val ^^^ b.val
+
+          wf_assume_cond := fun entry => entry.1 = 1,
+          wf_assert_cond := fun _ => False,
+
+          deserialise := BitwiseBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp
+          inv_ser_deser := by
+            simp_all
+            intro b; cases b
+            simp_all; grind
+      }
+
+    end BitwiseBus
 
   end buses
 
@@ -1354,5 +1594,7 @@ namespace InteractionList
               grind
 
   end consistency
+
+
 
 end InteractionList

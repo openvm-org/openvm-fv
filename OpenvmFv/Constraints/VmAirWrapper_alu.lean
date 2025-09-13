@@ -276,157 +276,202 @@ namespace VmAirWrapper_alu.constraints
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def executionBus_row [Field ExtF]
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
-      : List (F × List F) :=
+      : List (Interaction.ExecutionBusEntry FBB) :=
         let aa := air.adapter
         let ac := air.core
+        List.map (Interaction.ExecutionBusEntryInstance).deserialise
         [
-          (-ac.is_valid row 0, [aa.from_state.pc row 0, aa.from_state.timestamp row 0]),
-          (ac.is_valid row 0, [aa.from_state.pc row 0 + 4, aa.from_state.timestamp row 0 + 3])
+          (-ac.is_valid row 0, #v[aa.from_state.pc row 0, aa.from_state.timestamp row 0]),
+          (ac.is_valid row 0, #v[aa.from_state.pc row 0 + 4, aa.from_state.timestamp row 0 + 3])
         ]
 
       lemma constrain_execution_interactions
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       :
-        air.buses ExecutionBus = (List.range (air.last_row + 1)).flatMap (λ row => executionBus_row air row)
+        air.buses ExecutionBus =
+          List.map
+            (Interaction.ExecutionBusEntryInstance).serialiseToList
+            ((List.range (air.last_row + 1)).flatMap (λ row => executionBus_row air row))
       := by
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
-        simp [h]; clear h
-        rfl
+        simp [h, executionBus_row]
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def memoryBus_row [Field ExtF]
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
-      : List (F × List F) :=
+      : List (Interaction.MemoryBusEntry FBB) :=
         let aa := air.adapter
         let ac := air.core
+        List.map (Interaction.MemoryBusEntryInstance).deserialise
         [
-          (2013265920 * ac.is_valid row 0, [1, aa.rs1_ptr row 0, ac.b_0 row 0, ac.b_1 row 0, ac.b_2 row 0, ac.b_3 row 0, aa.reads_aux_0.base.prev_timestamp row 0]),
-          (ac.is_valid row 0, [1, aa.rs1_ptr row 0, ac.b_0 row 0, ac.b_1 row 0, ac.b_2 row 0, ac.b_3 row 0, aa.from_state.timestamp row 0]),
-          (2013265920 * aa.rs2_as row 0, [aa.rs2_as row 0, aa.rs2 row 0, ac.c_0 row 0, ac.c_1 row 0, ac.c_2 row 0, ac.c_3 row 0, aa.reads_aux_1.base.prev_timestamp row 0]),
-          (aa.rs2_as row 0, [aa.rs2_as row 0, aa.rs2 row 0, ac.c_0 row 0, ac.c_1 row 0, ac.c_2 row 0, ac.c_3 row 0, aa.from_state.timestamp row 0 + 1]),
-          (2013265920 * ac.is_valid row 0, [1, aa.rd_ptr row 0, aa.writes_aux.prev_data_0 row 0, aa.writes_aux.prev_data_1 row 0, aa.writes_aux.prev_data_2 row 0, aa.writes_aux.prev_data_3 row 0, aa.writes_aux.base.prev_timestamp row 0]),
-          (ac.is_valid row 0, [1, aa.rd_ptr row 0, ac.a_0 row 0, ac.a_1 row 0, ac.a_2 row 0, ac.a_3 row 0, aa.from_state.timestamp row 0 + 2])
+          (2013265920 * ac.is_valid row 0, #v[1, aa.rs1_ptr row 0, ac.b_0 row 0, ac.b_1 row 0, ac.b_2 row 0, ac.b_3 row 0, aa.reads_aux_0.base.prev_timestamp row 0]),
+          (ac.is_valid row 0, #v[1, aa.rs1_ptr row 0, ac.b_0 row 0, ac.b_1 row 0, ac.b_2 row 0, ac.b_3 row 0, aa.from_state.timestamp row 0]),
+          (2013265920 * aa.rs2_as row 0, #v[aa.rs2_as row 0, aa.rs2 row 0, ac.c_0 row 0, ac.c_1 row 0, ac.c_2 row 0, ac.c_3 row 0, aa.reads_aux_1.base.prev_timestamp row 0]),
+          (aa.rs2_as row 0, #v[aa.rs2_as row 0, aa.rs2 row 0, ac.c_0 row 0, ac.c_1 row 0, ac.c_2 row 0, ac.c_3 row 0, aa.from_state.timestamp row 0 + 1]),
+          (2013265920 * ac.is_valid row 0, #v[1, aa.rd_ptr row 0, aa.writes_aux.prev_data_0 row 0, aa.writes_aux.prev_data_1 row 0, aa.writes_aux.prev_data_2 row 0, aa.writes_aux.prev_data_3 row 0, aa.writes_aux.base.prev_timestamp row 0]),
+          (ac.is_valid row 0, #v[1, aa.rd_ptr row 0, ac.a_0 row 0, ac.a_1 row 0, ac.a_2 row 0, ac.a_3 row 0, aa.from_state.timestamp row 0 + 2])
         ]
 
       lemma constrain_memory_interactions
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       :
-        air.buses MemoryBus = (List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row air row)
+        air.buses MemoryBus =
+          List.map
+            (Interaction.MemoryBusEntryInstance).serialiseToList
+            ((List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row air row))
       := by
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
-        simp [h]; clear h
-        rfl
+        simp [h, memoryBus_row]
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def rangeBus_row [Field ExtF]
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
-      : List (F × List F) :=
+      : List (Interaction.RangeCheckerBusEntry FBB) :=
         let aa := air.adapter
         let ac := air.core
+        List.map (Interaction.RangeCheckerBusEntryInstance).deserialise
         [
-          (ac.is_valid row 0, [aa.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-          (ac.is_valid row 0, [aa.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-          (aa.rs2_as row 0, [aa.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-          (aa.rs2_as row 0, [aa.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-          (ac.is_valid row 0, [aa.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-          (ac.is_valid row 0, [aa.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+          (ac.is_valid row 0, #v[aa.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+          (ac.is_valid row 0, #v[aa.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+          (aa.rs2_as row 0, #v[aa.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+          (aa.rs2_as row 0, #v[aa.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+          (ac.is_valid row 0, #v[aa.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+          (ac.is_valid row 0, #v[aa.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
         ]
 
       lemma constrain_range_interactions
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       :
-        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeBus_row air row)
+        air.buses RangeCheckerBus =
+          List.map
+            (Interaction.RangeCheckerBusEntryInstance).serialiseToList
+            ((List.range (air.last_row + 1)).flatMap (λ row => rangeBus_row air row))
       := by
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
-        simp [h]; clear h
-        rfl
+        simp [h, rangeBus_row]
+
+      /-- The ALU-specific instance of the read-instruction bus properties -/
+      @[simp, grind]
+      instance (priority := 1001) ReadInstructionBusEntryInstanceALU
+      : Interaction.BusEntry FBB (Interaction.ReadInstructionBusEntry FBB) :=
+        let wf_prop_fun :=
+          fun (⟨_, _, opcode, rd, rs1, rs2, xd, rs2_as, xf, xg⟩ : Interaction.ReadInstructionBusEntry FBB) =>
+              -- rd and rs1 boundaries
+              rd.val < 32 ∧ rs1.val < 32 ∧
+              -- non-immediate rs2
+              (rs2_as = 1 → rs2.val < 32) ∧
+              -- immediate rs2
+              (rs2_as = 0 →
+                -- opcode cannot be SUB
+                ¬ opcode = 513 ∧
+                -- immediate fits 24 bits
+                rs2.val < 2 ^ 24 ∧
+                -- immediate is a sign-extended 12-bit value
+                (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
+              -- unused parameters
+              xd = 1 ∧ xf = 0 ∧ xg = 0
+        { Interaction.ReadInstructionBusEntryInstance with
+          wf_properties := wf_prop_fun
+          assume entry := Interaction.ReadInstructionBusEntryInstance.wf_assume_cond entry → wf_prop_fun entry,
+          assert entry := Interaction.ReadInstructionBusEntryInstance.wf_assert_cond entry → wf_prop_fun entry
+        }
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def readInstructionBus_row [Field ExtF]
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
-      : List (F × List F) :=
+      : List (Interaction.ReadInstructionBusEntry FBB) :=
         let aa := air.adapter
         let ac := air.core
+        List.map (ReadInstructionBusEntryInstanceALU).deserialise
         [
-          (ac.is_valid row 0, [
-                                aa.from_state.pc row 0,
-                                (ac.ctx row 0).instruction.opcode,
-                                aa.rd_ptr row 0,
-                                aa.rs1_ptr row 0,
-                                aa.rs2 row 0,
-                                1,
-                                aa.rs2_as row 0,
-                                0,
-                                0
-                              ])
+          (ac.is_valid row 0, #v[ aa.from_state.pc row 0,
+                                  (ac.ctx row 0).instruction.opcode,
+                                  aa.rd_ptr row 0,
+                                  aa.rs1_ptr row 0,
+                                  aa.rs2 row 0,
+                                  1,
+                                  aa.rs2_as row 0,
+                                  0,
+                                  0 ])
         ]
 
       lemma constrain_readInstruction_interactions
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       :
-        air.buses ReadInstructionBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ReadInstructionBus =
+          List.map
+            ReadInstructionBusEntryInstanceALU.serialiseToList
+            ((List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row))
       := by
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
-        simp [h]; clear h
-        rfl
+        simp [h, readInstructionBus_row]
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
       def bitwiseBus_row [Field ExtF]
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
-      : List (F × List F) :=
+      : List (Interaction.BitwiseBusEntry FBB) :=
         let aa := air.adapter
         let ac := air.core
+        List.map (Interaction.BitwiseBusEntryInstance).deserialise
         [
-          (ac.is_valid row 0, [ac.x_0 row 0, ac.y_0 row 0, ac.x_xor_y_0 row 0, 1]),
-          (ac.is_valid row 0, [ac.x_1 row 0, ac.y_1 row 0, ac.x_xor_y_1 row 0, 1]),
-          (ac.is_valid row 0, [ac.x_2 row 0, ac.y_2 row 0, ac.x_xor_y_2 row 0, 1]),
-          (ac.is_valid row 0, [ac.x_3 row 0, ac.y_3 row 0, ac.x_xor_y_3 row 0, 1]),
-          (ac.is_valid row 0 - aa.rs2_as row 0, [ac.c_0 row 0, ac.c_1 row 0, 0, 0])
+          (ac.is_valid row 0, #v[ac.x_0 row 0, ac.y_0 row 0, ac.x_xor_y_0 row 0, 1]),
+          (ac.is_valid row 0, #v[ac.x_1 row 0, ac.y_1 row 0, ac.x_xor_y_1 row 0, 1]),
+          (ac.is_valid row 0, #v[ac.x_2 row 0, ac.y_2 row 0, ac.x_xor_y_2 row 0, 1]),
+          (ac.is_valid row 0, #v[ac.x_3 row 0, ac.y_3 row 0, ac.x_xor_y_3 row 0, 1]),
+          (ac.is_valid row 0 - aa.rs2_as row 0, #v[ac.c_0 row 0, ac.c_1 row 0, 0, 0])
         ]
 
       lemma constrain_bitwise_interactions
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       :
-        air.buses BitwiseBus = (List.range (air.last_row + 1)).flatMap (λ row => bitwiseBus_row air row)
+        air.buses BitwiseBus =
+          List.map
+            (Interaction.BitwiseBusEntryInstance).serialiseToList
+            ((List.range (air.last_row + 1)).flatMap (λ row => bitwiseBus_row air row))
       := by
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
-        simp [h]; clear h
-        rfl
+        simp [h, bitwiseBus_row]
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
-      def constrain_interactions (air : Valid_VmAirWrapper_alu F ExtF) : Prop :=
+      def constrain_interactions (air : Valid_VmAirWrapper_alu FBB ExtF) : Prop :=
         air.buses = fun index ↦
-        if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
-        else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeBus_row air)
-        else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
-        else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
+        if index = ExecutionBus then List.map (Interaction.ExecutionBusEntryInstance).serialiseToList ((List.range (air.last_row + 1)).flatMap (executionBus_row air))
+        else if index = MemoryBus then List.map (Interaction.MemoryBusEntryInstance).serialiseToList ((List.range (air.last_row + 1)).flatMap (memoryBus_row air))
+        else if index = RangeCheckerBus then List.map (Interaction.RangeCheckerBusEntryInstance).serialiseToList ((List.range (air.last_row + 1)).flatMap (rangeBus_row air))
+        else if index = ReadInstructionBus then List.map ReadInstructionBusEntryInstanceALU.serialiseToList ((List.range (air.last_row + 1)).flatMap (readInstructionBus_row air))
+        else if index = BitwiseBus then List.map (Interaction.BitwiseBusEntryInstance).serialiseToList ((List.range (air.last_row + 1)).flatMap (bitwiseBus_row air))
         else []
 
       @[VmAirWrapper_alu_air_simplification]
       lemma constrain_interactions_of_extraction
-        (air : Valid_VmAirWrapper_alu F ExtF)
+        (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       : constrain_interactions air := by
+        unfold constrain_interactions
+        rw [← constrain_execution_interactions (h := h),
+            ← constrain_memory_interactions (h := h),
+            ← constrain_range_interactions (h := h),
+            ← constrain_readInstruction_interactions (h := h),
+            ← constrain_bitwise_interactions (h := h)]
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
-        exact h
+        simp [h]
 
     end interactions
 
@@ -512,7 +557,7 @@ namespace VmAirWrapper_alu.constraints
 
     @[simp]
     def allHold_simplified
-      (air : Valid_VmAirWrapper_alu F ExtF)
+      (air : Valid_VmAirWrapper_alu FBB ExtF)
       (row : ℕ)
       (_ : row ≤ air.last_row)
     : Prop :=
@@ -520,15 +565,15 @@ namespace VmAirWrapper_alu.constraints
       List.Forall (·) (row_constraint_list air row)
 
     lemma allHold_simplified_of_allHold
-      (air : Valid_VmAirWrapper_alu F ExtF)
+      (air : Valid_VmAirWrapper_alu FBB ExtF)
       (row : ℕ)
       (h_row : row ≤ air.last_row)
     : allHold air row h_row ↔ allHold_simplified air row h_row := by
       unfold allHold allHold_simplified
       apply Iff.and
       . unfold VmAirWrapper_alu.extraction.constrain_interactions
-        simp [openvm_encapsulation]
-        rfl
+        simp [openvm_encapsulation,
+              VmAirWrapper_alu_constraint_and_interaction_simplification]
       . simp only [extracted_row_constraint_list,
                    row_constraint_list,
                    VmAirWrapper_alu_air_simplification]
@@ -614,31 +659,63 @@ namespace VmAirWrapper_alu.constraints
 
   end properties
 
+  section auxiliaries
+
+    @[simp]
+    def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
+      rowData.map Interaction.BusEntry.serialiseToList
+
+    @[simp]
+    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+
+    @[simp]
+    def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
+
+    @[simp]
+    def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
+
+    @[simp]
+    def serialiseRow [Field ExtF] (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ)
+    : List (FBB × List FBB) :=
+      serialiseToList (executionBus_row air row) ++
+      serialiseToList (memoryBus_row air row) ++
+      serialiseToList (rangeBus_row air row) ++
+      serialiseToList (readInstructionBus_row air row) ++
+      serialiseToList (bitwiseBus_row air row)
+
+    @[simp]
+    def assumptionsPerRow [Field ExtF] (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ)
+    : Prop :=
+      assumptions (executionBus_row air row) ∧
+      assumptions (memoryBus_row air row) ∧
+      assumptions (rangeBus_row air row) ∧
+      assumptions (readInstructionBus_row air row) ∧
+      assumptions (bitwiseBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssume (executionBus_row air row) ∧
+      propertiesToAssume (memoryBus_row air row) ∧
+      propertiesToAssume (rangeBus_row air row) ∧
+      propertiesToAssume (readInstructionBus_row air row) ∧
+      propertiesToAssume (bitwiseBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssert (executionBus_row air row) ∧
+      propertiesToAssert (memoryBus_row air row) ∧
+      propertiesToAssert (rangeBus_row air row) ∧
+      propertiesToAssert (readInstructionBus_row air row) ∧
+      propertiesToAssert (bitwiseBus_row air row)
+
+  end auxiliaries
+
 end VmAirWrapper_alu.constraints
-
-namespace Interaction
-
-/-- ALU-related ReadInstruction bus assumptions -/
-def readInstructionBus_assumptions_ALU
-  (mul _ opcode rd rs1 rs2 xd rs2_as xf xg : FBB)
-: Prop :=
-  ¬ mul = 0 →
-    -- rd and rs1 boundaries
-    rd.val < 32 ∧ rs1.val < 32 ∧
-    -- non-immediate rs2
-    (rs2_as = 1 → rs2.val < 32) ∧
-    -- immediate rs2
-    (rs2_as = 0 →
-      -- opcode cannot be SUB
-      ¬ opcode = 513 ∧
-      -- immediate fits 24 bits
-      rs2.val < 2 ^ 24 ∧
-      -- immediate is a sign-extended 12-bit value
-      (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
-    -- unused parameters
-    xd = 1 ∧ xf = 0 ∧ xg = 0
-
-end Interaction
 
 namespace VmAirWrapper_alu.auxiliaries
 
