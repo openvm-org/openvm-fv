@@ -60,7 +60,7 @@ in
 lemma non_valid_row_ALU_all_interaction_multiplicities_zero
 :
   forall entry,
-  entry ∈ serialiseRow air row → entry.1 = 0
+  entry ∈ busRow air row → entry.1 = 0
 := by
   have : air.adapter.rs2_as row 0 = 0 := by
     obtain ⟨ hint, constraints ⟩ := constraints
