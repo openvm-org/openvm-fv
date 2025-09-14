@@ -175,10 +175,13 @@ lemma essentials
    (air.core.ctx row 0).instruction.opcode = 514 ∨
    (air.core.ctx row 0).instruction.opcode = 515 ∨
    (air.core.ctx row 0).instruction.opcode = 516) ∧
-  ((air.adapter.rs2_as row 0).val = 0 →
+  (air.adapter.rs2_as row 0 = 0 →
     ¬(air.core.ctx row 0).instruction.opcode = 513 ∧
     (air.adapter.rs2 row 0).val < 16777216 ∧
-    (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt = (BitVec.ofNat 12 (air.adapter.rs2 row 0).val).toInt)
+    (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt = (BitVec.ofNat 12 (air.adapter.rs2 row 0).val).toInt ∧
+    air.adapter.rs2 row 0 = air.rs2_imm row 0 ∧
+    air.rs2_sign row 0 = air.rs2_limbs row 0 3 ∧
+    (air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255))
 := by
   have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
@@ -472,21 +475,14 @@ theorem spec_base_ALU_imm
     . have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
       simp [h_imm, and_assoc] at essentials
       obtain ⟨ ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
-               opcodes, opcode_not_sub, h_rs2, imm_sign_extend ⟩ := essentials
-      rw [allHold_simplified_of_allHold] at constraints
-      obtain ⟨ constrain_interactions,
-           b_add, b_sub, b_xor, b_or, b_and, b_is_valid,
-           add_0, sub_0, add_1, sub_1, add_2, sub_2, add_3, sub_3,
-           b_rs2_as, rs2_as_imm, imm_sign, imm_sign_extend, rest ⟩ := constraints
-      clear constrain_interactions rest
-      simp [h_imm, VmAirWrapper_alu_constraint_and_interaction_simplification] at *
+               opcodes, opcode_not_sub, h_rs2, imm_sign_extend, rs2_as_imm, imm_sign, imm_sign_extend' ⟩ := essentials
       rw [← VmAirWrapper_alu.rs2_imm_def] at rs2_as_imm
       rw [← VmAirWrapper_alu.rs2_sign_limbs] at imm_sign
       simp [rs2_as_imm, Fin.val_add, Fin.val_mul]
       rw [← imm_sign,
           Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
       simp [U32.toInt, BitVec.toInt, U32.negative, U32.toNat]
-      rcases imm_sign_extend with h_pos | h_neg
+      rcases imm_sign_extend' with h_pos | h_neg
       . rw [h_pos]
         rw [if_neg (by omega)]
         rw [if_pos (by omega)]
