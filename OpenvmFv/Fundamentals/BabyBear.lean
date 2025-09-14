@@ -20,6 +20,7 @@ instance : NoZeroDivisors FBB := Fin.noZeroDivisors_of_prime _ (hp := Fact_BBPri
 
 section inverses
 
+lemma inv_255 : (465814468 : FBB) = 255⁻¹ := by native_decide
 lemma inv_256 : (2005401601 : FBB) = 256⁻¹ := by native_decide
 
 lemma inv_256_eq_one_lr : (2005401601 : FBB) * 256 = 1 := by rfl

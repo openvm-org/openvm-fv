@@ -24,7 +24,7 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def constraint_0 (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
       @[VmAirWrapper_mul_air_simplification]
       lemma constraint_0_of_extraction
@@ -42,12 +42,15 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def constraint_1 (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+  air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 =
+    air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+      air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_mul_air_simplification]
       lemma constraint_1_of_extraction
           (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      : VmAirWrapper_mul.extraction.constraint_1 air row ↔ constraint_1 air row := by
       apply Iff.intro
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -60,12 +63,15 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def constraint_2 (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+  air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 =
+    air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+      air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_mul_air_simplification]
       lemma constraint_2_of_extraction
           (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      : VmAirWrapper_mul.extraction.constraint_2 air row ↔ constraint_2 air row := by
       apply Iff.intro
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -78,12 +84,15 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def constraint_3 (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+  air.adapter.from_state.timestamp row 0 + 2 - air.adapter.writes_aux.base.prev_timestamp row 0 - 1 =
+    air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+      air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_mul_air_simplification]
       lemma constraint_3_of_extraction
           (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      : VmAirWrapper_mul.extraction.constraint_3 air row ↔ constraint_3 air row := by
       apply Iff.intro
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -101,7 +110,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_4_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_4 air row ↔ constraint_4 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -119,7 +128,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_5_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_5 air row ↔ constraint_5 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -137,7 +146,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_6_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_6 air row ↔ constraint_6 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -155,7 +164,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_7_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_7 air row ↔ constraint_7 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -173,7 +182,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_8_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_8 air row ↔ constraint_8 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -191,7 +200,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_9_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_9 air row ↔ constraint_9 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -209,7 +218,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_10_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_10 air row ↔ constraint_10 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -227,7 +236,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_11_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_11 air row ↔ constraint_11 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -245,7 +254,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_12_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_12 air row ↔ constraint_12 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -263,7 +272,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_13_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_13 air row ↔ constraint_13 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -281,7 +290,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_14_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_14 air row ↔ constraint_14 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -299,7 +308,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_15_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_15 air row ↔ constraint_15 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -317,7 +326,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_16_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_16 air row ↔ constraint_16 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -335,7 +344,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_17_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_17 air row ↔ constraint_17 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -353,7 +362,7 @@ namespace VmAirWrapper_mul.constraints
       -- @[VmAirWrapper_mul_air_simplification]
       -- lemma constraint_18_of_extraction
       --     (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ)
-      -- : VmAirWrapper_mul.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      -- : VmAirWrapper_mul.extraction.constraint_18 air row ↔ constraint_18 air row := by
       -- apply Iff.intro
       -- . intro h
       --   simp [openvm_encapsulation, VmAirWrapper_mul_constraint_and_interaction_simplification] at h
@@ -375,7 +384,8 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def executionBus_row (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(-air.core.is_valid row 0, [air.adapter.from_state.pc row 0, air.adapter.from_state.timestamp row 0]),
+        (air.core.is_valid row 0, [air.adapter.from_state.pc row 0 + 4, air.adapter.from_state.timestamp row 0 + 3])]
 
       lemma constrain_execution_interactions
         (air : Valid_VmAirWrapper_mul F ExtF)
@@ -391,7 +401,25 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def memoryBus_row (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(2013265920 * air.core.is_valid row 0,
+          [1, air.adapter.rs1_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
+            air.adapter.reads_aux_0.base.prev_timestamp row 0]),
+        (air.core.is_valid row 0,
+          [1, air.adapter.rs1_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
+            air.adapter.from_state.timestamp row 0]),
+        (2013265920 * air.core.is_valid row 0,
+          [1, air.adapter.rs2_ptr row 0, air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0,
+            air.adapter.reads_aux_1.base.prev_timestamp row 0]),
+        (air.core.is_valid row 0,
+          [1, air.adapter.rs2_ptr row 0, air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0,
+            air.adapter.from_state.timestamp row 0 + 1]),
+        (2013265920 * air.core.is_valid row 0,
+          [1, air.adapter.rd_ptr row 0, air.adapter.writes_aux.prev_data_0 row 0,
+            air.adapter.writes_aux.prev_data_1 row 0, air.adapter.writes_aux.prev_data_2 row 0,
+            air.adapter.writes_aux.prev_data_3 row 0, air.adapter.writes_aux.base.prev_timestamp row 0]),
+        (air.core.is_valid row 0,
+          [1, air.adapter.rd_ptr row 0, air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
+            air.adapter.from_state.timestamp row 0 + 2])]
 
       lemma constrain_memory_interactions
         (air : Valid_VmAirWrapper_mul F ExtF)
@@ -407,7 +435,12 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.core.is_valid row 0, [air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])]
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_mul F ExtF)
@@ -423,7 +456,9 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def readInstructionBus_row (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0,
+          [air.adapter.from_state.pc row 0, 592, air.adapter.rd_ptr row 0, air.adapter.rs1_ptr row 0,
+            air.adapter.rs2_ptr row 0, 1, 0, 0, 0])]
 
       lemma constrain_readInstruction_interactions
         (air : Valid_VmAirWrapper_mul F ExtF)
@@ -439,7 +474,10 @@ namespace VmAirWrapper_mul.constraints
 
       @[VmAirWrapper_mul_constraint_and_interaction_simplification]
       def rangeTupleCheckerBus_row (air : Valid_VmAirWrapper_mul F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0, [air.core.a_0 row 0, air.core.carry row 0 0]),
+        (air.core.is_valid row 0, [air.core.a_1 row 0, air.core.carry row 0 1]),
+        (air.core.is_valid row 0, [air.core.a_2 row 0, air.core.carry row 0 2]),
+        (air.core.is_valid row 0, [air.core.a_3 row 0, air.core.carry row 0 3])]
 
       lemma constrain_rangeTupleChecker_interactions
         (air : Valid_VmAirWrapper_mul F ExtF)
