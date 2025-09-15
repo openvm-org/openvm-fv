@@ -606,7 +606,7 @@ namespace VmAirWrapper_alu.constraints
 
   end properties
 
-  section auxiliaries
+  section bus_entries
 
     lemma executionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_alu FBB ExtF} {row : ℕ}
@@ -623,7 +623,7 @@ namespace VmAirWrapper_alu.constraints
       let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { brow // brow ∈ executionBus_row air row} =>
+          (fun x : { row' // row' ∈ executionBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (executionBus_row_length x.2)))
           (executionBus_row air row).attach
       List.map Interaction.ExecutionBusEntryInstance.deserialise vectorised_row
@@ -643,7 +643,7 @@ namespace VmAirWrapper_alu.constraints
       let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { brow // brow ∈ memoryBus_row air row} =>
+          (fun x : { row' // row' ∈ memoryBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (memoryBus_row_length x.2)))
           (memoryBus_row air row).attach
       List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
@@ -663,7 +663,7 @@ namespace VmAirWrapper_alu.constraints
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { brow // brow ∈ rangeBus_row air row} =>
+          (fun x : { row' // row' ∈ rangeBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (rangeBus_row_length x.2)))
           (rangeBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
@@ -708,7 +708,7 @@ namespace VmAirWrapper_alu.constraints
       let vectorised_row : List (FBB × Vector FBB ReadInstructionBusEntryInstanceALU.data_length) := by
         exact
         List.map
-          (fun x : { brow // brow ∈ readInstructionBus_row air row} =>
+          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
           (readInstructionBus_row air row).attach
       List.map ReadInstructionBusEntryInstanceALU.deserialise vectorised_row
@@ -728,7 +728,7 @@ namespace VmAirWrapper_alu.constraints
       let vectorised_row : List (FBB × Vector FBB Interaction.BitwiseBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { brow // brow ∈ bitwiseBus_row air row} =>
+          (fun x : { row' // row' ∈ bitwiseBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (bitwiseBus_row_length x.2)))
           (bitwiseBus_row air row).attach
       List.map Interaction.BitwiseBusEntryInstance.deserialise vectorised_row
@@ -786,7 +786,7 @@ namespace VmAirWrapper_alu.constraints
       propertiesToAssert (_readInstructionBus_row air row) ∧
       propertiesToAssert (_bitwiseBus_row air row)
 
-  end auxiliaries
+  end bus_entries
 
 end VmAirWrapper_alu.constraints
 

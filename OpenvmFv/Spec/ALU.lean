@@ -461,12 +461,6 @@ theorem spec_base_ALU_imm
     . simp [execute_ITYPE_pure]
       rw [← eq_c]; congr
 
-      obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-      clear pa_exec pa_mem pa_range pa_bit
-      simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
-      repeat rw [Fin.ext_iff] at pa_read
-      obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
-
       have opcodes := opcode_bounds air row row_in_range constraints row_valid
       simp [rop_of_ALU_opcode, iop_of_ALU_opcode]
       grind

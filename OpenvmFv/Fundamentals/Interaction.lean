@@ -377,6 +377,14 @@ lemma take_eq_self
 := by
   simpa [List.take_eq_self_iff]
 
+/-- `Forall` of `True` with `id` always holds -/
+@[simp, grind]
+lemma forall_id_true {len : ℕ}
+:
+  List.Forall id (List.replicate len True)
+:= by
+  induction len <;> simp_all [List.replicate_add]
+
 end List
 
 namespace BabyBear
@@ -660,7 +668,7 @@ namespace InteractionList
 
     variable
       -- Measure on bus data
-      (μ : List FBB → FBB)
+      (μ : List FBB → ℕ)
 
     /-- Rising pairs are pairs whose send data
         is greater than their receive data
@@ -1260,7 +1268,7 @@ namespace InteractionList
       set s_min := List.minimum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
       set s_max := List.maximum_of_length_pos (l := List.map μ (send_data bus_data)) (by simp [send_data]; omega)
       suffices : μ ldata = r_min ∧ μ rdata = s_max
-      . grind
+      . simp_all; grind
       . simp_all
         have h_unitary : unitary ((1, ldata) :: (rising_bus μ bus_data lt_proofs ++ [(-1, rdata)]))
         := by
@@ -1300,7 +1308,7 @@ namespace InteractionList
     lemma rising_bus_with_matching_sorted_data_is_monotonic
       (xs : List (List FBB))
       (d_min d_max : List FBB)
-      (μ : List FBB → FBB)
+      (μ : List FBB → ℕ)
       (sorted_xs : List.Sorted (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs)
       (bus_data : List (List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
@@ -1369,7 +1377,7 @@ namespace InteractionList
     lemma rising_bus_with_matching_sorted_data_has_no_duplicates
       (xs : List (List FBB))
       (d_min d_max : List FBB)
-      (μ : List FBB → FBB)
+      (μ : List FBB → ℕ)
       (sorted_xs : List.Sorted (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs)
       (bus_data : List (List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
@@ -1532,7 +1540,7 @@ namespace InteractionList
       - the proof that the execution bus consists of a single entry
       - a proof that the execution bus entries are rising
       - a proof that the memory bus entries are rising -/
-    class WFConstraints (α : Type) (μ : List FBB → FBB) where
+    class WFConstraints (α : Type) (μ : List FBB → ℕ) where
       execution_bus_entries : List (List FBB × List FBB)
       memory_bus_entries : List (List FBB × List FBB)
       single_pair_on_execution_bus : execution_bus_entries.length = 1
@@ -1545,12 +1553,12 @@ namespace InteractionList
           ) memory_bus_entries
 
     /-- A general well-formed chip -/
-    structure WFChip (μ : List FBB → FBB) where
+    structure WFChip (μ : List FBB → ℕ) where
       ChipType : Type
       chip : ChipType
       [inst_wf : WFConstraints ChipType μ]
 
-    instance {μ : List FBB → FBB} (c : WFChip μ) : WFConstraints c.ChipType μ := c.inst_wf
+    instance {μ : List FBB → ℕ} (c : WFChip μ) : WFConstraints c.ChipType μ := c.inst_wf
 
     /-- The execution bus of a well-formed chip:
       - `chips` denotes a collection of chips that can be called
