@@ -176,6 +176,7 @@ lemma essentials
      air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0] ∧
   ((air.core.ctx row 0).instruction.opcode = 520 ∨
    (air.core.ctx row 0).instruction.opcode = 521) ∧
+  (air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1) ∧
   (air.adapter.rs2_as row 0 = 0 →
     (air.adapter.rs2 row 0).val < 16777216 ∧
     (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt = (BitVec.ofNat 12 (air.adapter.rs2 row 0).val).toInt ∧
@@ -229,7 +230,7 @@ lemma essentials
      (air.core.c_2 row 0).val < 256 ∧
      (air.core.c_3 row 0).val < 256
   := by
-    clear *- b_rs2_as rs2_as_imm imm_sign imm_sign_extend ub_rs2n_c ri_imm b_rs2_as ba3
+    clear *- b_rs2_as rs2_as_imm imm_sign imm_sign_extend ub_rs2n_c ri_imm ba3
     rw [Fin.ext_iff] at *
     rcases b_rs2_as <;> simp_all
     . rw [← VmAirWrapper_lt.rs2_sign_limbs] at imm_sign
@@ -267,7 +268,7 @@ theorem spec_base_Lt
 := by
   have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
   simp [and_assoc] at essentials
-  obtain ⟨ ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3, opcodes, h_imm ⟩ := essentials
+  obtain ⟨ ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3, opcodes, b_rs2_as, h_imm ⟩ := essentials
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints

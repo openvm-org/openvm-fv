@@ -175,6 +175,7 @@ lemma essentials
    (air.core.ctx row 0).instruction.opcode = 514 ∨
    (air.core.ctx row 0).instruction.opcode = 515 ∨
    (air.core.ctx row 0).instruction.opcode = 516) ∧
+  (air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1) ∧
   (air.adapter.rs2_as row 0 = 0 →
     ¬(air.core.ctx row 0).instruction.opcode = 513 ∧
     (air.adapter.rs2 row 0).val < 16777216 ∧
