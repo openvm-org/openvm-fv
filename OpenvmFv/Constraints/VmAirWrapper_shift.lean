@@ -5,6 +5,8 @@ import OpenvmFv.Util
 
 import LeanZKCircuit.Interactions
 
+set_option maxHeartbeats 1_000_000_000
+
 namespace VmAirWrapper_shift.constraints
 
   section constraint_simplification
@@ -1257,7 +1259,7 @@ namespace VmAirWrapper_shift.constraints
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
       def constraint_67 (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.opcode_sra_flag row 0 ∨ air.core.b_sign row 0 = 0
+        air.core.opcode_sra_flag row 0 = 1 ∨ air.core.b_sign row 0 = 0
 
       @[VmAirWrapper_shift_air_simplification]
       lemma constraint_67_of_extraction
@@ -1267,11 +1269,11 @@ namespace VmAirWrapper_shift.constraints
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
-          exact h
+          grind
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-          exact h
+          grind
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
       def constraint_68 (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : Prop :=
@@ -1293,7 +1295,7 @@ namespace VmAirWrapper_shift.constraints
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
       def constraint_69 (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : Prop :=
-        1 = air.adapter.rs2_as row 0 ∨ air.adapter.rs2 row 0 = air.rs2_imm row 0
+        air.adapter.rs2_as row 0 = 1 ∨ air.adapter.rs2 row 0 = air.rs2_imm row 0
 
       @[VmAirWrapper_shift_air_simplification]
       lemma constraint_69_of_extraction
@@ -1303,15 +1305,15 @@ namespace VmAirWrapper_shift.constraints
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
-          exact h
+          grind
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-          exact h
+          grind
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
       def constraint_70 (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : Prop :=
-        1 = air.adapter.rs2_as row 0 ∨ air.rs2_sign row 0 = air.rs2_limbs row 0 3
+        air.adapter.rs2_as row 0 = 1 ∨ air.rs2_sign row 0 = air.rs2_limbs row 0 3
 
       @[VmAirWrapper_shift_air_simplification]
       lemma constraint_70_of_extraction
@@ -1321,15 +1323,15 @@ namespace VmAirWrapper_shift.constraints
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
-          exact h
+          grind
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-          exact h
+          grind
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
       def constraint_71 (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : Prop :=
-        1 = air.adapter.rs2_as row 0 ∨ air.core.c_2 row 0 = 0 ∨ 255 = air.core.c_2 row 0
+        air.adapter.rs2_as row 0 = 1 ∨ air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255
 
       @[VmAirWrapper_shift_air_simplification]
       lemma constraint_71_of_extraction
@@ -1339,11 +1341,11 @@ namespace VmAirWrapper_shift.constraints
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
-          exact h
+          grind
         . intro h
           simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
           simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-          exact h
+          grind
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
       def constraint_72 (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : Prop :=
@@ -1655,7 +1657,6 @@ namespace VmAirWrapper_shift.constraints
       ]
 
     -- TODO have extractor generate this and put in extraction file
-    @[simp]
     def allHold
       [Field ExtF]
       (air : Valid_VmAirWrapper_shift FBB ExtF)
@@ -1781,86 +1782,286 @@ namespace VmAirWrapper_shift.constraints
 
     variable[Field ExtF]
 
-    -- lemma single_op
-    --   (air : Valid_VmAirWrapper_shift FBB ExtF)
-    --   (row : ℕ)
-    --   (valid_row : row ≤ air.last_row)
-    --   (cstrs : allHold air row valid_row)
-    -- :
-    --   let is_slt := air.core.opcode_slt_flag row 0
-    --   let is_sltu := air.core.opcode_sltu_flag row 0
-    --   (is_slt = 1 → is_sltu = 0) ∧
-    --   (is_sltu = 1 → is_slt = 0)
-    -- := by
-    --   rw [allHold_simplified_of_allHold air row valid_row] at cstrs
-    --   obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
-    --   clear hint rest
-    --   simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at *
-    --   rw [Valid_LessThanCoreAir_4.is_valid] at h2
-    --   grind
+    lemma single_op
+      (air : Valid_VmAirWrapper_shift FBB ExtF)
+      (row : ℕ)
+      (valid_row : row ≤ air.last_row)
+      (cstrs : allHold air row valid_row)
+    :
+      let is_sll := air.core.opcode_sll_flag row 0
+      let is_srl := air.core.opcode_srl_flag row 0
+      let is_sra := air.core.opcode_sra_flag row 0
+      (is_sll = 1 → is_srl = 0 ∧ is_sra = 0) ∧
+      (is_srl = 1 → is_sll = 0 ∧ is_sra = 0) ∧
+      (is_sra = 1 → is_sll = 0 ∧ is_srl = 0)
+    := by
+      rw [allHold_simplified_of_allHold air row valid_row] at cstrs
+      obtain ⟨ hint, h0, h1, h2, h3, rest ⟩ := cstrs
+      clear hint rest
+      simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at *
+      rw [Valid_ShiftCoreAir_4_8.is_valid] at h3
+      grind
 
-    -- lemma op_from_opcode
-    --   (air : Valid_VmAirWrapper_shift FBB ExtF)
-    --   (row : ℕ)
-    --   (valid_row : row ≤ air.last_row)
-    --   (cstrs : allHold air row valid_row)
-    --   (is_valid : air.core.is_valid row 0 = 1)
-    -- :
-    --   let is_slt := air.core.opcode_slt_flag row 0
-    --   let is_sltu := air.core.opcode_sltu_flag row 0
-    --   ((air.core.ctx row 0).instruction.opcode = 520 → is_slt = 1) ∧
-    --   ((air.core.ctx row 0).instruction.opcode = 521 → is_sltu = 1)
-    -- := by
-    --   rw [allHold_simplified_of_allHold air row valid_row] at cstrs
-    --   obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
-    --   clear hint rest
-    --   simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at *
-    --   rw [Valid_LessThanCoreAir_4.is_valid] at h2
-    --   rw [← LessThanCoreAir_4.is_valid_def] at is_valid
-    --   rw [← LessThanCoreAir_4.ctx.instruction.opcode_def]
-    --   grind
+    lemma op_from_opcode
+      (air : Valid_VmAirWrapper_shift FBB ExtF)
+      (row : ℕ)
+      (valid_row : row ≤ air.last_row)
+      (cstrs : allHold air row valid_row)
+      (is_valid : air.core.is_valid row 0 = 1)
+    :
+      let is_sll := air.core.opcode_sll_flag row 0
+      let is_srl := air.core.opcode_srl_flag row 0
+      let is_sra := air.core.opcode_sra_flag row 0
+      ((air.core.ctx row 0).instruction.opcode = 517 → is_sll = 1) ∧
+      ((air.core.ctx row 0).instruction.opcode = 518 → is_srl = 1) ∧
+      ((air.core.ctx row 0).instruction.opcode = 519 → is_sra = 1)
+    := by
+      rw [allHold_simplified_of_allHold air row valid_row] at cstrs
+      obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
+      clear hint rest
+      simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at *
+      rw [Valid_ShiftCoreAir_4_8.is_valid] at *
+      rw [← Valid_ShiftCoreAir_4_8.ctx.instruction.opcode_def]
+      grind
 
-    -- lemma opcode_bounds
-    --   (air : Valid_VmAirWrapper_shift FBB ExtF)
-    --   (row : ℕ)
-    --   (valid_row : row ≤ air.last_row)
-    --   (cstrs : allHold air row valid_row)
-    --   (is_valid : air.core.is_valid row 0 = 1)
-    -- :
-    --   (air.core.ctx row 0).instruction.opcode = 520 ∨
-    --   (air.core.ctx row 0).instruction.opcode = 521
-    -- := by
-    --   have ⟨ sop1, sop2 ⟩ := single_op air row valid_row cstrs
-    --   rw [← LessThanCoreAir_4.ctx.instruction.opcode_def]
-    --   rw [← LessThanCoreAir_4.is_valid_def] at is_valid
-    --   rw [allHold_simplified_of_allHold air row valid_row] at cstrs
-    --   obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
-    --   clear hint rest
-    --   simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at *
-    --   grind
+    lemma opcode_bounds
+      (air : Valid_VmAirWrapper_shift FBB ExtF)
+      (row : ℕ)
+      (valid_row : row ≤ air.last_row)
+      (cstrs : allHold air row valid_row)
+      (is_valid : air.core.is_valid row 0 = 1)
+    :
+      (air.core.ctx row 0).instruction.opcode = 517 ∨
+      (air.core.ctx row 0).instruction.opcode = 518 ∨
+      (air.core.ctx row 0).instruction.opcode = 519
+    := by
+      have ⟨ sop1, sop2, sop3 ⟩ := single_op air row valid_row cstrs
+      rw [← Valid_ShiftCoreAir_4_8.ctx.instruction.opcode_def]
+      rw [← Valid_ShiftCoreAir_4_8.is_valid_def] at is_valid
+      rw [allHold_simplified_of_allHold air row valid_row] at cstrs
+      obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
+      clear hint rest
+      simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at *
+      grind
 
   end properties
 
+  section bus_entries
+
+    lemma executionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ executionBus_row air row)
+    :
+      entry.2.length = Interaction.ExecutionBusEntryInstance.data_length
+    := by
+      unfold executionBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def _executionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ executionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (executionBus_row_length x.2)))
+          (executionBus_row air row).attach
+      List.map Interaction.ExecutionBusEntryInstance.deserialise vectorised_row
+
+    lemma memoryBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ memoryBus_row air row)
+    :
+      entry.2.length = Interaction.MemoryBusEntryInstance.data_length
+    := by
+      unfold memoryBus_row at *; simp_all
+      grind (ematch := 8)
+
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def _memoryBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ memoryBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (memoryBus_row_length x.2)))
+          (memoryBus_row air row).attach
+      List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
+
+    lemma rangeBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ rangeBus_row air row)
+    :
+      entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
+    := by
+      unfold rangeBus_row at *; simp_all
+      grind (splits := 10)
+
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def _rangeBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ rangeBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeBus_row_length x.2)))
+          (rangeBus_row air row).attach
+      List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
+
+    /-- The ALU-specific instance of the read-instruction bus properties -/
+    @[simp, grind]
+    instance (priority := 1001) ReadInstructionBusEntryInstanceShift
+    : Interaction.BusEntry FBB (Interaction.ReadInstructionBusEntry FBB) :=
+      let wf_prop_fun :=
+        fun (⟨_, _, _, rd, rs1, rs2, xd, rs2_as, xf, xg⟩ : Interaction.ReadInstructionBusEntry FBB) =>
+            -- rd and rs1 boundaries
+            rd.val < 32 ∧ rs1.val < 32 ∧
+            -- non-immediate rs2
+            (rs2_as = 1 → rs2.val < 32) ∧
+            -- immediate rs2
+            (rs2_as = 0 →
+              -- immediate fits 24 bits
+              rs2.val < 2 ^ 24 ∧
+              -- immediate is a zero-extended 5-bit value
+              (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat) ∧
+            -- unused parameters
+            xd = 1 ∧ xf = 0 ∧ xg = 0
+      { Interaction.ReadInstructionBusEntryInstance with
+        wf_properties := wf_prop_fun
+        assume entry := Interaction.ReadInstructionBusEntryInstance.wf_assume_cond entry → wf_prop_fun entry,
+        assert entry := Interaction.ReadInstructionBusEntryInstance.wf_assert_cond entry → wf_prop_fun entry
+      }
+
+    lemma readInstructionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ readInstructionBus_row air row)
+    :
+      entry.2.length = ReadInstructionBusEntryInstanceShift.data_length
+    := by
+      unfold readInstructionBus_row at *; simp_all
+
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def _readInstructionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB ReadInstructionBusEntryInstanceShift.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
+          (readInstructionBus_row air row).attach
+      List.map ReadInstructionBusEntryInstanceShift.deserialise vectorised_row
+
+    lemma bitwiseBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ bitwiseBus_row air row)
+    :
+      entry.2.length = Interaction.BitwiseBusEntryInstance.data_length
+    := by
+      unfold bitwiseBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def _bitwiseBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.BitwiseBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ bitwiseBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (bitwiseBus_row_length x.2)))
+          (bitwiseBus_row air row).attach
+      List.map Interaction.BitwiseBusEntryInstance.deserialise vectorised_row
+
+    def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
+      rowData.map Interaction.BusEntry.serialiseToList
+
+    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+
+    def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
+
+    def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
+
+    def busRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
+    : List (FBB × List FBB) :=
+      executionBus_row air row ++
+      memoryBus_row air row ++
+      rangeBus_row air row ++
+      readInstructionBus_row air row ++
+      bitwiseBus_row air row
+
+    def assumptionsPerRow [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
+    : Prop :=
+      assumptions (_executionBus_row air row) ∧
+      assumptions (_memoryBus_row air row) ∧
+      assumptions (_rangeBus_row air row) ∧
+      assumptions (_readInstructionBus_row air row) ∧
+      assumptions (_bitwiseBus_row air row)
+
+    def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssume (_executionBus_row air row) ∧
+      propertiesToAssume (_memoryBus_row air row) ∧
+      propertiesToAssume (_rangeBus_row air row) ∧
+      propertiesToAssume (_readInstructionBus_row air row) ∧
+      propertiesToAssume (_bitwiseBus_row air row)
+
+    def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssert (_executionBus_row air row) ∧
+      propertiesToAssert (_memoryBus_row air row) ∧
+      propertiesToAssert (_rangeBus_row air row) ∧
+      propertiesToAssert (_readInstructionBus_row air row) ∧
+      propertiesToAssert (_bitwiseBus_row air row)
+
+  end bus_entries
+
+  section auxiliaries
+
+  lemma FBB_invert_shift_aux
+    {x : Fin 256} {y z : FBB}
+    (hy : y < 4)
+    (hz : z < 8)
+    (h_cond : (((x : FBB) - y * 8 - z) * 1950351361).val < 8)
+  :
+    x % 32 = y * 8 + z
+  := by
+    have hy_cases : y = 0 ∨ y = 1 ∨ y = 2 ∨ y = 3 := by grind
+    have hz_cases : z = 0 ∨ z = 1 ∨ z = 2 ∨ z = 3 ∨ z = 4 ∨ z = 5 ∨ z = 6 ∨ z = 7 := by grind
+    clear hy hz
+
+    have : (↑↑x - y * 8 - z) * 1950351361 = (62914560 * (y * 8 + z) + ↑↑x * 1950351361)
+      := by grind
+    rw [this] at h_cond; clear this
+
+    fin_cases x <;> simp_all <;> omega
+
+  lemma FBB_invert_shift
+    {x y z : FBB}
+    (hx : x < 256)
+    (hy : y < 4)
+    (hz : z < 8)
+    (h_cond : (((x : FBB) - y * 8 - z) * 1950351361).val < 8)
+  :
+    (x % 32).val = (y * 8 + z).val
+  := by
+    have := @FBB_invert_shift_aux ⟨ x.val, by omega ⟩ y z hy hz
+    simp_all
+
+  lemma FBB_quotient_with_properties
+    {a b : FBB}
+    (h_diff : (a - 256 * b).val < 256)
+    (ub_b : b.val < 128)
+  :
+    a.val < 32768 ∧
+    (a - 256 * b).val = a.val - 256 * b.val ∧
+    ((a - 256 * b).val : ℤ) = a.val - 256 * b.val ∧
+    a.val / (256 : FBB) = b.val
+  := by
+    grind
+
+  end auxiliaries
+
 end VmAirWrapper_shift.constraints
-
--- namespace Interaction
-
--- /-- ALU-related ReadInstruction bus assumptions -/
--- def readInstructionBus_assumptions_Lt
---   (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
--- : Prop :=
---   ¬ mul = 0 →
---     -- rd and rs1 boundaries
---     rd.val < 32 ∧ rs1.val < 32 ∧
---     -- non-immediate rs2
---     (rs2_as = 1 → rs2.val < 32) ∧
---     -- immediate rs2
---     (rs2_as = 0 →
---       -- immediate fits 24 bits
---       rs2.val < 2 ^ 24 ∧
---       -- immediate is a sign-extended 12-bit value
---       (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
---     -- unused parameters
---     xd = 1 ∧ xf = 0 ∧ xg = 0
-
--- end Interaction
