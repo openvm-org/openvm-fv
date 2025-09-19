@@ -140,16 +140,16 @@ lemma wf_propertiesToAssert
 
         simp_all
 
-      . have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba00 ba01 ba02
-        have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba10 ba11 ba12
-        have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba20 ba21 ba22
-        have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ba30 ba31 ba32
+      . have := BabyBear.xor_as_or ba00 ba01 ba02
+        have := BabyBear.xor_as_or ba10 ba11 ba12
+        have := BabyBear.xor_as_or ba20 ba21 ba22
+        have := BabyBear.xor_as_or ba30 ba31 ba32
         grind
 
-      . have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba00 ba01 ba02
-        have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba10 ba11 ba12
-        have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba20 ba21 ba22
-        have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ba30 ba31 ba32
+      . have := BabyBear.xor_as_and ba00 ba01 ba02
+        have := BabyBear.xor_as_and ba10 ba11 ba12
+        have := BabyBear.xor_as_and ba20 ba21 ba22
+        have := BabyBear.xor_as_and ba30 ba31 ba32
         grind
 
       . split_ands
@@ -354,10 +354,10 @@ theorem spec_base_ALU
   . repeat rw [BitVec.or_append, BitVec.append_eq_append_eql]
     simp_all [← BitVec.toNat_inj]
 
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ub_b0 ub_c0 ba02
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ub_b1 ub_c1 ba12
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ub_b2 ub_c2 ba22
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_or ub_b3 ub_c3 ba32
+    have := BabyBear.xor_as_or ub_b0 ub_c0 ba02
+    have := BabyBear.xor_as_or ub_b1 ub_c1 ba12
+    have := BabyBear.xor_as_or ub_b2 ub_c2 ba22
+    have := BabyBear.xor_as_or ub_b3 ub_c3 ba32
     repeat rw [Nat.mod_eq_of_lt (by omega)]
     simp_all
 
@@ -365,10 +365,10 @@ theorem spec_base_ALU
   . repeat rw [BitVec.and_append, BitVec.append_eq_append_eql]
     simp_all [← BitVec.toNat_inj]
 
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ub_b0 ub_c0 ba02
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ub_b1 ub_c1 ba12
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ub_b2 ub_c2 ba22
-    have := VmAirWrapper_alu.auxiliaries.FBB_xor_as_and ub_b3 ub_c3 ba32
+    have := BabyBear.xor_as_and ub_b0 ub_c0 ba02
+    have := BabyBear.xor_as_and ub_b1 ub_c1 ba12
+    have := BabyBear.xor_as_and ub_b2 ub_c2 ba22
+    have := BabyBear.xor_as_and ub_b3 ub_c3 ba32
     repeat rw [Nat.mod_eq_of_lt (by omega)]
     simp_all
 

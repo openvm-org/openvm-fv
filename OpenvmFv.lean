@@ -17,3 +17,4 @@ import OpenvmFv.Constraints.VolatileBoundaryAir
 
 import OpenvmFv.Spec.ALU
 import OpenvmFv.Spec.Lt
+import OpenvmFv.Spec.Shift

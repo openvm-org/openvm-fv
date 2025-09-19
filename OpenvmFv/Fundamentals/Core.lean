@@ -37,6 +37,41 @@ lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
       (BitVec.extractLsb ((n - 1) + shift) shift (BitVec.signExtend (n + shift) bv))
     := by grind
 
+lemma xor_as_and
+  {a b : ℕ}
+  (ub_a : a < 256)
+  (ub_b : b < 256)
+:
+  a ^^^ b = (a + b) - 2 * (a &&& b)
+:= by
+  have lt_b_and_c := @Nat.and_le_left a b
+  have bv_xor_as_and : forall (a b : BitVec 9), a ^^^ b = (a + b) - 2 * (a &&& b) := by bv_decide
+  specialize bv_xor_as_and { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
+  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_and
+  rw [Nat.mod_eq_of_lt (a := 2 * (a &&& b)) (by omega)] at bv_xor_as_and
+  have : (512 - 2 * (a &&& b) + (a + b)) % 512 < 256 := by rw [← bv_xor_as_and]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
+  have : (512 - 2 * (a &&& b) + (a + b)) % 512 = (a + b) - 2 * (a &&& b) := by omega
+  rw [this] at bv_xor_as_and
+  exact bv_xor_as_and
+
+lemma xor_as_or
+  {a b : ℕ}
+  (ub_a : a < 256)
+  (ub_b : b < 256)
+:
+  a ^^^ b = 2 * (a ||| b) - (a + b)
+:= by
+  have := @Nat.left_le_or a b
+  have := @Nat.or_lt_two_pow a b 8 ub_a ub_b
+  have bv_xor_as_or : forall (a b : BitVec 9), a ^^^ b = 2 * (a ||| b) - (a + b) := by bv_decide
+  specialize bv_xor_as_or { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
+  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_or
+  rw [Nat.mod_eq_of_lt (a := a + b) (by omega)] at bv_xor_as_or
+  have : (512 - (a + b) + 2 * (a ||| b)) % 512 < 256 := by rw [← bv_xor_as_or]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
+  have : (512 - (a + b) + 2 * (a ||| b)) % 512 = 2 * (a ||| b) - (a + b) := by omega
+  rw [this] at bv_xor_as_or
+  exact bv_xor_as_or
+
 end BitVec
 
 namespace Int

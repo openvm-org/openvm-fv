@@ -75,6 +75,34 @@ lemma lt_via_diff_and_range_check
 @[simp low] lemma one_plus_eq_zero : (1 : FBB) + a = 0 ↔ a = 2013265920 := by omega
 @[simp low] lemma neg_one_plus_eq_zero : (2013265920 : FBB) + a = 0 ↔ a = 1 := by omega
 
+lemma xor_as_and
+  {a b c : FBB}
+  (ub_b : b.val < 256)
+  (ub_c : c.val < 256)
+  (h_eq : (b + c - 2 * a).val = b.val ^^^ c.val)
+:
+  a.val < 256 ∧ a.val = b.val &&& c.val
+:= by
+  have := @Nat.and_le_left b c
+  have := @Nat.and_le_right b c
+  rw [BitVec.xor_as_and ub_b ub_c] at h_eq
+  simp [Fin.add_def, Fin.sub_def, Fin.mul_def] at *
+  grind
+
+lemma xor_as_or
+  {a b c : FBB}
+  (ub_b : b.val < 256)
+  (ub_c : c.val < 256)
+  (h_eq : (2 * a - b - c).val = b.val ^^^ c.val)
+:
+  a.val < 256 ∧ a.val = b.val ||| c.val
+:= by
+  have := @Nat.or_lt_two_pow b c 8 ub_b ub_c
+  have := @Nat.left_le_or b c
+  have := @Nat.right_le_or b c
+  rw [BitVec.xor_as_or ub_b ub_c] at h_eq
+  grind
+
 end auxiliaries
 
 end BabyBear
