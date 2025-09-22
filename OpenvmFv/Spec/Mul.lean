@@ -1,0 +1,254 @@
+import Mathlib
+
+import OpenvmFv.Airs.Alu.VmAirWrapper_mul
+import OpenvmFv.Constraints.VmAirWrapper_mul
+import OpenvmFv.Fundamentals.Execution
+import OpenvmFv.Fundamentals.Interaction
+
+import LeanZKCircuit.Interactions
+
+set_option maxHeartbeats 1_000_000_000
+set_option synthInstance.maxHeartbeats 1_000_000
+
+variable (ExtF : Type) [Field ExtF]
+variable (air : Valid_VmAirWrapper_mul FBB ExtF)
+variable (row : ℕ)
+variable (row_in_range : row ≤ air.last_row)
+variable (constraints : VmAirWrapper_mul.constraints.allHold air row row_in_range)
+
+namespace Mul.NonValidRows
+
+open VmAirWrapper_mul.constraints
+
+variable (row_not_valid : air.core.is_valid row 0 = 0)
+
+set_option maxRecDepth 1_000_000 in
+include
+  row_in_range
+in
+/-- Zeros required to form a non-valid row -/
+lemma non_valid_row_Mul_allZeros_allHold
+:
+  constrain_interactions air ∧
+  air.core.b_0 row 0 = 0 ∧
+  air.core.b_1 row 0 = 0 ∧
+  air.core.b_2 row 0 = 0 ∧
+  air.core.b_3 row 0 = 0 ∧
+  air.core.c_0 row 0 = 0 ∧
+  air.core.c_1 row 0 = 0 ∧
+  air.core.c_2 row 0 = 0 ∧
+  air.core.c_3 row 0 = 0 ∧
+  air.core.is_valid row 0 = 0
+    → allHold air row row_in_range
+:= by
+  rw [allHold_simplified_of_allHold]
+  intro h_zeros
+  simp [VmAirWrapper_mul_constraint_and_interaction_simplification]
+  grind
+
+include
+  row_in_range
+  row_not_valid
+  constraints
+in
+/-- On non-valid rows, all interactin multiplicities equal zero -/
+lemma non_valid_row_Mul_all_interaction_multiplicities_zero
+  (entry : FBB × List FBB)
+:
+  entry ∈ executionBus_row air row ++
+          memoryBus_row air row ++
+          rangeCheckerBus_row air row ++
+          readInstructionBus_row air row ++
+          rangeTupleCheckerBus_row air row → entry.1 = 0
+:= by
+  obtain ⟨ hint, constraints ⟩ := constraints
+  clear hint; unfold extracted_row_constraint_list at constraints
+  simp only [VmAirWrapper_mul_air_simplification,
+             VmAirWrapper_mul_constraint_and_interaction_simplification] at constraints
+  simp at constraints
+  simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification]
+  grind (splits := 18)
+
+end Mul.NonValidRows
+
+open VmAirWrapper_mul.constraints
+
+namespace Mul.ValidRows
+
+variable (row_valid : air.core.is_valid row 0 = 1)
+
+-- Row assumptions, properties to assume, and properties to prove
+variable
+  (assumptions : assumptionsPerRow air row)
+  (propertiesToAssume : wf_propertiesToAssumePerRow air row)
+
+section General
+
+include
+  row_valid
+  constraints
+  propertiesToAssume
+in
+/-- The properties that need to be proven actually hold -/
+lemma wf_propertiesToAssert
+:
+  wf_propertiesToAssertPerRow air row
+:= by
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_mul_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
+  obtain ⟨ ub_a0, ub_cry0, ub_a1, ub_cry1, ub_a2, ub_cry2, ub_a3, ub_cry3 ⟩ := pa_rtc
+  clear pa_exec pa_range
+
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [VmAirWrapper_mul_constraint_and_interaction_simplification] at constraints
+  obtain ⟨ constrain_interactions,
+           rest ⟩ := constraints
+  clear constrain_interactions
+  simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification,
+            wf_propertiesToAssertPerRow,
+            propertiesToAssert]
+
+/-- From Lt opcode to RISC-V opcode -/
+def rop_of_Mul_opcode (opcode : FBB) : mop :=
+  if opcode = 592 then .MUL else .MUL
+
+namespace Nat.DivMod
+
+lemma div_8 (a b : ℕ) :
+  (a / 256 + b) / 256 = (a + b * 256) / 65536
+    := by grind
+
+lemma div_16 (a b : ℕ) :
+  (a / 65536 + b) / 256 = (a + b * 65536) / 16777216
+    := by grind
+
+lemma div_24 (a b : ℕ) :
+  (a / 16777216 + b) / 256 = (a + b * 16777216) / 4294967296
+    := by grind
+
+lemma join_8 (a b : ℕ) :
+  a % 256 + (a / 256 + b) % 256 * 256 = (a + b * 256) % 65536
+    := by grind
+
+lemma join_16 (a b : ℕ) :
+  a % 65536 + (a / 65536 + b) % 256 * 65536 = (a + b * 65536) % 16777216
+    := by grind
+
+lemma join_24 (a b : ℕ) :
+  a % 16777216 + (a / 16777216 + b) % 256 * 16777216 = (a + b * 16777216) % 4294967296
+    := by grind
+
+end Nat.DivMod
+
+include
+  row_valid
+  propertiesToAssume in
+/-- The constraints entail correct implementation of the SLL opcode:
+    - the `b` operand read from memory; and
+    - the `c` operand as per the circuit
+--/
+theorem spec_MUL
+:
+  (U32.toBV #v[(air.core.a_0 row 0).val,
+               (air.core.a_1 row 0).val,
+               (air.core.a_2 row 0).val,
+               (air.core.a_3 row 0).val])
+    =
+  execute_MUL_pure
+    (U32.toBV #v[(air.core.b_0 row 0).val,
+                 (air.core.b_1 row 0).val,
+                 (air.core.b_2 row 0).val,
+                 (air.core.b_3 row 0).val])
+    (U32.toBV #v[(air.core.c_0 row 0).val,
+                 (air.core.c_1 row 0).val,
+                 (air.core.c_2 row 0).val,
+                 (air.core.c_3 row 0).val])
+    (rop_of_Mul_opcode (air.core.ctx row 0).instruction.opcode)
+:= by
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_mul_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
+  obtain ⟨ ub_a0, ub_cry0, ub_a1, ub_cry1, ub_a2, ub_cry2, ub_a3, ub_cry3 ⟩ := pa_rtc
+  clear pa_exec pa_range
+
+  simp_all [← MultiplicationCoreAir_4_8.carry_3,
+            ← MultiplicationCoreAir_4_8.carry_2,
+            ← MultiplicationCoreAir_4_8.carry_1,
+            ← MultiplicationCoreAir_4_8.carry_0]
+
+  simp [execute_MUL_pure, rop_of_Mul_opcode, BitVec.extend,
+        ← BitVec.toNat_inj, U32.toNat]
+  repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+
+  have ub_cry0' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
+  have ub_cry1' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
+  have ub_cry2' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
+  have ub_cry3' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+
+  rw [add_sub_assoc, ← add_sub_assoc (a := 2005401601 * _), ← add_assoc] at ub_cry1' ub_cry2' ub_cry3'
+  repeat rw [← add_assoc] at ub_cry2'
+
+  set a0 := air.core.a_0 row 0; set a1 := air.core.a_1 row 0; set a2 := air.core.a_2 row 0; set a3 := air.core.a_3 row
+  set b0 := air.core.b_0 row 0; set b1 := air.core.b_1 row 0; set b2 := air.core.b_2 row 0; set b3 := air.core.b_3 row 0
+  set c0 := air.core.c_0 row 0; set c1 := air.core.c_1 row 0; set c2 := air.core.c_2 row 0; set c3 := air.core.c_3 row 0
+
+  have ub_p00 : b0.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p01 : b0.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p10 : b1.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p02 : b0.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p11 : b1.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p20 : b2.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p03 : b0.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p12 : b1.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p21 : b2.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p30 : b3.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a0, eq_cry0 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a0 ub_cry0'
+  simp [Fin.ext_iff, Fin.val_mul] at eq_a0
+  rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a0
+  rw [eq_a0]; rw [eq_cry0] at ub_cry1' ub_cry2' ub_cry3'
+  repeat rw [← add_assoc] at ub_cry3'
+
+  have ⟨ eq_a1, eq_cry1 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a1 ub_cry1'
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a1
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a1
+  rw [add_assoc (a := _ / 256)] at eq_a1
+  rw [eq_a1]; rw [eq_cry1] at ub_cry2' ub_cry3'
+
+  rw [Nat.DivMod.join_8]
+
+  have ⟨ eq_a2, eq_cry2 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a2 ub_cry2'
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a2
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a2
+  rw [add_assoc (a := _ * _ / 256), add_assoc (a := _ / 256), add_assoc] at eq_a2
+  rw [eq_a2]; rw [eq_cry2] at ub_cry2' ub_cry3'
+
+  rw [Nat.DivMod.div_8, Nat.DivMod.join_16]
+
+  have ⟨ eq_a3, eq_cry3 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a3 ub_cry3'
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a3
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a3
+  rw [add_assoc (a := _ * _ / 256),
+      Nat.DivMod.div_8,
+      add_assoc (a := _ / 65536),
+      add_assoc (c := b2.val * c0),
+      Nat.DivMod.div_16,
+      add_assoc (b := b0.val * c3),
+      add_assoc (c := b2.val * c1),
+      add_assoc (c := b3.val * c0)] at eq_a3
+  rw [eq_a3]
+
+  rw [Nat.DivMod.join_24]
+
+  ring_nf; omega
+
+end General
+
+end Mul.ValidRows

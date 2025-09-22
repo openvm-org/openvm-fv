@@ -27,7 +27,7 @@ include
   row_in_range
 in
 /-- Zeros required to form a non-valid row -/
-lemma non_valid_row_Lt_allZeros_allHold
+lemma non_valid_row_Shift_allZeros_allHold
 :
   constrain_interactions air ∧
   air.adapter.rs2 row 0 = 0 ∧
@@ -96,12 +96,12 @@ include
   constraints
 in
 /-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_Lt_all_interaction_multiplicities_zero
+lemma non_valid_row_Shift_all_interaction_multiplicities_zero
   (entry : FBB × List FBB)
 :
   entry ∈ executionBus_row air row ++
           memoryBus_row air row ++
-          rangeBus_row air row ++
+          rangeCheckerBus_row air row ++
           readInstructionBus_row air row ++
           bitwiseBus_row air row → entry.1 = 0
 := by
@@ -327,7 +327,7 @@ lemma essentials
             apply pow_le_pow (by simp) (by omega); assumption
           . grind
 
-/-- From Lt opcode to RISC-V opcode -/
+/-- From Shift opcode to RISC-V opcode -/
 def rop_of_Shift_opcode (opcode : FBB) : rop :=
   if opcode = 517 then .SLL else
   if opcode = 518 then .SRL else .SRA
@@ -1590,7 +1590,7 @@ include
   propertiesToAssume in
 /-- The non-immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
-theorem spec_base_Lt_non_imm
+theorem spec_base_Shift_non_imm
   (_ : air.adapter.rs2_as row 0 = 1)
 :
   (U32.toBV #v[(air.core.a_0 row 0).val,
@@ -1615,7 +1615,7 @@ end NonImmediate
 
 section Immediate
 
-/-- From Lt opcode to RISC-V opcode -/
+/-- From Shift opcode to RISC-V opcode -/
 def iop_of_Shift_opcode (opcode : FBB) : sop :=
   if opcode = 517 then .SLLI else
   if opcode = 518 then .SRLI else .SRAI

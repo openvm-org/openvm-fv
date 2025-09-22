@@ -94,7 +94,7 @@ namespace Interaction
           wf_properties := fun _ => True
 
           wf_assume_cond := fun entry => entry.1 = -1,
-          wf_assert_cond :=  fun entry => entry.1 = 1,
+          wf_assert_cond := fun entry => entry.1 = 1,
 
           deserialise := ExecutionBusEntry.deserialise FBB
 
@@ -348,6 +348,54 @@ namespace Interaction
       }
 
     end BitwiseBus
+
+    section RangeTupleCheckerBus
+
+      /-- Execution bus entry -/
+      structure RangeTupleCheckerBusEntry where
+        multiplicity : F
+        x1 : F
+        x2 : F
+
+      @[simp, grind]
+      def RangeTupleCheckerBusEntry.deserialise
+        (entry : F × Vector F 2)
+      : RangeTupleCheckerBusEntry F :=
+        {
+            multiplicity := entry.1,
+            x1 := entry.2[0],
+            x2 := entry.2[1]
+        }
+
+      /-- Execution bus entry instance -/
+      @[simp, grind]
+      instance RangeTupleCheckerBusEntryInstance
+      : BusEntry FBB (RangeTupleCheckerBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.1,
+
+          data_length := 2,
+          data := fun ⟨_, x1, x2⟩ => #v[x1, x2],
+
+          -- No assumptions
+          assumptions := fun _ => True
+
+          -- The tuple range checker checks the appropriate ranges
+          wf_properties := fun ⟨_, x1, x2⟩ => x1.val < 256 ∧ x2.val < 2048
+
+          wf_assume_cond := fun entry => entry.1 = 1,
+          wf_assert_cond := fun _ => False,
+
+          deserialise := RangeTupleCheckerBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp
+          inv_ser_deser := by
+            simp_all
+            intro b; cases b
+            simp_all; grind
+      }
+
+    end RangeTupleCheckerBus
 
   end buses
 

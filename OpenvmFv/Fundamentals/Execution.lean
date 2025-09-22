@@ -154,7 +154,7 @@ def mop_of_mul_op (m : mul_op) : mop :=
   | { high := true, signed_rs1 := true, signed_rs2 := true } => .MULH
 
 /-- Pure part of 32-bit `execute_MUL` -/
-def execute_MUL_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : mop) : BitVec 64 :=
+def execute_MUL_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : mop) : BitVec 32 :=
   let rs1_ext : BitVec 64 := op1.extend 64 (op = .MULH ∨ op = .MULHSU)
   let rs2_ext : BitVec 64 := op2.extend 64 (op = .MULH ∨ op = .MULHUS)
   let result_wide := rs1_ext * rs2_ext
