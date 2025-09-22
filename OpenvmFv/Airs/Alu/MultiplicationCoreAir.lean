@@ -140,7 +140,7 @@ def Valid_MultiplicationCoreAir_4_8.ctx
     )
 
 @[openvm_encapsulation]
-lemma LessThanCoreAir_4.ctx.instruction.opcode_def
+lemma Valid_MultiplicationCoreAir_4_8.ctx.instruction.opcode_def
   [Field F]
   (c : Valid_MultiplicationCoreAir_4_8 F)
   (row rotation: ℕ)

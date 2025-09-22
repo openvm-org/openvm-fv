@@ -114,35 +114,7 @@ lemma wf_propertiesToAssert
 
 /-- From Lt opcode to RISC-V opcode -/
 def rop_of_Mul_opcode (opcode : FBB) : mop :=
-  if opcode = 592 then .MUL else .MUL
-
-namespace Nat.DivMod
-
-lemma div_8 (a b : ℕ) :
-  (a / 256 + b) / 256 = (a + b * 256) / 65536
-    := by grind
-
-lemma div_16 (a b : ℕ) :
-  (a / 65536 + b) / 256 = (a + b * 65536) / 16777216
-    := by grind
-
-lemma div_24 (a b : ℕ) :
-  (a / 16777216 + b) / 256 = (a + b * 16777216) / 4294967296
-    := by grind
-
-lemma join_8 (a b : ℕ) :
-  a % 256 + (a / 256 + b) % 256 * 256 = (a + b * 256) % 65536
-    := by grind
-
-lemma join_16 (a b : ℕ) :
-  a % 65536 + (a / 65536 + b) % 256 * 65536 = (a + b * 65536) % 16777216
-    := by grind
-
-lemma join_24 (a b : ℕ) :
-  a % 16777216 + (a / 16777216 + b) % 256 * 16777216 = (a + b * 16777216) % 4294967296
-    := by grind
-
-end Nat.DivMod
+  if opcode = 592 then .MUL else .MULHUS
 
 include
   row_valid
@@ -183,8 +155,10 @@ theorem spec_MUL
             ← MultiplicationCoreAir_4_8.carry_1,
             ← MultiplicationCoreAir_4_8.carry_0]
 
-  simp [execute_MUL_pure, rop_of_Mul_opcode, BitVec.extend,
-        ← BitVec.toNat_inj, U32.toNat]
+  simp [execute_MUL_pure,
+        ← Valid_MultiplicationCoreAir_4_8.ctx.instruction.opcode_def,
+        rop_of_Mul_opcode,
+        BitVec.extend, ← BitVec.toNat_inj, U32.toNat]
   repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
 
   have ub_cry0' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
