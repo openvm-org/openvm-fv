@@ -1,4 +1,3 @@
-import OpenvmFv.Spec.run_hart_active
 
 import OpenvmFv.Airs.Alu.VmAirWrapper_alu
 import OpenvmFv.Airs.Alu.VmAirWrapper_lt
@@ -17,3 +16,5 @@ import OpenvmFv.Constraints.VolatileBoundaryAir
 
 import OpenvmFv.Spec.ALU
 import OpenvmFv.Spec.Lt
+import OpenvmFv.Spec.run_hart_active
+import OpenvmFv.Spec.JAL.execute_jal
