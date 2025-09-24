@@ -45,7 +45,7 @@ import OpenvmFv.Fundamentals.RV32D
 import OpenvmFv.Fundamentals.U32
 
 import OpenvmFv.Spec.ALU
-import OpenvmFv.Spec.execute_rypte
+import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
