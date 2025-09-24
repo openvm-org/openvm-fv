@@ -16,7 +16,7 @@ variable (row : ℕ)
 variable (row_in_range : row ≤ air.last_row)
 variable (constraints : VmAirWrapper_mulh.constraints.allHold air row row_in_range)
 
-namespace Mul.NonValidRows
+namespace Mulh.NonValidRows
 
 open VmAirWrapper_mulh.constraints
 
@@ -83,11 +83,11 @@ lemma non_valid_row_Mul_all_interaction_multiplicities_zero
             VmAirWrapper_mulh_constraint_and_interaction_simplification]
   grind (splits := 28)
 
-end Mul.NonValidRows
+end Mulh.NonValidRows
 
 open VmAirWrapper_mulh.constraints
 
-namespace Mul.ValidRows
+namespace Mulh.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
@@ -132,10 +132,6 @@ def rop_of_Mulh_opcode (opcode : FBB) : mop :=
   if opcode = 593 then .MULH else
   if opcode = 594 then .MULHSU else
   if opcode = 595 then .MULHU else .MULHUS
-
-namespace Nat.DivMod
-
-end Nat.DivMod
 
 include
   row_valid
@@ -714,4 +710,4 @@ theorem spec_mulh
 
 end General
 
-end Mul.ValidRows
+end Mulh.ValidRows

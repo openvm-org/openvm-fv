@@ -2,6 +2,7 @@ name = "openvm-fv"
 version = "0.1.0"
 keywords = ["math"]
 defaultTargets = ["OpenvmFv"]
+moreLeanArgs = ["--tstack=400000"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
