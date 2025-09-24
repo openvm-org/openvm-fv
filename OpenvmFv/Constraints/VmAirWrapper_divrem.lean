@@ -492,7 +492,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_26 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.signed row 0 ∨ air.core.b_sign row 0 = 0
+        air.core.signed row 0 = 1 ∨ air.core.b_sign row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_26_of_extraction
@@ -502,15 +502,15 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_27 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.signed row 0 ∨ air.core.c_sign row 0 = 0
+        air.core.signed row 0 = 1 ∨ air.core.c_sign row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_27_of_extraction
@@ -520,11 +520,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_28 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -565,7 +565,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_30 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        air.core.nonzero_q row 0 = 0 ∨ 1 = air.core.zero_divisor row 0 ∨ air.core.q_sign row 0 = air.core.sign_xor row 0
+        air.core.nonzero_q row 0 = 0 ∨ air.core.zero_divisor row 0 = 1 ∨ air.core.q_sign row 0 = air.core.sign_xor row 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_30_of_extraction
@@ -575,15 +575,15 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_31 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        air.core.q_sign row 0 = air.core.sign_xor row 0 ∨ 1 = air.core.zero_divisor row 0 ∨ air.core.q_sign row 0 = 0
+        air.core.q_sign row 0 = air.core.sign_xor row 0 ∨ air.core.zero_divisor row 0 = 1 ∨ air.core.q_sign row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_31_of_extraction
@@ -593,15 +593,15 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_32 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.sign_xor row 0 ∨ air.core.r_0 row 0 = air.core.r_prime_0 row 0
+        air.core.sign_xor row 0 = 1 ∨ air.core.r_0 row 0 = air.core.r_prime_0 row 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_32_of_extraction
@@ -611,11 +611,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_33 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -655,7 +655,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_35 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        air.core.sign_xor row 0 = 0 ∨ 1 = air.core.carry_lt row 0 0 ∨ air.core.r_prime_0 row 0 = 0
+        air.core.sign_xor row 0 = 0 ∨ air.core.carry_lt row 0 0 = 1 ∨ air.core.r_prime_0 row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_35_of_extraction
@@ -665,15 +665,15 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_36 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.sign_xor row 0 ∨ air.core.r_1 row 0 = air.core.r_prime_1 row 0
+        air.core.sign_xor row 0 = 1 ∨ air.core.r_1 row 0 = air.core.r_prime_1 row 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_36_of_extraction
@@ -683,11 +683,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_37 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -727,7 +727,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_39 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        air.core.sign_xor row 0 = 0 ∨ 1 = air.core.carry_lt row 0 1 ∨ air.core.r_prime_1 row 0 = 0
+        air.core.sign_xor row 0 = 0 ∨ air.core.carry_lt row 0 1 = 1 ∨ air.core.r_prime_1 row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_39_of_extraction
@@ -737,15 +737,15 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_40 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.sign_xor row 0 ∨ air.core.r_2 row 0 = air.core.r_prime_2 row 0
+        air.core.sign_xor row 0 = 1 ∨ air.core.r_2 row 0 = air.core.r_prime_2 row 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_40_of_extraction
@@ -755,11 +755,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_41 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -799,7 +799,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_43 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        air.core.sign_xor row 0 = 0 ∨ 1 = air.core.carry_lt row 0 2 ∨ air.core.r_prime_2 row 0 = 0
+        air.core.sign_xor row 0 = 0 ∨ air.core.carry_lt row 0 2 = 1 ∨ air.core.r_prime_2 row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_43_of_extraction
@@ -809,15 +809,15 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_44 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.sign_xor row 0 ∨ air.core.r_3 row 0 = air.core.r_prime_3 row 0
+        air.core.sign_xor row 0 = 1 ∨ air.core.r_3 row 0 = air.core.r_prime_3 row 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_44_of_extraction
@@ -827,11 +827,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_45 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -871,7 +871,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_47 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        air.core.sign_xor row 0 = 0 ∨ 1 = air.core.carry_lt row 0 3 ∨ air.core.r_prime_3 row 0 = 0
+        air.core.sign_xor row 0 = 0 ∨ air.core.carry_lt row 0 3 = 1 ∨ air.core.r_prime_3 row 0 = 0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_47_of_extraction
@@ -881,11 +881,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_48 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -907,7 +907,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_49 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.special_case row 0 + air.core.lt_marker_3 row 0 ∨
+        air.core.special_case row 0 + air.core.lt_marker_3 row 0 = 1 ∨
     air.core.r_prime_3 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_3 row 0 * (1 - 2 * air.core.c_sign row 0) =
       0
 
@@ -919,11 +919,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_50 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -965,7 +965,7 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_52 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.special_case row 0 + air.core.lt_marker_3 row 0 + air.core.lt_marker_2 row 0 ∨
+        air.core.special_case row 0 + air.core.lt_marker_3 row 0 + air.core.lt_marker_2 row 0 = 1 ∨
     air.core.r_prime_2 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_2 row 0 * (1 - 2 * air.core.c_sign row 0) =
       0
 
@@ -977,11 +977,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_53 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -1023,9 +1023,8 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_55 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 =
       air.core.special_case row 0 + air.core.lt_marker_3 row 0 + air.core.lt_marker_2 row 0 +
-        air.core.lt_marker_1 row 0 ∨
+        air.core.lt_marker_1 row 0 = 1 ∨
     air.core.r_prime_1 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_1 row 0 * (1 - 2 * air.core.c_sign row 0) =
       0
 
@@ -1037,11 +1036,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_56 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -1083,10 +1082,9 @@ namespace VmAirWrapper_divrem.constraints
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_58 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-        1 =
       air.core.special_case row 0 + air.core.lt_marker_3 row 0 + air.core.lt_marker_2 row 0 +
           air.core.lt_marker_1 row 0 +
-        air.core.lt_marker_0 row 0 ∨
+        air.core.lt_marker_0 row 0 = 1 ∨
     air.core.r_prime_0 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_0 row 0 * (1 - 2 * air.core.c_sign row 0) =
       0
 
@@ -1098,11 +1096,11 @@ namespace VmAirWrapper_divrem.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_59 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
@@ -1207,366 +1205,6 @@ namespace VmAirWrapper_divrem.constraints
         simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
         exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_64 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_64_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_64 air row ↔ constraint_64 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_65 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_65_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_65 air row ↔ constraint_65 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_66 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_66_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_66 air row ↔ constraint_66 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_67 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_67_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_67 air row ↔ constraint_67 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_68 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_68_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_68 air row ↔ constraint_68 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_69 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_69_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_69 air row ↔ constraint_69 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_70 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_70_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_70 air row ↔ constraint_70 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_71 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_71_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_71 air row ↔ constraint_71 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_72 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_72_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_72 air row ↔ constraint_72 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_73 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_73_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_73 air row ↔ constraint_73 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_74 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_74_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_74 air row ↔ constraint_74 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_75 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_75_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_75 air row ↔ constraint_75 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_76 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_76_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_76 air row ↔ constraint_76 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_77 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_77_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_77 air row ↔ constraint_77 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_78 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_78_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_78 air row ↔ constraint_78 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_79 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_79_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_79 air row ↔ constraint_79 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_80 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_80_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_80 air row ↔ constraint_80 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_81 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_81_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_81 air row ↔ constraint_81 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_82 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_82_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_82 air row ↔ constraint_82 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      -- def constraint_83 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_divrem_air_simplification]
-      -- lemma constraint_83_of_extraction
-      --     (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ)
-      -- : VmAirWrapper_divrem.extraction.constraint_83 air row ↔ constraint_83 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_divrem_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_divrem_constraint_and_interaction_simplification] at h
-      --   exact h
 
     end row_constraints
 
@@ -1911,27 +1549,7 @@ namespace VmAirWrapper_divrem.constraints
         constraint_60 air row,
         constraint_61 air row,
         constraint_62 air row,
-        constraint_63 air row,
-    --     constraint_64 air row,
-    --     constraint_65 air row,
-    --     constraint_66 air row,
-    --     constraint_67 air row,
-    --     constraint_68 air row,
-    --     constraint_69 air row,
-    --     constraint_70 air row,
-    --     constraint_71 air row,
-    --     constraint_72 air row,
-    --     constraint_73 air row,
-    --     constraint_74 air row,
-    --     constraint_75 air row,
-    --     constraint_76 air row,
-    --     constraint_77 air row,
-    --     constraint_78 air row,
-    --     constraint_79 air row,
-    --     constraint_80 air row,
-    --     constraint_81 air row,
-    --     constraint_82 air row,
-    --     constraint_83 air row,
+        constraint_63 air row
       ]
 
     @[simp]
