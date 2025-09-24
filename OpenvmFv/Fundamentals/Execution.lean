@@ -38,7 +38,7 @@ def execute_RTYPE_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : rop) :=
   | .SLL => Sail.shift_bits_left op1 (Sail.BitVec.extractLsb op2 4 0)
   | .SRL => Sail.shift_bits_right op1 (Sail.BitVec.extractLsb op2 4 0)
   | .SUB => op1 - op2
-  | .SRA => shift_bits_right_arith op1 (Sail.BitVec.extractLsb op2 4 0)
+  | .SRA => BitVec.sshiftRight op1 (Sail.BitVec.extractLsb op2 4 0).toNat
 
 /-- `execute_RTYPE` with isolated pure part -/
 def execute_RTYPE' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (op : rop) : SailM ExecutionResult := do
@@ -51,7 +51,18 @@ def execute_RTYPE' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (op : rop) : Sail
 @[simp]
 lemma execute_RTYPE_eq_execute_RTYPE' :
   execute_RTYPE rs2 rs1 rd op = execute_RTYPE' rs2 rs1 rd op
-  := by cases op <;> simp_all [execute_RTYPE', execute_RTYPE, execute_RTYPE_pure] <;> congr
+  := by
+    cases op <;> simp_all [execute_RTYPE', execute_RTYPE, execute_RTYPE_pure]
+    . congr
+    . congr
+    . refine bind_congr ?_; intro r1
+      refine bind_congr ?_; intro r2
+      ext s; simp_all; congr 3
+      simp [LeanRV32D.Functions.log2_xlen]
+      have : (31 + ((BitVec.ofNat 5 r2.toNat).toNat) : ℤ).toNat - (BitVec.ofNat 5 r2.toNat).toNat + 1 = 32 := by omega
+      rw [this]; clear this; simp
+      rw [BitVec.sshiftright_eq]
+      simp; congr
 
 end RTYPE
 
@@ -114,7 +125,16 @@ lemma execute_SHIFTIOP_eq_execute_SHIFTIOP' :
     have h_eq_shamt : BitVec.ofNat 5 (shamt.toNat % 4294967296) = shamt := by
       rw [Nat.mod_eq_of_lt (by omega)]; simp
     simp [execute_SHIFTIOP, execute_SHIFTIOP', execute_SHIFTIOP_pure, execute_RTYPE_pure]
-    cases op <;> simp <;> aesop
+    cases op <;> simp
+    . aesop
+    . aesop
+    . refine bind_congr ?_; intro r1
+      ext s; simp_all; congr 3
+      simp [LeanRV32D.Functions.log2_xlen]
+      have : (31 + ((BitVec.ofNat 5 shamt.toNat).toNat) : ℤ).toNat - (BitVec.ofNat 5 shamt.toNat).toNat + 1 = 32 := by omega
+      rw [this]; clear this; simp
+      rw [BitVec.sshiftright_eq]
+      simp; congr
 
 end SHIFTIOP
 
@@ -134,7 +154,7 @@ def mop_of_mul_op (m : mul_op) : mop :=
   | { high := true, signed_rs1 := true, signed_rs2 := true } => .MULH
 
 /-- Pure part of 32-bit `execute_MUL` -/
-def execute_MUL_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : mop) : BitVec 64 :=
+def execute_MUL_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : mop) : BitVec 32 :=
   let rs1_ext : BitVec 64 := op1.extend 64 (op = .MULH ∨ op = .MULHSU)
   let rs2_ext : BitVec 64 := op2.extend 64 (op = .MULH ∨ op = .MULHUS)
   let result_wide := rs1_ext * rs2_ext

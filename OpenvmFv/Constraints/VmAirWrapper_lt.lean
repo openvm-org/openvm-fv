@@ -398,7 +398,7 @@ namespace VmAirWrapper_lt.constraints
         rfl
 
       @[VmAirWrapper_lt_constraint_and_interaction_simplification]
-      def rangeBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
+      def rangeCheckerBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
         [
           (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
           (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
@@ -412,7 +412,7 @@ namespace VmAirWrapper_lt.constraints
         (air : Valid_VmAirWrapper_lt F ExtF)
         (h : VmAirWrapper_lt.extraction.constrain_interactions air)
       :
-        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeBus_row air row)
+        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -469,7 +469,7 @@ namespace VmAirWrapper_lt.constraints
         air.buses = fun index ↦
         if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
         else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeBus_row air)
+        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
         else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
         else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
         else []
@@ -666,26 +666,184 @@ namespace VmAirWrapper_lt.constraints
 
   end properties
 
+section bus_entries
+
+    lemma executionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ executionBus_row air row)
+    :
+      entry.2.length = Interaction.ExecutionBusEntryInstance.data_length
+    := by
+      unfold executionBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_lt_constraint_and_interaction_simplification]
+    def _executionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ executionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (executionBus_row_length x.2)))
+          (executionBus_row air row).attach
+      List.map Interaction.ExecutionBusEntryInstance.deserialise vectorised_row
+
+    lemma memoryBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ memoryBus_row air row)
+    :
+      entry.2.length = Interaction.MemoryBusEntryInstance.data_length
+    := by
+      unfold memoryBus_row at *; simp_all
+      grind (ematch := 8)
+
+    @[VmAirWrapper_lt_constraint_and_interaction_simplification]
+    def _memoryBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ memoryBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (memoryBus_row_length x.2)))
+          (memoryBus_row air row).attach
+      List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
+
+    lemma rangeCheckerBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ rangeCheckerBus_row air row)
+    :
+      entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
+    := by
+      unfold rangeCheckerBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_lt_constraint_and_interaction_simplification]
+    def _rangeCheckerBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
+      List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
+
+    /-- The ALU-specific instance of the read-instruction bus properties -/
+    @[simp, grind]
+    instance (priority := 1001) ReadInstructionBusEntryInstanceLt
+    : Interaction.BusEntry FBB (Interaction.ReadInstructionBusEntry FBB) :=
+      let wf_prop_fun :=
+        fun (⟨_, _, _, rd, rs1, rs2, xd, rs2_as, xf, xg⟩ : Interaction.ReadInstructionBusEntry FBB) =>
+          -- rd and rs1 boundaries
+          rd.val < 32 ∧ rs1.val < 32 ∧
+          -- non-immediate rs2
+          (rs2_as = 1 → rs2.val < 32) ∧
+          -- immediate rs2
+          (rs2_as = 0 →
+            -- immediate fits 24 bits
+            rs2.val < 2 ^ 24 ∧
+            -- immediate is a sign-extended 12-bit value
+            (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
+          -- unused parameters
+          xd = 1 ∧ xf = 0 ∧ xg = 0
+      { Interaction.ReadInstructionBusEntryInstance with
+        wf_properties := wf_prop_fun
+        assume entry := Interaction.ReadInstructionBusEntryInstance.wf_assume_cond entry → wf_prop_fun entry,
+        assert entry := Interaction.ReadInstructionBusEntryInstance.wf_assert_cond entry → wf_prop_fun entry
+      }
+
+    lemma readInstructionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ readInstructionBus_row air row)
+    :
+      entry.2.length = ReadInstructionBusEntryInstanceLt.data_length
+    := by
+      unfold readInstructionBus_row at *; simp_all
+
+    @[VmAirWrapper_lt_constraint_and_interaction_simplification]
+    def _readInstructionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB ReadInstructionBusEntryInstanceLt.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
+          (readInstructionBus_row air row).attach
+      List.map ReadInstructionBusEntryInstanceLt.deserialise vectorised_row
+
+    lemma bitwiseBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ bitwiseBus_row air row)
+    :
+      entry.2.length = Interaction.BitwiseBusEntryInstance.data_length
+    := by
+      unfold bitwiseBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_lt_constraint_and_interaction_simplification]
+    def _bitwiseBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.BitwiseBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ bitwiseBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (bitwiseBus_row_length x.2)))
+          (bitwiseBus_row air row).attach
+      List.map Interaction.BitwiseBusEntryInstance.deserialise vectorised_row
+
+    @[simp]
+    def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
+      rowData.map Interaction.BusEntry.serialiseToList
+
+    @[simp]
+    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+
+    @[simp]
+    def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
+
+    @[simp]
+    def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
+
+    @[simp]
+    def busRow [Field ExtF] (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ)
+    : List (FBB × List FBB) :=
+      executionBus_row air row ++
+      memoryBus_row air row ++
+      rangeCheckerBus_row air row ++
+      readInstructionBus_row air row ++
+      bitwiseBus_row air row
+
+    @[simp]
+    def assumptionsPerRow [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ)
+    : Prop :=
+      assumptions (_executionBus_row air row) ∧
+      assumptions (_memoryBus_row air row) ∧
+      assumptions (_rangeCheckerBus_row air row) ∧
+      assumptions (_readInstructionBus_row air row) ∧
+      assumptions (_bitwiseBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssume (_executionBus_row air row) ∧
+      propertiesToAssume (_memoryBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
+      propertiesToAssume (_readInstructionBus_row air row) ∧
+      propertiesToAssume (_bitwiseBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssert (_executionBus_row air row) ∧
+      propertiesToAssert (_memoryBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
+      propertiesToAssert (_readInstructionBus_row air row) ∧
+      propertiesToAssert (_bitwiseBus_row air row)
+
+  end bus_entries
+
 end VmAirWrapper_lt.constraints
-
-namespace Interaction
-
-/-- ALU-related ReadInstruction bus assumptions -/
-def readInstructionBus_assumptions_Lt
-  (mul _ _ rd rs1 rs2 xd rs2_as xf xg : FBB)
-: Prop :=
-  ¬ mul = 0 →
-    -- rd and rs1 boundaries
-    rd.val < 32 ∧ rs1.val < 32 ∧
-    -- non-immediate rs2
-    (rs2_as = 1 → rs2.val < 32) ∧
-    -- immediate rs2
-    (rs2_as = 0 →
-      -- immediate fits 24 bits
-      rs2.val < 2 ^ 24 ∧
-      -- immediate is a sign-extended 12-bit value
-      (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
-    -- unused parameters
-    xd = 1 ∧ xf = 0 ∧ xg = 0
-
-end Interaction

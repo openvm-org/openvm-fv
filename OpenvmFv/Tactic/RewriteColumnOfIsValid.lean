@@ -1,5 +1,5 @@
 import Mathlib
-import OpenvmFv.Tactic.Util
+import LeanZKCircuit.Command.util
 
 open Lean Parser
 set_option hygiene false in
