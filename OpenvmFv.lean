@@ -54,7 +54,7 @@ import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.ALU
-import OpenvmFv.Spec.execute_rypte
+import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh

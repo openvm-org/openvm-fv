@@ -82,24 +82,37 @@ lemma execute_BNE_pure_equiv
   ]
 
   simp [Local.execute_BTYPE]
-  rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by { simp [regidx_to_fin] })]
-  simp [read_xreg_write_reg_state_nextPC _ h_input_r2]
-  rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by { simp [regidx_to_fin] })]
-  simp [read_xreg_write_reg_state_nextPC _ h_input_r1]
+  rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by {
+    simp [regidx_to_fin]
+  })]
+  rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
+  simp
+  rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by {
+    simp [regidx_to_fin]
+  })]
+  rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
+  simp
   by_cases h_eq: bne_input.r2_val = bne_input.r1_val
-  . simp [h_eq, execute_BNE_pure]
+  . simp [
+      h_eq,
+      execute_BNE_pure
+    ]
   . simp [h_eq]
     rewrite [readReg_state (writeReg_read_diff h_input_pc (by trivial))]
     simp [←Local.jump_to_equiv, jump_to_simplified_equiv, jump_to_simplified]
     rewrite [writeReg_read_diff h_input_misa (by trivial)]
     simp
 
-    by_cases h_throws : (execute_BNE_pure bne_input).throws <;>
-    simp [execute_BNE_pure, h_eq, h_input_imm] at h_throws <;>
-    simp [h_throws, execute_BNE_pure, h_eq, h_input_imm]
-    . by_cases h_success : (execute_BNE_pure bne_input).success
+    by_cases h_throws : (execute_BNE_pure bne_input).throws
+    . simp [execute_BNE_pure, h_eq, h_input_imm] at h_throws
+      simp [h_throws, execute_BNE_pure, h_eq, h_input_imm]
+    . simp [execute_BNE_pure, h_eq, h_input_imm] at h_throws
+      simp [h_throws, execute_BNE_pure, h_eq, h_input_imm]
+      by_cases h_success : (execute_BNE_pure bne_input).success
       . simp [execute_BNE_pure, h_eq, h_throws, h_input_imm] at h_success
-        iterate 3 rw [ite_cond_eq_false (h := by grind)]
-        grind [writeReg_write_same]
+        rw [ite_cond_eq_false, ite_cond_eq_false, ite_cond_eq_false]
+        . simp [writeReg_write_same]
+        all_goals cases h_success <;> simp [*]
       . simp [execute_BNE_pure, h_eq, h_throws, h_input_imm] at h_success
-        iterate 3 rw [ite_cond_eq_true (h := by grind)]
+        rw [ite_cond_eq_true, ite_cond_eq_true, ite_cond_eq_true]
+        all_goals simp [h_success]
