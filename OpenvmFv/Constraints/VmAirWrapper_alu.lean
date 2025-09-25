@@ -321,7 +321,7 @@ namespace VmAirWrapper_alu.constraints
         rfl
 
       @[VmAirWrapper_alu_constraint_and_interaction_simplification]
-      def rangeBus_row [Field ExtF]
+      def rangeCheckerBus_row [Field ExtF]
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
       : List (FBB × List FBB) :=
@@ -338,7 +338,7 @@ namespace VmAirWrapper_alu.constraints
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (h : VmAirWrapper_alu.extraction.constrain_interactions air)
       :
-        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeBus_row air row)
+        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
         unfold VmAirWrapper_alu.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -403,7 +403,7 @@ namespace VmAirWrapper_alu.constraints
         air.buses = fun index ↦
         if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
         else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeBus_row air)
+        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
         else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
         else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
         else []
@@ -648,24 +648,24 @@ namespace VmAirWrapper_alu.constraints
           (memoryBus_row air row).attach
       List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
 
-    lemma rangeBus_row_length [Field ExtF]
+    lemma rangeCheckerBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_alu FBB ExtF} {row : ℕ}
-      (h_in : entry ∈ rangeBus_row air row)
+      (h_in : entry ∈ rangeCheckerBus_row air row)
     :
       entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
     := by
-      unfold rangeBus_row at *; simp_all
+      unfold rangeCheckerBus_row at *; simp_all
       grind
 
     @[VmAirWrapper_alu_constraint_and_interaction_simplification]
-    def _rangeBus_row [Field ExtF]
+    def _rangeCheckerBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { row' // row' ∈ rangeBus_row air row} =>
-          (x.1.1, Vector.mk x.1.2.toArray (rangeBus_row_length x.2)))
-          (rangeBus_row air row).attach
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
     /-- The ALU-specific instance of the read-instruction bus properties -/
@@ -754,7 +754,7 @@ namespace VmAirWrapper_alu.constraints
     : List (FBB × List FBB) :=
       executionBus_row air row ++
       memoryBus_row air row ++
-      rangeBus_row air row ++
+      rangeCheckerBus_row air row ++
       readInstructionBus_row air row ++
       bitwiseBus_row air row
 
@@ -764,7 +764,7 @@ namespace VmAirWrapper_alu.constraints
     : Prop :=
       assumptions (_executionBus_row air row) ∧
       assumptions (_memoryBus_row air row) ∧
-      assumptions (_rangeBus_row air row) ∧
+      assumptions (_rangeCheckerBus_row air row) ∧
       assumptions (_readInstructionBus_row air row) ∧
       assumptions (_bitwiseBus_row air row)
 
@@ -773,7 +773,7 @@ namespace VmAirWrapper_alu.constraints
     : Prop :=
       propertiesToAssume (_executionBus_row air row) ∧
       propertiesToAssume (_memoryBus_row air row) ∧
-      propertiesToAssume (_rangeBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
       propertiesToAssume (_readInstructionBus_row air row) ∧
       propertiesToAssume (_bitwiseBus_row air row)
 
@@ -782,77 +782,10 @@ namespace VmAirWrapper_alu.constraints
     : Prop :=
       propertiesToAssert (_executionBus_row air row) ∧
       propertiesToAssert (_memoryBus_row air row) ∧
-      propertiesToAssert (_rangeBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
       propertiesToAssert (_readInstructionBus_row air row) ∧
       propertiesToAssert (_bitwiseBus_row air row)
 
   end bus_entries
 
 end VmAirWrapper_alu.constraints
-
-namespace VmAirWrapper_alu.auxiliaries
-
-lemma byte_xor_as_and
-  {a b : ℕ}
-  (ub_a : a < 256)
-  (ub_b : b < 256)
-:
-  a ^^^ b = (a + b) - 2 * (a &&& b)
-:= by
-  have lt_b_and_c := @Nat.and_le_left a b
-  have bv_xor_as_and : forall (a b : BitVec 9), a ^^^ b = (a + b) - 2 * (a &&& b) := by bv_decide
-  specialize bv_xor_as_and { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
-  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_and
-  rw [Nat.mod_eq_of_lt (a := 2 * (a &&& b)) (by omega)] at bv_xor_as_and
-  have : (512 - 2 * (a &&& b) + (a + b)) % 512 < 256 := by rw [← bv_xor_as_and]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
-  have : (512 - 2 * (a &&& b) + (a + b)) % 512 = (a + b) - 2 * (a &&& b) := by omega
-  rw [this] at bv_xor_as_and
-  exact bv_xor_as_and
-
-lemma byte_xor_as_or
-  {a b : ℕ}
-  (ub_a : a < 256)
-  (ub_b : b < 256)
-:
-  a ^^^ b = 2 * (a ||| b) - (a + b)
-:= by
-  have := @Nat.left_le_or a b
-  have := @Nat.or_lt_two_pow a b 8 ub_a ub_b
-  have bv_xor_as_or : forall (a b : BitVec 9), a ^^^ b = 2 * (a ||| b) - (a + b) := by bv_decide
-  specialize bv_xor_as_or { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
-  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_or
-  rw [Nat.mod_eq_of_lt (a := a + b) (by omega)] at bv_xor_as_or
-  have : (512 - (a + b) + 2 * (a ||| b)) % 512 < 256 := by rw [← bv_xor_as_or]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
-  have : (512 - (a + b) + 2 * (a ||| b)) % 512 = 2 * (a ||| b) - (a + b) := by omega
-  rw [this] at bv_xor_as_or
-  exact bv_xor_as_or
-
-lemma FBB_xor_as_and
-  {a b c : FBB}
-  (ub_b : b.val < 256)
-  (ub_c : c.val < 256)
-  (h_eq : (b + c - 2 * a).val = b.val ^^^ c.val)
-:
-  a.val < 256 ∧ a.val = b.val &&& c.val
-:= by
-  have := @Nat.and_le_left b c
-  have := @Nat.and_le_right b c
-  rw [byte_xor_as_and ub_b ub_c] at h_eq
-  simp [Fin.add_def, Fin.sub_def, Fin.mul_def] at *
-  grind
-
-lemma FBB_xor_as_or
-  {a b c : FBB}
-  (ub_b : b.val < 256)
-  (ub_c : c.val < 256)
-  (h_eq : (2 * a - b - c).val = b.val ^^^ c.val)
-:
-  a.val < 256 ∧ a.val = b.val ||| c.val
-:= by
-  have := @Nat.or_lt_two_pow b c 8 ub_b ub_c
-  have := @Nat.left_le_or b c
-  have := @Nat.right_le_or b c
-  rw [byte_xor_as_or ub_b ub_c] at h_eq
-  grind
-
-end VmAirWrapper_alu.auxiliaries

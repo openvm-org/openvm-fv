@@ -138,3 +138,14 @@ def Valid_MultiplicationCoreAir_4_8.ctx
           c.class_offset --opcode
         )
     )
+
+@[openvm_encapsulation]
+lemma Valid_MultiplicationCoreAir_4_8.ctx.instruction.opcode_def
+  [Field F]
+  (c : Valid_MultiplicationCoreAir_4_8 F)
+  (row rotation: ℕ)
+: 592 =
+  (c.ctx row rotation).instruction.opcode
+:= by
+  unfold Valid_MultiplicationCoreAir_4_8.ctx Valid_MultiplicationCoreAir_4_8.class_offset
+  simp

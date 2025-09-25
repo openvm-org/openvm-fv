@@ -398,7 +398,7 @@ namespace VmAirWrapper_lt.constraints
         rfl
 
       @[VmAirWrapper_lt_constraint_and_interaction_simplification]
-      def rangeBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
+      def rangeCheckerBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
         [
           (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
           (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
@@ -412,7 +412,7 @@ namespace VmAirWrapper_lt.constraints
         (air : Valid_VmAirWrapper_lt F ExtF)
         (h : VmAirWrapper_lt.extraction.constrain_interactions air)
       :
-        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeBus_row air row)
+        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -469,7 +469,7 @@ namespace VmAirWrapper_lt.constraints
         air.buses = fun index ↦
         if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
         else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeBus_row air)
+        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
         else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
         else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
         else []
@@ -708,24 +708,24 @@ section bus_entries
           (memoryBus_row air row).attach
       List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
 
-    lemma rangeBus_row_length [Field ExtF]
+    lemma rangeCheckerBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
-      (h_in : entry ∈ rangeBus_row air row)
+      (h_in : entry ∈ rangeCheckerBus_row air row)
     :
       entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
     := by
-      unfold rangeBus_row at *; simp_all
+      unfold rangeCheckerBus_row at *; simp_all
       grind
 
     @[VmAirWrapper_lt_constraint_and_interaction_simplification]
-    def _rangeBus_row [Field ExtF]
+    def _rangeCheckerBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { row' // row' ∈ rangeBus_row air row} =>
-          (x.1.1, Vector.mk x.1.2.toArray (rangeBus_row_length x.2)))
-          (rangeBus_row air row).attach
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
     /-- The ALU-specific instance of the read-instruction bus properties -/
@@ -812,7 +812,7 @@ section bus_entries
     : List (FBB × List FBB) :=
       executionBus_row air row ++
       memoryBus_row air row ++
-      rangeBus_row air row ++
+      rangeCheckerBus_row air row ++
       readInstructionBus_row air row ++
       bitwiseBus_row air row
 
@@ -822,7 +822,7 @@ section bus_entries
     : Prop :=
       assumptions (_executionBus_row air row) ∧
       assumptions (_memoryBus_row air row) ∧
-      assumptions (_rangeBus_row air row) ∧
+      assumptions (_rangeCheckerBus_row air row) ∧
       assumptions (_readInstructionBus_row air row) ∧
       assumptions (_bitwiseBus_row air row)
 
@@ -831,7 +831,7 @@ section bus_entries
     : Prop :=
       propertiesToAssume (_executionBus_row air row) ∧
       propertiesToAssume (_memoryBus_row air row) ∧
-      propertiesToAssume (_rangeBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
       propertiesToAssume (_readInstructionBus_row air row) ∧
       propertiesToAssume (_bitwiseBus_row air row)
 
@@ -840,7 +840,7 @@ section bus_entries
     : Prop :=
       propertiesToAssert (_executionBus_row air row) ∧
       propertiesToAssert (_memoryBus_row air row) ∧
-      propertiesToAssert (_rangeBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
       propertiesToAssert (_readInstructionBus_row air row) ∧
       propertiesToAssert (_bitwiseBus_row air row)
 

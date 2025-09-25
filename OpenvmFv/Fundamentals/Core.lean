@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option maxHeartbeats 1_000_000_000
+
 /-- A prime finite field has no zero divisors -/
 instance Fin.noZeroDivisors_of_prime (p : ℕ)
     [hp : Fact (Nat.Prime (p + 1))] : NoZeroDivisors (Fin (p + 1)) := by
@@ -14,7 +16,7 @@ lemma ext_iff {n : ℕ} {x y : BitVec n} : x = y ↔ ∀ i : Fin n, x[i] = y[i] 
     exact heq ⟨ j, lt_j ⟩
 
 /-- `BitVec` extension, signed and unsigned -/
-def extend {m : ℕ} (bv : BitVec m) (n : ℕ) (sgn : Prop) [Decidable sgn] :=
+def extend {m : ℕ} (bv : BitVec m) (n : ℕ) (sgn : Bool) :=
   (if sgn then signExtend else setWidth) n bv
 
 /-- Equality of `BitVec` concatenation, equal lengths -/
@@ -36,6 +38,41 @@ lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
     BitVec.setWidth n
       (BitVec.extractLsb ((n - 1) + shift) shift (BitVec.signExtend (n + shift) bv))
     := by grind
+
+lemma xor_as_and
+  {a b : ℕ}
+  (ub_a : a < 256)
+  (ub_b : b < 256)
+:
+  a ^^^ b = (a + b) - 2 * (a &&& b)
+:= by
+  have lt_b_and_c := @Nat.and_le_left a b
+  have bv_xor_as_and : forall (a b : BitVec 9), a ^^^ b = (a + b) - 2 * (a &&& b) := by bv_decide
+  specialize bv_xor_as_and { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
+  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_and
+  rw [Nat.mod_eq_of_lt (a := 2 * (a &&& b)) (by omega)] at bv_xor_as_and
+  have : (512 - 2 * (a &&& b) + (a + b)) % 512 < 256 := by rw [← bv_xor_as_and]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
+  have : (512 - 2 * (a &&& b) + (a + b)) % 512 = (a + b) - 2 * (a &&& b) := by omega
+  rw [this] at bv_xor_as_and
+  exact bv_xor_as_and
+
+lemma xor_as_or
+  {a b : ℕ}
+  (ub_a : a < 256)
+  (ub_b : b < 256)
+:
+  a ^^^ b = 2 * (a ||| b) - (a + b)
+:= by
+  have := @Nat.left_le_or a b
+  have := @Nat.or_lt_two_pow a b 8 ub_a ub_b
+  have bv_xor_as_or : forall (a b : BitVec 9), a ^^^ b = 2 * (a ||| b) - (a + b) := by bv_decide
+  specialize bv_xor_as_or { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
+  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_or
+  rw [Nat.mod_eq_of_lt (a := a + b) (by omega)] at bv_xor_as_or
+  have : (512 - (a + b) + 2 * (a ||| b)) % 512 < 256 := by rw [← bv_xor_as_or]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
+  have : (512 - (a + b) + 2 * (a ||| b)) % 512 = 2 * (a ||| b) - (a + b) := by omega
+  rw [this] at bv_xor_as_or
+  exact bv_xor_as_or
 
 end BitVec
 
@@ -64,6 +101,38 @@ lemma split_nzp (a : ℤ) (P : Prop) :
     . apply an (by omega)
 
 end Int
+
+namespace Nat.DivMod
+
+lemma div_8 (a b : ℕ) :
+  (a / 256 + b) / 256 = (a + b * 256) / 65536
+    := by grind
+
+lemma div_16 (a b : ℕ) :
+  (a / 65536 + b) / 256 = (a + b * 65536) / 16777216
+    := by grind
+
+lemma div_24 (a b : ℕ) :
+  (a / 16777216 + b) / 256 = (a + b * 16777216) / 4294967296
+    := by grind
+
+lemma join_8 (a b : ℕ) :
+  a % 256 + (a / 256 + b) % 256 * 256 = (a + b * 256) % 65536
+    := by grind
+
+lemma join_16 (a b : ℕ) :
+  a % 65536 + (a / 65536 + b) % 256 * 65536 = (a + b * 65536) % 16777216
+    := by grind
+
+lemma join_24 (a b : ℕ) :
+  a % 16777216 + (a / 16777216 + b) % 256 * 16777216 = (a + b * 16777216) % 4294967296
+    := by grind
+
+lemma join_24' (a : ℕ) :
+  a % 16777216 + (a / 16777216) % 256 * 16777216 = a % 4294967296
+    := by grind
+
+end Nat.DivMod
 
 section auxiliaries
 

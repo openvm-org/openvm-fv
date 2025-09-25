@@ -300,38 +300,56 @@ lemma MulHCoreAir_4_8.c_sign_def
   c.c_sign row rotation
 := rfl
 
+def Valid_MulHCoreAir_4_8.class_offset
+  [Field F]
+  (c : Valid_MulHCoreAir_4_8 F)
+: F :=
+  593
 
--- def Valid_MulHCoreAir_4_8.class_offset
---   [Field F]
---   (c : Valid_MulHCoreAir_4_8 F)
--- : F :=
---   592
+def Valid_MulHCoreAir_4_8.ctx
+  [Field F]
+  (c : Valid_MulHCoreAir_4_8 F)
+  (row rotation: ℕ)
+: AdapterAirContext F :=
+  AdapterAirContext.mk
+    .none --to_pc
+    λ x y => match x,y with -- reads
+      | 0, 0 => c.b_0 row rotation
+      | 0, 1 => c.b_1 row rotation
+      | 0, 2 => c.b_2 row rotation
+      | 0, 3 => c.b_3 row rotation
+      | 1, 0 => c.c_0 row rotation
+      | 1, 1 => c.c_1 row rotation
+      | 1, 2 => c.c_2 row rotation
+      | 1, 3 => c.c_3 row rotation
+    λ x => match x with --writes
+      | 0 => c.a_0 row rotation
+      | 1 => c.a_1 row rotation
+      | 2 => c.a_2 row rotation
+      | 3 => c.a_3 row rotation
+    (
+      MinimalInstruction.mk
+        (c.is_valid row rotation) --is_valid
+        (
+          c.class_offset + --opcode
+          (
+            c.opcode_mulhsu_flag row rotation * 1 +
+            c.opcode_mulhu_flag row rotation * 2
+          )
+        )
+    )
 
--- def Valid_MulHCoreAir_4_8.ctx
---   [Field F]
---   (c : Valid_MulHCoreAir_4_8 F)
---   (row rotation: ℕ)
--- : AdapterAirContext F :=
---   AdapterAirContext.mk
---     .none --to_pc
---     λ x y => match x,y with -- reads
---       | 0, 0 => c.b_0 row rotation
---       | 0, 1 => c.b_1 row rotation
---       | 0, 2 => c.b_2 row rotation
---       | 0, 3 => c.b_3 row rotation
---       | 1, 0 => c.c_0 row rotation
---       | 1, 1 => c.c_1 row rotation
---       | 1, 2 => c.c_2 row rotation
---       | 1, 3 => c.c_3 row rotation
---     λ x => match x with --writes
---       | 0 => c.a_0 row rotation
---       | 1 => c.a_1 row rotation
---       | 2 => c.a_2 row rotation
---       | 3 => c.a_3 row rotation
---     (
---       MinimalInstruction.mk
---         (c.is_valid row rotation) --is_valid
---         (
---           c.class_offset --opcode
---         )
---     )
+@[openvm_encapsulation]
+lemma Valid_MulHCoreAir_4_8.ctx.instruction.opcode_def
+  [Field F]
+  (c : Valid_MulHCoreAir_4_8 F)
+  (row rotation: ℕ)
+: 593 +
+  (
+    c.opcode_mulhsu_flag row rotation +
+    c.opcode_mulhu_flag row rotation * 2
+  ) =
+  (c.ctx row rotation).instruction.opcode
+:= by
+  unfold Valid_MulHCoreAir_4_8.ctx Valid_MulHCoreAir_4_8.class_offset
+  simp

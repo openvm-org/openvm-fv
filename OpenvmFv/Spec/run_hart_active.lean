@@ -951,18 +951,6 @@ lemma effectivePrivilege_instructionFetch
     pure, EStateM.pure
   ]
 
-lemma architecture_backwards_mstatus_SXL
-:
-  LeanRV32D.Functions.architecture_backwards (LeanRV32D.Functions.get_mstatus_SXL mstatus_val) state =
-  EStateM.Result.ok Architecture.RV32 state
-:= by
-  simp [
-    LeanRV32D.Functions.architecture_backwards,
-    LeanRV32D.Functions.get_mstatus_SXL,
-    LeanRV32D.Functions.architecture_forwards,
-    pure, EStateM.pure
-  ]
-
 -- -- example (b: BitVec 1) :
 -- --   0#3 ++ b = 0#4
 -- -- := by
@@ -981,7 +969,6 @@ lemma extract_all_satp
   ]
 
 lemma translationMode
-  (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
   (h_satp: state.regs.get? Register.satp = .some satp_val)
 :
   LeanRV32D.Functions.translationMode cur_privilege_val state =
@@ -1001,7 +988,7 @@ lemma translationMode
   by_cases h: cur_privilege_val == Privilege.Machine
   . simp_all
   . simp_all [
-      readReg_state, architecture_backwards_mstatus_SXL,
+      readReg_state,
       LeanRV32D.Functions.satpMode_of_bits,
       LeanRV32D.Functions._get_Satp32_Mode,
       LeanRV32D.Functions.Mk_Satp32,

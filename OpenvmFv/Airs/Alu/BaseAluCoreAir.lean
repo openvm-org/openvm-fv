@@ -501,7 +501,6 @@ def Valid_BaseAluCoreAir.ctx
         )
     )
 
-
 @[openvm_encapsulation]
 lemma BaseAluCoreAir.ctx.instruction.opcode_def
   [Field F]

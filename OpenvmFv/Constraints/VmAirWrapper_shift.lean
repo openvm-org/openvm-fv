@@ -1485,7 +1485,7 @@ namespace VmAirWrapper_shift.constraints
         rfl
 
       @[VmAirWrapper_shift_constraint_and_interaction_simplification]
-      def rangeBus_row (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : List (F × List F) :=
+      def rangeCheckerBus_row (air : Valid_VmAirWrapper_shift F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
           [(air.core.c_0 row 0 - air.core.limb_shift row 0 3 * 8 - air.core.bit_shift row 0) * 1950351361, 3]),
         (air.core.is_valid row 0, [air.core.bit_shift_carry_0 row 0, air.core.bit_shift row 0]),
@@ -1503,7 +1503,7 @@ namespace VmAirWrapper_shift.constraints
         (air : Valid_VmAirWrapper_shift F ExtF)
         (h : VmAirWrapper_shift.extraction.constrain_interactions air)
       :
-        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeBus_row air row)
+        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
         unfold VmAirWrapper_shift.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -1550,7 +1550,7 @@ namespace VmAirWrapper_shift.constraints
         air.buses = fun index ↦
         if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
         else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeBus_row air)
+        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
         else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
         else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
         else []
@@ -1888,24 +1888,24 @@ namespace VmAirWrapper_shift.constraints
           (memoryBus_row air row).attach
       List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
 
-    lemma rangeBus_row_length [Field ExtF]
+    lemma rangeCheckerBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
-      (h_in : entry ∈ rangeBus_row air row)
+      (h_in : entry ∈ rangeCheckerBus_row air row)
     :
       entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
     := by
-      unfold rangeBus_row at *; simp_all
+      unfold rangeCheckerBus_row at *; simp_all
       grind (splits := 10)
 
     @[VmAirWrapper_shift_constraint_and_interaction_simplification]
-    def _rangeBus_row [Field ExtF]
+    def _rangeCheckerBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { row' // row' ∈ rangeBus_row air row} =>
-          (x.1.1, Vector.mk x.1.2.toArray (rangeBus_row_length x.2)))
-          (rangeBus_row air row).attach
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
     /-- The ALU-specific instance of the read-instruction bus properties -/
@@ -1987,7 +1987,7 @@ namespace VmAirWrapper_shift.constraints
     : List (FBB × List FBB) :=
       executionBus_row air row ++
       memoryBus_row air row ++
-      rangeBus_row air row ++
+      rangeCheckerBus_row air row ++
       readInstructionBus_row air row ++
       bitwiseBus_row air row
 
@@ -1996,7 +1996,7 @@ namespace VmAirWrapper_shift.constraints
     : Prop :=
       assumptions (_executionBus_row air row) ∧
       assumptions (_memoryBus_row air row) ∧
-      assumptions (_rangeBus_row air row) ∧
+      assumptions (_rangeCheckerBus_row air row) ∧
       assumptions (_readInstructionBus_row air row) ∧
       assumptions (_bitwiseBus_row air row)
 
@@ -2004,7 +2004,7 @@ namespace VmAirWrapper_shift.constraints
     : Prop :=
       propertiesToAssume (_executionBus_row air row) ∧
       propertiesToAssume (_memoryBus_row air row) ∧
-      propertiesToAssume (_rangeBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
       propertiesToAssume (_readInstructionBus_row air row) ∧
       propertiesToAssume (_bitwiseBus_row air row)
 
@@ -2012,7 +2012,7 @@ namespace VmAirWrapper_shift.constraints
     : Prop :=
       propertiesToAssert (_executionBus_row air row) ∧
       propertiesToAssert (_memoryBus_row air row) ∧
-      propertiesToAssert (_rangeBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
       propertiesToAssert (_readInstructionBus_row air row) ∧
       propertiesToAssert (_bitwiseBus_row air row)
 

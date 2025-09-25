@@ -80,7 +80,7 @@ lemma non_valid_row_Lt_all_interaction_multiplicities_zero
 :
   (entry ∈ executionBus_row air row ++
            memoryBus_row air row ++
-           rangeBus_row air row ++
+           rangeCheckerBus_row air row ++
            readInstructionBus_row air row → entry.1 = 0) ∧
   (entry ∈ bitwiseBus_row air row →
     entry.1 = 0 ∨
