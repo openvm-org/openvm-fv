@@ -44,6 +44,15 @@ import OpenvmFv.Fundamentals.Interaction
 import OpenvmFv.Fundamentals.RV32D
 import OpenvmFv.Fundamentals.U32
 
+import OpenvmFv.Spec.ALU.add
+import OpenvmFv.Spec.ALU.local
+import OpenvmFv.Spec.ALU.slt
+import OpenvmFv.Spec.ALU.sltu
+import OpenvmFv.Spec.ControlFlow.auipc
+import OpenvmFv.Spec.ControlFlow.bne
+import OpenvmFv.Spec.ControlFlow.jump_to
+import OpenvmFv.Spec.ControlFlow.local
+import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.ALU
 import OpenvmFv.Spec.execute_rypte
 import OpenvmFv.Spec.Lt
@@ -51,7 +60,6 @@ import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
 import OpenvmFv.Spec.Shift
 import OpenvmFv.Spec.run_hart_active
-import OpenvmFv.Spec.JAL.execute_jal
 
 import OpenvmFv.Tactic.AssignColumn
 import OpenvmFv.Tactic.RewriteColumnOfIsValid
