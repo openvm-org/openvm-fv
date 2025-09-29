@@ -48,6 +48,7 @@ import OpenvmFv.Spec.ControlFlow.auipc
 import OpenvmFv.Spec.ControlFlow.bne
 import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
+import OpenvmFv.Spec.ITYPE.addi
 import OpenvmFv.Spec.ITYPE.local
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.RTYPE.add
