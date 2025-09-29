@@ -275,7 +275,7 @@ namespace Interaction
           (rs2_as = 0 →
             -- opcode cannot be SUB
             ¬ entry.opcode = 513 ∧
-            -- immedaite fits 24 bits
+            -- immediate fits 24 bits
             rs2.val < 2^ 24 ∧
             ( entry.opcode ∈ Finset.Icc 517 519 → -- shift opcodes
               -- immediate is a zero-extended 5-bit value

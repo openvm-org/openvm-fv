@@ -1,7 +1,7 @@
-import OpenvmFv.Spec.ALU.local
+import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.rX_bits
 
-structure AddInput where
+structure SllInput where
   -- operands
   r1_val : BitVec 32
   r2_val : BitVec 32
@@ -9,12 +9,12 @@ structure AddInput where
   -- registers
   PC : BitVec 32
 
-structure AddOutput where
+structure SllOutput where
   -- registers
   nextPC : BitVec 32
   rd : Option (Finset.Icc 1 31 × BitVec 32)
 
-def execute_RTYPE_add_pure (input : AddInput) : AddOutput := {
+def execute_RTYPE_sll_pure (input : SllInput) : SllOutput := {
   nextPC := input.PC + 4#32
   rd := if h: input.rd = 0
     then .none
@@ -23,28 +23,28 @@ def execute_RTYPE_add_pure (input : AddInput) : AddOutput := {
         input.rd.val,
         by apply Finset.mem_Icc.mpr; omega
       ⟩,
-      input.r2_val + input.r1_val
+      input.r2_val <<< (input.r1_val.toNat % 32)
     )
-  : AddOutput
+  : SllOutput
 }
 
-lemma execute_RTYPE_add_pure_equiv
-  (add_input : AddInput)
+lemma execute_RTYPE_sll_pure_equiv
+  (sll_input : SllInput)
   (r1 r2 rd: regidx)
-  (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (add_input.r1_val) state)
-  (h_input_r2: read_xreg (regidx_to_fin r2) state = EStateM.Result.ok (add_input.r2_val) state)
-  (h_input_rd: add_input.rd = regidx_to_fin rd)
-  (h_input_pc: state.regs.get? Register.PC = .some add_input.PC)
+  (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (sll_input.r1_val) state)
+  (h_input_r2: read_xreg (regidx_to_fin r2) state = EStateM.Result.ok (sll_input.r2_val) state)
+  (h_input_rd: sll_input.rd = regidx_to_fin rd)
+  (h_input_pc: state.regs.get? Register.PC = .some sll_input.PC)
 :
   (
     do
       Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-      LeanRV32D.Functions.execute (instruction.RTYPE (r1, r2, rd, rop.ADD))
+      LeanRV32D.Functions.execute (instruction.RTYPE (r1, r2, rd, rop.SLL))
   ) state =
-  let add_output := execute_RTYPE_add_pure add_input
+  let sll_output := execute_RTYPE_sll_pure sll_input
   (do
-    Sail.writeReg Register.nextPC add_output.nextPC
-    match add_output.rd with
+    Sail.writeReg Register.nextPC sll_output.nextPC
+    match sll_output.rd with
       | .some (rd, rd_val) => write_xreg rd rd_val
       | .none => pure ()
     pure (ExecutionResult.Retire_Success ())
@@ -78,7 +78,7 @@ lemma execute_RTYPE_add_pure_equiv
   rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
   simp [EStateM.pure]
 
-  simp [execute_RTYPE_add_pure]
+  simp [execute_RTYPE_sll_pure]
 
   obtain ⟨rd⟩ := rd
   by_cases h_zero: rd = 0
@@ -99,5 +99,8 @@ lemma execute_RTYPE_add_pure_equiv
     simp [regidx_to_fin]
     rewrite [dite_cond_eq_false]
     . simp [h_input_rd, regidx_to_fin]
+      simp [
+        Sail.shift_bits_left, Sail.BitVec.extractLsb, log2_xlen
+      ]
     . simp [regidx_to_fin] at *
       omega

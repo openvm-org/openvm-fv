@@ -1,7 +1,7 @@
-import OpenvmFv.Spec.ALU.local
+import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.rX_bits
 
-structure SltInput where
+structure SrlInput where
   -- operands
   r1_val : BitVec 32
   r2_val : BitVec 32
@@ -9,12 +9,12 @@ structure SltInput where
   -- registers
   PC : BitVec 32
 
-structure SltOutput where
+structure SrlOutput where
   -- registers
   nextPC : BitVec 32
   rd : Option (Finset.Icc 1 31 × BitVec 32)
 
-def execute_RTYPE_slt_pure (input : SltInput) : SltOutput := {
+def execute_RTYPE_srl_pure (input : SrlInput) : SrlOutput := {
   nextPC := input.PC + 4#32
   rd := if h: input.rd = 0
     then .none
@@ -23,30 +23,28 @@ def execute_RTYPE_slt_pure (input : SltInput) : SltOutput := {
         input.rd.val,
         by apply Finset.mem_Icc.mpr; omega
       ⟩,
-      if input.r2_val.slt input.r1_val
-      then 1#32
-      else 0#32
+      input.r2_val >>> (input.r1_val.toNat % 32)
     )
-  : SltOutput
+  : SrlOutput
 }
 
-lemma execute_RTYPE_slt_pure_equiv
-  (slt_input : SltInput)
+lemma execute_RTYPE_srl_pure_equiv
+  (srl_input : SrlInput)
   (r1 r2 rd: regidx)
-  (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (slt_input.r1_val) state)
-  (h_input_r2: read_xreg (regidx_to_fin r2) state = EStateM.Result.ok (slt_input.r2_val) state)
-  (h_input_rd: slt_input.rd = regidx_to_fin rd)
-  (h_input_pc: state.regs.get? Register.PC = .some slt_input.PC)
+  (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (srl_input.r1_val) state)
+  (h_input_r2: read_xreg (regidx_to_fin r2) state = EStateM.Result.ok (srl_input.r2_val) state)
+  (h_input_rd: srl_input.rd = regidx_to_fin rd)
+  (h_input_pc: state.regs.get? Register.PC = .some srl_input.PC)
 :
   (
     do
       Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-      LeanRV32D.Functions.execute (instruction.RTYPE (r1, r2, rd, rop.SLT))
+      LeanRV32D.Functions.execute (instruction.RTYPE (r1, r2, rd, rop.SRL))
   ) state =
-  let slt_output := execute_RTYPE_slt_pure slt_input
+  let srl_output := execute_RTYPE_srl_pure srl_input
   (do
-    Sail.writeReg Register.nextPC slt_output.nextPC
-    match slt_output.rd with
+    Sail.writeReg Register.nextPC srl_output.nextPC
+    match srl_output.rd with
       | .some (rd, rd_val) => write_xreg rd rd_val
       | .none => pure ()
     pure (ExecutionResult.Retire_Success ())
@@ -80,7 +78,7 @@ lemma execute_RTYPE_slt_pure_equiv
   rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
   simp [EStateM.pure]
 
-  simp [execute_RTYPE_slt_pure]
+  simp [execute_RTYPE_srl_pure]
 
   obtain ⟨rd⟩ := rd
   by_cases h_zero: rd = 0
@@ -102,15 +100,7 @@ lemma execute_RTYPE_slt_pure_equiv
     rewrite [dite_cond_eq_false]
     . simp [h_input_rd, regidx_to_fin]
       simp [
-        LeanRV32D.Functions.zopz0zI_s,
-        LeanRV32D.Functions.bool_to_bits, LeanRV32D.Functions.bool_bits_forwards
+        Sail.shift_bits_right, Sail.BitVec.extractLsb, log2_xlen
       ]
-      by_cases h_lt: slt_input.r2_val.slt slt_input.r1_val
-      . simp [h_lt]
-        have : slt_input.r2_val.toInt<bslt_input.r1_val.toInt := h_lt
-        simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
-      . simp [h_lt]
-        have : ¬(slt_input.r2_val.toInt<bslt_input.r1_val.toInt) := h_lt
-        simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
     . simp [regidx_to_fin] at *
       omega
