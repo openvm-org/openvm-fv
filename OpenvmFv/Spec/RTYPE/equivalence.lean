@@ -1,5 +1,9 @@
 import OpenvmFv.Spec.ALU
 import OpenvmFv.Spec.RTYPE.add
+import OpenvmFv.Spec.RTYPE.sub
+import OpenvmFv.Spec.RTYPE.xor
+import OpenvmFv.Spec.RTYPE.or
+import OpenvmFv.Spec.RTYPE.and
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -61,6 +65,38 @@ namespace Equivalence.ALU
     : PureSpec.AddInput
   }
 
+  def SubInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.SubInput := {
+    r1_val := wrap_to_word row.b
+    r2_val := wrap_to_word row.c
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.SubInput
+  }
+
+  def XorInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.XorInput := {
+    r1_val := wrap_to_word row.b
+    r2_val := wrap_to_word row.c
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.XorInput
+  }
+
+  def OrInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.OrInput := {
+    r1_val := wrap_to_word row.b
+    r2_val := wrap_to_word row.c
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.OrInput
+  }
+
+  def AndInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AndInput := {
+    r1_val := wrap_to_word row.b
+    r2_val := wrap_to_word row.c
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.AndInput
+  }
+
   def AddOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (add_output : PureSpec.AddOutput) : Prop :=
     is_normalized_word row.b ∧
     is_normalized_word row.c ∧
@@ -72,14 +108,78 @@ namespace Equivalence.ALU
         wrap_to_word row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
+  def SubOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (sub_output : PureSpec.SubOutput) : Prop :=
+    is_normalized_word row.b ∧
+    is_normalized_word row.c ∧
+    sub_output.nextPC = row.next_pc.toNat ∧
+    match sub_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        is_normalized_word row.a ∧
+        wrap_to_word row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
+  def XorOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (xor_output : PureSpec.XorOutput) : Prop :=
+    is_normalized_word row.b ∧
+    is_normalized_word row.c ∧
+    xor_output.nextPC = row.next_pc.toNat ∧
+    match xor_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        is_normalized_word row.a ∧
+        wrap_to_word row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
+  def OrOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (or_output : PureSpec.OrOutput) : Prop :=
+    is_normalized_word row.b ∧
+    is_normalized_word row.c ∧
+    or_output.nextPC = row.next_pc.toNat ∧
+    match or_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        is_normalized_word row.a ∧
+        wrap_to_word row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
+  def AndOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (and_output : PureSpec.AndOutput) : Prop :=
+    is_normalized_word row.b ∧
+    is_normalized_word row.c ∧
+    and_output.nextPC = row.next_pc.toNat ∧
+    match and_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        is_normalized_word row.a ∧
+        wrap_to_word row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
   def ALU_instruction_fields.spec (row : ALU_instruction_fields) : Prop :=
     row.is_valid = 1 → (
       row.opcode ∈ Finset.Icc 512 516 ∧
-      ((row.opcode = 512 ∧ row.non_imm = 1) → (
+      (row.opcode = 512 ∧ row.non_imm = 1 →
         AddOutput_matches_ALU_instruction_fields
           row
           (PureSpec.execute_RTYPE_add_pure (AddInput_of_ALU_instruction_fields row))
-      ))
+      ) ∧
+      (row.opcode = 513 ∧ row.non_imm = 1 →
+        SubOutput_matches_ALU_instruction_fields
+          row
+          (PureSpec.execute_RTYPE_sub_pure (SubInput_of_ALU_instruction_fields row))
+      ) ∧
+      (row.opcode = 514 ∧ row.non_imm = 1 →
+        XorOutput_matches_ALU_instruction_fields
+          row
+          (PureSpec.execute_RTYPE_xor_pure (XorInput_of_ALU_instruction_fields row))
+      ) ∧
+      (row.opcode = 515 ∧ row.non_imm = 1 →
+        OrOutput_matches_ALU_instruction_fields
+          row
+          (PureSpec.execute_RTYPE_or_pure (OrInput_of_ALU_instruction_fields row))
+      ) ∧
+      (row.opcode = 516 ∧ row.non_imm = 1 →
+        AndOutput_matches_ALU_instruction_fields
+          row
+          (PureSpec.execute_RTYPE_and_pure (AndInput_of_ALU_instruction_fields row))
+      )
     )
 
   def ALU_instruction_fields.execution (row : ALU_instruction_fields) : List (FBB × List FBB) := [
@@ -275,37 +375,142 @@ namespace Equivalence.ALU
 
       dsimp only at *
 
-      split_ands
-      . grind
-      . grind
+      split_ands <;> [ grind; grind; skip; skip; skip; skip; skip ]
       . intro h_opcode h_non_imm
         simp [AddOutput_matches_ALU_instruction_fields]
-        split_ands
-        . assumption
-        . assumption
-        . assumption
-        . assumption
-        . assumption
-        . assumption
-        . assumption
-        . assumption
+        split_ands <;>
+        [ assumption; assumption; assumption; assumption;
+          assumption; assumption; assumption; assumption;
+          skip; skip ]
         . simp [AddInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_add_pure]
           simp [← BitVec.toNat_inj]
           omega
         . simp [AddInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_add_pure]
           rewrite [dite_cond_eq_false]
           . simp
-            split_ands
-            . assumption
-            . assumption
-            . assumption
-            . assumption
+            split_ands <;>
+            [ assumption; assumption; assumption; assumption; skip; skip ]
             . specialize non_imm_spec h_non_imm
               unfold execute_RTYPE_pure at non_imm_spec
               simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
               dsimp at non_imm_spec
-              simp [← BitVec.toNat_inj, U32.toNat] at non_imm_spec ⊢
+              assumption
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
+          . simp [wrap_to_regidx]
+            specialize h_bus_wellformedness row (by omega)
+            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+            omega
+      . intro h_opcode h_non_imm
+        simp [SubOutput_matches_ALU_instruction_fields]
+        split_ands <;>
+        [ assumption; assumption; assumption; assumption;
+          assumption; assumption; assumption; assumption;
+          skip; skip ]
+        . simp [SubInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_sub_pure]
+          simp [← BitVec.toNat_inj]
+          omega
+        . simp [SubInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_sub_pure]
+          rewrite [dite_cond_eq_false]
+          . simp
+            split_ands <;>
+            [ assumption; assumption; assumption; assumption; skip; skip ]
+            . specialize non_imm_spec h_non_imm
+              unfold execute_RTYPE_pure at non_imm_spec
+              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+              dsimp at non_imm_spec
+              assumption
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+          . simp [wrap_to_regidx]
+            specialize h_bus_wellformedness row (by omega)
+            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+            omega
+      . intro h_opcode h_non_imm
+        simp [XorOutput_matches_ALU_instruction_fields]
+        split_ands <;>
+        [ assumption; assumption; assumption; assumption;
+          assumption; assumption; assumption; assumption;
+          skip; skip ]
+        . simp [XorInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_xor_pure]
+          simp [← BitVec.toNat_inj]
+          omega
+        . simp [XorInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_xor_pure]
+          rewrite [dite_cond_eq_false]
+          . simp
+            split_ands <;>
+            [ assumption; assumption; assumption; assumption; skip; skip ]
+            . specialize non_imm_spec h_non_imm
+              unfold execute_RTYPE_pure at non_imm_spec
+              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+              dsimp at non_imm_spec
+              assumption
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+          . simp [wrap_to_regidx]
+            specialize h_bus_wellformedness row (by omega)
+            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+            omega
+      . intro h_opcode h_non_imm
+        simp [OrOutput_matches_ALU_instruction_fields]
+        split_ands <;>
+        [ assumption; assumption; assumption; assumption;
+          assumption; assumption; assumption; assumption;
+          skip; skip ]
+        . simp [OrInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_or_pure]
+          simp [← BitVec.toNat_inj]
+          omega
+        . simp [OrInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_or_pure]
+          rewrite [dite_cond_eq_false]
+          . simp
+            split_ands <;>
+            [ assumption; assumption; assumption; assumption; skip; skip ]
+            . specialize non_imm_spec h_non_imm
+              unfold execute_RTYPE_pure at non_imm_spec
+              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+              dsimp at non_imm_spec
+              assumption
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+          . simp [wrap_to_regidx]
+            specialize h_bus_wellformedness row (by omega)
+            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+            omega
+      . intro h_opcode h_non_imm
+        simp [AndOutput_matches_ALU_instruction_fields]
+        split_ands <;>
+        [ assumption; assumption; assumption; assumption;
+          assumption; assumption; assumption; assumption;
+          skip; skip ]
+        . simp [AndInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_and_pure]
+          simp [← BitVec.toNat_inj]
+          omega
+        . simp [AndInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_and_pure]
+          rewrite [dite_cond_eq_false]
+          . simp
+            split_ands <;>
+            [ assumption; assumption; assumption; assumption; skip; skip ]
+            . specialize non_imm_spec h_non_imm
+              unfold execute_RTYPE_pure at non_imm_spec
+              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+              dsimp at non_imm_spec
+              assumption
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_alu_constraint_and_interaction_simplification,

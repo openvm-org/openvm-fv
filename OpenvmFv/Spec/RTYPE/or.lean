@@ -24,7 +24,7 @@ namespace PureSpec
           input.rd.val,
           by apply Finset.mem_Icc.mpr; omega
         ⟩,
-        input.r2_val ||| input.r1_val
+        input.r1_val ||| input.r2_val
       )
     : OrOutput
   }
@@ -40,7 +40,7 @@ namespace PureSpec
     (
       do
         Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-        LeanRV32D.Functions.execute (instruction.RTYPE (r1, r2, rd, rop.OR))
+        LeanRV32D.Functions.execute (instruction.RTYPE (r2, r1, rd, rop.OR))
     ) state =
     let or_output := execute_RTYPE_or_pure or_input
     (do
@@ -72,11 +72,11 @@ namespace PureSpec
       bind, EStateM.instMonad, EStateM.bind
     ]
 
-    rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by simp [regidx_to_fin])]
-    rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
-    simp
     rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by simp [regidx_to_fin])]
     rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
+    simp
+    rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by simp [regidx_to_fin])]
+    rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
     simp [EStateM.pure]
 
     simp [execute_RTYPE_or_pure]
