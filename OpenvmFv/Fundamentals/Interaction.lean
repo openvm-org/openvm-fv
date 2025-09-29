@@ -86,9 +86,13 @@ namespace Interaction
           data_length := 2,
           data := fun ⟨_, pc, timestamp⟩ => #v[pc, timestamp],
 
-          -- Timestamps are always less than `2^29`
-          assumptions := fun ⟨multiplicity, _, timestamp⟩ =>
-                           ¬ multiplicity = 0 → timestamp < 2 ^ 29
+          -- `pc`s are always less than `2^30`,
+          -- timestamps are always less than `2^29`.
+          assumptions :=
+            fun ⟨multiplicity, pc, timestamp⟩ =>
+              ¬ multiplicity = 0 →
+                pc < 2^30 ∧
+                timestamp < 2^29
 
           -- An execution bus entry has no assume/prove properties
           wf_properties := fun _ => True
@@ -262,9 +266,9 @@ namespace Interaction
         -- RTYPE and ITYPE opcodes
         ( entry.opcode ∈ Finset.Icc 512 521 → (
           let rd := entry.xa
-          let rs1 :=  entry.xb
-          let rs2 :=  entry.xc
-          let rs2_as :=  entry.xe
+          let rs1 := entry.xb
+          let rs2 := entry.xc
+          let rs2_as := entry.xe
           -- rd is a nonzero xreg
           rd.val ∈ Finset.Icc 1 31 ∧
           -- rs1 is an xreg
@@ -276,7 +280,7 @@ namespace Interaction
             -- opcode cannot be SUB
             ¬ entry.opcode = 513 ∧
             -- immediate fits 24 bits
-            rs2.val < 2^ 24 ∧
+            rs2.val < 2^24 ∧
             ( entry.opcode ∈ Finset.Icc 517 519 → -- shift opcodes
               -- immediate is a zero-extended 5-bit value
               (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat)
@@ -287,21 +291,20 @@ namespace Interaction
             )
           ) ∧
           -- unused parameters
-           entry.xd = 1 ∧  entry.xf = 0 ∧  entry.xg = 0
+          entry.xd = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
         ) ∧
         -- MUL, MULH, and DIVREM opcodes
         ( entry.opcode ∈ Finset.Icc 592 599 → (
-          let rd :=  entry.xa
-          let rs1 :=  entry.xb
-          let rs2 :=  entry.xc
+          let rd := entry.xa
+          let rs1 := entry.xb
+          let rs2 := entry.xc
           -- rd is a nonzero xreg
           rd.val ∈ Finset.Icc 1 31 ∧
           -- rs1 and rs2 are xregs
           rs1.val < 32 ∧ rs2.val < 32 ∧
           -- unused parameters
-           entry.xd = 1 ∧  entry.xe = 0 ∧  entry.xf = 0 ∧  entry.xg = 0
+          entry.xd = 1 ∧ entry.xe = 0 ∧ entry.xf = 0 ∧ entry.xg = 0
         ))
-
 
       /-- Read-instruction bus entry instance -/
       @[simp, grind]

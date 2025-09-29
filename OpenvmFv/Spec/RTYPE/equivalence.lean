@@ -1,6 +1,8 @@
 import OpenvmFv.Spec.ALU
 import OpenvmFv.Spec.RTYPE.add
 
+set_option maxHeartbeats 1_000_000_000
+
 namespace Equivalence.ALU
 
   structure ALU_instruction_fields where
@@ -31,7 +33,7 @@ namespace Equivalence.ALU
     c : Fin 4 → FBB
 
     range_checked_vals : Fin 6 → FBB
-    bitwise_vals : Fin 5 → Fin 4 → FBB
+    bitwise_vals : Fin 5 → Fin 3 → FBB
 
   def wrap_to_word (vals : Fin 4 → FBB) : BitVec 32 :=
     (@BabyBear.toU32
@@ -108,11 +110,11 @@ namespace Equivalence.ALU
   ]
 
   def ALU_instruction_fields.bitwise (row : ALU_instruction_fields) : List (FBB × List FBB) := [
-    (row.is_valid, [row.bitwise_vals 0 0, row.bitwise_vals 0 1, row.bitwise_vals 0 2, row.bitwise_vals 0 3]),
-    (row.is_valid, [row.bitwise_vals 1 0, row.bitwise_vals 1 1, row.bitwise_vals 1 2, row.bitwise_vals 1 3]),
-    (row.is_valid, [row.bitwise_vals 2 0, row.bitwise_vals 2 1, row.bitwise_vals 2 2, row.bitwise_vals 2 3]),
-    (row.is_valid, [row.bitwise_vals 3 0, row.bitwise_vals 3 1, row.bitwise_vals 3 2, row.bitwise_vals 3 3]),
-    (row.is_valid - row.non_imm, [row.bitwise_vals 4 0, row.bitwise_vals 4 1, row.bitwise_vals 4 2, row.bitwise_vals 4 3]),
+    (row.is_valid, [row.bitwise_vals 0 0, row.bitwise_vals 0 1, row.bitwise_vals 0 2, 1]),
+    (row.is_valid, [row.bitwise_vals 1 0, row.bitwise_vals 1 1, row.bitwise_vals 1 2, 1]),
+    (row.is_valid, [row.bitwise_vals 2 0, row.bitwise_vals 2 1, row.bitwise_vals 2 2, 1]),
+    (row.is_valid, [row.bitwise_vals 3 0, row.bitwise_vals 3 1, row.bitwise_vals 3 2, 1]),
+    (row.is_valid - row.non_imm, [row.bitwise_vals 4 0, row.bitwise_vals 4 1, row.bitwise_vals 4 2, 0]),
   ]
 
   def bus_from_instruction_fields (rows : List ALU_instruction_fields) : ℕ → List (FBB × List FBB) :=
@@ -176,29 +178,25 @@ namespace Equivalence.ALU
         | (0, 0) => air.core.x_0 row 0
         | (0, 1) => air.core.y_0 row 0
         | (0, 2) => air.core.x_xor_y_0 row 0
-        | (0, 3) => 1
         | (1, 0) => air.core.x_1 row 0
         | (1, 1) => air.core.y_1 row 0
         | (1, 2) => air.core.x_xor_y_1 row 0
-        | (1, 3) => 1
         | (2, 0) => air.core.x_2 row 0
         | (2, 1) => air.core.y_2 row 0
         | (2, 2) => air.core.x_xor_y_2 row 0
-        | (2, 3) => 1
         | (3, 0) => air.core.x_3 row 0
         | (3, 1) => air.core.y_3 row 0
         | (3, 2) => air.core.x_xor_y_3 row 0
-        | (3, 3) => 1
         | (4, 0) => air.core.c_0 row 0
         | (4, 1) => air.core.c_1 row 0
         | (4, 2) => 0
-        | (4, 3) => 0
       : ALU_instruction_fields
     })
 
   theorem alu_spec [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
     (h_constraints : allHold_allRows air)
+    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_alu.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_alu.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List ALU_instruction_fields,
@@ -239,7 +237,6 @@ namespace Equivalence.ALU
       by_cases h_index: index = BitwiseBus
       . simp [h_index, List.flatMap_map]
       . simp [*]
-      done
     . apply List.forall_iff_forall_mem.mpr
       intro instruction_fields h_instruction_fields
       unfold ALU_instruction_fields.spec
@@ -260,6 +257,8 @@ namespace Equivalence.ALU
         (h_bus_wellformedness row (by omega))
 
       have ⟨
+        h_pc,
+        h_timestamp,
         ⟨h_a0, h_a1, h_a2, h_a3, h_b0, h_b1, h_b2, h_b3, h_c0, h_c1, h_c2, h_c3⟩,
         h_opcodes,
         h_imm_binary,
@@ -271,6 +270,7 @@ namespace Equivalence.ALU
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
 
       dsimp only at *
@@ -290,7 +290,8 @@ namespace Equivalence.ALU
         . assumption
         . assumption
         . simp [AddInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_add_pure]
-          sorry
+          simp [← BitVec.toNat_inj]
+          omega
         . simp [AddInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_add_pure]
           rewrite [dite_cond_eq_false]
           . simp
@@ -303,31 +304,17 @@ namespace Equivalence.ALU
               unfold execute_RTYPE_pure at non_imm_spec
               simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
               dsimp at non_imm_spec
-              simp [
-                Nat.mod_eq_of_lt h_a0,
-                Nat.mod_eq_of_lt h_a1,
-                Nat.mod_eq_of_lt h_a2,
-                Nat.mod_eq_of_lt h_a3,
-                Nat.mod_eq_of_lt h_b0,
-                Nat.mod_eq_of_lt h_b1,
-                Nat.mod_eq_of_lt h_b2,
-                Nat.mod_eq_of_lt h_b3,
-                Nat.mod_eq_of_lt h_c0,
-                Nat.mod_eq_of_lt h_c1,
-                Nat.mod_eq_of_lt h_c2,
-                Nat.mod_eq_of_lt h_c3,
-              ]
-              rewrite [add_comm]
-              convert non_imm_spec using 7
-              . simp [Nat.mod_eq_of_lt h_a0]
-              . simp [Fin.ext_iff, Nat.mod_eq_of_lt h_a1]
-              simp [execute_RTYPE_pure, h_opcode, ALU.ValidRows.rop_of_ALU_opcode]
-              done
-            done
-          . -- rd != 0
-            done
-          done
-      done
-    done
+              simp [← BitVec.toNat_inj, U32.toNat] at non_imm_spec ⊢
+              omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+          . simp [wrap_to_regidx]
+            specialize h_bus_wellformedness row (by omega)
+            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+            omega
 
 end Equivalence.ALU

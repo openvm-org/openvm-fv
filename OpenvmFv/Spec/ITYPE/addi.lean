@@ -2,6 +2,7 @@ import OpenvmFv.Spec.ITYPE.local
 import OpenvmFv.Spec.rX_bits
 
 namespace PureSpec
+
   structure AddiInput where
     -- operands
     r1_val : BitVec 32
@@ -29,7 +30,7 @@ namespace PureSpec
     : AddiOutput
   }
 
-  lemma execute_RTYPE_add_pure_equiv
+  lemma execute_ITYPE_add_pure_equiv
     (addi_input : AddiInput)
     (r1 rd: regidx)
     (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (addi_input.r1_val) state)
@@ -72,7 +73,6 @@ namespace PureSpec
       bind, EStateM.instMonad, EStateM.bind
     ]
 
-
     rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by simp [regidx_to_fin])]
     rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
     simp [EStateM.pure]
@@ -100,4 +100,5 @@ namespace PureSpec
       . simp [h_input_rd, regidx_to_fin, h_input_imm, Local.sign_extend_equiv]
       . simp [regidx_to_fin] at *
         omega
+
 end PureSpec
