@@ -44,8 +44,26 @@ import OpenvmFv.Fundamentals.Interaction
 import OpenvmFv.Fundamentals.RV32D
 import OpenvmFv.Fundamentals.U32
 
+import OpenvmFv.Spec.ControlFlow.auipc
+import OpenvmFv.Spec.ControlFlow.bne
+import OpenvmFv.Spec.ControlFlow.jump_to
+import OpenvmFv.Spec.ControlFlow.local
+import OpenvmFv.Spec.ITYPE.addi
+import OpenvmFv.Spec.ITYPE.local
+import OpenvmFv.Spec.JAL.execute_jal
+import OpenvmFv.Spec.RTYPE.add
+import OpenvmFv.Spec.RTYPE.and
+import OpenvmFv.Spec.RTYPE.equivalence
+import OpenvmFv.Spec.RTYPE.local
+import OpenvmFv.Spec.RTYPE.or
+import OpenvmFv.Spec.RTYPE.sll
+import OpenvmFv.Spec.RTYPE.slt
+import OpenvmFv.Spec.RTYPE.sra
+import OpenvmFv.Spec.RTYPE.srl
+import OpenvmFv.Spec.RTYPE.sub
+import OpenvmFv.Spec.RTYPE.xor
 import OpenvmFv.Spec.ALU
-import OpenvmFv.Spec.execute_rypte
+import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh

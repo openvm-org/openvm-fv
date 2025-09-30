@@ -10,6 +10,6 @@ set_option linter.unusedVariables false
 #define_subair "VariableRangeCols" using "openvm_encapsulation" where
   Column["mult"]
 
-#define_air? "VariableRangeCheckerAir" using "openvm_encapsulation" where
+#define_air "VariableRangeCheckerAir" using "openvm_encapsulation" where
   MainSubAir["main_cols" : "VariableRangeCols" width := 1]
   PreprocessedSubAir["preprocessed_cols" : "VariableRangePreprocessedCols" width := 2]
