@@ -50,17 +50,19 @@ end coercions
 section U32
 
 @[simp, grind]
-def isU32 (bb0 bb1 bb2 bb3 : FBB) :=
-  bb0.val < 256 ∧ bb1.val < 256 ∧ bb2.val < 256 ∧ bb3.val < 256
+def isU32 (v : Vector FBB 4) :=
+  v[0].val < 256 ∧ v[1].val < 256 ∧ v[2].val < 256 ∧ v[3].val < 256
 
 @[simp, grind]
-def toU32 {bb0 bb1 bb2 bb3 : FBB}
-  (isU32_b : isU32 bb0 bb1 bb2 bb3) : U32
-:=
-  #v[ { toFin := ⟨ bb0.val, (by grind)⟩ },
-      { toFin := ⟨ bb1.val, (by grind)⟩ },
-      { toFin := ⟨ bb2.val, (by grind)⟩ },
-      { toFin := ⟨ bb3.val, (by grind)⟩ } ]
+def toU32 (v : Vector FBB 4) : U32 :=
+  #v[ { toFin := ⟨ v[0].val % 256, (by grind)⟩ },
+      { toFin := ⟨ v[1].val % 256, (by grind)⟩ },
+      { toFin := ⟨ v[2].val % 256, (by grind)⟩ },
+      { toFin := ⟨ v[3].val % 256, (by grind)⟩ } ]
+
+@[simp, grind]
+def toBV32 (v : Vector FBB 4) : BitVec 32 :=
+  (toU32 v).toBV
 
 end U32
 
