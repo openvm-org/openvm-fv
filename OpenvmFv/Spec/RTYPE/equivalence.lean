@@ -31,125 +31,110 @@ namespace Equivalence.ALU
     rs2_ptr : FBB
     rd_ptr : FBB
 
-    prev_a : Fin 4 → FBB
-    a : Fin 4 → FBB
-    b : Fin 4 → FBB
-    c : Fin 4 → FBB
+    prev_a : Vector FBB 4
+    a : Vector FBB 4
+    b : Vector FBB 4
+    c : Vector FBB 4
 
-    range_checked_vals : Fin 6 → FBB
-    bitwise_vals : Fin 5 → Fin 3 → FBB
-
-  def wrap_to_word (vals : Fin 4 → FBB) : BitVec 32 :=
-    (@BabyBear.toU32
-      (vals 0 % 256)
-      (vals 1 % 256)
-      (vals 2 % 256)
-      (vals 3 % 256)
-      (by grind)).toBV
-
-  def is_normalized_word (vals : Fin 4 → FBB) : Prop :=
-    BabyBear.isU32
-      (vals 0)
-      (vals 1)
-      (vals 2)
-      (vals 3)
+    range_checked_vals : Vector FBB 6
+    bitwise_vals : Vector (Vector FBB 3) 5
 
   def wrap_to_regidx (val : FBB) : Fin 32 :=
     ⟨val % 32, by grind⟩
 
   def AddInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AddInput := {
-    r1_val := wrap_to_word row.b
-    r2_val := wrap_to_word row.c
+    r1_val := BabyBear.toBV32 row.b
+    r2_val := BabyBear.toBV32 row.c
     rd := wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.AddInput
   }
 
   def SubInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.SubInput := {
-    r1_val := wrap_to_word row.b
-    r2_val := wrap_to_word row.c
+    r1_val := BabyBear.toBV32 row.b
+    r2_val := BabyBear.toBV32 row.c
     rd := wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.SubInput
   }
 
   def XorInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.XorInput := {
-    r1_val := wrap_to_word row.b
-    r2_val := wrap_to_word row.c
+    r1_val := BabyBear.toBV32 row.b
+    r2_val := BabyBear.toBV32 row.c
     rd := wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.XorInput
   }
 
   def OrInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.OrInput := {
-    r1_val := wrap_to_word row.b
-    r2_val := wrap_to_word row.c
+    r1_val := BabyBear.toBV32 row.b
+    r2_val := BabyBear.toBV32 row.c
     rd := wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.OrInput
   }
 
   def AndInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AndInput := {
-    r1_val := wrap_to_word row.b
-    r2_val := wrap_to_word row.c
+    r1_val := BabyBear.toBV32 row.b
+    r2_val := BabyBear.toBV32 row.c
     rd := wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.AndInput
   }
 
   def AddOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (add_output : PureSpec.AddOutput) : Prop :=
-    is_normalized_word row.b ∧
-    is_normalized_word row.c ∧
+    BabyBear.isU32 row.b ∧
+    BabyBear.isU32 row.c ∧
     add_output.nextPC = row.next_pc.toNat ∧
     match add_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
-        is_normalized_word row.a ∧
-        wrap_to_word row.a = rd_val ∧
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
   def SubOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (sub_output : PureSpec.SubOutput) : Prop :=
-    is_normalized_word row.b ∧
-    is_normalized_word row.c ∧
+    BabyBear.isU32 row.b ∧
+    BabyBear.isU32 row.c ∧
     sub_output.nextPC = row.next_pc.toNat ∧
     match sub_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
-        is_normalized_word row.a ∧
-        wrap_to_word row.a = rd_val ∧
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
   def XorOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (xor_output : PureSpec.XorOutput) : Prop :=
-    is_normalized_word row.b ∧
-    is_normalized_word row.c ∧
+    BabyBear.isU32 row.b ∧
+    BabyBear.isU32 row.c ∧
     xor_output.nextPC = row.next_pc.toNat ∧
     match xor_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
-        is_normalized_word row.a ∧
-        wrap_to_word row.a = rd_val ∧
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
   def OrOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (or_output : PureSpec.OrOutput) : Prop :=
-    is_normalized_word row.b ∧
-    is_normalized_word row.c ∧
+    BabyBear.isU32 row.b ∧
+    BabyBear.isU32 row.c ∧
     or_output.nextPC = row.next_pc.toNat ∧
     match or_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
-        is_normalized_word row.a ∧
-        wrap_to_word row.a = rd_val ∧
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
   def AndOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (and_output : PureSpec.AndOutput) : Prop :=
-    is_normalized_word row.b ∧
-    is_normalized_word row.c ∧
+    BabyBear.isU32 row.b ∧
+    BabyBear.isU32 row.c ∧
     and_output.nextPC = row.next_pc.toNat ∧
     match and_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
-        is_normalized_word row.a ∧
-        wrap_to_word row.a = rd_val ∧
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
   def ALU_instruction_fields.spec (row : ALU_instruction_fields) : Prop :=
@@ -188,21 +173,21 @@ namespace Equivalence.ALU
   ]
 
   def ALU_instruction_fields.memory (row : ALU_instruction_fields) : List (FBB × List FBB) := [
-    (-row.is_valid, [1, row.rs1_ptr, row.b 0, row.b 1, row.b 2, row.b 3, row.prev_b_timestamp]),
-    ( row.is_valid, [1, row.rs1_ptr, row.b 0, row.b 1, row.b 2, row.b 3, row.b_timestamp]),
-    (-row.non_imm, [row.non_imm, row.rs2_ptr, row.c 0, row.c 1, row.c 2, row.c 3, row.prev_c_timestamp]),
-    ( row.non_imm, [row.non_imm, row.rs2_ptr, row.c 0, row.c 1, row.c 2, row.c 3, row.c_timestamp]),
-    (-row.is_valid, [1, row.rd_ptr, row.prev_a 0, row.prev_a 1, row.prev_a 2, row.prev_a 3, row.prev_a_timestamp]),
-    ( row.is_valid, [1, row.rd_ptr, row.a 0, row.a 1, row.a 2, row.a 3, row.a_timestamp]),
+    (-row.is_valid, [1, row.rs1_ptr, row.b[0], row.b[1], row.b[2], row.b[3], row.prev_b_timestamp]),
+    ( row.is_valid, [1, row.rs1_ptr, row.b[0], row.b[1], row.b[2], row.b[3], row.b_timestamp]),
+    (-row.non_imm, [row.non_imm, row.rs2_ptr, row.c[0], row.c[1], row.c[2], row.c[3], row.prev_c_timestamp]),
+    ( row.non_imm, [row.non_imm, row.rs2_ptr, row.c[0], row.c[1], row.c[2], row.c[3], row.c_timestamp]),
+    (-row.is_valid, [1, row.rd_ptr, row.prev_a[0], row.prev_a[1], row.prev_a[2], row.prev_a[3], row.prev_a_timestamp]),
+    ( row.is_valid, [1, row.rd_ptr, row.a[0], row.a[1], row.a[2], row.a[3], row.a_timestamp]),
   ]
 
   def ALU_instruction_fields.range_checks (row : ALU_instruction_fields) : List (FBB × List FBB) := [
-    (row.is_valid, [row.range_checked_vals 0, 17]),
-    (row.is_valid, [row.range_checked_vals 1, 12]),
-    (row.non_imm, [row.range_checked_vals 2, 17]),
-    (row.non_imm, [row.range_checked_vals 3, 12]),
-    (row.is_valid, [row.range_checked_vals 4, 17]),
-    (row.is_valid, [row.range_checked_vals 5, 12]),
+    (row.is_valid, [row.range_checked_vals[0], 17]),
+    (row.is_valid, [row.range_checked_vals[1], 12]),
+    (row.non_imm, [row.range_checked_vals[2], 17]),
+    (row.non_imm, [row.range_checked_vals[3], 12]),
+    (row.is_valid, [row.range_checked_vals[4], 17]),
+    (row.is_valid, [row.range_checked_vals[5], 12]),
   ]
 
   def ALU_instruction_fields.read_instruction (row : ALU_instruction_fields) : List (FBB × List FBB) := [
@@ -210,11 +195,11 @@ namespace Equivalence.ALU
   ]
 
   def ALU_instruction_fields.bitwise (row : ALU_instruction_fields) : List (FBB × List FBB) := [
-    (row.is_valid, [row.bitwise_vals 0 0, row.bitwise_vals 0 1, row.bitwise_vals 0 2, 1]),
-    (row.is_valid, [row.bitwise_vals 1 0, row.bitwise_vals 1 1, row.bitwise_vals 1 2, 1]),
-    (row.is_valid, [row.bitwise_vals 2 0, row.bitwise_vals 2 1, row.bitwise_vals 2 2, 1]),
-    (row.is_valid, [row.bitwise_vals 3 0, row.bitwise_vals 3 1, row.bitwise_vals 3 2, 1]),
-    (row.is_valid - row.non_imm, [row.bitwise_vals 4 0, row.bitwise_vals 4 1, row.bitwise_vals 4 2, 0]),
+    (row.is_valid, [row.bitwise_vals[0][0], row.bitwise_vals[0][1], row.bitwise_vals[0][2], 1]),
+    (row.is_valid, [row.bitwise_vals[1][0], row.bitwise_vals[1][1], row.bitwise_vals[1][2], 1]),
+    (row.is_valid, [row.bitwise_vals[2][0], row.bitwise_vals[2][1], row.bitwise_vals[2][2], 1]),
+    (row.is_valid, [row.bitwise_vals[3][0], row.bitwise_vals[3][1], row.bitwise_vals[3][2], 1]),
+    (row.is_valid - row.non_imm, [row.bitwise_vals[4][0], row.bitwise_vals[4][1], row.bitwise_vals[4][2], 0]),
   ]
 
   def bus_from_instruction_fields (rows : List ALU_instruction_fields) : ℕ → List (FBB × List FBB) :=
@@ -247,49 +232,28 @@ namespace Equivalence.ALU
       rs1_ptr := air.adapter.rs1_ptr row 0
       rs2_ptr := air.adapter.rs2 row 0
       rd_ptr := air.adapter.rd_ptr row 0
-      prev_a := λ idx => match idx with
-        | 0 => air.adapter.writes_aux.prev_data_0 row 0
-        | 1 => air.adapter.writes_aux.prev_data_1 row 0
-        | 2 => air.adapter.writes_aux.prev_data_2 row 0
-        | 3 => air.adapter.writes_aux.prev_data_3 row 0
-      a := λ idx => match idx with
-        | 0 => air.core.a_0 row 0
-        | 1 => air.core.a_1 row 0
-        | 2 => air.core.a_2 row 0
-        | 3 => air.core.a_3 row 0
-      b := λ idx => match idx with
-        | 0 => air.core.b_0 row 0
-        | 1 => air.core.b_1 row 0
-        | 2 => air.core.b_2 row 0
-        | 3 => air.core.b_3 row 0
-      c := λ idx => match idx with
-        | 0 => air.core.c_0 row 0
-        | 1 => air.core.c_1 row 0
-        | 2 => air.core.c_2 row 0
-        | 3 => air.core.c_3 row 0
-      range_checked_vals := λ idx => match idx with
-        | 0 => air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0
-        | 1 => air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0
-        | 2 => air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0
-        | 3 => air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0
-        | 4 => air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0
-        | 5 => air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0
-      bitwise_vals := λ x y => match (x, y) with
-        | (0, 0) => air.core.x_0 row 0
-        | (0, 1) => air.core.y_0 row 0
-        | (0, 2) => air.core.x_xor_y_0 row 0
-        | (1, 0) => air.core.x_1 row 0
-        | (1, 1) => air.core.y_1 row 0
-        | (1, 2) => air.core.x_xor_y_1 row 0
-        | (2, 0) => air.core.x_2 row 0
-        | (2, 1) => air.core.y_2 row 0
-        | (2, 2) => air.core.x_xor_y_2 row 0
-        | (3, 0) => air.core.x_3 row 0
-        | (3, 1) => air.core.y_3 row 0
-        | (3, 2) => air.core.x_xor_y_3 row 0
-        | (4, 0) => air.core.c_0 row 0
-        | (4, 1) => air.core.c_1 row 0
-        | (4, 2) => 0
+      prev_a := #v[air.adapter.writes_aux.prev_data_0 row 0,
+                   air.adapter.writes_aux.prev_data_1 row 0,
+                   air.adapter.writes_aux.prev_data_2 row 0,
+                   air.adapter.writes_aux.prev_data_3 row 0]
+      a := #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0]
+      b := #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0]
+      c := #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0]
+      range_checked_vals :=
+        #v[air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0,
+           air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0,
+           air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0,
+           air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0,
+           air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0,
+           air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0]
+      bitwise_vals :=
+        #v[
+          #v[air.core.x_0 row 0, air.core.y_0 row 0, air.core.x_xor_y_0 row 0],
+          #v[air.core.x_1 row 0, air.core.y_1 row 0, air.core.x_xor_y_1 row 0],
+          #v[air.core.x_2 row 0, air.core.y_2 row 0, air.core.x_xor_y_2 row 0],
+          #v[air.core.x_3 row 0, air.core.y_3 row 0, air.core.x_xor_y_3 row 0],
+          #v[air.core.c_0 row 0, air.core.c_1 row 0, 0]
+        ]
       : ALU_instruction_fields
     })
 
@@ -382,10 +346,10 @@ namespace Equivalence.ALU
         [ assumption; assumption; assumption; assumption;
           assumption; assumption; assumption; assumption;
           skip; skip ]
-        . simp [AddInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_add_pure]
+        . simp [AddInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_add_pure]
           simp [← BitVec.toNat_inj]
           omega
-        . simp [AddInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_add_pure]
+        . simp [AddInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_add_pure]
           rewrite [dite_cond_eq_false]
           . simp
             split_ands <;>
@@ -411,10 +375,10 @@ namespace Equivalence.ALU
         [ assumption; assumption; assumption; assumption;
           assumption; assumption; assumption; assumption;
           skip; skip ]
-        . simp [SubInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_sub_pure]
+        . simp [SubInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sub_pure]
           simp [← BitVec.toNat_inj]
           omega
-        . simp [SubInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_sub_pure]
+        . simp [SubInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sub_pure]
           rewrite [dite_cond_eq_false]
           . simp
             split_ands <;>
@@ -440,10 +404,10 @@ namespace Equivalence.ALU
         [ assumption; assumption; assumption; assumption;
           assumption; assumption; assumption; assumption;
           skip; skip ]
-        . simp [XorInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_xor_pure]
+        . simp [XorInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_xor_pure]
           simp [← BitVec.toNat_inj]
           omega
-        . simp [XorInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_xor_pure]
+        . simp [XorInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_xor_pure]
           rewrite [dite_cond_eq_false]
           . simp
             split_ands <;>
@@ -469,10 +433,10 @@ namespace Equivalence.ALU
         [ assumption; assumption; assumption; assumption;
           assumption; assumption; assumption; assumption;
           skip; skip ]
-        . simp [OrInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_or_pure]
+        . simp [OrInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_or_pure]
           simp [← BitVec.toNat_inj]
           omega
-        . simp [OrInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_or_pure]
+        . simp [OrInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_or_pure]
           rewrite [dite_cond_eq_false]
           . simp
             split_ands <;>
@@ -498,10 +462,10 @@ namespace Equivalence.ALU
         [ assumption; assumption; assumption; assumption;
           assumption; assumption; assumption; assumption;
           skip; skip ]
-        . simp [AndInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_and_pure]
+        . simp [AndInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_and_pure]
           simp [← BitVec.toNat_inj]
           omega
-        . simp [AndInput_of_ALU_instruction_fields, wrap_to_word, PureSpec.execute_RTYPE_and_pure]
+        . simp [AndInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_and_pure]
           rewrite [dite_cond_eq_false]
           . simp
             split_ands <;>
