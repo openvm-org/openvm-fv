@@ -8,6 +8,7 @@ import OpenvmFv.Fundamentals.Interaction
 import LeanZKCircuit.Interactions
 
 set_option maxHeartbeats 1_000_000_000
+set_option maxRecDepth 1_000_000
 
 variable (ExtF : Type) [Field ExtF]
 variable (air : Valid_VmAirWrapper_lt FBB ExtF)
@@ -125,16 +126,12 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_bit
+  simp [row_valid, VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
-  simp only [propertiesToAssume,
-             ReadInstructionBusEntryInstanceLt,
-             Interaction.ReadInstructionBusEntryInstance,
-             _readInstructionBus_row,
-             readInstructionBus_row.eq_1] at pa_read
-  simp only [List.attach_cons, List.attach_nil, List.map_cons, List.map_nil] at pa_read
-  simp only [row_valid, Interaction.ReadInstructionBusEntry.deserialise] at pa_read
-  simp at pa_read
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_read
+
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -163,6 +160,7 @@ lemma wf_propertiesToAssert
 
 include
   row_valid
+  assumptions
   constraints
   propertiesToAssume
 in
@@ -170,6 +168,8 @@ in
     be easily accessible -/
 lemma essentials
 :
+  (air.adapter.from_state.pc row 0).val + 4 < 1073741824 ∧
+  (air.adapter.from_state.timestamp row 0) + 3 < 536870912 ∧
   List.Forall (fun x => x.val < 256)
     [air.core.cmp_result row 0,
      air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
@@ -191,16 +191,12 @@ lemma essentials
         VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_mem
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_bit
+  simp [row_valid, VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
-  simp only [propertiesToAssume,
-             ReadInstructionBusEntryInstanceLt,
-             Interaction.ReadInstructionBusEntryInstance,
-             _readInstructionBus_row,
-             readInstructionBus_row.eq_1] at pa_read
-  simp only [List.attach_cons, List.attach_nil, List.map_cons, List.map_nil] at pa_read
-  simp only [row_valid, Interaction.ReadInstructionBusEntry.deserialise] at pa_read
-  simp at pa_read
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_read
+
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -224,6 +220,8 @@ lemma essentials
   clear constrain_interactions rest
   simp_all
 
+  simp [row_valid, VmAirWrapper_lt_constraint_and_interaction_simplification] at *
+
   obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3 ⟩ :
      (air.core.c_0 row 0).val < 256 ∧
      (air.core.c_1 row 0).val < 256 ∧
@@ -245,6 +243,7 @@ def rop_of_Lt_opcode (opcode : FBB) : rop :=
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The constraints entail correct implementation of the
     two base Lt opcodes for:
@@ -266,9 +265,9 @@ theorem spec_base_Lt
                  (air.core.c_3 row 0).val])
     (rop_of_Lt_opcode (air.core.ctx row 0).instruction.opcode)
 := by
-  have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+  have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   simp [and_assoc] at essentials
-  obtain ⟨ ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3, opcodes, b_rs2_as, h_imm ⟩ := essentials
+  obtain ⟨ ub_pc, ub_timestamp, ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3, opcodes, b_rs2_as, h_imm ⟩ := essentials
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
@@ -298,7 +297,7 @@ theorem spec_base_Lt
         ← LessThanCoreAir_4.diff_def_1,
         ← LessThanCoreAir_4.diff_def_2,
         ← LessThanCoreAir_4.diff_def_3] at *
-  repeat rw [sub_eq_zero] at *
+  repeat rw [sub_eq_zero] at sum0_diff sum1_diff sum2_diff sum3_diff
   simp_all
 
   have impossible : 2 * (air.core.cmp_result row 0) = 1 ↔ False := by
@@ -385,6 +384,7 @@ section NonImmediate
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The non-immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
@@ -417,6 +417,7 @@ def iop_of_Lt_opcode (opcode : FBB) : iop :=
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
@@ -437,14 +438,10 @@ theorem spec_base_ALU_imm
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume'
   clear pa_exec pa_mem pa_range pa_bit
 
-  simp only [VmAirWrapper_lt.constraints.propertiesToAssume,
-             ReadInstructionBusEntryInstanceLt,
-             Interaction.ReadInstructionBusEntryInstance,
-             _readInstructionBus_row,
-             readInstructionBus_row.eq_1] at pa_read
-  simp only [List.attach_cons, List.attach_nil, List.map_cons, List.map_nil] at pa_read
-  simp only [row_valid, Interaction.ReadInstructionBusEntry.deserialise] at pa_read
-  simp at pa_read
+  simp [row_valid, VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_read
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_read
   repeat rw [Fin.ext_iff] at pa_read
   simp at pa_read
   obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
@@ -467,16 +464,16 @@ theorem spec_base_ALU_imm
             (rop_of_Lt_opcode (air.core.ctx row 0).instruction.opcode)
     . apply spec_base_Lt <;> assumption
     . simp [execute_ITYPE_pure]
-      rw [← eq_c]; congr
+      rw [← eq_c]
 
       have opcodes := opcode_bounds air row row_in_range constraints row_valid
       simp [rop_of_Lt_opcode, iop_of_Lt_opcode]
       grind
   . simp [*, ← BitVec.toInt_inj]
     trans (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt
-    . have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+    . have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
       simp [h_imm, and_assoc] at essentials
-      obtain ⟨ ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
+      obtain ⟨ ub_pc, ub_timestamp, ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
                opcodes, h_rs2, imm_sign_extend, rs2_as_imm, imm_sign, imm_sign_extend' ⟩ := essentials
       rw [← VmAirWrapper_lt.rs2_imm_def] at rs2_as_imm
       rw [← VmAirWrapper_lt.rs2_sign_limbs] at imm_sign

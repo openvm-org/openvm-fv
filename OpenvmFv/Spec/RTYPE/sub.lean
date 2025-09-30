@@ -2,6 +2,7 @@ import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.rX_bits
 
 namespace PureSpec
+
   structure SubInput where
     -- operands
     r1_val : BitVec 32
