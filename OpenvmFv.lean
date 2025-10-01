@@ -49,7 +49,10 @@ import OpenvmFv.Spec.ControlFlow.bne
 import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
 import OpenvmFv.Spec.ITYPE.addi
+import OpenvmFv.Spec.ITYPE.andi
 import OpenvmFv.Spec.ITYPE.local
+import OpenvmFv.Spec.ITYPE.ori
+import OpenvmFv.Spec.ITYPE.xori
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.and

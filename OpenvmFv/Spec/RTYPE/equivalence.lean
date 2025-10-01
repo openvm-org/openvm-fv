@@ -9,6 +9,11 @@ import OpenvmFv.Spec.RTYPE.and
 import OpenvmFv.Spec.RTYPE.slt
 import OpenvmFv.Spec.RTYPE.sltu
 
+import OpenvmFv.Spec.ITYPE.addi
+import OpenvmFv.Spec.ITYPE.andi
+import OpenvmFv.Spec.ITYPE.ori
+import OpenvmFv.Spec.ITYPE.xori
+
 set_option maxHeartbeats 1_000_000_000
 
 namespace Equivalence.ALU
@@ -54,6 +59,14 @@ namespace Equivalence.ALU
     : PureSpec.AddInput
   }
 
+  def AddiInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AddiInput := {
+    r1_val := BabyBear.toBV32 row.b
+    imm := BitVec.ofNat 12 row.rs2_ptr.toNat
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.AddiInput
+  }
+
   def SubInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.SubInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
@@ -70,12 +83,28 @@ namespace Equivalence.ALU
     : PureSpec.XorInput
   }
 
+  def XoriInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.XoriInput := {
+    r1_val := BabyBear.toBV32 row.b
+    imm := BitVec.ofNat 12 row.rs2_ptr.toNat
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.XoriInput
+  }
+
   def OrInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.OrInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
     rd := wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.OrInput
+  }
+
+  def OriInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.OriInput := {
+    r1_val := BabyBear.toBV32 row.b
+    imm := BitVec.ofNat 12 row.rs2_ptr.toNat
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.OriInput
   }
 
   def AndInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AndInput := {
@@ -86,11 +115,31 @@ namespace Equivalence.ALU
     : PureSpec.AndInput
   }
 
+  def AndiInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AndiInput := {
+    r1_val := BabyBear.toBV32 row.b
+    imm := BitVec.ofNat 12 row.rs2_ptr.toNat
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.AndiInput
+  }
+
   def AddOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (add_output : PureSpec.AddOutput) : Prop :=
     BabyBear.isU32 row.b ∧
     BabyBear.isU32 row.c ∧
     add_output.nextPC = row.next_pc.toNat ∧
     match add_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
+  def AddiOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (addi_output : PureSpec.AddiOutput) : Prop :=
+    BabyBear.isU32 row.b ∧
+    (BitVec.ofNat 12 (row.rs2_ptr)).signExtend 24 =
+    (BitVec.ofNat 24 (row.rs2_ptr)) ∧
+    addi_output.nextPC = row.next_pc.toNat ∧
+    match addi_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
@@ -119,11 +168,35 @@ namespace Equivalence.ALU
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
+  def XoriOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (xori_output : PureSpec.XoriOutput) : Prop :=
+    BabyBear.isU32 row.b ∧
+    (BitVec.ofNat 12 (row.rs2_ptr)).signExtend 24 =
+    (BitVec.ofNat 24 (row.rs2_ptr)) ∧
+    xori_output.nextPC = row.next_pc.toNat ∧
+    match xori_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
   def OrOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (or_output : PureSpec.OrOutput) : Prop :=
     BabyBear.isU32 row.b ∧
     BabyBear.isU32 row.c ∧
     or_output.nextPC = row.next_pc.toNat ∧
     match or_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
+  def OriOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (ori_output : PureSpec.OriOutput) : Prop :=
+    BabyBear.isU32 row.b ∧
+    (BitVec.ofNat 12 (row.rs2_ptr)).signExtend 24 =
+    (BitVec.ofNat 24 (row.rs2_ptr)) ∧
+    ori_output.nextPC = row.next_pc.toNat ∧
+    match ori_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
@@ -141,34 +214,72 @@ namespace Equivalence.ALU
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
+  def AndiOutput_matches_ALU_instruction_fields (row : ALU_instruction_fields) (andi_output : PureSpec.AndiOutput) : Prop :=
+    BabyBear.isU32 row.b ∧
+    (BitVec.ofNat 12 (row.rs2_ptr)).signExtend 24 =
+    (BitVec.ofNat 24 (row.rs2_ptr)) ∧
+    andi_output.nextPC = row.next_pc.toNat ∧
+    match andi_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
   def ALU_instruction_fields.spec (row : ALU_instruction_fields) : Prop :=
     row.is_valid = 1 → (
+      (row.non_imm = 0 ∨ row.non_imm = 1) ∧
       row.opcode ∈ Finset.Icc 512 516 ∧
-      (row.opcode = 512 ∧ row.non_imm = 1 →
-        AddOutput_matches_ALU_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_add_pure (AddInput_of_ALU_instruction_fields row))
-      ) ∧
-      (row.opcode = 513 ∧ row.non_imm = 1 →
-        SubOutput_matches_ALU_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_sub_pure (SubInput_of_ALU_instruction_fields row))
-      ) ∧
-      (row.opcode = 514 ∧ row.non_imm = 1 →
-        XorOutput_matches_ALU_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_xor_pure (XorInput_of_ALU_instruction_fields row))
-      ) ∧
-      (row.opcode = 515 ∧ row.non_imm = 1 →
-        OrOutput_matches_ALU_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_or_pure (OrInput_of_ALU_instruction_fields row))
-      ) ∧
-      (row.opcode = 516 ∧ row.non_imm = 1 →
-        AndOutput_matches_ALU_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_and_pure (AndInput_of_ALU_instruction_fields row))
-      )
+      (row.non_imm = 1 → (
+        (row.opcode = 512 →
+          AddOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_add_pure (AddInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode = 513 →
+          SubOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_sub_pure (SubInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode = 514 →
+          XorOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_xor_pure (XorInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode = 515 →
+          OrOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_or_pure (OrInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode = 516 →
+          AndOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_and_pure (AndInput_of_ALU_instruction_fields row))
+        )
+      )) ∧
+      (row.non_imm = 0 → (
+        (row.opcode = 512 →
+          AddiOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_ITYPE_addi_pure (AddiInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode ≠ 513) ∧
+        (row.opcode = 514 →
+          XoriOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_ITYPE_xori_pure (XoriInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode = 515 →
+          OriOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_ITYPE_ori_pure (OriInput_of_ALU_instruction_fields row))
+        ) ∧
+        (row.opcode = 516 →
+          AndiOutput_matches_ALU_instruction_fields
+            row
+            (PureSpec.execute_ITYPE_andi_pure (AndiInput_of_ALU_instruction_fields row))
+        )
+      ))
     )
 
   def ALU_instruction_fields.execution (row : ALU_instruction_fields) : List (FBB × List FBB) := [
@@ -315,15 +426,6 @@ namespace Equivalence.ALU
 
       intro h_is_valid
 
-      have non_imm_spec := ALU.ValidRows.spec_base_ALU_non_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_wellformedness row (by omega))
-
       have ⟨
         h_pc,
         h_timestamp,
@@ -340,155 +442,333 @@ namespace Equivalence.ALU
         h_is_valid
         (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
+      simp only [h_imm_binary, true_and]
+      clear h_imm_binary
 
-      dsimp only at *
+      -- discharge opcode range, leave non-imm specs and imm-specs respectively
+      split_ands <;> [grind; grind; skip; skip]
 
-      split_ands <;> [ grind; grind; skip; skip; skip; skip; skip ]
-      . intro h_opcode h_non_imm
-        simp [AddOutput_matches_ALU_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [AddInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_add_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [AddInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_add_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; assumption; assumption; assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
-              dsimp at non_imm_spec
-              assumption
+      . intro h_non_imm
+        have non_imm_spec := ALU.ValidRows.spec_base_ALU_non_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_wellformedness row (by omega))
+
+        dsimp only at *
+
+        split_ands
+        . intro h_opcode
+          simp [AddOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [AddInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_add_pure]
+            simp [← BitVec.toNat_inj]
+            omega
+          . simp [AddInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_add_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+                dsimp at non_imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+        . intro h_opcode
+          simp [SubOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [SubInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sub_pure]
+            simp [← BitVec.toNat_inj]
             omega
-      . intro h_opcode h_non_imm
-        simp [SubOutput_matches_ALU_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [SubInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sub_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [SubInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sub_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; assumption; assumption; assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
-              dsimp at non_imm_spec
-              assumption
+          . simp [SubInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sub_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+                dsimp at non_imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+        . intro h_opcode
+          simp [XorOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [XorInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_xor_pure]
+            simp [← BitVec.toNat_inj]
             omega
-      . intro h_opcode h_non_imm
-        simp [XorOutput_matches_ALU_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [XorInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_xor_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [XorInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_xor_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; assumption; assumption; assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
-              dsimp at non_imm_spec
-              assumption
+          . simp [XorInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_xor_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+                dsimp at non_imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+        . intro h_opcode
+          simp [OrOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [OrInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_or_pure]
+            simp [← BitVec.toNat_inj]
             omega
-      . intro h_opcode h_non_imm
-        simp [OrOutput_matches_ALU_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [OrInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_or_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [OrInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_or_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; assumption; assumption; assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
-              dsimp at non_imm_spec
-              assumption
+          . simp [OrInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_or_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+                dsimp at non_imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+        . intro h_opcode
+          simp [AndOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [AndInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_and_pure]
+            simp [← BitVec.toNat_inj]
             omega
-      . intro h_opcode h_non_imm
-        simp [AndOutput_matches_ALU_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [AndInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_and_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [AndInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_and_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; assumption; assumption; assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
-              dsimp at non_imm_spec
-              assumption
+          . simp [AndInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_and_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp only [h_opcode, ALU.ValidRows.rop_of_ALU_opcode] at non_imm_spec
+                dsimp at non_imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+      . intro h_imm
+        have imm_spec := ALU.ValidRows.spec_base_ALU_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+          h_imm
+
+        dsimp only at *
+
+        split_ands
+
+        . intro h_opcode
+          simp [AddiOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            skip; skip; skip ]
+          . clear *-h_imm_op_properties h_imm
+            simp [h_imm] at h_imm_op_properties
+            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
+            apply BitVec.eq_of_toInt_eq
+            rewrite [this]
+            simp
+            have := h_imm_op_properties.2.2.1
+            rewrite [this]
+            exact Int.bmod_eq_of_le (by grind) (by grind)
+          . simp [AddiInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_addi_pure]
+            simp [← BitVec.toNat_inj]
             omega
+          . simp [AddiInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_addi_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . unfold execute_ITYPE_pure at imm_spec
+                simp only [h_opcode, ALU.ValidRows.iop_of_ALU_opcode] at imm_spec
+                dsimp at imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+        . specialize h_imm_op_properties h_imm
+          clear *-h_imm_op_properties
+          grind
+        . intro h_opcode
+          simp [XoriOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            skip; skip; skip ]
+          . clear *-h_imm_op_properties h_imm
+            simp [h_imm] at h_imm_op_properties
+            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
+            apply BitVec.eq_of_toInt_eq
+            rewrite [this]
+            simp
+            have := h_imm_op_properties.2.2.1
+            rewrite [this]
+            exact Int.bmod_eq_of_le (by grind) (by grind)
+          . simp [XoriInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_xori_pure]
+            simp [← BitVec.toNat_inj]
+            omega
+          . simp [XoriInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_xori_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . unfold execute_ITYPE_pure at imm_spec
+                simp only [h_opcode, ALU.ValidRows.iop_of_ALU_opcode] at imm_spec
+                dsimp at imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+        . intro h_opcode
+          simp [OriOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            skip; skip; skip ]
+          . clear *-h_imm_op_properties h_imm
+            simp [h_imm] at h_imm_op_properties
+            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
+            apply BitVec.eq_of_toInt_eq
+            rewrite [this]
+            simp
+            have := h_imm_op_properties.2.2.1
+            rewrite [this]
+            exact Int.bmod_eq_of_le (by grind) (by grind)
+          . simp [OriInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_ori_pure]
+            simp [← BitVec.toNat_inj]
+            omega
+          . simp [OriInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_ori_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . unfold execute_ITYPE_pure at imm_spec
+                simp only [h_opcode, ALU.ValidRows.iop_of_ALU_opcode] at imm_spec
+                dsimp at imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+        . intro h_opcode
+          simp [AndiOutput_matches_ALU_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            skip; skip; skip ]
+          . clear *-h_imm_op_properties h_imm
+            simp [h_imm] at h_imm_op_properties
+            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
+            apply BitVec.eq_of_toInt_eq
+            rewrite [this]
+            simp
+            have := h_imm_op_properties.2.2.1
+            rewrite [this]
+            exact Int.bmod_eq_of_le (by grind) (by grind)
+          . simp [AndiInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_andi_pure]
+            simp [← BitVec.toNat_inj]
+            omega
+          . simp [AndiInput_of_ALU_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_andi_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; assumption; assumption; assumption; skip; skip ]
+              . unfold execute_ITYPE_pure at imm_spec
+                simp only [h_opcode, ALU.ValidRows.iop_of_ALU_opcode] at imm_spec
+                dsimp at imm_spec
+                assumption
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_alu_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
 
 end Equivalence.ALU
 
