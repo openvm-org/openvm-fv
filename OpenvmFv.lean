@@ -53,6 +53,8 @@ import OpenvmFv.Spec.ITYPE.andi
 import OpenvmFv.Spec.ITYPE.local
 import OpenvmFv.Spec.ITYPE.ori
 import OpenvmFv.Spec.ITYPE.xori
+import OpenvmFv.Spec.ITYPE.slti
+import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.and

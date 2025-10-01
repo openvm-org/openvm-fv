@@ -12,6 +12,8 @@ import OpenvmFv.Spec.RTYPE.sltu
 import OpenvmFv.Spec.ITYPE.addi
 import OpenvmFv.Spec.ITYPE.andi
 import OpenvmFv.Spec.ITYPE.ori
+import OpenvmFv.Spec.ITYPE.slti
+import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.ITYPE.xori
 
 set_option maxHeartbeats 1_000_000_000
@@ -817,6 +819,14 @@ namespace Equivalence.Lt
     : PureSpec.SltInput
   }
 
+  def SltiInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltiInput := {
+    r1_val := BabyBear.toBV32 row.b
+    imm := BitVec.ofNat 12 row.rs2_ptr.toNat
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.SltiInput
+  }
+
   def SltuInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltuInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
@@ -825,11 +835,31 @@ namespace Equivalence.Lt
     : PureSpec.SltuInput
   }
 
+  def SltiuInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltiuInput := {
+    r1_val := BabyBear.toBV32 row.b
+    imm := BitVec.ofNat 12 row.rs2_ptr.toNat
+    rd := wrap_to_regidx row.rd_ptr
+    PC := row.pc.toNat
+    : PureSpec.SltiuInput
+  }
+
   def SltOutput_matches_Lt_instruction_fields (row : Lt_instruction_fields) (slt_output : PureSpec.SltOutput) : Prop :=
     BabyBear.isU32 row.b ∧
     BabyBear.isU32 row.c ∧
     slt_output.nextPC = row.next_pc.toNat ∧
     match slt_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
+  def SltiOutput_matches_Lt_instruction_fields (row : Lt_instruction_fields) (slti_output : PureSpec.SltiOutput) : Prop :=
+    BabyBear.isU32 row.b ∧
+    (BitVec.ofNat 12 (row.rs2_ptr)).signExtend 24 =
+    (BitVec.ofNat 24 (row.rs2_ptr)) ∧
+    slti_output.nextPC = row.next_pc.toNat ∧
+    match slti_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
@@ -847,18 +877,45 @@ namespace Equivalence.Lt
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
+  def SltiuOutput_matches_Lt_instruction_fields (row : Lt_instruction_fields) (sltiu_output : PureSpec.SltiuOutput) : Prop :=
+    BabyBear.isU32 row.b ∧
+    (BitVec.ofNat 12 (row.rs2_ptr)).signExtend 24 =
+    (BitVec.ofNat 24 (row.rs2_ptr)) ∧
+    sltiu_output.nextPC = row.next_pc.toNat ∧
+    match sltiu_output.rd with
+      | .none => row.a = row.prev_a
+      | .some (rd, rd_val) =>
+        BabyBear.isU32 row.a ∧
+        BabyBear.toBV32 row.a = rd_val ∧
+        rd.1.toNat = row.rd_ptr.toNat
+
   def Lt_instruction_fields.spec (row : Lt_instruction_fields) : Prop :=
     row.is_valid = 1 → (
+      (row.non_imm = 0 ∨ row.non_imm = 1) ∧
       row.opcode ∈ Finset.Icc 520 521 ∧
-      (row.opcode = 520 ∧ row.non_imm = 1 →
-        SltOutput_matches_Lt_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_slt_pure (SltInput_of_Lt_instruction_fields row))
+      (row.non_imm = 1 →
+        (row.opcode = 520 →
+          SltOutput_matches_Lt_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_slt_pure (SltInput_of_Lt_instruction_fields row))
+        ) ∧
+        (row.opcode = 521 →
+          SltuOutput_matches_Lt_instruction_fields
+            row
+            (PureSpec.execute_RTYPE_sltu_pure (SltuInput_of_Lt_instruction_fields row))
+        )
       ) ∧
-      (row.opcode = 521 ∧ row.non_imm = 1 →
-        SltuOutput_matches_Lt_instruction_fields
-          row
-          (PureSpec.execute_RTYPE_sltu_pure (SltuInput_of_Lt_instruction_fields row))
+      (row.non_imm = 0 →
+        (row.opcode = 520 →
+          SltiOutput_matches_Lt_instruction_fields
+            row
+            (PureSpec.execute_ITYPE_slti_pure (SltiInput_of_Lt_instruction_fields row))
+        ) ∧
+        (row.opcode = 521 →
+          SltiuOutput_matches_Lt_instruction_fields
+            row
+            (PureSpec.execute_ITYPE_sltiu_pure (SltiuInput_of_Lt_instruction_fields row))
+        )
       )
     )
 
@@ -1004,16 +1061,6 @@ namespace Equivalence.Lt
 
       intro h_is_valid
 
-      have non_imm_spec := Lt.ValidRows.spec_base_Lt_non_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-
       have ⟨
         h_pc,
         h_timestamp,
@@ -1030,77 +1077,189 @@ namespace Equivalence.Lt
         h_is_valid
         (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
+      simp only [h_imm_binary, true_and]
+      clear h_imm_binary
 
       dsimp only at *
 
       split_ands <;> [ grind; grind; skip; skip ]
-      . intro h_opcode h_non_imm
-        simp [SltOutput_matches_Lt_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [SltInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_slt_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [SltInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_slt_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp [h_opcode, Lt.ValidRows.rop_of_Lt_opcode] at non_imm_spec
-              split_ifs at non_imm_spec with h_lt <;> simp at non_imm_spec h_lt
-              . rw [if_pos]
-                . assumption
-                . simpa [BitVec.slt]
-              . rw [if_neg]
-                . assumption
-                . simpa [BitVec.slt]
+
+      . intro h_non_imm
+        have non_imm_spec := Lt.ValidRows.spec_base_Lt_non_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+
+        split_ands
+
+        . intro h_opcode
+          simp [SltOutput_matches_Lt_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [SltInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_slt_pure]
+            simp [← BitVec.toNat_inj]
+            omega
+          . simp [SltInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_slt_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp [h_opcode, Lt.ValidRows.rop_of_Lt_opcode] at non_imm_spec
+                split_ifs at non_imm_spec with h_lt <;> simp at non_imm_spec h_lt
+                . rw [if_pos]
+                  . assumption
+                  . simpa [BitVec.slt]
+                . rw [if_neg]
+                  . assumption
+                  . simpa [BitVec.slt]
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+        . intro h_opcode
+          simp [SltuOutput_matches_Lt_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            assumption; assumption; assumption; assumption;
+            skip; skip ]
+          . simp [SltuInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sltu_pure]
+            simp [← BitVec.toNat_inj]
             omega
-      . intro h_opcode h_non_imm
-        simp [SltuOutput_matches_Lt_instruction_fields]
-        split_ands <;>
-        [ assumption; assumption; assumption; assumption;
-          assumption; assumption; assumption; assumption;
-          skip; skip ]
-        . simp [SltuInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sltu_pure]
-          simp [← BitVec.toNat_inj]
-          omega
-        . simp [SltuInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sltu_pure]
-          rewrite [dite_cond_eq_false]
-          . simp
-            split_ands <;>
-            [ assumption; skip; skip ]
-            . specialize non_imm_spec h_non_imm
-              unfold execute_RTYPE_pure at non_imm_spec
-              simp [h_opcode, Lt.ValidRows.rop_of_Lt_opcode] at non_imm_spec
-              split_ifs at non_imm_spec with h_lt <;> simp at non_imm_spec h_lt
-              . rw [if_pos]
-                . assumption
-                . simpa [BitVec.lt_def]
-              . rw [if_neg]
-                . assumption
-                . simpa [BitVec.lt_def]
+          . simp [SltuInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sltu_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; skip; skip ]
+              . specialize non_imm_spec h_non_imm
+                unfold execute_RTYPE_pure at non_imm_spec
+                simp [h_opcode, Lt.ValidRows.rop_of_Lt_opcode] at non_imm_spec
+                split_ifs at non_imm_spec with h_lt <;> simp at non_imm_spec h_lt
+                . rw [if_pos]
+                  . assumption
+                  . simpa [BitVec.lt_def]
+                . rw [if_neg]
+                  . assumption
+                  . simpa [BitVec.lt_def]
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
             . simp [wrap_to_regidx]
               specialize h_bus_wellformedness row (by omega)
               simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
-          . simp [wrap_to_regidx]
-            specialize h_bus_wellformedness row (by omega)
-            simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                  Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+
+      . intro h_imm
+        have imm_spec := Lt.ValidRows.spec_base_ALU_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+          h_imm
+
+        split_ands
+
+        . intro h_opcode
+          simp [SltiOutput_matches_Lt_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            skip; skip; skip ]
+          . clear *- h_imm_op_properties h_imm
+            simp [h_imm] at h_imm_op_properties
+            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
+            apply BitVec.eq_of_toInt_eq
+            simp [this]
+            have := h_imm_op_properties.2.1
+            rewrite [this]
+            exact Int.bmod_eq_of_le (by grind) (by grind)
+          . simp [SltiInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_slti_pure]
+            simp [← BitVec.toNat_inj]
             omega
+          . simp [SltiInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_slti_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; skip; skip ]
+              . unfold execute_ITYPE_pure at imm_spec
+                simp [h_opcode, Lt.ValidRows.iop_of_Lt_opcode, execute_RTYPE_pure] at imm_spec
+                split_ifs at imm_spec with h_lt <;> simp at imm_spec h_lt
+                . rw [if_pos]
+                  . assumption
+                  . simpa [BitVec.slt]
+                . rw [if_neg]
+                  . assumption
+                  . simpa [BitVec.slt]
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
+
+        . intro h_opcode
+          simp [SltiuOutput_matches_Lt_instruction_fields]
+          split_ands <;>
+          [ assumption; assumption; assumption; assumption;
+            skip; skip; skip ]
+          . clear *- h_imm_op_properties h_imm
+            simp [h_imm] at h_imm_op_properties
+            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
+            apply BitVec.eq_of_toInt_eq
+            simp [this]
+            have := h_imm_op_properties.2.1
+            rewrite [this]
+            exact Int.bmod_eq_of_le (by grind) (by grind)
+          . simp [SltiuInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_sltiu_pure]
+            simp [← BitVec.toNat_inj]
+            omega
+          . simp [SltiuInput_of_Lt_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_sltiu_pure]
+            rewrite [dite_cond_eq_false]
+            . simp
+              split_ands <;>
+              [ assumption; skip; skip ]
+              . unfold execute_ITYPE_pure at imm_spec
+                simp [h_opcode, Lt.ValidRows.iop_of_Lt_opcode, execute_RTYPE_pure] at imm_spec
+                split_ifs at imm_spec with h_lt <;> simp at imm_spec h_lt
+                . rw [if_pos]
+                  . assumption
+                  . simpa [BitVec.lt_def]
+                . rw [if_neg]
+                  . assumption
+                  . simpa [BitVec.lt_def]
+              . simp [wrap_to_regidx]
+                specialize h_bus_wellformedness row (by omega)
+                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
+                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+                omega
+            . simp [wrap_to_regidx]
+              specialize h_bus_wellformedness row (by omega)
+              simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
+                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
+              omega
 
 end Equivalence.Lt
