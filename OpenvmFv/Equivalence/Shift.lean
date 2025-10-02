@@ -1581,6 +1581,6 @@ namespace Equivalence.Shift
       simp [← Fin.ext_iff] <;> (try assumption) <;> simp [*]
     . ext i hi j hj
       interval_cases i <;> interval_cases j <;>
-      simp [← Fin.ext_iff] <;> (try assumption) <;> simp [*]
+      simp [← Fin.ext_iff] <;> (try assumption); simp [*]
 
 end Equivalence.Shift
