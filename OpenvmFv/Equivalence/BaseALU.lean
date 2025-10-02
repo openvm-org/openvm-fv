@@ -1,4 +1,4 @@
-import OpenvmFv.Spec.ALU
+import OpenvmFv.Spec.BaseALU
 
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.sub
@@ -13,7 +13,7 @@ import OpenvmFv.Spec.ITYPE.xori
 
 set_option maxHeartbeats 1_000_000_000
 
-namespace Equivalence.ALU
+namespace Equivalence.BaseALU
 
   structure ALU_instruction_fields where
     is_valid : FBB
@@ -767,4 +767,4 @@ namespace Equivalence.ALU
                     Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
               omega
 
-end Equivalence.ALU
+end Equivalence.BaseALU
