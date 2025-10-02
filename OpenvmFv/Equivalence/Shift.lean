@@ -1366,56 +1366,6 @@ namespace Equivalence.Shift
     ]
     trivial
 
-  lemma List.append_eq_append_split
-    {T : Type}
-    {a b c d : List T}
-    (h_eq : a ++ b = c ++ d)
-    (h_len_ab : a.length = c.length)
-  :
-    a = c ∧ b = d
-  := by
-    induction a generalizing b c d
-    case nil => simp_all
-    case cons a₀ a ih =>
-      cases c
-      case nil => grind
-      case cons c₀ c =>
-        simp_all
-        apply ih <;> grind
-
-  lemma List.flatMap_eq_flatMap
-    {A B C : Type}
-    {f : A → List C}
-    {g : B → List C}
-    {lf : List A}
-    {lg : List B}
-    (h_eq_fmap : List.flatMap f lf = List.flatMap g lg)
-    (h_eq_len : lf.length = lg.length)
-    (h_eq_len_fg : forall a b, (f a).length = (g b).length)
-    (idx : ℕ)
-    (h_idx : idx < lf.length)
-  :
-    f lf[idx] = g lg[idx]
-  := by
-    induction lf generalizing idx lg
-    case nil => grind
-    case cons f₀ lf ih =>
-      cases lg
-      case nil => grind
-      case cons g₀ lg =>
-        simp_all
-        have h_eq'
-        :
-          List.flatMap f lf = List.flatMap g lg
-        := by
-          apply append_eq_append_split (h_len_ab := h_eq_len_fg f₀ g₀) at h_eq_fmap
-          tauto
-        cases idx
-        case zero => simp_all
-        case succ idx =>
-          specialize @ih lg h_eq' (by grind)
-          grind
-
   theorem shift_spec_completeness [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
     (h_constraints : allHold_allRows air)
@@ -1463,7 +1413,7 @@ namespace Equivalence.Shift
                List.get_eq_getElem,
                List.getElem_map,
                List.getElem_range,
-              Fin.isValue]
+               Fin.isValue]
 
     -- Prepare buses
     unfold bus_from_instruction_fields at h_buses
