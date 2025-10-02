@@ -24,7 +24,9 @@ import OpenvmFv.Constraints.VmAirWrapper_lt
 import OpenvmFv.Constraints.VmAirWrapper_shift
 import OpenvmFv.Constraints.VolatileBoundaryAir
 
-import OpenvmFv.Equivalence.BaseAluCoreAir
+import OpenvmFv.Equivalence.ALU
+import OpenvmFv.Equivalence.Lt
+import OpenvmFv.Equivalence.Shift
 
 import OpenvmFv.Extraction.AccessAdapterAir_2
 import OpenvmFv.Extraction.AccessAdapterAir_4
@@ -58,7 +60,6 @@ import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.and
-import OpenvmFv.Spec.RTYPE.equivalence
 import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.RTYPE.or
 import OpenvmFv.Spec.RTYPE.sll
@@ -67,6 +68,10 @@ import OpenvmFv.Spec.RTYPE.sra
 import OpenvmFv.Spec.RTYPE.srl
 import OpenvmFv.Spec.RTYPE.sub
 import OpenvmFv.Spec.RTYPE.xor
+import OpenvmFv.Spec.SHIFTIOP.local
+import OpenvmFv.Spec.SHIFTIOP.slli
+import OpenvmFv.Spec.SHIFTIOP.srai
+import OpenvmFv.Spec.SHIFTIOP.srli
 import OpenvmFv.Spec.ALU
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
@@ -74,9 +79,5 @@ import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
 import OpenvmFv.Spec.Shift
 import OpenvmFv.Spec.run_hart_active
-
-import OpenvmFv.Tactic.AssignColumn
-import OpenvmFv.Tactic.RewriteColumnOfIsValid
-import OpenvmFv.Tactic.SubcircuitIsValidOfIsValid
 
 import OpenvmFv.Util

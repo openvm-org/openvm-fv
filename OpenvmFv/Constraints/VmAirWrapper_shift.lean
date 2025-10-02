@@ -1908,48 +1908,57 @@ namespace VmAirWrapper_shift.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-    /-- The ALU-specific instance of the read-instruction bus properties -/
-    @[simp, grind]
-    instance (priority := 1001) ReadInstructionBusEntryInstanceShift
-    : Interaction.BusEntry FBB (Interaction.ReadInstructionBusEntry FBB) :=
-      let wf_prop_fun :=
-        fun (⟨_, _, _, rd, rs1, rs2, xd, rs2_as, xf, xg⟩ : Interaction.ReadInstructionBusEntry FBB) =>
-            -- rd and rs1 boundaries
-            rd.val < 32 ∧ rs1.val < 32 ∧
-            -- non-immediate rs2
-            (rs2_as = 1 → rs2.val < 32) ∧
-            -- immediate rs2
-            (rs2_as = 0 →
-              -- immediate fits 24 bits
-              rs2.val < 2 ^ 24 ∧
-              -- immediate is a zero-extended 5-bit value
-              (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat) ∧
-            -- unused parameters
-            xd = 1 ∧ xf = 0 ∧ xg = 0
-      { Interaction.ReadInstructionBusEntryInstance with
-        wf_properties := wf_prop_fun
-        assume entry := Interaction.ReadInstructionBusEntryInstance.wf_assume_cond entry → wf_prop_fun entry,
-        assert entry := Interaction.ReadInstructionBusEntryInstance.wf_assert_cond entry → wf_prop_fun entry
-      }
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
+      let rd := entry.xa
+      let rs1 := entry.xb
+      let rs2 := entry.xc
+      let rs2_as := entry.xe
+      -- rd and rs1 boundaries
+      rd.val < 32 ∧ rs1.val < 32 ∧
+      -- non-immediate rs2
+      (rs2_as = 1 → rs2.val < 32) ∧
+      -- immediate rs2
+      (rs2_as = 0 →
+        -- immediate fits 24 bits
+        rs2.val < 2 ^ 24 ∧
+        -- immediate is a zero-extended 5-bit value
+        (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat) ∧
+      -- unused parameters
+      entry.xd = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
+
+    lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
+      (h_bounds :
+        entry.opcode = 517 ∨
+        entry.opcode = 518 ∨
+        entry.opcode = 519
+      )
+      (h_bus : Interaction.ReadInstructionBusEntry.operand_properties entry)
+    :
+      readInstructionBus_properties entry
+    := by
+      simp [readInstructionBus_properties.eq_def]
+      simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
+      omega
 
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
       (h_in : entry ∈ readInstructionBus_row air row)
     :
-      entry.2.length = ReadInstructionBusEntryInstanceShift.data_length
+      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
     := by
       unfold readInstructionBus_row at *; simp_all
 
     @[VmAirWrapper_shift_constraint_and_interaction_simplification]
     def _readInstructionBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
-      let vectorised_row : List (FBB × Vector FBB ReadInstructionBusEntryInstanceShift.data_length) := by
+      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
         exact
         List.map
           (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
           (readInstructionBus_row air row).attach
-      List.map ReadInstructionBusEntryInstanceShift.deserialise vectorised_row
+      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
 
     lemma bitwiseBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
