@@ -125,69 +125,69 @@ namespace Equivalence.Shift
     : PureSpec.SraiInput
   }
 
-  def SllOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (add_output : PureSpec.SllOutput) : Prop :=
+  def SllOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (sll_output : PureSpec.SllOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
     BabyBear.isU32 row.b ∧
     BabyBear.isU32 row.c ∧
-    add_output.nextPC = row.next_pc.toNat ∧
-    match add_output.rd with
+    sll_output.nextPC = row.next_pc.toNat ∧
+    match sll_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
-  def SlliOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (addi_output : PureSpec.SlliOutput) : Prop :=
+  def SlliOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (slli_output : PureSpec.SlliOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
     BabyBear.isU32 row.b ∧
-    addi_output.nextPC = row.next_pc.toNat ∧
-    match addi_output.rd with
+    slli_output.nextPC = row.next_pc.toNat ∧
+    match slli_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
-  def SrlOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (xor_output : PureSpec.SrlOutput) : Prop :=
+  def SrlOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (srl_output : PureSpec.SrlOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
     BabyBear.isU32 row.b ∧
     BabyBear.isU32 row.c ∧
-    xor_output.nextPC = row.next_pc.toNat ∧
-    match xor_output.rd with
+    srl_output.nextPC = row.next_pc.toNat ∧
+    match srl_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
-  def SrliOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (xori_output : PureSpec.SrliOutput) : Prop :=
+  def SrliOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (srli_output : PureSpec.SrliOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
     BabyBear.isU32 row.b ∧
-    xori_output.nextPC = row.next_pc.toNat ∧
-    match xori_output.rd with
+    srli_output.nextPC = row.next_pc.toNat ∧
+    match srli_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
-  def SraOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (or_output : PureSpec.SraOutput) : Prop :=
+  def SraOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (sra_output : PureSpec.SraOutput) : Prop :=
     row.opcode_sra_flag = 1 ∧
     BabyBear.isU32 row.b ∧
     BabyBear.isU32 row.c ∧
-    or_output.nextPC = row.next_pc.toNat ∧
-    match or_output.rd with
+    sra_output.nextPC = row.next_pc.toNat ∧
+    match sra_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
         rd.1.toNat = row.rd_ptr.toNat
 
-  def SraiOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (ori_output : PureSpec.SraiOutput) : Prop :=
+  def SraiOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (srai_output : PureSpec.SraiOutput) : Prop :=
     row.opcode_sra_flag = 1 ∧
     BabyBear.isU32 row.b ∧
-    ori_output.nextPC = row.next_pc.toNat ∧
-    match ori_output.rd with
+    srai_output.nextPC = row.next_pc.toNat ∧
+    match srai_output.rd with
       | .none => row.a = row.prev_a
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
@@ -1365,172 +1365,5 @@ namespace Equivalence.Shift
       spec_of_get_instruction_fields air h_constraints h_bus_assumptions h_bus_wellformedness
     ]
     trivial
-
-  theorem shift_spec_completeness [Field ExtF]
-    (air : Valid_VmAirWrapper_shift FBB ExtF)
-    (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_shift.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
-    (instruction_fields_list : List Shift_instruction_fields)
-    (h_buses : air.buses = bus_from_instruction_fields instruction_fields_list)
-    (h_specs : instruction_fields_list.Forall Shift_instruction_fields.spec)
-  :
-    instruction_fields_list = get_instruction_fields air
-  := by
-    -- The two lists have equal lengths
-    have h_len_eq
-    :
-      instruction_fields_list.length = (get_instruction_fields air).length
-    := by
-      simp [get_instruction_fields]
-      unfold bus_from_instruction_fields at h_buses
-      have h_interactions := VmAirWrapper_shift.constraints.constrain_interactions_of_extraction air (h_constraints 0).1
-      unfold VmAirWrapper_shift.constraints.constrain_interactions at h_interactions
-      rewrite [h_interactions] at h_buses; clear h_interactions
-      suffices h_eq_len :
-        List.length (List.flatMap (VmAirWrapper_shift.constraints.executionBus_row air) (List.range (air.last_row + 1))) =
-        List.length (List.flatMap Shift_instruction_fields.execution instruction_fields_list)
-      . unfold VmAirWrapper_shift.constraints.executionBus_row
-               Shift_instruction_fields.execution
-          at h_eq_len
-        simp at h_eq_len; omega
-      . have := congrFun h_buses ExecutionBus
-        simp_all
-
-    -- and this length is `air.last_row + 1`
-    have h_len_eq_ifl
-    :
-      instruction_fields_list.length = air.last_row + 1
-    := by
-      simp [h_len_eq, get_instruction_fields]
-
-    -- then show all elements are equal
-    apply List.ext_get h_len_eq
-    intro row h₁ h₂
-    apply Shift_instruction_fields_eq
-    simp only [get_instruction_fields,
-               get_instruction_fields_row,
-               List.get_eq_getElem,
-               List.getElem_map,
-               List.getElem_range,
-               Fin.isValue]
-
-    -- Prepare buses
-    unfold bus_from_instruction_fields at h_buses
-    have h_interactions := VmAirWrapper_shift.constraints.constrain_interactions_of_extraction air (h_constraints 0).1
-    unfold VmAirWrapper_shift.constraints.constrain_interactions at h_interactions
-    rewrite [h_interactions] at h_buses; clear h_interactions
-
-    -- Match from Execution bus
-    have h_exec := congrFun h_buses ExecutionBus
-    unfold VmAirWrapper_shift.constraints.executionBus_row
-           Shift_instruction_fields.execution
-      at h_exec
-    simp at h_exec
-    have h_eq_exec :=
-      List.flatMap_eq_flatMap
-        h_exec
-        (by grind)
-        (by simp)
-        row
-        (by grind)
-    simp [and_assoc] at h_eq_exec
-    obtain ⟨ h0, h1, h2, h3, h4, h5 ⟩ := h_eq_exec
-    symm at h0 h1 h2 h3 h4 h5
-
-    -- Match from ReadInstruction bus
-    have h_read := congrFun h_buses ReadInstructionBus
-    unfold VmAirWrapper_shift.constraints.readInstructionBus_row
-           Shift_instruction_fields.read_instruction
-      at h_read
-    simp at h_read
-    have h_eq_read :=
-      List.flatMap_eq_flatMap
-        h_read
-        (by grind)
-        (by simp)
-        row
-        (by grind)
-    simp at h_eq_read
-    obtain ⟨ h6, h7, h8, h9, h10, h11, h12 ⟩ := h_eq_read
-    symm at h6 h7 h8 h9 h10 h11 h12
-
-    -- Match from Memory bus
-    have h_mem := congrFun h_buses MemoryBus
-    unfold VmAirWrapper_shift.constraints.memoryBus_row
-           Shift_instruction_fields.memory
-      at h_mem
-    simp at h_mem
-    have h_eq_mem :=
-      List.flatMap_eq_flatMap
-        h_mem
-        (by grind)
-        (by simp)
-        row
-        (by grind)
-    simp [and_assoc] at h_eq_mem
-    obtain ⟨ h13, h14, h15, h16, h17, h18, h19, h20, h21, h22,
-             h23, h24, h25, h26, h27, h28, h29, h30, h31, h32,
-             h33, h34, h35, h36, h37, h38, h39, h40, h41, h42,
-             h43, h44, h45, h46, h47, h48, h49, h50, h51, h52,
-             h53, h54, h55 ⟩ := h_eq_mem
-    symm at h13 h14 h15 h16 h17 h18 h19 h20 h21 h22
-            h23 h24 h25 h26 h27 h28 h29 h30 h31 h32
-            h33 h34 h35 h36 h37 h38 h39 h40 h41 h42
-            h43 h44 h45 h46 h47 h48 h49 h50 h51 h52
-            h53 h54 h55
-
-    -- Match from RangeChecker bus
-    have h_range := congrFun h_buses RangeCheckerBus
-    unfold VmAirWrapper_shift.constraints.rangeCheckerBus_row
-          Shift_instruction_fields.range_checks
-      at h_range
-    simp at h_range
-    have h_eq_range :=
-      List.flatMap_eq_flatMap
-        h_range
-        (by grind)
-        (by simp)
-        row
-        (by grind)
-    simp [and_assoc] at h_eq_range
-    obtain ⟨ h56, h57, h58, h59, h60, h61, h62, h63, h64, h65,
-            h66, h67, h68, h69, h70, h71, h72, h73, h74, h75,
-            h76, h77, h78, h79, h80, h81, h82, h83, h84, h85,
-            h86, h87, h88 ⟩ := h_eq_range
-    symm at h56 h57 h58 h59 h60 h61 h62 h63 h64 h65
-            h66 h67 h68 h69 h70 h71 h72 h73 h74 h75
-            h76 h77 h78 h79 h80 h81 h82 h83 h84 h85
-            h86 h87 h88
-
-    -- Match from Bitwise bus
-    have h_bit := congrFun h_buses BitwiseBus
-    unfold VmAirWrapper_shift.constraints.bitwiseBus_row
-           Shift_instruction_fields.bitwise
-      at h_bit
-    simp at h_bit
-    have h_eq_bit :=
-      List.flatMap_eq_flatMap
-        h_bit
-        (by grind)
-        (by simp)
-        row
-        (by grind)
-    simp [and_assoc] at h_eq_bit
-    obtain ⟨ h89, h90, h91, h92, h93, h94, h95, h96, h97, h98,
-             h99, h100, h101, h102, h103, h104 ⟩ := h_eq_bit
-    symm at h89 h90 h91 h92 h93 h94 h95 h97 h98 h99 h101 h102 h103
-
-    split_ands <;> try assumption
-    . ext i hi; interval_cases i <;> simp_all
-    . ext i hi; interval_cases i <;> simp_all
-    . ext i hi; interval_cases i <;> simp_all
-    . ext i hi; interval_cases i <;> simp_all
-    . ext i hi j hj
-      interval_cases i <;> interval_cases j <;>
-      simp [← Fin.ext_iff] <;> (try assumption) <;> simp [*]
-    . ext i hi j hj
-      interval_cases i <;> interval_cases j <;>
-      simp [← Fin.ext_iff] <;> (try assumption); simp [*]
 
 end Equivalence.Shift
