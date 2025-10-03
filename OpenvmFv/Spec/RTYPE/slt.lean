@@ -1,6 +1,8 @@
 import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.rX_bits
 
+namespace PureSpec
+
 structure SltInput where
   -- operands
   r1_val : BitVec 32
@@ -23,7 +25,7 @@ def execute_RTYPE_slt_pure (input : SltInput) : SltOutput := {
         input.rd.val,
         by apply Finset.mem_Icc.mpr; omega
       ⟩,
-      if input.r2_val.slt input.r1_val
+      if input.r1_val.slt input.r2_val
       then 1#32
       else 0#32
     )
@@ -41,7 +43,7 @@ lemma execute_RTYPE_slt_pure_equiv
   (
     do
       Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-      LeanRV32D.Functions.execute (instruction.RTYPE (r1, r2, rd, rop.SLT))
+      LeanRV32D.Functions.execute (instruction.RTYPE (r2, r1, rd, rop.SLT))
   ) state =
   let slt_output := execute_RTYPE_slt_pure slt_input
   (do
@@ -73,11 +75,11 @@ lemma execute_RTYPE_slt_pure_equiv
     bind, EStateM.instMonad, EStateM.bind
   ]
 
-  rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by simp [regidx_to_fin])]
-  rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
-  simp
   rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by simp [regidx_to_fin])]
   rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
+  simp
+  rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by simp [regidx_to_fin])]
+  rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
   simp [EStateM.pure]
 
   simp [execute_RTYPE_slt_pure]
@@ -105,12 +107,14 @@ lemma execute_RTYPE_slt_pure_equiv
         LeanRV32D.Functions.zopz0zI_s,
         LeanRV32D.Functions.bool_to_bits, LeanRV32D.Functions.bool_bits_forwards
       ]
-      by_cases h_lt: slt_input.r2_val.slt slt_input.r1_val
+      by_cases h_lt: slt_input.r1_val.slt slt_input.r2_val
       . simp [h_lt]
-        have : slt_input.r2_val.toInt<bslt_input.r1_val.toInt := h_lt
+        have : slt_input.r1_val.toInt<bslt_input.r2_val.toInt := h_lt
         simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
       . simp [h_lt]
-        have : ¬(slt_input.r2_val.toInt<bslt_input.r1_val.toInt) := h_lt
+        have : ¬(slt_input.r1_val.toInt<bslt_input.r2_val.toInt) := h_lt
         simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
     . simp [regidx_to_fin] at *
       omega
+
+end PureSpec

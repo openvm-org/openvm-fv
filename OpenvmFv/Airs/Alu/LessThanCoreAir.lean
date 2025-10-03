@@ -161,11 +161,10 @@ def Valid_LessThanCoreAir_4.ctx
       MinimalInstruction.mk
         (c.is_valid row rotation) --is_valid
         (
-          c.class_offset + --opcode
           (
             c.opcode_slt_flag row rotation * 0 +
             c.opcode_sltu_flag row rotation * 1
-          )
+          ) + c.class_offset
         )
     )
 
@@ -174,7 +173,7 @@ lemma LessThanCoreAir_4.ctx.instruction.opcode_def
   [Field F]
   (c : Valid_LessThanCoreAir_4 F)
   (row rotation: ℕ)
-: 520 + c.opcode_sltu_flag row rotation =
+: c.opcode_sltu_flag row rotation + 520 =
   (c.ctx row rotation).instruction.opcode
 := by
   unfold Valid_LessThanCoreAir_4.ctx Valid_LessThanCoreAir_4.class_offset

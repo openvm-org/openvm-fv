@@ -2,6 +2,7 @@ import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.rX_bits
 
 namespace PureSpec
+
   structure OrInput where
     -- operands
     r1_val : BitVec 32
@@ -102,4 +103,5 @@ namespace PureSpec
       . simp [h_input_rd, regidx_to_fin]
       . simp [regidx_to_fin] at *
         omega
+
 end PureSpec

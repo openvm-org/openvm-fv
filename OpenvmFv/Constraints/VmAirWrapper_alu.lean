@@ -668,7 +668,6 @@ namespace VmAirWrapper_alu.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-
     @[VmAirWrapper_alu_constraint_and_interaction_simplification]
     def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
       let rd := entry.xa

@@ -2,10 +2,68 @@ import Mathlib
 
 set_option maxHeartbeats 1_000_000_000
 
-/-- A prime finite field has no zero divisors -/
-instance Fin.noZeroDivisors_of_prime (p : ℕ)
-    [hp : Fact (Nat.Prime (p + 1))] : NoZeroDivisors (Fin (p + 1)) := by
-  refine IsDomain.to_noZeroDivisors (ZMod (p + 1))
+namespace Fin
+
+  /-- A prime finite field has no zero divisors -/
+  instance noZeroDivisors_of_prime (p : ℕ)
+      [hp : Fact (Nat.Prime (p + 1))] : NoZeroDivisors (Fin (p + 1)) := by
+    refine IsDomain.to_noZeroDivisors (ZMod (p + 1))
+
+end Fin
+
+namespace List
+
+  lemma append_eq_append_split
+    {T : Type}
+    {a b c d : List T}
+    (h_eq : a ++ b = c ++ d)
+    (h_len_ab : a.length = c.length)
+  :
+    a = c ∧ b = d
+  := by
+    induction a generalizing b c d
+    case nil => symm at h_len_ab; simp_all
+    case cons a₀ a ih =>
+      cases c
+      case nil => grind
+      case cons c₀ c =>
+        simp_all
+        apply ih <;> grind
+
+  lemma flatMap_eq_flatMap
+    {A B C : Type}
+    {f : A → List C}
+    {g : B → List C}
+    {lf : List A}
+    {lg : List B}
+    (h_eq_fmap : List.flatMap f lf = List.flatMap g lg)
+    (h_eq_len : lf.length = lg.length)
+    (h_eq_len_fg : forall a b, (f a).length = (g b).length)
+    (idx : ℕ)
+    (h_idx : idx < lf.length)
+  :
+    f lf[idx] = g lg[idx]
+  := by
+    induction lf generalizing idx lg
+    case nil => grind
+    case cons f₀ lf ih =>
+      cases lg
+      case nil => grind
+      case cons g₀ lg =>
+        simp_all
+        have h_eq'
+        :
+          List.flatMap f lf = List.flatMap g lg
+        := by
+          apply append_eq_append_split (h_len_ab := h_eq_len_fg f₀ g₀) at h_eq_fmap
+          tauto
+        cases idx
+        case zero => simp_all
+        case succ idx =>
+          specialize @ih lg h_eq' (by grind)
+          grind
+
+end List
 
 namespace BitVec
 

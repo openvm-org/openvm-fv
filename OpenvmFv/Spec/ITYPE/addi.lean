@@ -30,7 +30,7 @@ namespace PureSpec
     : AddiOutput
   }
 
-  lemma execute_ITYPE_add_pure_equiv
+  lemma execute_ITYPE_addi_pure_equiv
     (addi_input : AddiInput)
     (r1 rd: regidx)
     (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (addi_input.r1_val) state)
