@@ -66,6 +66,13 @@ def toBV32 (v : Vector FBB 4) : BitVec 32 :=
 
 end U32
 
+section toInt
+
+def toInt (a : FBB) : ℤ :=
+  if a.val ≤ BB_prime / 2 then a.val else a.val - BB_prime
+
+end toInt
+
 section auxiliaries
 
 lemma lt_via_diff_and_range_check

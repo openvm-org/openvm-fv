@@ -90,6 +90,48 @@ lemma append_eq_append_eql {m n : ℕ} {x1 y1 : BitVec m} {x2 y2 : BitVec n} :
     iterate 2 rw [BitVec.getElem_append (by omega)] at h_eq_bv
     simp_all
 
+/-- Characterisation of `toInt` invertibility -/
+lemma toInt_ofInt_eq_self_iff
+  {w : Nat} (hw : 0 < w) {n : Int}
+:
+  (BitVec.ofInt w n).toInt = n ↔ -2 ^ (w - 1) ≤ n ∧ n < 2 ^ (w - 1)
+:= by
+  constructor <;> intro h
+  . simp [BitVec.ofInt, BitVec.toInt] at h
+    rw [Int.max_eq_left (by omega)] at h
+    split_ifs at h with h'
+    . replace h' : (n % 2 ^ w).toNat < 2 ^ (w - 1) := by
+        rw [← mul_lt_mul_left (a := 2 ^ 1) (by omega)]
+        apply lt_of_lt_of_le
+        . exact h'
+        . rw [← pow_add]
+          apply pow_le_pow <;> omega
+      have ⟨ lb_n, ub_n ⟩ : 0 ≤ n ∧ n < 2 ^ w := by omega
+      rw [h] at *; clear h
+      simp_all
+      omega
+    . replace h' :  2 ^ (w - 1) ≤ (n % 2 ^ w).toNat := by
+        rw [← mul_le_mul_left (a := 2 ^ 1) (by omega)]
+        simp at h'; trans; rotate_left
+        . simp; exact h'
+        . rw [← pow_add]
+          apply pow_le_pow <;> omega
+      have ub_n : n < 0 := by omega
+      split_ands <;> [ skip; grind ]
+      replace h : n % 2 ^ w = n + 2 ^ w := by omega
+      rw [h] at h'
+      suffices : -2 ^ (w - 1) + 2 ^ w ≤ n + 2 ^ w
+      . omega
+      . trans 2 ^ (w - 1)
+        . simp [← Int.two_mul]
+          rw [mul_comm]
+          simp [← pow_succ]
+          have : (w - 1) + 1 = w := by omega
+          simp [this]
+        . zify at *; simp_all
+          omega
+  . apply BitVec.toInt_ofInt_eq_self <;> omega
+
 /-- Reformulation of `sshiftRight` -/
 lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
   bv.sshiftRight shift =

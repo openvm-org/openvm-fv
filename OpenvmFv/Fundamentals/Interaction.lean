@@ -304,6 +304,17 @@ namespace Interaction
           rs1.val < 32 ∧ rs2.val < 32 ∧
           -- unused parameters
           entry.xd = 1 ∧ entry.xe = 0 ∧ entry.xf = 0 ∧ entry.xg = 0
+        )) ∧
+        ( entry.opcode ∈ Finset.Icc 544 545 → (
+          let rs1 := entry.xa
+          let rs2 := entry.xb
+          let imm := entry.xc
+          -- rs1 and rs2 are xregs
+          rs1.val < 32 ∧ rs2.val < 32 ∧
+          -- imm is a 13-bit signed integer represented as a field element
+          -2^13 ≤ BabyBear.toInt imm ∧ BabyBear.toInt imm < 2^13 ∧
+          -- unused parameters
+          entry.xd = 1 ∧ entry.xe = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
         ))
 
       /-- Read-instruction bus entry instance -/
