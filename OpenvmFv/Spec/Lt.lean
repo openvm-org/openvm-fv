@@ -135,7 +135,6 @@ lemma wf_propertiesToAssert
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
   obtain ⟨ ba0, ba1, ba2, ba3 ⟩ := pa_bit
   clear pa_exec pa_range
 
@@ -200,7 +199,6 @@ lemma essentials
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
   obtain ⟨ ba0, ba1, ba2, ba3 ⟩ := pa_bit
   clear pa_exec pa_range
 
@@ -228,7 +226,7 @@ lemma essentials
      (air.core.c_2 row 0).val < 256 ∧
      (air.core.c_3 row 0).val < 256
   := by
-    clear *- b_rs2_as rs2_as_imm imm_sign imm_sign_extend ub_rs2n_c ri_imm ba3
+    clear *- b_rs2_as rs2_as_imm imm_sign imm_sign_extend ub_rs2n_c pa_read ba3
     rw [Fin.ext_iff] at *
     rcases b_rs2_as <;> simp_all
     . rw [← VmAirWrapper_lt.rs2_sign_limbs] at imm_sign
@@ -444,7 +442,6 @@ theorem spec_base_ALU_imm
   simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at pa_read
   repeat rw [Fin.ext_iff] at pa_read
   simp at pa_read
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
 
   suffices eq_c
   : U32.toBV #v[(air.core.c_0 row 0).val,

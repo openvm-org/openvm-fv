@@ -730,24 +730,15 @@ section bus_entries
 
     @[VmAirWrapper_lt_constraint_and_interaction_simplification]
     def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
-      let rd := entry.xa
-      let rs1 := entry.xb
       let rs2 := entry.xc
       let rs2_as := entry.xe
-      -- rd and rs1 boundaries
-      rd.val < 32 ∧ rs1.val < 32 ∧
-      -- non-immediate rs2
-      (rs2_as = 1 → rs2.val < 32) ∧
-      -- immediate rs2
       (rs2_as = 0 →
         -- opcode cannot be SUB
-        ¬ entry.opcode = 513 ∧
+        -- ¬ entry.opcode = 513 ∧
         -- immediate fits 24 bits
         rs2.val < 2 ^ 24 ∧
         -- immediate is a sign-extended 12-bit value
-        (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt) ∧
-      -- unused parameters
-      entry.xd = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
+        (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt)
 
     lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
       (h_bounds :
