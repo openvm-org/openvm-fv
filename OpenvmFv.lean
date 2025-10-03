@@ -1,14 +1,26 @@
 import OpenvmFv.Airs.Alu.AdapterAirContext
 import OpenvmFv.Airs.Alu.BaseAluCoreAir
+import OpenvmFv.Airs.Alu.DivRemCoreAir
 import OpenvmFv.Airs.Alu.LessThanCoreAir
+import OpenvmFv.Airs.Alu.MulHCoreAir
+import OpenvmFv.Airs.Alu.MultiplicationCoreAir
 import OpenvmFv.Airs.Alu.Rv32BaseAluAdapterAir
+import OpenvmFv.Airs.Alu.Rv32MultAdapterAir
 import OpenvmFv.Airs.Alu.VmAirWrapper_alu
 import OpenvmFv.Airs.Alu.VmAirWrapper_lt
+import OpenvmFv.Airs.Alu.VmAirWrapper_mul
+import OpenvmFv.Airs.Alu.VmAirWrapper_mulh
+import OpenvmFv.Airs.Alu.VmAirWrapper_shift
+
+import OpenvmFv.Airs.Branch.BranchEqualCoreAir
+import OpenvmFv.Airs.Branch.Rv32BranchAdapterAir
+import OpenvmFv.Airs.Branch.VmAirWrapper_branch_eq
 
 import OpenvmFv.Airs.AccessAdapterAir
 import OpenvmFv.Airs.ExecutionState
 import OpenvmFv.Airs.LessThanAuxCols
 import OpenvmFv.Airs.Memory
+import OpenvmFv.Airs.PhantomAir
 import OpenvmFv.Airs.VariableRangeCheckerAir
 
 import OpenvmFv.Constraints.AccessAdapterAir_2
@@ -20,7 +32,11 @@ import OpenvmFv.Constraints.PhantomAir
 import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
+import OpenvmFv.Constraints.VmAirWrapper_branch_eq
+import OpenvmFv.Constraints.VmAirWrapper_divrem
 import OpenvmFv.Constraints.VmAirWrapper_lt
+import OpenvmFv.Constraints.VmAirWrapper_mul
+import OpenvmFv.Constraints.VmAirWrapper_mulh
 import OpenvmFv.Constraints.VmAirWrapper_shift
 import OpenvmFv.Constraints.VolatileBoundaryAir
 
@@ -33,10 +49,16 @@ import OpenvmFv.Extraction.AccessAdapterAir_4
 import OpenvmFv.Extraction.BitwiseOperationLookupAir_8
 import OpenvmFv.Extraction.ExecutionDummyAir
 import OpenvmFv.Extraction.MemoryDummyAir_1
+import OpenvmFv.Extraction.PhantomAir
 import OpenvmFv.Extraction.ProgramDummyAir
 import OpenvmFv.Extraction.VariableRangeCheckerAir
 import OpenvmFv.Extraction.VmAirWrapper_alu
+import OpenvmFv.Extraction.VmAirWrapper_branch_eq
+import OpenvmFv.Extraction.VmAirWrapper_divrem
 import OpenvmFv.Extraction.VmAirWrapper_lt
+import OpenvmFv.Extraction.VmAirWrapper_mul
+import OpenvmFv.Extraction.VmAirWrapper_mulh
+import OpenvmFv.Extraction.VmAirWrapper_shift
 import OpenvmFv.Extraction.VolatileBoundaryAir
 
 import OpenvmFv.Fundamentals.BabyBear
@@ -64,6 +86,7 @@ import OpenvmFv.Spec.RTYPE.local
 import OpenvmFv.Spec.RTYPE.or
 import OpenvmFv.Spec.RTYPE.sll
 import OpenvmFv.Spec.RTYPE.slt
+import OpenvmFv.Spec.RTYPE.sltu
 import OpenvmFv.Spec.RTYPE.sra
 import OpenvmFv.Spec.RTYPE.srl
 import OpenvmFv.Spec.RTYPE.sub
@@ -77,7 +100,8 @@ import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
-import OpenvmFv.Spec.Shift
+import OpenvmFv.Spec.rX_bits
 import OpenvmFv.Spec.run_hart_active
+import OpenvmFv.Spec.Shift
 
 import OpenvmFv.Util
