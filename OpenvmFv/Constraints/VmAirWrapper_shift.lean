@@ -1928,7 +1928,116 @@ namespace VmAirWrapper_shift.constraints
     := by
       simp [readInstructionBus_properties.eq_def]
       simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
-      omega
+      obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
+      simp [←h_data] at h_bounds ⊢ h_transpile
+      clear h_data
+      have h_supported_types := Transpiler.transpiler_supported_opcode_types h_transpile
+      have : data = #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]] := by
+        clear *-data
+        apply Vector.ext
+        intro i h_i
+        by_cases i=0; simp [*]
+        by_cases i=1; simp [*]
+        by_cases i=2; simp [*]
+        by_cases i=3; simp [*]
+        by_cases i=4; simp [*]
+        by_cases i=5; simp [*]
+        by_cases i=6; simp [*]
+        by_cases i=7; simp [*]
+        by_cases i=8; simp [*]
+        exfalso; omega
+      have h_op_1 :
+        (multiplicity, #v[data[0], 1, 0, 0, 0, 0, 0, 0, 0]) =
+        (multiplicity, #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]]) →
+        data[1] = 1 := by grind
+      have h_rs2_1 {op rd rs1 rs2}:
+        (multiplicity, #v[data[0], op, rd, rs1, rs2, 1, 1, 0, 0]) =
+        (multiplicity, #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]]) →
+        data[6] = 1 := by grind
+      rcases h_supported_types with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      . obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type -- RTYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          . exfalso
+            have : data[1] = 1 := h_op_1 h_transpile
+            simp [this] at h_bounds
+          . intro h_rs2_as; exfalso
+            have : data[6] = 1 := h_rs2_1 h_transpile
+            simp [this] at h_rs2_as
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          exfalso
+          grind
+        }
+      . obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type -- SHIFTIOP
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          . exfalso; grind
+          . intro h_rs2_as
+            have : data[4] = Transpiler.utof (Transpiler.zero_extend_24 (BitVec.extractLsb 4 0 shamt)) := by grind
+            rewrite [this]
+            simp [Transpiler.utof, Transpiler.zero_extend_24]
+            omega
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          exfalso
+          grind
+        }
+      . obtain ⟨⟨imm, rs1, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          grind
+        }
+      . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2 <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          grind
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile <;> simp at h_transpile <;> grind
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile <;> simp at h_transpile <;> grind
+        }
+
 
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
