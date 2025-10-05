@@ -194,7 +194,7 @@ namespace Equivalence.BranchEqual
       intro h_is_valid
 
       have ⟨
-        h_pc, h_next_pc,
+        h_pc, h_next_pc, h_next_pc_mod_4,
         h_timestamp,
         ⟨h_a0, h_a1, h_a2, h_a3, h_b0, h_b1, h_b2, h_b3⟩,
         h_opcodes,
@@ -209,10 +209,23 @@ namespace Equivalence.BranchEqual
             (h_bus_assumptions row (by omega))
             (h_bus_wellformedness row (by omega))
 
+      have ⟨ npc0_z, npc1_z ⟩ :=
+        BranchEqual.ValidRows.next_pc_two_last_bits_zero
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+
       split_ands
       . grind
       . grind
-      . have ⟨ spec_beq, spec_bne ⟩
+
+      all_goals
+        have ⟨ spec_beq, spec_bne ⟩
         := BranchEqual.ValidRows.spec_BEQ_BNE_pc
             ExtF
             air
@@ -222,266 +235,25 @@ namespace Equivalence.BranchEqual
             h_is_valid
             (h_bus_assumptions row (by omega))
             (h_bus_wellformedness row (by omega))
-        clear spec_bne
+
+      . clear spec_bne
         intro h_beq; simp [h_beq] at spec_beq
         simp [BeqOutput_matches_BranchEqual_instruction_fields,
               BeqInput_of_BranchEqual_instruction_fields]
         clear h_constraints h_bus_assumptions h_bus_wellformedness
+        simp [PureSpec.execute_BEQ_pure]
         simp_all
 
-        conv at spec_beq =>
-          rhs; arg 1
-          simp [← BitVec.toNat_inj, U32.toNat]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+        simp [← BitVec.toNat_inj, U32.toNat]
 
-        simp [PureSpec.execute_BEQ_pure]
+      . clear spec_beq
+        intro h_bne; simp [h_bne] at spec_bne
+        simp [BneOutput_matches_BranchEqual_instruction_fields,
+              BneInput_of_BranchEqual_instruction_fields]
+        clear h_constraints h_bus_assumptions h_bus_wellformedness
+        simp [PureSpec.execute_BNE_pure]
+        simp_all
 
-        conv =>
-          arg 1; lhs; arg 1
-          simp [← BitVec.toNat_inj, U32.toNat]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-        conv =>
-          arg 1; rhs
-          simp [← BitVec.toNat_inj, U32.toNat]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-        conv =>
-          arg 2
-          simp [← BitVec.toNat_inj, U32.toNat]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-          rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#exit
-
-      dsimp only at *
-
-      split_ands <;> [ grind; grind; skip; skip ]
-
-      . intro h_non_imm
-        have non_imm_spec := Lt.ValidRows.spec_base_Lt_non_imm
-          ExtF
-          air
-          row
-          (by omega)
-          (h_constraints ⟨row, by omega⟩)
-          h_is_valid
-          (h_bus_assumptions row (by omega))
-          (h_bus_wellformedness row (by omega))
-
-        split_ands
-
-        . intro h_opcode
-          simp [SltOutput_matches_BranchEqual_instruction_fields]
-          split_ands <;>
-          [ assumption; assumption; assumption; assumption;
-            assumption; assumption; assumption; assumption;
-            skip; skip ]
-          . simp [BeqInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_slt_pure]
-            simp [← BitVec.toNat_inj]
-            omega
-          . simp [BeqInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_slt_pure]
-            rewrite [dite_cond_eq_false]
-            . simp
-              split_ands <;>
-              [ assumption; skip; skip ]
-              . specialize non_imm_spec h_non_imm
-                unfold execute_RTYPE_pure at non_imm_spec
-                simp [h_opcode, Lt.ValidRows.rop_of_Lt_opcode] at non_imm_spec
-                split_ifs at non_imm_spec with h_lt <;> simp at non_imm_spec h_lt
-                . rw [if_pos]
-                  . assumption
-                  . simpa [BitVec.slt]
-                . rw [if_neg]
-                  . assumption
-                  . simpa [BitVec.slt]
-              . simp [wrap_to_regidx]
-                specialize h_bus_wellformedness row (by omega)
-                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-                omega
-            . simp [wrap_to_regidx]
-              specialize h_bus_wellformedness row (by omega)
-              simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-              omega
-        . intro h_opcode
-          simp [SltuOutput_matches_BranchEqual_instruction_fields]
-          split_ands <;>
-          [ assumption; assumption; assumption; assumption;
-            assumption; assumption; assumption; assumption;
-            skip; skip ]
-          . simp [BneInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sltu_pure]
-            simp [← BitVec.toNat_inj]
-            omega
-          . simp [BneInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_RTYPE_sltu_pure]
-            rewrite [dite_cond_eq_false]
-            . simp
-              split_ands <;>
-              [ assumption; skip; skip ]
-              . specialize non_imm_spec h_non_imm
-                unfold execute_RTYPE_pure at non_imm_spec
-                simp [h_opcode, Lt.ValidRows.rop_of_Lt_opcode] at non_imm_spec
-                split_ifs at non_imm_spec with h_lt <;> simp at non_imm_spec h_lt
-                . rw [if_pos]
-                  . assumption
-                  . simpa [BitVec.lt_def]
-                . rw [if_neg]
-                  . assumption
-                  . simpa [BitVec.lt_def]
-              . simp [wrap_to_regidx]
-                specialize h_bus_wellformedness row (by omega)
-                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-                omega
-            . simp [wrap_to_regidx]
-              specialize h_bus_wellformedness row (by omega)
-              simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-              omega
-
-      . intro h_imm
-        have imm_spec := Lt.ValidRows.spec_base_ALU_imm
-          ExtF
-          air
-          row
-          (by omega)
-          (h_constraints ⟨row, by omega⟩)
-          h_is_valid
-          (h_bus_assumptions row (by omega))
-          (h_bus_wellformedness row (by omega))
-          h_imm
-
-        split_ands
-
-        . intro h_opcode
-          simp [SltiOutput_matches_BranchEqual_instruction_fields]
-          split_ands <;>
-          [ assumption; assumption; assumption; assumption;
-            skip; skip; skip ]
-          . clear *- h_imm_op_properties h_imm
-            simp [h_imm] at h_imm_op_properties
-            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
-            apply BitVec.eq_of_toInt_eq
-            simp [this]
-            have := h_imm_op_properties.2.1
-            rewrite [this]
-            exact Int.bmod_eq_of_le (by grind) (by grind)
-          . simp [SltiInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_slti_pure]
-            simp [← BitVec.toNat_inj]
-            omega
-          . simp [SltiInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_slti_pure]
-            rewrite [dite_cond_eq_false]
-            . simp
-              split_ands <;>
-              [ assumption; skip; skip ]
-              . unfold execute_ITYPE_pure at imm_spec
-                simp [h_opcode, Lt.ValidRows.iop_of_Lt_opcode, execute_RTYPE_pure] at imm_spec
-                split_ifs at imm_spec with h_lt <;> simp at imm_spec h_lt
-                . rw [if_pos]
-                  . assumption
-                  . simpa [BitVec.slt]
-                . rw [if_neg]
-                  . assumption
-                  . simpa [BitVec.slt]
-              . simp [wrap_to_regidx]
-                specialize h_bus_wellformedness row (by omega)
-                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-                omega
-            . simp [wrap_to_regidx]
-              specialize h_bus_wellformedness row (by omega)
-              simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-              omega
-
-        . intro h_opcode
-          simp [SltiuOutput_matches_BranchEqual_instruction_fields]
-          split_ands <;>
-          [ assumption; assumption; assumption; assumption;
-            skip; skip; skip ]
-          . clear *- h_imm_op_properties h_imm
-            simp [h_imm] at h_imm_op_properties
-            have := @BitVec.toInt_signExtend 12 24 (BitVec.ofNat 12 ↑(air.adapter.rs2 row 0))
-            apply BitVec.eq_of_toInt_eq
-            simp [this]
-            have := h_imm_op_properties.2.1
-            rewrite [this]
-            exact Int.bmod_eq_of_le (by grind) (by grind)
-          . simp [SltiuInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_sltiu_pure]
-            simp [← BitVec.toNat_inj]
-            omega
-          . simp [SltiuInput_of_BranchEqual_instruction_fields, BabyBear.toBV32, PureSpec.execute_ITYPE_sltiu_pure]
-            rewrite [dite_cond_eq_false]
-            . simp
-              split_ands <;>
-              [ assumption; skip; skip ]
-              . unfold execute_ITYPE_pure at imm_spec
-                simp [h_opcode, Lt.ValidRows.iop_of_Lt_opcode, execute_RTYPE_pure] at imm_spec
-                split_ifs at imm_spec with h_lt <;> simp at imm_spec h_lt
-                . rw [if_pos]
-                  . assumption
-                  . simpa [BitVec.lt_def]
-                . rw [if_neg]
-                  . assumption
-                  . simpa [BitVec.lt_def]
-              . simp [wrap_to_regidx]
-                specialize h_bus_wellformedness row (by omega)
-                simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                      Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-                omega
-            . simp [wrap_to_regidx]
-              specialize h_bus_wellformedness row (by omega)
-              simp [VmAirWrapper_lt_constraint_and_interaction_simplification,
-                    Interaction.ReadInstructionBusEntry.operand_properties] at h_bus_wellformedness
-              omega
+        simp [← BitVec.toNat_inj, U32.toNat]
 
 end Equivalence.BranchEqual

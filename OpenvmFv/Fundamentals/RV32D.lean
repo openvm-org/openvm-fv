@@ -12,6 +12,9 @@ section misa
 
   opaque misa : BitVec 32
 
+  @[simp]
+  axiom c_extension_not_active : misa[2] = false
+
 end misa
 
 end LeanRV32D.Functions

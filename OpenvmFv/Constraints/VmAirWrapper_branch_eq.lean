@@ -549,6 +549,8 @@ namespace VmAirWrapper_branch_eq.constraints
       rs1.val < 32 ∧ rs2.val < 32 ∧
       -- imm is a 13-bit signed integer represented as a field element
       -2^12 ≤ BabyBear.toInt imm ∧ BabyBear.toInt imm < 2^12 ∧
+      -- imm is aligned
+      BabyBear.toInt imm % 4 = 0 ∧
       -- unused parameters
       entry.xd = 1 ∧ entry.xe = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
 

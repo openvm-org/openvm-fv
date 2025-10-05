@@ -200,6 +200,27 @@ lemma inv256_prod_diff_div_mod
     (conv => lhs; arg 2; arg 1; rw [this]); simp
     rw [mul_comm (b := 256), ← mul_assoc, inv_256_eq_one_lr]; simp
 
+lemma mod_4_zero_bits_zero
+  (a : FBB)
+:
+  a % 4 = 0
+    ↔
+  (BitVec.ofNat 32 a.val)[0] = false ∧
+  (BitVec.ofNat 32 a.val)[1] = false
+:= by
+  have : a % (4 : FBB) = (1 : FBB) * ((BitVec.ofNat 32 a.val)[0]).toNat + (2 : FBB) * (BitVec.ofNat 32 a.val)[1].toNat
+  := by
+    simp only [BitVec.getElem_eq_testBit_toNat]
+    simp [Nat.testBit_eq_decide_div_mod_eq]
+    rw [Nat.mod_eq_of_lt (b := 4294967296) (by omega)]
+    simp [Fin.ext_iff]
+    by_cases a.val % 2 = 1 <;>
+    by_cases a.val / 2 % 2 = 1 <;>
+    simp_all <;> omega
+  rw [this]; clear this
+  by_cases (BitVec.ofNat 32 ↑a)[0] <;>
+  by_cases (BitVec.ofNat 32 ↑a)[1] <;> simp_all
+
 end auxiliaries
 
 end BabyBear

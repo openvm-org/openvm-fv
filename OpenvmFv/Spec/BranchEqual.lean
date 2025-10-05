@@ -7,6 +7,10 @@ import OpenvmFv.Fundamentals.Interaction
 
 import LeanZKCircuit.Interactions
 
+attribute [-simp]
+  EuclideanDomain.mod_eq_zero
+  neg_le_sub_iff_le_add
+
 set_option maxHeartbeats 1_000_000_000
 set_option maxRecDepth 1_000_000
 
@@ -82,6 +86,7 @@ section General
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- The properties that need to be proven actually hold -/
@@ -99,12 +104,41 @@ lemma wf_propertiesToAssert
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
-  clear pa_exec pa_range
+  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, imm_mod ⟩ := pa_read
+  clear pa_range
 
   have ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
   simp_all [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+  simp [and_assoc] at assumptions
+  obtain ⟨ ub_pc, r0, ub_to_pc, rest ⟩ := assumptions
+  clear r0 rest
+
+  simp [Valid_VmAirWrapper_branch_eq.to_pc,
+        Valid_BranchEqualCoreAir_4.to_pc,
+        Valid_BranchEqualCoreAir_4.pc_step] at *
+
+  obtain ⟨ constrain_interactions,
+           b_beq, b_bne, b_cmp,
+           cmp_0, cmp_1, cmp_2, cmp_3, sum, rest ⟩ := constraints
+  clear constrain_interactions rest
+
+  rcases b_cmp <;> simp_all
+  . grind
+  . simp [Fin.ext_iff, Fin.val_add]
+    simp [BabyBear.toInt] at *
+    by_cases h_pos : (air.core.imm row 0).val ≤ 1006632960
+    . simp_all
+      grind
+    . simp_all
+      simp [Fin.ext_iff] at pa_exec
+      have ub_sum : (air.adapter.from_state.pc row 0).val + (air.core.imm row 0) < 4026531842 := by omega
+      rw [Nat.mod_eq_sub_mod (b := 2013265921)]
+      . rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+        omega
+      . simp [Fin.lt_def, Fin.val_add] at ub_to_pc
+        zify at *
+        grind
 
 include
   row_valid
@@ -118,6 +152,7 @@ lemma essentials
 :
   (air.adapter.from_state.pc row 0).val < 1073741824 ∧
   (air.to_pc row 0).val < 1073741824 ∧
+  (air.to_pc row 0) % 4 = 0 ∧
   (air.adapter.from_state.timestamp row 0) + 2 < 536870912 ∧
   List.Forall (fun x => x.val < 256)
     [air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
@@ -126,6 +161,8 @@ lemma essentials
    air.core.expected_opcode row 0 = 545) ∧
   (-2^12 ≤ BabyBear.toInt (air.core.imm row 0) ∧ BabyBear.toInt (air.core.imm row 0) < 2^12)
 := by
+  have assertions := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid assumptions propertiesToAssume
+
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
   simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
 
@@ -139,9 +176,65 @@ lemma essentials
   obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
-  simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at assumptions
+  simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at assumptions assertions
   clear constraints; simp_all
   split_ands <;> omega
+
+include
+  row_valid
+  constraints
+  assumptions
+  propertiesToAssume in
+lemma next_pc_two_last_bits_zero
+:
+  (BitVec.ofNat 32 (air.adapter.from_state.pc row 0).val +
+    BitVec.signExtend 32 (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0))))[0] = false ∧
+  (BitVec.ofNat 32 (air.adapter.from_state.pc row 0).val +
+    BitVec.signExtend 32 (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0))))[1] = false
+:= by
+  have assertions := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid assumptions propertiesToAssume
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
+
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_read
+
+  rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read
+  obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
+  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, aligned_imm ⟩ := pa_read
+  clear pa_range
+
+  simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at assumptions assertions
+  rw [BabyBear.mod_4_zero_bits_zero] at pa_exec
+  obtain ⟨ pc0, pc1 ⟩ := pa_exec
+  suffices :
+    (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0)))[0] = false ∧
+    (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0)))[1] = false
+  . obtain ⟨ npc0, npc1 ⟩ := this
+    bv_decide
+  . obtain ⟨ x, eq_x ⟩ : exists x, BabyBear.toInt (air.core.imm row 0) = x := by simp
+    simp [eq_x] at lb_imm ub_imm aligned_imm ⊢
+    clear *- lb_imm ub_imm aligned_imm
+    have : x % (4 : ℤ) = (1 : ℤ) * ((BitVec.ofInt 13 x)[0]).toNat + (2 : ℤ) * (BitVec.ofInt 13 x)[1].toNat
+    := by
+      simp only [BitVec.getElem_eq_testBit_toNat]
+      simp [Nat.testBit_eq_decide_div_mod_eq]
+      by_cases h_sgn : 0 ≤ x
+      . rw [Int.emod_eq_of_lt (b := 8192) (by omega) (by omega)]
+        by_cases (x.toNat % 2 = 1) <;>
+        by_cases (x.toNat / 2 % 2 = 1) <;>
+        simp_all <;>
+        omega
+      . simp at h_sgn
+        by_cases ((x % 8192).toNat % 2 = 1) <;>
+        simp_all <;> omega
+
+    rw [this] at aligned_imm; clear this
+    by_cases (BitVec.ofInt 13 x)[0] <;>
+    by_cases (BitVec.ofInt 13 x)[1] <;> simp_all
 
 include
   row_valid
@@ -314,7 +407,7 @@ theorem spec_BEQ_BNE_pc
         . simp [← BitVec.toNat_inj]
           omega
         . simp [BitVec.msb_eq_decide]; omega
-      . simp_all [-neg_le_sub_iff_le_add]
+      . simp_all
         trans (BitVec.ofInt 32 ↑(air.adapter.from_state.pc row 0 + air.core.imm row 0))
         . grind
         . have : BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) = BitVec.ofInt 32 ↑(air.adapter.from_state.pc row 0) := by grind
@@ -357,7 +450,7 @@ theorem spec_BEQ_BNE_pc
         . simp [← BitVec.toNat_inj]
           omega
         . simp [BitVec.msb_eq_decide]; omega
-      . simp_all [-neg_le_sub_iff_le_add]
+      . simp_all
         trans (BitVec.ofInt 32 ↑(air.adapter.from_state.pc row 0 + air.core.imm row 0))
         . grind
         . have : BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) = BitVec.ofInt 32 ↑(air.adapter.from_state.pc row 0) := by grind

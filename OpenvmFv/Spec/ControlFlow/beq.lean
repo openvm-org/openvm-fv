@@ -21,7 +21,7 @@ namespace PureSpec
     throws : Bool
 
   def execute_BEQ_pure (input : BeqInput) : BeqOutput :=
-    let skip := input.r2_val != input.r1_val
+    let skip := input.r1_val != input.r2_val
     let throws := !skip && BitVec.ofBool (input.PC + BitVec.signExtend 32 input.imm)[0] == 1#1
     let fails := throws || (!skip && BitVec.ofBool (input.PC + BitVec.signExtend 32 input.imm)[1] == 1#1 && !input.misa[2])
     {
@@ -60,7 +60,7 @@ namespace PureSpec
     (
       do
         Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-        LeanRV32D.Functions.execute (instruction.BTYPE (imm, r1, r2, bop.BEQ ))
+        LeanRV32D.Functions.execute (instruction.BTYPE (imm, r2, r1, bop.BEQ ))
     ) state =
     let beq_output := execute_BEQ_pure beq_input
     (do
@@ -87,17 +87,17 @@ namespace PureSpec
     ]
 
     simp [Local.execute_BTYPE]
-    rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by {
-      simp [regidx_to_fin]
-    })]
-    rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
-    simp
     rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by {
       simp [regidx_to_fin]
     })]
     rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
     simp
-    by_cases h_eq: beq_input.r2_val = beq_input.r1_val
+    rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by {
+      simp [regidx_to_fin]
+    })]
+    rewrite [read_xreg_write_reg_state_nextPC _ h_input_r2]
+    simp
+    by_cases h_eq: beq_input.r1_val = beq_input.r2_val
     . simp [h_eq]
       rewrite [readReg_state (writeReg_read_diff h_input_pc (by trivial))]
       simp [←Local.jump_to_equiv, jump_to_simplified_equiv, jump_to_simplified]

@@ -95,7 +95,7 @@ namespace Interaction
                 timestamp < 2^29
 
           -- An execution bus entry has no assume/prove properties
-          wf_properties := fun _ => True
+          wf_properties := fun ⟨_, pc, _⟩ => pc % 4 = 0
 
           wf_assume_cond := fun entry => entry.1 = -1,
           wf_assert_cond := fun entry => entry.1 = 1,
@@ -313,6 +313,8 @@ namespace Interaction
           rs1.val < 32 ∧ rs2.val < 32 ∧
           -- imm is a 13-bit signed integer represented as a field element
           -2^12 ≤ BabyBear.toInt imm ∧ BabyBear.toInt imm < 2^12 ∧
+          -- imm is aligned
+          BabyBear.toInt imm % 4 = 0 ∧
           -- unused parameters
           entry.xd = 1 ∧ entry.xe = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
         ))
