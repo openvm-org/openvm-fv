@@ -2127,6 +2127,15 @@ namespace VmAirWrapper_shift.constraints
 
   section auxiliaries
 
+  instance : Coe (Fin 256) FBB where
+    coe b := ⟨ b.toNat, by {
+      apply lt_trans _ (show 256 < BB_prime by trivial)
+      obtain ⟨b, h_b⟩ := b
+      dsimp
+      exact h_b
+    } ⟩
+
+
   lemma FBB_invert_shift_aux
     {x : Fin 256} {y z : FBB}
     (hy : y < 4)

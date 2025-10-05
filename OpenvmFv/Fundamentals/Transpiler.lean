@@ -199,6 +199,473 @@ namespace Transpiler
         simp at h_some
       }
 
+    lemma non_phantom_rd
+      (h: ¬(rd == regidx.Regidx 0#5) = true)
+    : ¬rd.1 = 0#5 := by
+      by_cases h_contr : rd = regidx.Regidx 0#5
+      . simp [h_contr] at h
+        exfalso
+        have : (regidx.Regidx 0#5 == regidx.Regidx 0#5) = true := rfl
+        contradiction
+      . obtain ⟨rd⟩ := rd
+        by_cases h_contr' : (regidx.Regidx rd).1 = 0#5
+        . aesop
+        . aesop
+
+    lemma extract_opcode
+      (h: some (mult, #v[x1, x2, x3, x4, x5, x6, x7, x8, x9]) = some result)
+    : result.2[1] = x2 := by
+      aesop
+
+    lemma extract_rs2_as
+      (h: some (mult, #v[x1, x2, x3, x4, x5, x6, x7, x8, x9]) = some result)
+    : result.2[6] = x7 := by
+      aesop
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_517
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 517)
+    :
+      (result.2[6] = 0 ∧ ∃ shamt rs1 rd, inst = .SHIFTIOP (shamt, rs1, rd, sop.SLLI) ∧ rd.1 ≠ 0) ∨
+      (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SLL) ∧ rd.1 ≠ 0)
+    := by
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        case SLL =>
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            exfalso
+            omega
+          . have h_rs2_as := extract_rs2_as h_transpile
+            simp [h_rs2_as]
+            have h_rd := non_phantom_rd h_if
+            use rs2, rs1, rd
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        case SLLI =>
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            exfalso
+            omega
+          . have h_rs2_as := extract_rs2_as h_transpile
+            simp [h_rs2_as]
+            have h_rd := non_phantom_rd h_if
+            use shamt, rs1, rd
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          simp at h_transpile
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_518
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 518)
+    :
+      (result.2[6] = 0 ∧ ∃ shamt rs1 rd, inst = .SHIFTIOP (shamt, rs1, rd, sop.SRLI) ∧ rd.1 ≠ 0) ∨
+      (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SRL) ∧ rd.1 ≠ 0)
+    := by
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        case SRL =>
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            exfalso
+            omega
+          . have h_rs2_as := extract_rs2_as h_transpile
+            simp [h_rs2_as]
+            have h_rd := non_phantom_rd h_if
+            use rs2, rs1, rd
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        case SRLI =>
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            exfalso
+            omega
+          . have h_rs2_as := extract_rs2_as h_transpile
+            simp [h_rs2_as]
+            have h_rd := non_phantom_rd h_if
+            use shamt, rs1, rd
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          simp at h_transpile
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_519
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 519)
+    :
+      (result.2[6] = 0 ∧ ∃ shamt rs1 rd, inst = .SHIFTIOP (shamt, rs1, rd, sop.SRAI) ∧ rd.1 ≠ 0) ∨
+      (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SRA) ∧ rd.1 ≠ 0)
+    := by
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        case SRA =>
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            exfalso
+            omega
+          . have h_rs2_as := extract_rs2_as h_transpile
+            simp [h_rs2_as]
+            have h_rd := non_phantom_rd h_if
+            use rs2, rs1, rd
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        case SRAI =>
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            exfalso
+            omega
+          . have h_rs2_as := extract_rs2_as h_transpile
+            simp [h_rs2_as]
+            have h_rd := non_phantom_rd h_if
+            use shamt, rs1, rd
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          simp at h_transpile
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
 
     -- def transpile_opcode_512
     --   (h_transpile : transpile_op inst mult pc = some (mult, data))
