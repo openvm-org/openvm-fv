@@ -33,6 +33,15 @@ namespace PureSpec
       : BeqOutput
     }
 
+  lemma execute_BEQ_pure_succ_throws
+    (input : BeqInput)
+  :
+    let output := execute_BEQ_pure input
+    output.success = true → output.throws = false
+  := by
+    simp [execute_BEQ_pure]
+    grind
+
   @[simp]
   lemma sign_extend_equiv :
     @LeanRV32D.Functions.sign_extend width1 width2 =

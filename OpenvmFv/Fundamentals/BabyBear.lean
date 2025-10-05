@@ -66,143 +66,20 @@ def toBV32 (v : Vector FBB 4) : BitVec 32 :=
 
 end U32
 
-section conversions
+section toInt
 
 def toInt (a : FBB) : ℤ :=
   if a.val ≤ BB_prime / 2 then a.val else a.val - BB_prime
 
-def ofBVInt (a : FBB) {w : ℕ} (b : BitVec w) : Prop :=
-  a = b.toInt
-
-lemma toInt_eq_ofBVInt
+@[simp]
+lemma toInt_inv
   (a : FBB)
-  (b : BitVec w)
-  (lb_w : 0 < w)
-  (ub_w : w < 30)
-  (ofBV : ofBVInt a b)
 :
-  toInt a = b.toInt
+  ((toInt a) : FBB) = a
 := by
-  have ub_b : (b.toNat : ℤ) < 2 ^ w := by
-    have : b.toNat < 2 ^ w := by omega
-    zify at this; exact this
-  have ub_w_pow : 2 ^ w ≤ 2 ^ 29 := by
-    apply Nat.pow_le_pow_right (by simp) (by omega)
-  rw [ofBVInt, Fin.intCast_def] at ofBV
-  rw [toInt, BitVec.toInt] at *
-  subst a; simp_all
-  split_ifs with b_neg₁ bb_neg b_neg₂ b_neg₂ bb_neg b_neg₂ b_neg₂ <;> simp_all
-  . have ub_bnat : b.toNat < 2 ^ 29
-    := by
-      apply lt_of_lt_of_le (b := 2 ^ (w - 1))
-      . rw [← mul_lt_mul_left (a := 2) (by simp), mul_comm (b := _ ^ _), ← pow_succ]
-        have : w - 1 + 1 = w := by omega
-        simp_all
-      . trans 2 ^ 29
-        . apply Nat.pow_le_pow_right (by simp) (by omega)
-        . decide
-    rw [Int.emod_eq_of_lt (by simp) (by omega)]
-  . have ub_bnat : b.toNat < 2 ^ 29
-    := by
-      apply lt_of_lt_of_le (b := 2 ^ (w - 1))
-      . rw [← mul_lt_mul_left (a := 2) (by simp), mul_comm (b := _ ^ _), ← pow_succ]
-        have : w - 1 + 1 = w := by omega
-        simp_all
-      . trans 2 ^ 29
-        . apply Nat.pow_le_pow_right (by simp) (by omega)
-        . decide
-    omega
-  . omega
-  . omega
-  . rw [abs_of_nonpos (by omega)] at *
-    simp_all
-    replace b_neg₁ : 2 ^ (w - 1) ≤ b.toNat
-    := by
-      rw [← mul_le_mul_left (a := 2) (by simp), mul_comm (b := _ ^ _), ← pow_succ]
-      have : w - 1 + 1 = w := by omega
-      simp_all
-    have lb : (2 ^ w : FBB) ≤ 2 ^ 29
-    := by
-      simp [Fin.le_def]
-      grind
-    have lb_diff : - 2 ^ w ≤ (b.toNat : FBB) - 2 ^ w
-    := by
-      simp [Fin.le_def, Fin.neg_def, Fin.sub_def]
-      simp [Fin.sub_def] at b_neg₂
-      simp [Fin.le_def] at lb
-      grind
-    grind
-  . rw [abs_of_nonpos (by omega)] at *
-    simp_all
-    replace b_neg₁ : 2 ^ (w - 1) ≤ b.toNat
-    := by
-      rw [← mul_le_mul_left (a := 2) (by simp), mul_comm (b := _ ^ _), ← pow_succ]
-      have : w - 1 + 1 = w := by omega
-      simp_all
-    simp [Fin.sub_def] at *
-    zify at b_neg₂; rw [Int.natCast_sub (by omega)] at b_neg₂
-    simp_all
-    rw [Int.emod_eq_of_lt (by omega) (by omega)] at *
-    ring_nf
-    suffices : (2 : ℤ) ^ w = (((2 : FBB) ^ w) : FBB)
-    . rw [this]; omega
-    . clear *- ub_w
-      interval_cases w <;> simp
+  simp [toInt]
 
-lemma ofBVInt_ex
-  {a : FBB} {w : ℕ}
-  (ub_w : w < 30)
-  (lb_a : -2^w ≤ toInt a)
-  (ub_a : toInt a < 2^w)
-:
-  ∃ (b : BitVec (w + 1)), ofBVInt a b
-:= by
-  exists BitVec.ofInt (w + 1) (toInt a)
-  simp [ofBVInt, toInt] at *
-  split_ifs with sgn_a
-  . simp_all
-    have : a.val < 2 ^ (w + 1) := by zify; grind
-    rw [Int.bmod_def]
-    rw [Int.emod_eq_of_lt (by omega) (by omega)]
-    have : ((Nat.cast (R := ℤ) (2 ^ (w + 1))) + 1) / 2 = 2 ^ w := by grind
-    simp_all
-  . simp_all only [↓reduceIte, not_le]
-    rw [Int.bmod_def]
-    have : ((Nat.cast (R := ℤ) (2 ^ (w + 1))) + 1) / 2 = 2 ^ w := by grind
-    simp only [this]; clear this
-    split_ifs with sgn_a'
-    . simp_all [-neg_le_sub_iff_le_add]
-      set a' := (a : ℤ) - 2013265921
-      replace ub_a : a' < 0 := by omega
-      have : a' % 2 ^ (w + 1) = 2 ^ (w + 1) + a' := by
-        rw [Int.emod_def]
-        suffices : (a' / 2 ^ (w + 1)) = -1
-        . rw [this]; omega
-        . suffices : - 2 ^ (w + 1) ≤ a'
-          . clear *- ub_a this
-            have lb_c : 0 < (2 : ℤ) ^ (w + 1) := by grind
-            rw [Int.ediv_eq_iff_of_pos (by omega)]
-            omega
-          . omega
-      omega
-    . simp_all [-neg_le_sub_iff_le_add, -Lean.Grind.Fin.pow_succ]
-      set a' := (a : ℤ) - 2013265921
-      replace ub_a : a' < 0 := by omega
-      have : a' % 2 ^ (w + 1) = 2 ^ (w + 1) + a' := by
-        rw [Int.emod_def]
-        suffices : (a' / 2 ^ (w + 1)) = -1
-        . rw [this]; omega
-        . suffices : - 2 ^ (w + 1) ≤ a'
-          . clear *- ub_a this
-            have lb_c : 0 < (2 : ℤ) ^ (w + 1) := by grind
-            rw [Int.ediv_eq_iff_of_pos (by omega)]
-            omega
-          . omega
-      simp [this]
-      subst a'
-      simp
-
-end conversions
+end toInt
 
 section auxiliaries
 
