@@ -425,7 +425,6 @@ namespace Equivalence.BaseALU
 
       have ⟨
         h_pc,
-        h_timestamp,
         ⟨h_a0, h_a1, h_a2, h_a3, h_b0, h_b1, h_b2, h_b3, h_c0, h_c1, h_c2, h_c3⟩,
         h_opcodes,
         h_imm_binary,
@@ -453,6 +452,7 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
+          (h_bus_assumptions row (by omega))
           (h_bus_wellformedness row (by omega))
 
         dsimp only at *

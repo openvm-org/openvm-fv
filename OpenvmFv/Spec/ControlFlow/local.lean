@@ -1,6 +1,7 @@
 import OpenvmFv.Spec.run_hart_active
 
 namespace Local
+
   def execute_UTYPE (imm : (BitVec 20)) (rd : regidx) (op : uop) : SailM ExecutionResult := do
   let off : xlenbits := (LeanRV32D.Functions.sign_extend (m := 32) (imm ++ (0x000 : (BitVec 12))))
   (LeanRV32D.Functions.wX_bits rd
@@ -46,4 +47,5 @@ namespace Local
   lemma jump_to_equiv :
     jump_to = LeanRV32D.Functions.jump_to
   := rfl
+
 end Local

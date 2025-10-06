@@ -19,4 +19,5 @@ namespace Local
   lemma execute_ITYPE_equiv :
     execute_ITYPE = LeanRV32D.Functions.execute_ITYPE
   := rfl
+
 end Local

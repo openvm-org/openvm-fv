@@ -224,168 +224,6 @@ namespace VmAirWrapper_branch_eq.constraints
         simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
         exact h
 
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_11 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_11_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_11 air row ↔ constraint_11 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_12 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_12_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_12 air row ↔ constraint_12 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_13 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_13_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_13 air row ↔ constraint_13 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_14 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_14_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_14 air row ↔ constraint_14 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_15 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_15_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_15 air row ↔ constraint_15 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_16 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_16_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_16 air row ↔ constraint_16 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_17 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_17_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_17 air row ↔ constraint_17 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_18 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_18_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_18 air row ↔ constraint_18 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
-      -- @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      -- def constraint_19 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
-      --   sorry
-      --
-      -- @[VmAirWrapper_branch_eq_air_simplification]
-      -- lemma constraint_19_of_extraction
-      --     (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      -- : VmAirWrapper_branch_eq.extraction.constraint_19 air row ↔ constraint_19 air row := by
-      -- apply Iff.intro
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   exact h
-      -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-      --   exact h
-
     end row_constraints
 
     section interactions
@@ -518,15 +356,6 @@ namespace VmAirWrapper_branch_eq.constraints
         VmAirWrapper_branch_eq.extraction.constraint_8 air row,
         VmAirWrapper_branch_eq.extraction.constraint_9 air row,
         VmAirWrapper_branch_eq.extraction.constraint_10 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_11 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_12 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_13 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_14 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_15 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_16 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_17 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_18 air row,
-    --     VmAirWrapper_branch_eq.extraction.constraint_19 air row,
       ]
 
     @[simp]
@@ -557,15 +386,6 @@ namespace VmAirWrapper_branch_eq.constraints
         constraint_8 air row,
         constraint_9 air row,
         constraint_10 air row,
-    --     constraint_11 air row,
-    --     constraint_12 air row,
-    --     constraint_13 air row,
-    --     constraint_14 air row,
-    --     constraint_15 air row,
-    --     constraint_16 air row,
-    --     constraint_17 air row,
-    --     constraint_18 air row,
-    --     constraint_19 air row,
       ]
 
     @[simp]
@@ -599,6 +419,222 @@ namespace VmAirWrapper_branch_eq.constraints
 
     variable[Field ExtF]
 
+    lemma single_op
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
+      (row : ℕ)
+      (valid_row : row ≤ air.last_row)
+      (cstrs : allHold air row valid_row)
+    :
+      let is_beq := air.core.opcode_beq_flag row 0
+      let is_bne := air.core.opcode_bne_flag row 0
+      (is_beq = 1 → is_bne = 0) ∧
+      (is_bne = 1 → is_beq = 0)
+    := by
+      rw [allHold_simplified_of_allHold air row valid_row] at cstrs
+      obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
+      clear hint rest
+      simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h0 h1 h2
+      rw [Valid_BranchEqualCoreAir_4.is_valid] at h2
+      grind
+
+    lemma op_from_opcode
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
+      (row : ℕ)
+      (valid_row : row ≤ air.last_row)
+      (cstrs : allHold air row valid_row)
+      (is_valid : air.core.is_valid row 0 = 1)
+    :
+      let is_beq := air.core.opcode_beq_flag row 0
+      let is_bne := air.core.opcode_bne_flag row 0
+      (air.core.expected_opcode row 0 = 544 → is_beq = 1) ∧
+      (air.core.expected_opcode row 0 = 545 → is_bne = 1)
+    := by
+      rw [allHold_simplified_of_allHold air row valid_row] at cstrs
+      obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
+      clear hint rest
+      simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at *
+      rw [Valid_BranchEqualCoreAir_4.is_valid] at is_valid h2
+      rw [← BranchEqualCoreAir_4.expected_opcode_def]
+      grind
+
+    lemma opcode_bounds
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
+      (row : ℕ)
+      (valid_row : row ≤ air.last_row)
+      (cstrs : allHold air row valid_row)
+      (is_valid : air.core.is_valid row 0 = 1)
+    :
+      air.core.expected_opcode row 0 = 544 ∨
+      air.core.expected_opcode row 0 = 545
+    := by
+      have ⟨ sop1, sop2 ⟩ := single_op air row valid_row cstrs
+      rw [← BranchEqualCoreAir_4.expected_opcode_def]
+      rw [Valid_BranchEqualCoreAir_4.is_valid] at is_valid
+      rw [allHold_simplified_of_allHold air row valid_row] at cstrs
+      obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
+      clear hint rest
+      simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at *
+      grind
+
   end properties
+
+  section bus_entries
+
+    lemma executionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_branch_eq FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ executionBus_row air row)
+    :
+      entry.2.length = Interaction.ExecutionBusEntryInstance.data_length
+    := by
+      unfold executionBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    def _executionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ executionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (executionBus_row_length x.2)))
+          (executionBus_row air row).attach
+      List.map Interaction.ExecutionBusEntryInstance.deserialise vectorised_row
+
+    lemma memoryBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_branch_eq FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ memoryBus_row air row)
+    :
+      entry.2.length = Interaction.MemoryBusEntryInstance.data_length
+    := by
+      unfold memoryBus_row at *; simp_all
+      grind (ematch := 8)
+
+    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    def _memoryBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ memoryBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (memoryBus_row_length x.2)))
+          (memoryBus_row air row).attach
+      List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
+
+    lemma rangeCheckerBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_branch_eq FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ rangeCheckerBus_row air row)
+    :
+      entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
+    := by
+      unfold rangeCheckerBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    def _rangeCheckerBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
+      List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
+
+    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
+      let rs1 := entry.xa
+      let rs2 := entry.xb
+      let imm := entry.xc
+      -- rs1 and rs2 are xregs
+      rs1.val < 32 ∧ rs2.val < 32 ∧
+      -- imm is a 13-bit signed integer represented as a field element
+      -2^12 ≤ BabyBear.toInt imm ∧ BabyBear.toInt imm < 2^12 ∧
+      -- imm is aligned
+      BabyBear.toInt imm % 4 = 0 ∧
+      -- unused parameters
+      entry.xd = 1 ∧ entry.xe = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
+
+    lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
+      (h_bounds :
+        entry.opcode = 544 ∨
+        entry.opcode = 545
+      )
+      (h_bus : Interaction.ReadInstructionBusEntry.operand_properties entry)
+    :
+      readInstructionBus_properties entry
+    := by
+      simp [readInstructionBus_properties.eq_def]
+      simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
+      omega
+
+    lemma readInstructionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_branch_eq FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ readInstructionBus_row air row)
+    :
+      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
+    := by
+      unfold readInstructionBus_row at *; simp_all
+
+    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    def _readInstructionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
+          (readInstructionBus_row air row).attach
+      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
+
+    @[simp]
+    def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
+      rowData.map Interaction.BusEntry.serialiseToList
+
+    @[simp]
+    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+
+    @[simp]
+    def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
+
+    @[simp]
+    def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
+
+    @[simp]
+    def busRow [Field ExtF] (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ)
+    : List (FBB × List FBB) :=
+      executionBus_row air row ++
+      memoryBus_row air row ++
+      rangeCheckerBus_row air row ++
+      readInstructionBus_row air row
+
+    @[simp]
+    def assumptionsPerRow [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ)
+    : Prop :=
+      assumptions (_executionBus_row air row) ∧
+      assumptions (_memoryBus_row air row) ∧
+      assumptions (_rangeCheckerBus_row air row) ∧
+      assumptions (_readInstructionBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssume (_executionBus_row air row) ∧
+      propertiesToAssume (_memoryBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
+      propertiesToAssume (_readInstructionBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssert (_executionBus_row air row) ∧
+      propertiesToAssert (_memoryBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
+      propertiesToAssert (_readInstructionBus_row air row)
+
+  end bus_entries
 
 end VmAirWrapper_branch_eq.constraints
