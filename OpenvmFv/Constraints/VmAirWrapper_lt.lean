@@ -3,6 +3,8 @@ import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Fundamentals.Interaction
 import OpenvmFv.Util
 
+import OpenvmFv.Constraints.VmAirWrapper_alu
+
 import LeanZKCircuit.Interactions
 
 set_option maxHeartbeats 1_000_000_000
@@ -296,7 +298,8 @@ namespace VmAirWrapper_lt.constraints
       @[VmAirWrapper_lt_constraint_and_interaction_simplification]
       def constraint_24 (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
-        air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
+        air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 =
+        air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_lt_air_simplification]
       lemma constraint_24_of_extraction
