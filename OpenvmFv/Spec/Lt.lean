@@ -384,7 +384,7 @@ include
   constraints
   assumptions
   propertiesToAssume in
-/-- The non-immediate variants of the five base ALU opcodes
+/-- The non-immediate variants of the five base Lt opcodes
     are implemented as per the RISC-V spec -/
 theorem spec_base_Lt_non_imm
   (_ : air.adapter.rs2_as row 0 = 1)
@@ -417,9 +417,9 @@ include
   constraints
   assumptions
   propertiesToAssume in
-/-- The immediate variants of the five base ALU opcodes
+/-- The immediate variants of the five base Lt opcodes
     are implemented as per the RISC-V spec -/
-theorem spec_base_ALU_imm
+theorem spec_base_Lt_imm
   (h_imm : air.adapter.rs2_as row 0 = 0)
 :
   U32.toBV #v[(air.core.cmp_result row 0).val, 0, 0, 0]
