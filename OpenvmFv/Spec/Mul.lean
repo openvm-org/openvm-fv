@@ -87,7 +87,6 @@ section General
 include
   row_valid
   constraints
-  assumptions
   propertiesToAssume
 in
 /-- The properties that need to be proven actually hold -/
@@ -105,14 +104,13 @@ lemma wf_propertiesToAssert
   clear pa_range
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mul_constraint_and_interaction_simplification] at constraints assumptions
+  simp [VmAirWrapper_mul_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            rest ⟩ := constraints
   clear constrain_interactions
   simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
-  grind
 
 /-- From Lt opcode to RISC-V opcode -/
 def rop_of_Mul_opcode (opcode : FBB) : mop :=

@@ -171,7 +171,6 @@ in
 lemma essentials
 :
   (air.adapter.from_state.pc row 0).val + 4 < 1073741824 ∧
-  (air.adapter.from_state.timestamp row 0) + 3 < 536870912 ∧
   List.Forall (fun x => x.val < 256)
     [air.core.cmp_result row 0,
      air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
@@ -269,7 +268,7 @@ theorem spec_base_Lt
 := by
   have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   simp [and_assoc] at essentials
-  obtain ⟨ ub_pc, ub_timestamp, ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3, opcodes, b_rs2_as, h_imm ⟩ := essentials
+  obtain ⟨ ub_pc, ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3, opcodes, b_rs2_as, h_imm ⟩ := essentials
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
@@ -475,7 +474,7 @@ theorem spec_base_ALU_imm
     trans (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt
     . have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
       simp [h_imm, and_assoc] at essentials
-      obtain ⟨ ub_pc, ub_timestamp, ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
+      obtain ⟨ ub_pc, ub_cmp, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
                opcodes, h_rs2, imm_sign_extend, rs2_as_imm, imm_sign, imm_sign_extend' ⟩ := essentials
       rw [← VmAirWrapper_lt.rs2_imm_def] at rs2_as_imm
       rw [← VmAirWrapper_lt.rs2_sign_limbs] at imm_sign

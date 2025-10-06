@@ -195,7 +195,6 @@ namespace Equivalence.BranchEqual
 
       have ⟨
         h_pc, h_next_pc, h_next_pc_mod_4,
-        h_timestamp,
         ⟨h_a0, h_a1, h_a2, h_a3, h_b0, h_b1, h_b2, h_b3⟩,
         h_opcodes,
         imm_range

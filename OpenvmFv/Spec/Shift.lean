@@ -176,11 +176,10 @@ lemma wf_propertiesToAssert
   simp_all [VmAirWrapper_shift_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
-  constructor
+  by_cases h_rs2_0 : air.adapter.rs2_as row 0 = 0 <;> simp_all
   . grind
-  . by_cases h_rs2_0 : air.adapter.rs2_as row 0 = 0 <;> simp_all
-    . simp [Fin.ext_iff] at ub_rs2n_c
-      assumption
+  . simp [Fin.ext_iff] at ub_rs2n_c
+    grind
 
 include
   row_valid
