@@ -453,6 +453,7 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
+          (h_bus_assumptions row (by omega))
           (h_bus_wellformedness row (by omega))
 
         dsimp only at *

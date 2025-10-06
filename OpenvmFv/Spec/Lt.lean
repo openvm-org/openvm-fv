@@ -118,6 +118,7 @@ section General
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- The properties that need to be proven actually hold -/
@@ -137,7 +138,7 @@ lemma wf_propertiesToAssert
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
   obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
   obtain ⟨ ba0, ba1, ba2, ba3 ⟩ := pa_bit
-  clear pa_exec pa_range
+  clear pa_range
 
   have ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
@@ -156,12 +157,13 @@ lemma wf_propertiesToAssert
   simp [Fin.ext_iff] at ub_rs2n_c
 
   rcases b_rs2_as <;>
-  simp_all [VmAirWrapper_lt_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_lt_constraint_and_interaction_simplification] <;>
+  grind
 
 include
   row_valid
-  assumptions
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- Some properties more important than others that should
@@ -184,7 +186,7 @@ lemma essentials
     air.rs2_sign row 0 = air.rs2_limbs row 0 3 ∧
     (air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255))
 := by
-  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid propertiesToAssume
+  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   clear pa_exec rest
   simp [row_valid, and_assoc,

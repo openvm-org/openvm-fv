@@ -434,6 +434,7 @@ namespace Equivalence.Shift
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_shift.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).non_imm = 0 ∨
@@ -447,6 +448,7 @@ namespace Equivalence.Shift
       (by omega)
       (h_constraints ⟨row, by omega⟩)
       h_is_valid
+      (h_bus_assumptions row (by omega))
       (h_bus_wellformedness row (by omega))
 
     exact this.2.2.1
@@ -457,6 +459,7 @@ namespace Equivalence.Shift
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_shift.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).opcode ∈ Finset.Icc 517 519
@@ -469,6 +472,7 @@ namespace Equivalence.Shift
       (by omega)
       (h_constraints ⟨row, by omega⟩)
       h_is_valid
+      (h_bus_assumptions row (by omega))
       (h_bus_wellformedness row (by omega))
 
     replace this := this.2.1
@@ -514,6 +518,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *- h_row h_constraints h_opcode h_is_valid
@@ -553,9 +558,9 @@ namespace Equivalence.Shift
         VmAirWrapper_shift_constraint_and_interaction_simplification
       ] at h_bus_assumptions
       replace h_bus_assumptions := h_bus_assumptions.1
-      simp [VmAirWrapper_shift.constraints.assumptions, h_is_valid] at h_bus_assumptions
+      simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
+    . clear *- h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
       simp [SllInput_of_Shift_instruction_fields, PureSpec.execute_RTYPE_sll_pure]
       have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
         clear *-h_bus_wellformedness h_row h_is_valid h_opcode
@@ -595,6 +600,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
         h_non_imm
 
@@ -648,6 +654,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *- h_row h_constraints h_opcode h_is_valid
@@ -687,9 +694,9 @@ namespace Equivalence.Shift
         VmAirWrapper_shift_constraint_and_interaction_simplification
       ] at h_bus_assumptions
       replace h_bus_assumptions := h_bus_assumptions.1
-      simp [VmAirWrapper_shift.constraints.assumptions, h_is_valid] at h_bus_assumptions
+      simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
+    . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
       simp [SrlInput_of_Shift_instruction_fields, PureSpec.execute_RTYPE_srl_pure]
       have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
         clear *-h_bus_wellformedness h_row h_is_valid h_opcode
@@ -729,6 +736,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
         h_non_imm
 
@@ -781,6 +789,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *- h_row h_constraints h_opcode h_is_valid
@@ -820,9 +829,9 @@ namespace Equivalence.Shift
         VmAirWrapper_shift_constraint_and_interaction_simplification
       ] at h_bus_assumptions
       replace h_bus_assumptions := h_bus_assumptions.1
-      simp [VmAirWrapper_shift.constraints.assumptions, h_is_valid] at h_bus_assumptions
+      simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
+    . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
       simp [SraInput_of_Shift_instruction_fields, PureSpec.execute_RTYPE_sra_pure]
       have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
         clear *-h_bus_wellformedness h_row h_is_valid h_opcode
@@ -862,6 +871,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
         h_non_imm
 
@@ -914,6 +924,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *- h_row h_constraints h_opcode h_is_valid
@@ -944,9 +955,9 @@ namespace Equivalence.Shift
         VmAirWrapper_shift_constraint_and_interaction_simplification
       ] at h_bus_assumptions
       replace h_bus_assumptions := h_bus_assumptions.1
-      simp [VmAirWrapper_shift.constraints.assumptions, h_is_valid] at h_bus_assumptions
+      simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
+    . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
       replace h_imm_op_properties := (h_imm_op_properties h_imm).2.1
       simp [SlliInput_of_Shift_instruction_fields, PureSpec.execute_SHIFTIOP_slli_pure]
       have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
@@ -987,6 +998,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
         h_imm
 
@@ -1039,6 +1051,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *- h_row h_constraints h_opcode h_is_valid
@@ -1069,9 +1082,9 @@ namespace Equivalence.Shift
         VmAirWrapper_shift_constraint_and_interaction_simplification
       ] at h_bus_assumptions
       replace h_bus_assumptions := h_bus_assumptions.1
-      simp [VmAirWrapper_shift.constraints.assumptions, h_is_valid] at h_bus_assumptions
+      simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
+    . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
       replace h_imm_op_properties := (h_imm_op_properties h_imm).2.1
       simp [SrliInput_of_Shift_instruction_fields, PureSpec.execute_SHIFTIOP_srli_pure]
       have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
@@ -1112,6 +1125,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
         h_imm
 
@@ -1164,6 +1178,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *- h_row h_constraints h_opcode h_is_valid
@@ -1194,9 +1209,9 @@ namespace Equivalence.Shift
         VmAirWrapper_shift_constraint_and_interaction_simplification
       ] at h_bus_assumptions
       replace h_bus_assumptions := h_bus_assumptions.1
-      simp [VmAirWrapper_shift.constraints.assumptions, h_is_valid] at h_bus_assumptions
+      simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
+    . clear *-h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
       replace h_imm_op_properties := (h_imm_op_properties h_imm).2.1
       simp [SraiInput_of_Shift_instruction_fields, PureSpec.execute_SHIFTIOP_srai_pure]
       have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
@@ -1237,6 +1252,7 @@ namespace Equivalence.Shift
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
+        (h_bus_assumptions row (by omega))
         (h_bus_wellformedness row (by omega))
         h_imm
 
@@ -1339,9 +1355,9 @@ namespace Equivalence.Shift
     simp [get_instruction_fields_row] at h_is_valid
 
     exact ⟨
-      get_instruction_fields_row_non_imm_binary air row (by omega) h_constraints h_is_valid h_bus_wellformedness,
+      get_instruction_fields_row_non_imm_binary air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
       ⟨
-        get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_wellformedness,
+        get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
         ⟨
           non_imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
           imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
