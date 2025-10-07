@@ -304,7 +304,7 @@ namespace Interaction
           -- unused parameters
           entry.xd = 1 ∧ entry.xe = 0 ∧ entry.xf = 0 ∧ entry.xg = 0
         )) ∧
-        ( entry.opcode ∈ Finset.Icc 544 545 → (
+        ( entry.opcode ∈ Finset.Icc 544 545 ∨ entry.opcode ∈ Finset.Icc 549 553 → (
           let rs1 := entry.xa
           let rs2 := entry.xb
           let imm := entry.xc

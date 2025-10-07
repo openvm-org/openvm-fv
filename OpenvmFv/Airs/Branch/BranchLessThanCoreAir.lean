@@ -40,7 +40,7 @@ def Valid_BranchLessThanCoreAir_4_8.is_valid
   c.opcode_bgeu_flag row rotation
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.is_valid_def
+lemma BranchLessThanCoreAir_4_8.is_valid_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -66,7 +66,7 @@ def Valid_BranchLessThanCoreAir_4_8.ge
   c.opcode_bgeu_flag row rotation
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.cmp_lt_def
+lemma BranchLessThanCoreAir_4_8.cmp_lt_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -89,7 +89,7 @@ def Valid_BranchLessThanCoreAir_4_8.a_diff
   c.a_3 row rotation - c.a_msb_f row rotation
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.a_diff_def
+lemma BranchLessThanCoreAir_4_8.a_diff_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -104,7 +104,7 @@ def Valid_BranchLessThanCoreAir_4_8.b_diff
   c.b_3 row rotation - c.b_msb_f row rotation
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.b_diff_def
+lemma BranchLessThanCoreAir_4_8.b_diff_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -123,7 +123,7 @@ def Valid_BranchLessThanCoreAir_4_8.diff
     | 3 => (c.b_msb_f row rotation - c.a_msb_f row rotation) * (2 * c.cmp_lt row rotation - 1)
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.diff_0_def
+lemma BranchLessThanCoreAir_4_8.diff_0_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -132,7 +132,7 @@ lemma BranchEqualCoreAir_4.diff_0_def
 := rfl
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.diff_1_def
+lemma BranchLessThanCoreAir_4_8.diff_1_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -141,7 +141,7 @@ lemma BranchEqualCoreAir_4.diff_1_def
 := rfl
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.diff_2_def
+lemma BranchLessThanCoreAir_4_8.diff_2_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -150,7 +150,7 @@ lemma BranchEqualCoreAir_4.diff_2_def
 := rfl
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.diff_3_def
+lemma BranchLessThanCoreAir_4_8.diff_3_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -169,7 +169,7 @@ def Valid_BranchLessThanCoreAir_4_8.prefix_sum
     | 3 => c.diff_marker_3 row rotation
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.prefix_sum_3_def
+lemma BranchLessThanCoreAir_4_8.prefix_sum_3_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -178,7 +178,7 @@ lemma BranchEqualCoreAir_4.prefix_sum_3_def
 := rfl
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.prefix_sum_2_def
+lemma BranchLessThanCoreAir_4_8.prefix_sum_2_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -187,7 +187,7 @@ lemma BranchEqualCoreAir_4.prefix_sum_2_def
 := rfl
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.prefix_sum_1_def
+lemma BranchLessThanCoreAir_4_8.prefix_sum_1_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -196,7 +196,7 @@ lemma BranchEqualCoreAir_4.prefix_sum_1_def
 := rfl
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.prefix_sum_0_def
+lemma BranchLessThanCoreAir_4_8.prefix_sum_0_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
@@ -211,17 +211,17 @@ def Valid_BranchLessThanCoreAir_4_8.expected_opcode
   c.opcode_bltu_flag row rotation +
   c.opcode_bge_flag row rotation * 2 +
   c.opcode_bgeu_flag row rotation * 3 +
-  544
+  549
 
 @[openvm_encapsulation]
-lemma BranchEqualCoreAir_4.expected_opcode_def
+lemma BranchLessThanCoreAir_4_8.expected_opcode_def
   [Field F]
   (c : Valid_BranchLessThanCoreAir_4_8 F) (row rotation: ℕ)
 :
   c.opcode_bltu_flag row rotation +
   c.opcode_bge_flag row rotation * 2 +
   c.opcode_bgeu_flag row rotation * 3 +
-  544 =
+  549 =
   c.expected_opcode row rotation
 := rfl
 
