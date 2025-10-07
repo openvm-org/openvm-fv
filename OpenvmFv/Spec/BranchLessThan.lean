@@ -20,7 +20,7 @@ variable (row : ℕ)
 variable (row_in_range : row ≤ air.last_row)
 variable (constraints : VmAirWrapper_branch_lt.constraints.allHold air row row_in_range)
 
-namespace BranchLt.NonValidRows
+namespace BranchLessThan.NonValidRows
 
 open VmAirWrapper_branch_lt.constraints
 
@@ -30,7 +30,7 @@ include
   row_in_range
 in
 /-- Zeros required to form a non-valid row -/
-lemma non_valid_row_BranchLt_allZeros_allHold
+lemma non_valid_row_BranchLessThan_allZeros_allHold
 :
   constrain_interactions air ∧
   air.core.a_0 row 0 = 0 ∧
@@ -80,7 +80,7 @@ include
   constraints
 in
 /-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_BranchLt_all_interaction_multiplicities_zero
+lemma non_valid_row_BranchLessThan_all_interaction_multiplicities_zero
 :
   (entry ∈ executionBus_row air row ++
            memoryBus_row air row ++
@@ -102,11 +102,11 @@ lemma non_valid_row_BranchLt_all_interaction_multiplicities_zero
             ← BranchLessThanCoreAir_4_8.prefix_sum_2_def]
   grind (splits := 11)
 
-end BranchLt.NonValidRows
+end BranchLessThan.NonValidRows
 
 open VmAirWrapper_branch_lt.constraints
 
-namespace BranchLt.ValidRows
+namespace BranchLessThan.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
@@ -331,8 +331,8 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   -- clear constrain_interactions rest
 
   -- rw [← VmAirWrapper_branch_lt.to_pc_def] at *
-  -- rw [← BranchLtCoreAir_4.sum_def] at *
-  -- rw [← BranchLtCoreAir_4.cmp_eq_def] at *
+  -- rw [← BranchLessThanCoreAir_4.sum_def] at *
+  -- rw [← BranchLessThanCoreAir_4.cmp_eq_def] at *
 
   -- split_ands <;> intro h_opcode <;> simp_all
 
@@ -421,7 +421,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
   have ⟨
     h_pc, h_next_pc,
     rest
-  ⟩ := BranchLt.ValidRows.essentials
+  ⟩ := BranchLessThan.ValidRows.essentials
         ExtF
         air
         row
@@ -605,4 +605,4 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
 
 end General
 
-end BranchLt.ValidRows
+end BranchLessThan.ValidRows
