@@ -70,6 +70,10 @@ import OpenvmFv.Fundamentals.U32
 
 import OpenvmFv.Spec.ControlFlow.auipc
 import OpenvmFv.Spec.ControlFlow.beq
+import OpenvmFv.Spec.ControlFlow.bge
+import OpenvmFv.Spec.ControlFlow.bgeu
+import OpenvmFv.Spec.ControlFlow.blt
+import OpenvmFv.Spec.ControlFlow.bltu
 import OpenvmFv.Spec.ControlFlow.bne
 import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
