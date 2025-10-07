@@ -427,18 +427,23 @@ namespace VmAirWrapper_mul.constraints
           (rangeTupleCheckerBus_row air row).attach
       List.map Interaction.RangeTupleCheckerBusEntryInstance.deserialise vectorised_row
 
+    @[simp]
     def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
       rowData.map Interaction.BusEntry.serialiseToList
 
+    @[simp]
     def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
       List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
 
+    @[simp]
     def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
       List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
 
+    @[simp]
     def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
       List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
 
+    @[simp]
     def busRow [Field ExtF] (air : Valid_VmAirWrapper_mul FBB ExtF) (row : ℕ)
     : List (FBB × List FBB) :=
       executionBus_row air row ++
@@ -447,6 +452,7 @@ namespace VmAirWrapper_mul.constraints
       readInstructionBus_row air row ++
       rangeTupleCheckerBus_row air row
 
+    @[simp]
     def assumptionsPerRow [Field ExtF]
       (air : Valid_VmAirWrapper_mul FBB ExtF) (row : ℕ)
     : Prop :=
@@ -456,6 +462,7 @@ namespace VmAirWrapper_mul.constraints
       assumptions (_readInstructionBus_row air row) ∧
       assumptions (_rangeTupleCheckerBus_row air row)
 
+    @[simp]
     def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_mul FBB ExtF) (row : ℕ)
     : Prop :=
       propertiesToAssume (_executionBus_row air row) ∧
@@ -464,6 +471,7 @@ namespace VmAirWrapper_mul.constraints
       propertiesToAssume (_readInstructionBus_row air row) ∧
       propertiesToAssume (_rangeTupleCheckerBus_row air row)
 
+    @[simp]
     def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_mul FBB ExtF) (row : ℕ)
     : Prop :=
       propertiesToAssert (_executionBus_row air row) ∧

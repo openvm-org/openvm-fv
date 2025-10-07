@@ -92,11 +92,10 @@ namespace Interaction
           assumptions :=
             fun ⟨multiplicity, pc, timestamp⟩ =>
               ¬ multiplicity = 0 →
-                pc < 2^30 ∧
-                timestamp < 2^29
+                pc < 2^30 ∧ pc % 4 = 0
 
           -- An execution bus entry has no assume/prove properties
-          wf_properties := fun _ => True
+          wf_properties := fun ⟨_, pc, _⟩ => True
 
           wf_assume_cond := fun entry => entry.1 = -1,
           wf_assert_cond := fun entry => entry.1 = 1,
@@ -218,7 +217,7 @@ namespace Interaction
               val.val < 2 ^ deg.val
 
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := RangeCheckerBusEntry.deserialise FBB
 
@@ -285,7 +284,7 @@ namespace Interaction
           -- No well-formedness properties imposed right now
           wf_properties := ReadInstructionBusEntry.operand_properties
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := ReadInstructionBusEntry.deserialise FBB
 
@@ -345,7 +344,7 @@ namespace Interaction
               c.val = if op = 0 then 0 else a.val ^^^ b.val
 
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := BitwiseBusEntry.deserialise FBB
 
@@ -393,7 +392,7 @@ namespace Interaction
           wf_properties := fun ⟨_, x1, x2⟩ => x1.val < 256 ∧ x2.val < 2048
 
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := RangeTupleCheckerBusEntry.deserialise FBB
 

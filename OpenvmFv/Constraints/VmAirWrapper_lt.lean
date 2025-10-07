@@ -3,6 +3,9 @@ import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Fundamentals.Interaction
 import OpenvmFv.Util
 
+-- removes "environment already contains
+-- 'iop.enumToBitVec' from
+-- OpenvmFv.Constraints.VmAirWrapper_alu" error
 import OpenvmFv.Constraints.VmAirWrapper_alu
 
 import LeanZKCircuit.Interactions

@@ -41,6 +41,7 @@ import OpenvmFv.Constraints.VmAirWrapper_shift
 import OpenvmFv.Constraints.VolatileBoundaryAir
 
 import OpenvmFv.Equivalence.BaseALU
+import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Shift
 
@@ -69,6 +70,7 @@ import OpenvmFv.Fundamentals.RV32D
 import OpenvmFv.Fundamentals.U32
 
 import OpenvmFv.Spec.ControlFlow.auipc
+import OpenvmFv.Spec.ControlFlow.beq
 import OpenvmFv.Spec.ControlFlow.bne
 import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
@@ -96,6 +98,7 @@ import OpenvmFv.Spec.SHIFTIOP.slli
 import OpenvmFv.Spec.SHIFTIOP.srai
 import OpenvmFv.Spec.SHIFTIOP.srli
 import OpenvmFv.Spec.BaseALU
+import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul

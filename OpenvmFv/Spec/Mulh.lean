@@ -116,16 +116,18 @@ lemma wf_propertiesToAssert
   obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_am0, ub_cm0, ub_am1, ub_cm1, ub_am2, ub_cm2, ub_am3, ub_cm3,
            ub_a0, ub_cry0, ub_a1, ub_cry1, ub_a2, ub_cry2, ub_a3, ub_cry3 ⟩ := pa_rtc
-  clear pa_exec pa_range pa_bit
+  clear pa_range pa_bit
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
-           rest ⟩ := constraints
+           b_mulh, b_mulhsu, rest ⟩ := constraints
   clear constrain_interactions
   simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
+  clear *- b_mulh b_mulhsu
+  grind
 
 /-- From Lt opcode to RISC-V opcode -/
 def rop_of_Mulh_opcode (opcode : FBB) : mop :=

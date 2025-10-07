@@ -531,7 +531,7 @@ namespace Equivalence.BaseALU
       (h_bus_assumptions row (by omega))
       (h_bus_wellformedness row (by omega))
 
-    exact this.2.2.2.2.1
+    exact this.2.2.2.1
 
   lemma get_instruction_fields_row_opcode_range [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -555,7 +555,7 @@ namespace Equivalence.BaseALU
       (h_bus_assumptions row (by omega))
       (h_bus_wellformedness row (by omega))
 
-    replace this := this.2.2.2.1
+    replace this := this.2.2.1
     grind
 
   lemma transpile_of_bus_wellformedness [Field ExtF]
@@ -664,7 +664,6 @@ namespace Equivalence.BaseALU
     simp [AddOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -735,6 +734,7 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
+          (h_bus_assumptions row (by omega))
           (h_bus_wellformedness row (by omega))
           h_non_imm
 
@@ -748,7 +748,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma sub_rd_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -805,7 +805,6 @@ namespace Equivalence.BaseALU
     simp [SubOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -875,7 +874,8 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_wellformedness row (by omega))
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
           h_non_imm
 
         simp [
@@ -888,7 +888,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma xor_rd_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -962,7 +962,6 @@ namespace Equivalence.BaseALU
     simp [XorOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -1033,7 +1032,8 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_wellformedness row (by omega))
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
           h_non_imm
 
         simp [
@@ -1046,7 +1046,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma or_rd_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -1120,7 +1120,6 @@ namespace Equivalence.BaseALU
     simp [OrOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -1191,7 +1190,8 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_wellformedness row (by omega))
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
           h_non_imm
 
         simp [
@@ -1204,7 +1204,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma and_rd_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -1278,7 +1278,6 @@ namespace Equivalence.BaseALU
     simp [AndOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -1349,7 +1348,8 @@ namespace Equivalence.BaseALU
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_wellformedness row (by omega))
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
           h_non_imm
 
         simp [
@@ -1362,7 +1362,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma addi_register_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -1445,7 +1445,6 @@ namespace Equivalence.BaseALU
     simp [AddiOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -1530,7 +1529,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma subi_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -1635,7 +1634,6 @@ namespace Equivalence.BaseALU
     simp [XoriOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -1720,7 +1718,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma ori_register_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -1803,7 +1801,6 @@ namespace Equivalence.BaseALU
     simp [OriOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -1888,7 +1885,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma andi_register_properties [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
@@ -1971,7 +1968,6 @@ namespace Equivalence.BaseALU
     simp [AndiOutput_matches_ALU_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_a0, h_a1, h_a2, h_a3,
           h_b0, h_b1, h_b2, h_b3,
@@ -2056,7 +2052,7 @@ namespace Equivalence.BaseALU
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma non_imm_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)

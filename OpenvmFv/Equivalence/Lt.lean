@@ -393,7 +393,7 @@ namespace Equivalence.Lt
       (h_bus_assumptions row (by omega))
       (h_bus_wellformedness row (by omega))
 
-    exact this.2.2.2.2.1
+    exact this.2.2.2.1
 
   lemma get_instruction_fields_row_opcode_range [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)
@@ -417,7 +417,7 @@ namespace Equivalence.Lt
       (h_bus_assumptions row (by omega))
       (h_bus_wellformedness row (by omega))
 
-    replace this := this.2.2.2.1
+    replace this := this.2.2.1
     grind
 
   lemma transpile_of_bus_wellformedness [Field ExtF]
@@ -526,7 +526,6 @@ namespace Equivalence.Lt
     simp [SltOutput_matches_Lt_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_cmp_result,
           h_b0, h_b1, h_b2, h_b3,
@@ -624,7 +623,7 @@ namespace Equivalence.Lt
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma sltu_rd_properties [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)
@@ -698,7 +697,6 @@ namespace Equivalence.Lt
     simp [SltuOutput_matches_Lt_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_cmp_result,
           h_b0, h_b1, h_b2, h_b3,
@@ -795,7 +793,7 @@ namespace Equivalence.Lt
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma slti_register_properties [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)
@@ -878,7 +876,6 @@ namespace Equivalence.Lt
     simp [SltiOutput_matches_Lt_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_cmp_result,
           h_b0, h_b1, h_b2, h_b3,
@@ -977,7 +974,7 @@ namespace Equivalence.Lt
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma sltiu_register_properties [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)
@@ -1060,7 +1057,6 @@ namespace Equivalence.Lt
     simp [SltiuOutput_matches_Lt_instruction_fields]
     have ⟨
         h_pc,
-        h_timestamp,
         ⟨
           h_cmp_result,
           h_b0, h_b1, h_b2, h_b3,
@@ -1158,7 +1154,7 @@ namespace Equivalence.Lt
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
-          grind
+          simp
 
   lemma non_imm_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)

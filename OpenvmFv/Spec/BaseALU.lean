@@ -90,6 +90,7 @@ section General
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- The properties that need to be proven actually hold -/
@@ -108,7 +109,7 @@ lemma wf_propertiesToAssert
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
   obtain ⟨ ba00, ba01, ba02, ba10, ba11, ba12, ba20, ba21, ba22, ba30, ba31, ba32, ba4 ⟩ := pa_bit
-  clear pa_exec pa_range
+  clear pa_range
 
   have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
@@ -123,48 +124,50 @@ lemma wf_propertiesToAssert
   simp_all
 
   constructor
-  . rcases b_rs2_as <;> simp_all
   . constructor
     . rcases b_rs2_as <;> simp_all
-      rw [Fin.ext_iff] at *; simp_all
-    . clear *- b_add b_sub b_xor b_or b_and
-              ba00 ba01 ba02 ba10 ba11 ba12 ba20 ba21 ba22 ba30 ba31 ba32
-              sop0 sop1 sop2 sop3 sop4
+    . constructor
+      . rcases b_rs2_as <;> simp_all
+        rw [Fin.ext_iff] at *; simp_all
+      . clear *- b_add b_sub b_xor b_or b_and
+                ba00 ba01 ba02 ba10 ba11 ba12 ba20 ba21 ba22 ba30 ba31 ba32
+                sop0 sop1 sop2 sop3 sop4
 
-      rcases b_add <;> [ skip; simp_all ]
-      rcases b_sub <;> [ skip; simp_all ]
-      rcases b_xor <;> rcases b_and <;> rcases b_or <;> simp_all
-      all_goals
-        simp [← BaseAluCoreAir.x_xor_y_0_def, ← BaseAluCoreAir.x_xor_y_1_def,
-              ← BaseAluCoreAir.x_xor_y_2_def, ← BaseAluCoreAir.x_xor_y_3_def,
-              ← BaseAluCoreAir.x_0_def, ← BaseAluCoreAir.x_1_def,
-              ← BaseAluCoreAir.x_2_def, ← BaseAluCoreAir.x_3_def,
-              ← BaseAluCoreAir.y_0_def, ← BaseAluCoreAir.y_1_def,
-              ← BaseAluCoreAir.y_2_def, ← BaseAluCoreAir.y_3_def] at *
-
-        simp_all
-
-      . have := BabyBear.xor_as_or ba00 ba01 ba02
-        have := BabyBear.xor_as_or ba10 ba11 ba12
-        have := BabyBear.xor_as_or ba20 ba21 ba22
-        have := BabyBear.xor_as_or ba30 ba31 ba32
-        grind
-
-      . have := BabyBear.xor_as_and ba00 ba01 ba02
-        have := BabyBear.xor_as_and ba10 ba11 ba12
-        have := BabyBear.xor_as_and ba20 ba21 ba22
-        have := BabyBear.xor_as_and ba30 ba31 ba32
-        grind
-
-      . split_ands
+        rcases b_add <;> [ skip; simp_all ]
+        rcases b_sub <;> [ skip; simp_all ]
+        rcases b_xor <;> rcases b_and <;> rcases b_or <;> simp_all
         all_goals
-          apply Nat.xor_lt_two_pow (n := 8) <;>
-          omega
+          simp [← BaseAluCoreAir.x_xor_y_0_def, ← BaseAluCoreAir.x_xor_y_1_def,
+                ← BaseAluCoreAir.x_xor_y_2_def, ← BaseAluCoreAir.x_xor_y_3_def,
+                ← BaseAluCoreAir.x_0_def, ← BaseAluCoreAir.x_1_def,
+                ← BaseAluCoreAir.x_2_def, ← BaseAluCoreAir.x_3_def,
+                ← BaseAluCoreAir.y_0_def, ← BaseAluCoreAir.y_1_def,
+                ← BaseAluCoreAir.y_2_def, ← BaseAluCoreAir.y_3_def] at *
+
+          simp_all
+
+        . have := BabyBear.xor_as_or ba00 ba01 ba02
+          have := BabyBear.xor_as_or ba10 ba11 ba12
+          have := BabyBear.xor_as_or ba20 ba21 ba22
+          have := BabyBear.xor_as_or ba30 ba31 ba32
+          grind
+
+        . have := BabyBear.xor_as_and ba00 ba01 ba02
+          have := BabyBear.xor_as_and ba10 ba11 ba12
+          have := BabyBear.xor_as_and ba20 ba21 ba22
+          have := BabyBear.xor_as_and ba30 ba31 ba32
+          grind
+
+        . split_ands
+          all_goals
+            apply Nat.xor_lt_two_pow (n := 8) <;>
+            omega
+  . grind
 
 include
   row_valid
-  assumptions
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- Some properties more important than others that should
@@ -172,7 +175,6 @@ in
 lemma essentials
 :
   (air.adapter.from_state.pc row 0).val + 4 < 1073741824 ∧
-  (air.adapter.from_state.timestamp row 0) + 3 < 536870912 ∧
   List.Forall (fun x => x.val < 256)
     [air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
      air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
@@ -191,7 +193,7 @@ lemma essentials
     air.rs2_sign row 0 = air.rs2_limbs row 0 3 ∧
     (air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255))
 := by
-  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid propertiesToAssume
+  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   simp [row_valid, and_assoc,
         VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_mem
@@ -244,6 +246,7 @@ def rop_of_ALU_opcode (opcode : FBB) : rop :=
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The constraints entail correct implementation of the
     five base ALU opcodes for:
@@ -269,7 +272,7 @@ theorem spec_base_ALU
     (rop_of_ALU_opcode (air.core.ctx row 0).instruction.opcode)
 := by
   -- Get relevant previous info
-  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid propertiesToAssume
+  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   simp [row_valid, and_assoc,
         VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_mem
@@ -390,6 +393,7 @@ section NonImmediate
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The non-immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
@@ -426,8 +430,8 @@ def iop_of_ALU_opcode (opcode : FBB) : iop :=
 
 include
   row_valid
-  assumptions
   constraints
+  assumptions
   propertiesToAssume in
 /-- The immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
@@ -485,7 +489,7 @@ theorem spec_base_ALU_imm
     trans (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt
     . have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
       simp [h_imm, and_assoc] at essentials
-      obtain ⟨ ub_pc, ub_timestamp, ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
+      obtain ⟨ ub_pc, ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
                opcodes, opcode_not_sub, h_rs2, imm_sign_extend, rs2_as_imm, imm_sign, imm_sign_extend' ⟩ := essentials
       rw [← VmAirWrapper_alu.rs2_imm_def] at rs2_as_imm
       rw [← VmAirWrapper_alu.rs2_sign_limbs] at imm_sign
