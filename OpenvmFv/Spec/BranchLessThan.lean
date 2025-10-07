@@ -170,11 +170,11 @@ lemma essentials
   have assertions := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
+  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read pa_bit
 
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
@@ -182,8 +182,17 @@ lemma essentials
   obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions
-  clear constraints; simp_all
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions constraints
+  obtain ⟨ constrain_interactions,
+           b_blt, b_bltu, b_bge, b_bgeu,
+           b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
+           h_b_ps3, h_ps3_diff, h_ps3_diff_val, h_b_dm2,
+           h_b_ps2, h_ps2_diff, h_ps2_diff_val, h_b_dm1,
+           h_b_ps1, h_ps1_diff, h_ps1_diff_val, h_b_dm0,
+           h_b_ps0, h_ps0_lt, rest
+         ⟩ := constraints
+  simp_all
   split_ands <;> omega
 
 include
@@ -305,36 +314,89 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
       then air.adapter.from_state.pc row 0 + air.core.imm row 0
       else air.adapter.from_state.pc row 0 + 4)
 := by
-  sorry
-  -- obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
-  -- simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
-  -- -- Get all opcode properties
-  -- obtain ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
-  -- obtain ⟨ op0, op1 ⟩ := op_from_opcode air row row_in_range constraints row_valid
-  -- have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  -- replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
-  -- simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
+  -- Get all opcode properties
+  obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
+  obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
 
-  -- rw [Fin.ext_iff] at pa_mem
-  -- simp [and_assoc] at pa_mem pa_range pa_read
-  -- obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  -- obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
-  -- clear pa_exec pa_range
+  rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read
+  obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
+  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
+  clear pa_exec
 
-  -- -- Prepare constraints
-  -- rw [allHold_simplified_of_allHold] at constraints
-  -- simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at *
-  -- obtain ⟨ constrain_interactions,
-  --          b_beq, b_bne, b_is_valid, b_cmp,
-  --          cmp_0, cmp_1, cmp_2, cmp_3, sum, rest ⟩ := constraints
-  -- clear constrain_interactions rest
+  -- Prepare constraints
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at *
+  obtain ⟨ constrain_interactions, rest ⟩ := constraints
+  clear constrain_interactions
 
-  -- rw [← VmAirWrapper_branch_lt.to_pc_def] at *
-  -- rw [← BranchLessThanCoreAir_4.sum_def] at *
-  -- rw [← BranchLessThanCoreAir_4.cmp_eq_def] at *
+  rw [← VmAirWrapper_branch_lt.to_pc_def] at *
+  rw [← BranchLessThanCoreAir_4_8.prefix_sum_0_def] at *
+  rw [← BranchLessThanCoreAir_4_8.prefix_sum_1_def] at *
+  rw [← BranchLessThanCoreAir_4_8.prefix_sum_2_def] at *
+  rw [← BranchLessThanCoreAir_4_8.prefix_sum_3_def] at *
+  rw [← BranchLessThanCoreAir_4_8.diff_0_def] at *
+  rw [← BranchLessThanCoreAir_4_8.diff_1_def] at *
+  rw [← BranchLessThanCoreAir_4_8.diff_2_def] at *
+  rw [← BranchLessThanCoreAir_4_8.diff_3_def] at *
+  rw [← BranchLessThanCoreAir_4_8.cmp_lt_def] at *
+  rw [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+  rw [← BranchLessThanCoreAir_4_8.b_diff_def] at *
 
-  -- split_ands <;> intro h_opcode <;> simp_all
+  split_ands <;> intro h_opcode <;> simp_all
+  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
+    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
+      grind
+    . congr
+  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
+    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
+      grind
+    . congr
+  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
+    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
+      grind
+    . congr
+  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
+    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
+      grind
+    . congr
+      obtain ⟨ b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
+               h_b_ps3, h_ps3_diff, h_ps3_diff_val, h_b_dm2,
+               h_b_ps2, h_ps2_diff, h_ps2_diff_val, h_b_dm1,
+               h_b_ps1, h_ps1_diff, h_ps1_diff_val, h_b_dm0,
+               h_b_ps0, h_ps0_lt, rest
+             ⟩ := rest; clear rest
+      trans (air.core.cmp_lt row 0 = 0)
+      . grind
+      . clear b_cmp_result h_cmp_lt
+        rcases h_b_ps3 with h_ps | h_ps
+        . skip
+        . have ⟨ z0, z1, z2 ⟩ : air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_0 row 0 = 0 := by grind
+          simp [h_ps, z0, z1, z2] at pa_bit
+          obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+          have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+            := by clear *- h_a_diff ub_a3 h_msb_a; grind
+          have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+            := by clear *- h_b_diff ub_b3 h_msb_b; grind
+          simp_all
+          by_cases hz : air.core.cmp_lt row 0 = 0
+          . simp_all
+            have : air.core.a_3 row 0 > air.core.b_3 row 0 := by omega
+            simp [U32.toNat]; grind
+          . simp_all
+
+
+
+
+
+#exit
+
 
   -- all_goals
   --   rcases b_cmp with h_cmp | h_cmp <;> simp_all

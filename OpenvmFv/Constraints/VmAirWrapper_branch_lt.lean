@@ -132,7 +132,7 @@ namespace VmAirWrapper_branch_lt.constraints
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_6 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
         air.core.cmp_lt row 0 =
-    air.core.cmp_result row 0 * air.core.lt row 0 + (1 - air.core.cmp_result row 0) * air.core.ge row 0
+          air.core.cmp_result row 0 * air.core.lt row 0 + (1 - air.core.cmp_result row 0) * air.core.ge row 0
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_6_of_extraction
