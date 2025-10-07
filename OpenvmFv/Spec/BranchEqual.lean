@@ -42,6 +42,7 @@ lemma non_valid_row_BranchEqual_allZeros_allHold
   air.core.b_2 row 0 = 0 ∧
   air.core.b_3 row 0 = 0 ∧
   air.core.cmp_result row 0 = 0 ∧
+  air.core.imm row 0 = 0 ∧
   air.core.opcode_beq_flag row 0 = 0 ∧
   air.core.opcode_bne_flag row 0 = 0 ∧
   air.core.diff_inv_marker_0 row 0 = 0 ∧
@@ -68,7 +69,6 @@ lemma non_valid_row_BranchEqual_all_interaction_multiplicities_zero
   simp_all [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
 
 end BranchEqual.NonValidRows
-
 
 open VmAirWrapper_branch_eq.constraints
 
