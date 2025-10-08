@@ -548,15 +548,6 @@ namespace VmAirWrapper_branch_eq.constraints
       -- imm is aligned
       BabyBear.toInt imm % 4 = 0
 
-    lemma toInt_mod_eq_zero_of_bitvec_mod_eq_zero (bv: BitVec 13) (h: bv % 4 = 0):
-      bv.toInt % 4 = 0
-    := by
-      simp at h ⊢
-      have : (4: Int) = (4#13).toInt := rfl
-      rewrite [this]
-      apply BitVec.toInt_dvd_toInt_iff.mpr
-      bv_decide
-
     set_option maxHeartbeats 0 in
     lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
       (h_bounds :
@@ -624,7 +615,7 @@ namespace VmAirWrapper_branch_eq.constraints
             . have : imm.toInt % 2013265921 = imm.toInt := by omega
               rewrite [this]; clear this
               refine Int.dvd_of_emod_eq_zero ?_
-              exact toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
+              exact BitVec.toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
             . simp
               clear *- h_sign this
               omega
@@ -635,7 +626,7 @@ namespace VmAirWrapper_branch_eq.constraints
               rewrite [this]; clear this
               simp
               refine Int.dvd_of_emod_eq_zero ?_
-              exact toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
+              exact BitVec.toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
             . simp
               omega
       }

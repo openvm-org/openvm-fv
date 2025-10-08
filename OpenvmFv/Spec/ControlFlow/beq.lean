@@ -21,7 +21,7 @@ namespace PureSpec
     throws : Bool
 
   def execute_BEQ_pure (input : BeqInput) : BeqOutput :=
-    let skip := input.r1_val != input.r2_val
+    let skip := !(input.r1_val == input.r2_val)
     let throws := !skip && BitVec.ofBool (input.PC + BitVec.signExtend 32 input.imm)[0] == 1#1
     let fails := throws || (!skip && BitVec.ofBool (input.PC + BitVec.signExtend 32 input.imm)[1] == 1#1 && !input.misa[2])
     {
