@@ -150,7 +150,7 @@ namespace VmAirWrapper_branch_lt.constraints
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_7 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        air.core.a_diff row 0 = 0 ∨ 256 = air.core.a_diff row 0
+        air.core.a_diff row 0 = 0 ∨ air.core.a_diff row 0 = 256
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_7_of_extraction
@@ -160,15 +160,15 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_8 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        air.core.b_diff row 0 = 0 ∨ 256 = air.core.b_diff row 0
+        air.core.b_diff row 0 = 0 ∨ air.core.b_diff row 0 = 256
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_8_of_extraction
@@ -178,11 +178,11 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_9 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
@@ -204,7 +204,7 @@ namespace VmAirWrapper_branch_lt.constraints
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_10 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.prefix_sum row 0 3 ∨ air.core.diff row 0 3 = 0
+        air.core.prefix_sum row 0 3 = 1 ∨ air.core.diff row 0 3 = 0
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_10_of_extraction
@@ -214,11 +214,11 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_11 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
@@ -258,7 +258,7 @@ namespace VmAirWrapper_branch_lt.constraints
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_13 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.prefix_sum row 0 2 ∨ air.core.diff row 0 2 = 0
+        air.core.prefix_sum row 0 2 = 1 ∨ air.core.diff row 0 2 = 0
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_13_of_extraction
@@ -268,11 +268,11 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_14 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
@@ -312,7 +312,7 @@ namespace VmAirWrapper_branch_lt.constraints
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_16 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.prefix_sum row 0 1 ∨ air.core.diff row 0 1 = 0
+        air.core.prefix_sum row 0 1 = 1 ∨ air.core.diff row 0 1 = 0
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_16_of_extraction
@@ -322,11 +322,11 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_17 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
@@ -367,7 +367,7 @@ namespace VmAirWrapper_branch_lt.constraints
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_19 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.prefix_sum row 0 0 ∨ air.core.diff row 0 0 = 0
+        air.core.prefix_sum row 0 0 = 1 ∨ air.core.diff row 0 0 = 0
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_19_of_extraction
@@ -377,11 +377,11 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_20 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
@@ -421,7 +421,7 @@ namespace VmAirWrapper_branch_lt.constraints
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_22 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=
-        1 = air.core.prefix_sum row 0 0 ∨ air.core.cmp_lt row 0 = 0
+        air.core.prefix_sum row 0 0 = 1 ∨ air.core.cmp_lt row 0 = 0
 
       @[VmAirWrapper_branch_lt_air_simplification]
       lemma constraint_22_of_extraction
@@ -431,11 +431,11 @@ namespace VmAirWrapper_branch_lt.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-        exact h
+        grind
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at h
-        exact h
+        grind
 
       @[VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
       def constraint_23 (air : Valid_VmAirWrapper_branch_lt F ExtF) (row : ℕ) : Prop :=

@@ -179,8 +179,11 @@ lemma essentials
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
+  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, imm_mod ⟩ := pa_read
   clear pa_exec pa_range
+
+  obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
+  obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions constraints
@@ -192,7 +195,7 @@ lemma essentials
            h_b_ps1, h_ps1_diff, h_ps1_diff_val, h_b_dm0,
            h_b_ps0, h_ps0_lt, rest
          ⟩ := constraints
-  simp_all
+  simp_all [Valid_BranchLessThanCoreAir_4_8.lt, Valid_BranchLessThanCoreAir_4_8.ge]
   split_ands <;> omega
 
 include
@@ -219,7 +222,7 @@ lemma next_pc_two_last_bits_zero
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, aligned_imm ⟩ := pa_read
+  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, imm_mod ⟩ := pa_read
   clear pa_exec pa_range
 
   simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions
@@ -232,8 +235,8 @@ lemma next_pc_two_last_bits_zero
   . obtain ⟨ npc0, npc1 ⟩ := this
     bv_decide
   . obtain ⟨ x, eq_x ⟩ : exists x, BabyBear.toInt (air.core.imm row 0) = x := by simp
-    simp [eq_x] at lb_imm ub_imm aligned_imm ⊢
-    clear *- lb_imm ub_imm aligned_imm
+    simp [eq_x] at lb_imm ub_imm imm_mod ⊢
+    clear *- lb_imm ub_imm imm_mod
     have : x % (4 : ℤ) = (1 : ℤ) * ((BitVec.ofInt 13 x)[0]).toNat + (2 : ℤ) * (BitVec.ofInt 13 x)[1].toNat
     := by
       simp only [BitVec.getElem_eq_testBit_toNat]
@@ -248,7 +251,7 @@ lemma next_pc_two_last_bits_zero
         by_cases ((x % 8192).toNat % 2 = 1) <;>
         simp_all <;> omega
 
-    rw [this] at aligned_imm; clear this
+    rw [this] at imm_mod; clear this
     by_cases (BitVec.ofInt 13 x)[0] <;>
     by_cases (BitVec.ofInt 13 x)[1] <;> simp_all
 
@@ -327,7 +330,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
+  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, imm_mod ⟩ := pa_read
   clear pa_exec
 
   -- Prepare constraints
@@ -336,79 +339,315 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   obtain ⟨ constrain_interactions, rest ⟩ := constraints
   clear constrain_interactions
 
-  rw [← VmAirWrapper_branch_lt.to_pc_def] at *
-  rw [← BranchLessThanCoreAir_4_8.prefix_sum_0_def] at *
-  rw [← BranchLessThanCoreAir_4_8.prefix_sum_1_def] at *
-  rw [← BranchLessThanCoreAir_4_8.prefix_sum_2_def] at *
-  rw [← BranchLessThanCoreAir_4_8.prefix_sum_3_def] at *
-  rw [← BranchLessThanCoreAir_4_8.diff_0_def] at *
-  rw [← BranchLessThanCoreAir_4_8.diff_1_def] at *
-  rw [← BranchLessThanCoreAir_4_8.diff_2_def] at *
-  rw [← BranchLessThanCoreAir_4_8.diff_3_def] at *
-  rw [← BranchLessThanCoreAir_4_8.cmp_lt_def] at *
-  rw [← BranchLessThanCoreAir_4_8.a_diff_def] at *
-  rw [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+  obtain ⟨ b_blt, b_bltu, b_bge, b_bgeu, b_valid,
+           b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
+           h_b_ps3, h_ps3_diff, h_ps3_diff_val, h_b_dm2,
+           h_ps2_diff, h_ps2_diff_val, h_b_dm1,
+           h_ps1_diff, h_ps1_diff_val, h_b_dm0,
+           h_ps0_diff, h_ps0_diff_val, h_b_ps0, h_ps0_lt, rest
+         ⟩ := rest; clear rest
+
+  simp [← VmAirWrapper_branch_lt.to_pc_def] at *
+  simp [← BranchLessThanCoreAir_4_8.prefix_sum_0_def] at *
+  simp [← BranchLessThanCoreAir_4_8.prefix_sum_1_def] at *
+  simp [← BranchLessThanCoreAir_4_8.prefix_sum_2_def] at *
+  simp [← BranchLessThanCoreAir_4_8.prefix_sum_3_def] at *
+  simp [Valid_BranchLessThanCoreAir_4_8.lt] at *
+  simp [Valid_BranchLessThanCoreAir_4_8.ge] at *
 
   split_ands <;> intro h_opcode <;> simp_all
+
+  -- BLT
   . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
-      grind
+    . clear *- b_cmp_result; grind
     . congr
+      clear pa_range lb_imm ub_imm imm_mod
+      obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+      simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+            ← BranchLessThanCoreAir_4_8.diff_1_def,
+            ← BranchLessThanCoreAir_4_8.diff_2_def,
+            ← BranchLessThanCoreAir_4_8.diff_3_def,
+              h_cmp_lt] at *
+      have : ¬(2 * (1 - air.core.cmp_result row 0) - 1 = 0) := by grind
+      simp [this] at *; clear this
+      simp [← BranchLessThanCoreAir_4_8.a_diff_def,
+            ← BranchLessThanCoreAir_4_8.b_diff_def] at *
+
+      have eq_msb_b : air.core.a_msb_f row 0 = if 128 ≤ (air.core.a_3 row 0).val then (air.core.a_3 row 0) - 256 else (air.core.a_3 row 0)
+        := by clear *- ub_a3 h_msb_a h_a_diff; split_ifs <;> grind
+      have eq_msb_c : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then air.core.b_3 row 0 - 256 else air.core.b_3 row 0
+        := by clear *- ub_b3 h_msb_b h_b_diff; split_ifs <;> grind
+
+      simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
+      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+      repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
+
+      have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
+        (air.core.diff_marker_0 row 0 = 1 → air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
+        (air.core.diff_marker_1 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
+        (air.core.diff_marker_2 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
+        (air.core.diff_marker_3 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0)
+      := by
+        clear *- h_b_ps3 h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0
+        grind (splits := 14)
+
+      rcases h_b_ps3 with h_dm3 | h_dm3
+      . rcases h_b_dm2 with h_dm2 | h_dm2
+        . rcases h_b_dm1 with h_dm1 | h_dm1
+          . rcases h_b_dm0 with h_dm0 | h_dm0
+            . simp_all; split_ifs <;> simp_all <;> grind
+            . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+          . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+        . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+      . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+
+  -- BLTU
   . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
-      grind
+    . clear *- b_cmp_result; grind
     . congr
-  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
-      grind
-    . congr
-  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-    . obtain ⟨ b_cmp_result, rest ⟩ := rest; clear *- b_cmp_result
-      grind
-    . congr
-      obtain ⟨ b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
-               h_b_ps3, h_ps3_diff, h_ps3_diff_val, h_b_dm2,
-               h_b_ps2, h_ps2_diff, h_ps2_diff_val, h_b_dm1,
-               h_b_ps1, h_ps1_diff, h_ps1_diff_val, h_b_dm0,
-               h_b_ps0, h_ps0_lt, rest
-             ⟩ := rest; clear rest
-      trans (air.core.cmp_lt row 0 = 0)
-      . grind
-      . clear b_cmp_result h_cmp_lt
-        rcases h_b_ps3 with h_ps | h_ps
-        . skip
-        . have ⟨ z0, z1, z2 ⟩ : air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_0 row 0 = 0 := by grind
-          simp [h_ps, z0, z1, z2] at pa_bit
+      rcases h_b_ps3 with h_b_dm3 | h_dm
+      . rcases h_b_dm2 with h_b_dm2 | h_dm
+        . rcases h_b_dm1 with h_dm1 | h_dm
+          . rcases h_b_dm0 with h_dm | h_dm
+            all_goals
+              simp [h_dm] at pa_bit
+              obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+              have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+              := by
+                clear *- h_a_diff ub_a3 h_msb_a
+                simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+                grind
+              have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+              := by
+                clear *- h_b_diff ub_b3 h_msb_b
+                simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+                grind
+              simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+                    ← BranchLessThanCoreAir_4_8.diff_1_def,
+                    ← BranchLessThanCoreAir_4_8.diff_2_def,
+                    ← BranchLessThanCoreAir_4_8.diff_3_def,
+                      h_cmp_lt] at *
+              by_cases hz : air.core.cmp_result row 0 = 1 <;>
+              simp_all [U32.toNat] <;>
+              omega
+          . have z0 :
+              air.core.diff_marker_0 row 0 = 0
+            := by clear *- h_dm h_b_dm3 h_b_dm2 h_b_dm0 h_b_ps0; grind
+            simp [h_dm, z0] at pa_bit
+            obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+            have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+            := by
+              clear *- h_a_diff ub_a3 h_msb_a
+              simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+              grind
+            have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+            := by
+              clear *- h_b_diff ub_b3 h_msb_b
+              simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+              grind
+            simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+                  ← BranchLessThanCoreAir_4_8.diff_1_def,
+                  ← BranchLessThanCoreAir_4_8.diff_2_def,
+                  ← BranchLessThanCoreAir_4_8.diff_3_def,
+                    h_cmp_lt] at *
+            by_cases hz : air.core.cmp_result row 0 = 1 <;>
+            simp_all [U32.toNat] <;>
+            omega
+        . have ⟨ z0, z1 ⟩ :
+            air.core.diff_marker_1 row 0 = 0 ∧
+            air.core.diff_marker_0 row 0 = 0
+          := by clear *- h_dm h_b_dm3 h_b_dm1 h_b_dm0 h_b_ps0; grind
+          simp [h_dm, z0, z1] at pa_bit
           obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
           have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
-            := by clear *- h_a_diff ub_a3 h_msb_a; grind
+          := by
+            clear *- h_a_diff ub_a3 h_msb_a
+            simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+            grind
           have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
-            := by clear *- h_b_diff ub_b3 h_msb_b; grind
-          simp_all
-          by_cases hz : air.core.cmp_lt row 0 = 0
-          . simp_all
-            have : air.core.a_3 row 0 > air.core.b_3 row 0 := by omega
-            simp [U32.toNat]; grind
-          . simp_all
+          := by
+            clear *- h_b_diff ub_b3 h_msb_b
+            simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+            grind
+          simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+                ← BranchLessThanCoreAir_4_8.diff_1_def,
+                ← BranchLessThanCoreAir_4_8.diff_2_def,
+                ← BranchLessThanCoreAir_4_8.diff_3_def,
+                  h_cmp_lt] at *
+          by_cases hz : air.core.cmp_result row 0 = 1 <;>
+          simp_all [U32.toNat] <;>
+          omega
+      . have ⟨ z0, z1, z2 ⟩ :
+          air.core.diff_marker_2 row 0 = 0 ∧
+          air.core.diff_marker_1 row 0 = 0 ∧
+          air.core.diff_marker_0 row 0 = 0
+        := by clear *- h_dm h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0; grind
+        simp [h_dm, z0, z1, z2] at pa_bit
+        obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+        have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+        := by
+          clear *- h_a_diff ub_a3 h_msb_a
+          simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+          grind
+        have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+        := by
+          clear *- h_b_diff ub_b3 h_msb_b
+          simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+          grind
+        simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+              ← BranchLessThanCoreAir_4_8.diff_1_def,
+              ← BranchLessThanCoreAir_4_8.diff_2_def,
+              ← BranchLessThanCoreAir_4_8.diff_3_def,
+                h_cmp_lt] at *
+        by_cases hz : air.core.cmp_result row 0 = 1 <;>
+        simp_all [U32.toNat] <;>
+        omega
 
+  -- BGE
+  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
+    . clear *- b_cmp_result; grind
+    . congr
+      clear pa_range lb_imm ub_imm imm_mod
+      obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+      simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+            ← BranchLessThanCoreAir_4_8.diff_1_def,
+            ← BranchLessThanCoreAir_4_8.diff_2_def,
+            ← BranchLessThanCoreAir_4_8.diff_3_def,
+              h_cmp_lt] at *
+      have : ¬(2 * (1 - air.core.cmp_result row 0) - 1 = 0) := by grind
+      simp [this] at *; clear this
+      simp [← BranchLessThanCoreAir_4_8.a_diff_def,
+            ← BranchLessThanCoreAir_4_8.b_diff_def] at *
 
+      have eq_msb_b : air.core.a_msb_f row 0 = if 128 ≤ (air.core.a_3 row 0).val then (air.core.a_3 row 0) - 256 else (air.core.a_3 row 0)
+        := by clear *- ub_a3 h_msb_a h_a_diff; split_ifs <;> grind
+      have eq_msb_c : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then air.core.b_3 row 0 - 256 else air.core.b_3 row 0
+        := by clear *- ub_b3 h_msb_b h_b_diff; split_ifs <;> grind
 
+      simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
+      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+      repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
 
+      have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
+        (air.core.diff_marker_0 row 0 = 1 → air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
+        (air.core.diff_marker_1 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
+        (air.core.diff_marker_2 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
+        (air.core.diff_marker_3 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0)
+      := by
+        clear *- h_b_ps3 h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0
+        grind (splits := 14)
 
-#exit
+      rcases h_b_ps3 with h_dm3 | h_dm3
+      . rcases h_b_dm2 with h_dm2 | h_dm2
+        . rcases h_b_dm1 with h_dm1 | h_dm1
+          . rcases h_b_dm0 with h_dm0 | h_dm0
+            . simp_all; split_ifs <;> simp_all <;> grind
+            . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+          . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+        . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
+      . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
 
-
-  -- all_goals
-  --   rcases b_cmp with h_cmp | h_cmp <;> simp_all
-  --   . intro h_eq
-  --     have : air.core.a_0 row 0 = air.core.b_0 row 0 ∧
-  --           air.core.a_1 row 0 = air.core.b_1 row 0 ∧
-  --           air.core.a_2 row 0 = air.core.b_2 row 0 ∧
-  --           air.core.a_3 row 0 = air.core.b_3 row 0
-  --     := by
-  --       simp [← BitVec.toNat_inj, U32.toNat] at h_eq
-  --       grind
-  --     simp_all
+  -- BGEU
+  . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
+    . clear *- b_cmp_result; grind
+    . congr
+      rcases h_b_ps3 with h_b_dm3 | h_dm
+      . rcases h_b_dm2 with h_b_dm2 | h_dm
+        . rcases h_b_dm1 with h_dm1 | h_dm
+          . rcases h_b_dm0 with h_dm | h_dm
+            all_goals
+              simp [h_dm] at pa_bit
+              obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+              have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+              := by
+                clear *- h_a_diff ub_a3 h_msb_a
+                simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+                grind
+              have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+              := by
+                clear *- h_b_diff ub_b3 h_msb_b
+                simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+                grind
+              simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+                    ← BranchLessThanCoreAir_4_8.diff_1_def,
+                    ← BranchLessThanCoreAir_4_8.diff_2_def,
+                    ← BranchLessThanCoreAir_4_8.diff_3_def,
+                      h_cmp_lt] at *
+              by_cases hz : air.core.cmp_result row 0 = 1 <;>
+              simp_all [U32.toNat] <;>
+              omega
+          . have z0 :
+              air.core.diff_marker_0 row 0 = 0
+            := by clear *- h_dm h_b_dm3 h_b_dm2 h_b_dm0 h_b_ps0; grind
+            simp [h_dm, z0] at pa_bit
+            obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+            have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+            := by
+              clear *- h_a_diff ub_a3 h_msb_a
+              simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+              grind
+            have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+            := by
+              clear *- h_b_diff ub_b3 h_msb_b
+              simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+              grind
+            simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+                  ← BranchLessThanCoreAir_4_8.diff_1_def,
+                  ← BranchLessThanCoreAir_4_8.diff_2_def,
+                  ← BranchLessThanCoreAir_4_8.diff_3_def,
+                    h_cmp_lt] at *
+            by_cases hz : air.core.cmp_result row 0 = 1 <;>
+            simp_all [U32.toNat] <;>
+            omega
+        . have ⟨ z0, z1 ⟩ :
+            air.core.diff_marker_1 row 0 = 0 ∧
+            air.core.diff_marker_0 row 0 = 0
+          := by clear *- h_dm h_b_dm3 h_b_dm1 h_b_dm0 h_b_ps0; grind
+          simp [h_dm, z0, z1] at pa_bit
+          obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+          have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+          := by
+            clear *- h_a_diff ub_a3 h_msb_a
+            simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+            grind
+          have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+          := by
+            clear *- h_b_diff ub_b3 h_msb_b
+            simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+            grind
+          simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+                ← BranchLessThanCoreAir_4_8.diff_1_def,
+                ← BranchLessThanCoreAir_4_8.diff_2_def,
+                ← BranchLessThanCoreAir_4_8.diff_3_def,
+                  h_cmp_lt] at *
+          by_cases hz : air.core.cmp_result row 0 = 1 <;>
+          simp_all [U32.toNat] <;>
+          omega
+      . have ⟨ z0, z1, z2 ⟩ :
+          air.core.diff_marker_2 row 0 = 0 ∧
+          air.core.diff_marker_1 row 0 = 0 ∧
+          air.core.diff_marker_0 row 0 = 0
+        := by clear *- h_dm h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0; grind
+        simp [h_dm, z0, z1, z2] at pa_bit
+        obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
+        have h_eq_a3 : air.core.a_msb_f row 0 = air.core.a_3 row 0
+        := by
+          clear *- h_a_diff ub_a3 h_msb_a
+          simp [← BranchLessThanCoreAir_4_8.a_diff_def] at *
+          grind
+        have h_eq_b3 : air.core.b_msb_f row 0 = air.core.b_3 row 0
+        := by
+          clear *- h_b_diff ub_b3 h_msb_b
+          simp [← BranchLessThanCoreAir_4_8.b_diff_def] at *
+          grind
+        simp [← BranchLessThanCoreAir_4_8.diff_0_def,
+              ← BranchLessThanCoreAir_4_8.diff_1_def,
+              ← BranchLessThanCoreAir_4_8.diff_2_def,
+              ← BranchLessThanCoreAir_4_8.diff_3_def,
+                h_cmp_lt] at *
+        by_cases hz : air.core.cmp_result row 0 = 1 <;>
+        simp_all [U32.toNat] <;>
+        omega
 
 include
   row_valid
