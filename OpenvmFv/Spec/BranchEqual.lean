@@ -42,6 +42,7 @@ lemma non_valid_row_BranchEqual_allZeros_allHold
   air.core.b_2 row 0 = 0 ∧
   air.core.b_3 row 0 = 0 ∧
   air.core.cmp_result row 0 = 0 ∧
+  air.core.imm row 0 = 0 ∧
   air.core.opcode_beq_flag row 0 = 0 ∧
   air.core.opcode_bne_flag row 0 = 0 ∧
   air.core.diff_inv_marker_0 row 0 = 0 ∧
@@ -68,7 +69,6 @@ lemma non_valid_row_BranchEqual_all_interaction_multiplicities_zero
   simp_all [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
 
 end BranchEqual.NonValidRows
-
 
 open VmAirWrapper_branch_eq.constraints
 
@@ -103,7 +103,7 @@ lemma wf_propertiesToAssert
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, imm_mod ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm, imm_mod ⟩ := pa_read
   clear pa_range
 
   have ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
@@ -142,7 +142,7 @@ lemma essentials
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
   simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at assumptions assertions
@@ -173,7 +173,7 @@ lemma next_pc_two_last_bits_zero
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm, aligned_imm ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm, aligned_imm ⟩ := pa_read
   clear pa_exec pa_range
 
   simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at assumptions assertions
@@ -255,7 +255,7 @@ theorem spec_BEQ_BNE_pc_FBB
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
   -- Prepare constraints
@@ -353,7 +353,7 @@ theorem spec_BEQ_BNE_pc
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ ri_rs1, ri_rs2, lb_imm, ub_imm ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
   clear constraints

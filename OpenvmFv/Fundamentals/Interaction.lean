@@ -1,4 +1,5 @@
 import OpenvmFv.Fundamentals.BabyBear
+import OpenvmFv.Fundamentals.Transpiler
 
 import LeanZKCircuit.Interactions
 
@@ -262,61 +263,9 @@ namespace Interaction
         }
 
       def ReadInstructionBusEntry.operand_properties (entry : ReadInstructionBusEntry FBB) : Prop :=
-        -- RTYPE and ITYPE opcodes
-        ( entry.opcode ∈ Finset.Icc 512 521 → (
-          let rd := entry.xa
-          let rs1 := entry.xb
-          let rs2 := entry.xc
-          let rs2_as := entry.xe
-          -- rd is a nonzero xreg
-          rd.val ∈ Finset.Icc 1 31 ∧
-          -- rs1 is an xreg
-          rs1.val < 32 ∧
-          -- non-immediate rs2 is an xreg
-          (rs2_as = 1 → rs2.val < 32) ∧
-          -- immediate rs2
-          (rs2_as = 0 →
-            -- opcode cannot be SUB
-            ¬ entry.opcode = 513 ∧
-            -- immediate fits 24 bits
-            rs2.val < 2^24 ∧
-            ( entry.opcode ∈ Finset.Icc 517 519 → -- shift opcodes
-              -- immediate is a zero-extended 5-bit value
-              (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat)
-            ) ∧
-            ( entry.opcode ∉ Finset.Icc 517 519 → --non-shift opcodes
-              -- immediate is a zero-extended 12-bit value
-              (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt
-            )
-          ) ∧
-          -- unused parameters
-          entry.xd = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
-        ) ∧
-        -- MUL, MULH, and DIVREM opcodes
-        ( entry.opcode ∈ Finset.Icc 592 599 → (
-          let rd := entry.xa
-          let rs1 := entry.xb
-          let rs2 := entry.xc
-          -- rd is a nonzero xreg
-          rd.val ∈ Finset.Icc 1 31 ∧
-          -- rs1 and rs2 are xregs
-          rs1.val < 32 ∧ rs2.val < 32 ∧
-          -- unused parameters
-          entry.xd = 1 ∧ entry.xe = 0 ∧ entry.xf = 0 ∧ entry.xg = 0
-        )) ∧
-        ( entry.opcode ∈ Finset.Icc 544 545 → (
-          let rs1 := entry.xa
-          let rs2 := entry.xb
-          let imm := entry.xc
-          -- rs1 and rs2 are xregs
-          rs1.val < 32 ∧ rs2.val < 32 ∧
-          -- imm is a 13-bit signed integer represented as a field element
-          -2^12 ≤ BabyBear.toInt imm ∧ BabyBear.toInt imm < 2^12 ∧
-          -- imm is aligned
-          BabyBear.toInt imm % 4 = 0 ∧
-          -- unused parameters
-          entry.xd = 1 ∧ entry.xe = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
-        ))
+        ∃ instruction data,
+          (Transpiler.transpile_op instruction entry.multiplicity entry.pc = .some data) ∧
+          (ReadInstructionBusEntry.deserialise FBB data = entry)
 
       /-- Read-instruction bus entry instance -/
       @[simp, grind]

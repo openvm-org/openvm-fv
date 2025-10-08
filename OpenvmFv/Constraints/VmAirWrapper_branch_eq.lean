@@ -186,9 +186,9 @@ namespace VmAirWrapper_branch_eq.constraints
       @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
       def constraint_9 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
-        air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux.base.prev_timestamp row 0 - 1 =
-          air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 +
-            air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
+  air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 =
+    air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+      air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_branch_eq_air_simplification]
       lemma constraint_9_of_extraction
@@ -207,8 +207,9 @@ namespace VmAirWrapper_branch_eq.constraints
       @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
       def constraint_10 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
-        air.adapter.from_state.timestamp row 0 + 1 - air.adapter.columns 7 row 0 - 1 =
-          air.adapter.columns 8 row 0 + air.adapter.columns 9 row 0 * 131072
+    air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 =
+      air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_branch_eq_air_simplification]
       lemma constraint_10_of_extraction
@@ -253,13 +254,13 @@ namespace VmAirWrapper_branch_eq.constraints
       def memoryBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
         [(2013265920 * air.core.is_valid row 0,
           [1, air.adapter.rs1_ptr row 0, air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
-            air.adapter.reads_aux.base.prev_timestamp row 0]),
+            air.adapter.reads_aux_0.base.prev_timestamp row 0]),
         (air.core.is_valid row 0,
           [1, air.adapter.rs1_ptr row 0, air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
             air.adapter.from_state.timestamp row 0]),
         (2013265920 * air.core.is_valid row 0,
           [1, air.adapter.rs2_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
-            air.adapter.columns 7 row 0]),
+            air.adapter.reads_aux_1.base.prev_timestamp row 0]),
         (air.core.is_valid row 0,
           [1, air.adapter.rs2_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
             air.adapter.from_state.timestamp row 0 + 1])]
@@ -278,10 +279,10 @@ namespace VmAirWrapper_branch_eq.constraints
 
       @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
-        [(air.core.is_valid row 0, [air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-        (air.core.is_valid row 0, [air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-        (air.core.is_valid row 0, [air.adapter.columns 8 row 0, 17]),
-        (air.core.is_valid row 0, [air.adapter.columns 9 row 0, 12])]
+        [(air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])]
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
@@ -542,18 +543,13 @@ namespace VmAirWrapper_branch_eq.constraints
 
     @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
     def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
-      let rs1 := entry.xa
-      let rs2 := entry.xb
       let imm := entry.xc
-      -- rs1 and rs2 are xregs
-      rs1.val < 32 ∧ rs2.val < 32 ∧
       -- imm is a 13-bit signed integer represented as a field element
-      -2^12 ≤ BabyBear.toInt imm ∧ BabyBear.toInt imm < 2^12 ∧
+      (-2^12 ≤ BabyBear.toInt imm) ∧ BabyBear.toInt imm < 2^12 ∧
       -- imm is aligned
-      BabyBear.toInt imm % 4 = 0 ∧
-      -- unused parameters
-      entry.xd = 1 ∧ entry.xe = 1 ∧ entry.xf = 0 ∧ entry.xg = 0
+      BabyBear.toInt imm % 4 = 0
 
+    set_option maxHeartbeats 0 in
     lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
       (h_bounds :
         entry.opcode = 544 ∨
@@ -565,7 +561,76 @@ namespace VmAirWrapper_branch_eq.constraints
     := by
       simp [readInstructionBus_properties.eq_def]
       simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
-      omega
+      obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
+      simp [←h_data] at h_bounds ⊢ h_transpile
+      obtain h_opcode | h_opcode := h_bounds <;> [
+        have := Transpiler.transpiler_opcode_544 h_transpile h_opcode;
+        have := Transpiler.transpiler_opcode_545 h_transpile h_opcode
+      ]
+      all_goals {
+        obtain ⟨imm, rs2, rs1, h_imm, h_instruction⟩ := this
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        simp [-Vector.mk_eq] at h_transpile
+        replace h_transpile := h_transpile.2
+        rewrite [←h_transpile]
+        simp [Transpiler.itof, BabyBear.toInt]
+        split_ands
+        . clear *- imm
+          rewrite [max_eq_left (by omega)]
+          by_cases h_sign : imm.toInt ≥ 0
+          . have := @BitVec.toInt_le _ imm
+            simp at this
+            rewrite [ite_cond_eq_true]
+            . omega
+            . simp
+              omega
+          . have := BitVec.le_toInt imm
+            simp at this
+            rewrite [ite_cond_eq_false]
+            . omega
+            . simp
+              omega
+        . clear *- imm
+          rewrite [max_eq_left (by omega)]
+          by_cases h_sign : imm.toInt ≥ 0
+          . have := @BitVec.toInt_le _ imm
+            simp at this
+            rewrite [ite_cond_eq_true]
+            . omega
+            . simp
+              omega
+          . have := BitVec.le_toInt imm
+            simp at this
+            rewrite [ite_cond_eq_false]
+            . omega
+            . simp
+              omega
+        . clear *- h_imm
+          rewrite [max_eq_left (by omega)]
+          by_cases h_sign : imm.toInt ≥ 0
+          . have := @BitVec.toInt_le _ imm
+            simp at this
+            rewrite [ite_cond_eq_true]
+            . have : imm.toInt % 2013265921 = imm.toInt := by omega
+              rewrite [this]; clear this
+              refine Int.dvd_of_emod_eq_zero ?_
+              exact BitVec.toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
+            . simp
+              clear *- h_sign this
+              omega
+          . have := BitVec.le_toInt imm
+            simp at this
+            rewrite [ite_cond_eq_false]
+            . have : imm.toInt % 2013265921 = imm.toInt + 2013265921 := by omega
+              rewrite [this]; clear this
+              simp
+              refine Int.dvd_of_emod_eq_zero ?_
+              exact BitVec.toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
+            . simp
+              omega
+      }
 
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_branch_eq FBB ExtF} {row : ℕ}

@@ -8,7 +8,6 @@ import OpenvmFv.Spec.SHIFTIOP.slli
 import OpenvmFv.Spec.SHIFTIOP.srai
 import OpenvmFv.Spec.SHIFTIOP.srli
 
-set_option maxHeartbeats 1_000_000_000
 
 namespace Equivalence.Shift
 
@@ -75,7 +74,7 @@ namespace Equivalence.Shift
     ext <;> grind
 
   def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val % 32, by grind⟩
+    ⟨val / 4 % 32, by grind⟩
 
   def SllInput_of_Shift_instruction_fields (row : Shift_instruction_fields) : PureSpec.SllInput := {
     r1_val := BabyBear.toBV32 row.b
@@ -131,22 +130,26 @@ namespace Equivalence.Shift
     BabyBear.isU32 row.c ∧
     sll_output.nextPC = row.next_pc.toNat ∧
     match sll_output.rd with
-      | .none => row.a = row.prev_a
+      | .none =>
+        row.a = row.prev_a ∧
+        row.rd_ptr = 0
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
-        rd.1.toNat = row.rd_ptr.toNat
+        rd.1.toNat * 4 = row.rd_ptr.toNat
 
   def SlliOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (slli_output : PureSpec.SlliOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
     BabyBear.isU32 row.b ∧
     slli_output.nextPC = row.next_pc.toNat ∧
     match slli_output.rd with
-      | .none => row.a = row.prev_a
+      | .none =>
+        row.a = row.prev_a ∧
+        row.rd_ptr = 0
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
-        rd.1.toNat = row.rd_ptr.toNat
+        rd.1.toNat * 4 = row.rd_ptr.toNat
 
   def SrlOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (srl_output : PureSpec.SrlOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
@@ -154,22 +157,26 @@ namespace Equivalence.Shift
     BabyBear.isU32 row.c ∧
     srl_output.nextPC = row.next_pc.toNat ∧
     match srl_output.rd with
-      | .none => row.a = row.prev_a
+      | .none =>
+        row.a = row.prev_a ∧
+        row.rd_ptr = 0
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
-        rd.1.toNat = row.rd_ptr.toNat
+        rd.1.toNat * 4 = row.rd_ptr.toNat
 
   def SrliOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (srli_output : PureSpec.SrliOutput) : Prop :=
     row.opcode_sra_flag = 0 ∧
     BabyBear.isU32 row.b ∧
     srli_output.nextPC = row.next_pc.toNat ∧
     match srli_output.rd with
-      | .none => row.a = row.prev_a
+      | .none =>
+        row.a = row.prev_a ∧
+        row.rd_ptr = 0
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
-        rd.1.toNat = row.rd_ptr.toNat
+        rd.1.toNat * 4 = row.rd_ptr.toNat
 
   def SraOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (sra_output : PureSpec.SraOutput) : Prop :=
     row.opcode_sra_flag = 1 ∧
@@ -177,22 +184,26 @@ namespace Equivalence.Shift
     BabyBear.isU32 row.c ∧
     sra_output.nextPC = row.next_pc.toNat ∧
     match sra_output.rd with
-      | .none => row.a = row.prev_a
+      | .none =>
+        row.a = row.prev_a ∧
+        row.rd_ptr = 0
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
-        rd.1.toNat = row.rd_ptr.toNat
+        rd.1.toNat * 4 = row.rd_ptr.toNat
 
   def SraiOutput_matches_Shift_instruction_fields (row : Shift_instruction_fields) (srai_output : PureSpec.SraiOutput) : Prop :=
     row.opcode_sra_flag = 1 ∧
     BabyBear.isU32 row.b ∧
     srai_output.nextPC = row.next_pc.toNat ∧
     match srai_output.rd with
-      | .none => row.a = row.prev_a
+      | .none =>
+        row.a = row.prev_a ∧
+        row.rd_ptr = 0
       | .some (rd, rd_val) =>
         BabyBear.isU32 row.a ∧
         BabyBear.toBV32 row.a = rd_val ∧
-        rd.1.toNat = row.rd_ptr.toNat
+        rd.1.toNat * 4 = row.rd_ptr.toNat
 
   def Shift_instruction_fields.spec (row : Shift_instruction_fields) : Prop :=
     row.is_valid = 1 → (
@@ -478,6 +489,65 @@ namespace Equivalence.Shift
     replace this := this.2.1
     grind
 
+  lemma sll_rd_properties [Field ExtF]
+    (air : Valid_VmAirWrapper_shift FBB ExtF)
+    (row : ℕ)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
+    (h_non_imm : air.adapter.rs2_as row 0 = 1)
+    (h_opcode : (air.core.ctx row 0).instruction.opcode = 517)
+  :
+    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
+  := by
+    unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
+    simp [
+      VmAirWrapper_shift_constraint_and_interaction_simplification,
+      VmAirWrapper_shift.constraints.propertiesToAssume,
+      Interaction.ReadInstructionBusEntry.operand_properties,
+      h_is_valid
+    ] at h_bus_wellformedness
+    simp [wrap_to_regidx, get_instruction_fields_row]
+    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    rewrite [h_opcode] at h_transpile
+    have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.2.1
+    cases h_cases with
+      | inl h_slli =>
+        exfalso
+        obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_slli
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [h_non_imm] at h_transpile
+          rewrite [←h_transpile.1.2] at h_transpile
+          simp at h_transpile
+      | inr h_sll =>
+        obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sll
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          exfalso
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          simp [Transpiler.ind, regidx_to_fin]
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          split_ands
+          . by_cases h_contr : rd.1 = 0
+            . simp [h_contr] at h_rd
+            . simp [BitVec.toNat_eq_nat]
+              convert h_contr
+          . use rd
+
   lemma sll_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
     (row : ℕ)
@@ -562,26 +632,17 @@ namespace Equivalence.Shift
       omega
     . clear *- h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
       simp [SllInput_of_Shift_instruction_fields, PureSpec.execute_RTYPE_sll_pure]
-      have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
-        clear *-h_bus_wellformedness h_row h_is_valid h_opcode
-        specialize h_bus_wellformedness row h_row
-        unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
-        simp [
-          VmAirWrapper_shift_constraint_and_interaction_simplification,
-          VmAirWrapper_shift.constraints.propertiesToAssume,
-          Interaction.ReadInstructionBusEntry.operand_properties,
-          h_is_valid
-        ] at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.1
-        simp [wrap_to_regidx, get_instruction_fields_row]
-        replace h_bus_wellformedness := (h_bus_wellformedness (by omega) (by omega)).1
-        omega
-      obtain ⟨h_rd_non_zero, h_rd_lt_32⟩ := h_rd
+      have h_rd := sll_rd_properties
+        air
+        row
+        h_is_valid
+        (h_bus_wellformedness row h_row)
+        h_non_imm
+        h_opcode
+      obtain ⟨h_rd_non_zero, h_rd_ind⟩ := h_rd
       simp only [dite_cond_eq_false, h_rd_non_zero]
-      simp [get_instruction_fields_row] at ⊢ h_rd_lt_32
-      replace h_rd_lt_32 := Fin.val_fin_lt.mpr h_rd_lt_32
-      simp at h_rd_lt_32
+      simp [get_instruction_fields_row] at ⊢ h_rd_ind
+      obtain ⟨rd, h_rd_ind⟩ := h_rd_ind
       simp [
         true_and,
         h_a0,
@@ -589,30 +650,95 @@ namespace Equivalence.Shift
         h_a2,
         h_a3,
         wrap_to_regidx,
-        h_rd_lt_32
+        h_rd_ind
       ]
-      clear h_a0 h_a1 h_a2 h_a3 h_rd_lt_32
+      clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
 
-      have h_spec := Shift.ValidRows.spec_base_Shift_non_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-        h_non_imm
+      split_ands
+      . have h_spec := Shift.ValidRows.spec_base_Shift_non_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+          h_non_imm
 
-      simp only [
-        h_opcode, Shift.ValidRows.rop_of_Shift_opcode, ite_cond_eq_true, execute_RTYPE_pure,
-        Sail.shift_bits_left, Sail.BitVec.extractLsb, BitVec.extractLsb, BitVec.extractLsb',
-      ] at h_spec
+        simp only [
+          h_opcode, Shift.ValidRows.rop_of_Shift_opcode, ite_cond_eq_true, execute_RTYPE_pure,
+          Sail.shift_bits_left, Sail.BitVec.extractLsb, BitVec.extractLsb, BitVec.extractLsb',
+        ] at h_spec
 
-      convert h_spec
-      congr
-      simp
-      congr
+        convert h_spec
+        congr
+        simp
+        congr
+      . simp [Transpiler.ind, regidx_to_fin]
+        rewrite [Nat.mod_eq_of_lt]
+        . simp [Nat.toNat, mul_comm]
+        . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
+          simp
+
+  lemma srl_rd_properties [Field ExtF]
+    (air : Valid_VmAirWrapper_shift FBB ExtF)
+    (row : ℕ)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
+    (h_non_imm : air.adapter.rs2_as row 0 = 1)
+    (h_opcode : (air.core.ctx row 0).instruction.opcode = 518)
+  :
+    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
+  := by
+    unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
+    simp [
+      VmAirWrapper_shift_constraint_and_interaction_simplification,
+      VmAirWrapper_shift.constraints.propertiesToAssume,
+      Interaction.ReadInstructionBusEntry.operand_properties,
+      h_is_valid
+    ] at h_bus_wellformedness
+    simp [wrap_to_regidx, get_instruction_fields_row]
+    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    rewrite [h_opcode] at h_transpile
+    have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.2.1
+    cases h_cases with
+      | inl h_srli =>
+        exfalso
+        obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srli
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [h_non_imm] at h_transpile
+          rewrite [←h_transpile.1.2] at h_transpile
+          simp at h_transpile
+      | inr h_srl =>
+        obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_srl
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          exfalso
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          simp [Transpiler.ind, regidx_to_fin]
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          split_ands
+          . by_cases h_contr : rd.1 = 0
+            . simp [h_contr] at h_rd
+            . simp [BitVec.toNat_eq_nat]
+              convert h_contr
+          . use rd
 
   lemma srl_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
@@ -698,26 +824,17 @@ namespace Equivalence.Shift
       omega
     . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
       simp [SrlInput_of_Shift_instruction_fields, PureSpec.execute_RTYPE_srl_pure]
-      have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
-        clear *-h_bus_wellformedness h_row h_is_valid h_opcode
-        specialize h_bus_wellformedness row h_row
-        unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
-        simp [
-          VmAirWrapper_shift_constraint_and_interaction_simplification,
-          VmAirWrapper_shift.constraints.propertiesToAssume,
-          Interaction.ReadInstructionBusEntry.operand_properties,
-          h_is_valid
-        ] at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.1
-        simp [wrap_to_regidx, get_instruction_fields_row]
-        replace h_bus_wellformedness := (h_bus_wellformedness (by omega) (by omega)).1
-        omega
-      obtain ⟨h_rd_non_zero, h_rd_lt_32⟩ := h_rd
+      have h_rd := srl_rd_properties
+        air
+        row
+        h_is_valid
+        (h_bus_wellformedness row h_row)
+        h_non_imm
+        h_opcode
+      obtain ⟨h_rd_non_zero, h_rd_ind⟩ := h_rd
       simp only [dite_cond_eq_false, h_rd_non_zero]
-      simp [get_instruction_fields_row] at ⊢ h_rd_lt_32
-      replace h_rd_lt_32 := Fin.val_fin_lt.mpr h_rd_lt_32
-      simp at h_rd_lt_32
+      simp [get_instruction_fields_row] at ⊢ h_rd_ind
+      obtain ⟨rd, h_rd_ind⟩ := h_rd_ind
       simp [
         true_and,
         h_a0,
@@ -725,29 +842,94 @@ namespace Equivalence.Shift
         h_a2,
         h_a3,
         wrap_to_regidx,
-        h_rd_lt_32
+        h_rd_ind
       ]
-      clear h_a0 h_a1 h_a2 h_a3 h_rd_lt_32
+      clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
 
-      have h_spec := Shift.ValidRows.spec_base_Shift_non_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-        h_non_imm
+      split_ands
+      . have h_spec := Shift.ValidRows.spec_base_Shift_non_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+          h_non_imm
 
-      simp only [
-        h_opcode, Shift.ValidRows.rop_of_Shift_opcode, execute_RTYPE_pure
-      ] at h_spec
-      dsimp at h_spec
+        simp only [
+          h_opcode, Shift.ValidRows.rop_of_Shift_opcode, execute_RTYPE_pure
+        ] at h_spec
+        dsimp at h_spec
 
-      convert h_spec
-      simp
-      congr
+        convert h_spec
+        simp
+        congr
+      . simp [Transpiler.ind, regidx_to_fin]
+        rewrite [Nat.mod_eq_of_lt]
+        . simp [Nat.toNat, mul_comm]
+        . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
+          simp
+
+  lemma sra_rd_properties [Field ExtF]
+    (air : Valid_VmAirWrapper_shift FBB ExtF)
+    (row : ℕ)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
+    (h_non_imm : air.adapter.rs2_as row 0 = 1)
+    (h_opcode : (air.core.ctx row 0).instruction.opcode = 519)
+  :
+    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
+  := by
+    unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
+    simp [
+      VmAirWrapper_shift_constraint_and_interaction_simplification,
+      VmAirWrapper_shift.constraints.propertiesToAssume,
+      Interaction.ReadInstructionBusEntry.operand_properties,
+      h_is_valid
+    ] at h_bus_wellformedness
+    simp [wrap_to_regidx, get_instruction_fields_row]
+    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    rewrite [h_opcode] at h_transpile
+    have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.2.1
+    cases h_cases with
+      | inl h_srai =>
+        exfalso
+        obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srai
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [h_non_imm] at h_transpile
+          rewrite [←h_transpile.1.2] at h_transpile
+          simp at h_transpile
+      | inr h_sra =>
+        obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sra
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          exfalso
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          simp [Transpiler.ind, regidx_to_fin]
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          split_ands
+          . by_cases h_contr : rd.1 = 0
+            . simp [h_contr] at h_rd
+            . simp [BitVec.toNat_eq_nat]
+              convert h_contr
+          . use rd
 
   lemma sra_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
@@ -760,9 +942,9 @@ namespace Equivalence.Shift
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
   :
     ((get_instruction_fields_row air row).opcode = 519 →
-      SraOutput_matches_Shift_instruction_fields (get_instruction_fields_row air row)
-        (PureSpec.execute_RTYPE_sra_pure
-          (SraInput_of_Shift_instruction_fields (get_instruction_fields_row air row))))
+        SraOutput_matches_Shift_instruction_fields (get_instruction_fields_row air row)
+          (PureSpec.execute_RTYPE_sra_pure
+            (SraInput_of_Shift_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
     simp [get_instruction_fields_row] at h_opcode
@@ -833,26 +1015,17 @@ namespace Equivalence.Shift
       omega
     . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_non_imm
       simp [SraInput_of_Shift_instruction_fields, PureSpec.execute_RTYPE_sra_pure]
-      have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
-        clear *-h_bus_wellformedness h_row h_is_valid h_opcode
-        specialize h_bus_wellformedness row h_row
-        unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
-        simp [
-          VmAirWrapper_shift_constraint_and_interaction_simplification,
-          VmAirWrapper_shift.constraints.propertiesToAssume,
-          Interaction.ReadInstructionBusEntry.operand_properties,
-          h_is_valid
-        ] at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.1
-        simp [wrap_to_regidx, get_instruction_fields_row]
-        replace h_bus_wellformedness := (h_bus_wellformedness (by omega) (by omega)).1
-        omega
-      obtain ⟨h_rd_non_zero, h_rd_lt_32⟩ := h_rd
+      have h_rd := sra_rd_properties
+        air
+        row
+        h_is_valid
+        (h_bus_wellformedness row h_row)
+        h_non_imm
+        h_opcode
+      obtain ⟨h_rd_non_zero, h_rd_ind⟩ := h_rd
       simp only [dite_cond_eq_false, h_rd_non_zero]
-      simp [get_instruction_fields_row] at ⊢ h_rd_lt_32
-      replace h_rd_lt_32 := Fin.val_fin_lt.mpr h_rd_lt_32
-      simp at h_rd_lt_32
+      simp [get_instruction_fields_row] at ⊢ h_rd_ind
+      obtain ⟨rd, h_rd_ind⟩ := h_rd_ind
       simp [
         true_and,
         h_a0,
@@ -860,29 +1033,103 @@ namespace Equivalence.Shift
         h_a2,
         h_a3,
         wrap_to_regidx,
-        h_rd_lt_32
+        h_rd_ind
       ]
-      clear h_a0 h_a1 h_a2 h_a3 h_rd_lt_32
+      clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
 
-      have h_spec := Shift.ValidRows.spec_base_Shift_non_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-        h_non_imm
+      split_ands
+      . have h_spec := Shift.ValidRows.spec_base_Shift_non_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row (by omega))
+          (h_bus_wellformedness row (by omega))
+          h_non_imm
 
-      simp only [
-        h_opcode, Shift.ValidRows.rop_of_Shift_opcode, execute_RTYPE_pure
-      ] at h_spec
-      dsimp at h_spec
+        simp only [
+          h_opcode, Shift.ValidRows.rop_of_Shift_opcode, execute_RTYPE_pure
+        ] at h_spec
+        dsimp at h_spec
 
-      convert h_spec
-      simp
-      congr
+        convert h_spec
+        simp
+        congr
+      . simp [Transpiler.ind, regidx_to_fin]
+        rewrite [Nat.mod_eq_of_lt]
+        . simp [Nat.toNat, mul_comm]
+        . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
+          simp
+
+  lemma slli_register_properties [Field ExtF]
+    (air : Valid_VmAirWrapper_shift FBB ExtF)
+    (row : ℕ)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
+    (h_imm : air.adapter.rs2_as row 0 = 0)
+    (h_opcode : (air.core.ctx row 0).instruction.opcode = 517)
+  :
+    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
+    (∃ (shamt: BitVec 6),
+      (get_instruction_fields_row air row).rs2_ptr =
+      Transpiler.utof (Transpiler.zero_extend_24 (BitVec.extractLsb 4 0 shamt))
+    )
+  := by
+    unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
+    simp [
+      VmAirWrapper_shift_constraint_and_interaction_simplification,
+      VmAirWrapper_shift.constraints.propertiesToAssume,
+      Interaction.ReadInstructionBusEntry.operand_properties,
+      h_is_valid
+    ] at h_bus_wellformedness
+    simp [wrap_to_regidx, get_instruction_fields_row]
+    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    rewrite [h_opcode] at h_transpile
+    have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.2.1
+    cases h_cases with
+      | inl h_slli =>
+        obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_slli
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          exfalso
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          simp [Transpiler.ind, regidx_to_fin]
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          split_ands
+          . by_cases h_contr : rd.1 = 0
+            . simp [h_contr] at h_rd
+            . simp [BitVec.toNat_eq_nat]
+              convert h_contr
+          . use rd
+          . use shamt
+            obtain ⟨a, ⟨_, _, _, _, _, b, _, _, _⟩⟩ := h_transpile
+            rewrite [←a.2] at b
+            rewrite [←b]
+            simp
+      | inr h_sll =>
+        exfalso
+        obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sll
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [h_imm] at h_transpile
+          rewrite [←h_transpile.1.2] at h_transpile
+          simp at h_transpile
 
   lemma slli_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
@@ -957,29 +1204,19 @@ namespace Equivalence.Shift
       replace h_bus_assumptions := h_bus_assumptions.1
       simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
-      replace h_imm_op_properties := (h_imm_op_properties h_imm).2.1
+    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm
       simp [SlliInput_of_Shift_instruction_fields, PureSpec.execute_SHIFTIOP_slli_pure]
-      have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
-        clear *-h_bus_wellformedness h_row h_is_valid h_opcode
-        specialize h_bus_wellformedness row h_row
-        unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
-        simp [
-          VmAirWrapper_shift_constraint_and_interaction_simplification,
-          VmAirWrapper_shift.constraints.propertiesToAssume,
-          Interaction.ReadInstructionBusEntry.operand_properties,
-          h_is_valid
-        ] at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.1
-        simp [wrap_to_regidx, get_instruction_fields_row]
-        replace h_bus_wellformedness := (h_bus_wellformedness (by omega) (by omega)).1
-        omega
-      obtain ⟨h_rd_non_zero, h_rd_lt_32⟩ := h_rd
+      have h_rd := slli_register_properties
+        air
+        row
+        h_is_valid
+        (h_bus_wellformedness row h_row)
+        h_imm
+        h_opcode
+      obtain ⟨h_rd_non_zero, h_rd_ind, h_shamt⟩ := h_rd
       simp only [dite_cond_eq_false, h_rd_non_zero]
-      simp [get_instruction_fields_row] at ⊢ h_rd_lt_32
-      replace h_rd_lt_32 := Fin.val_fin_lt.mpr h_rd_lt_32
-      simp at h_rd_lt_32
+      simp [get_instruction_fields_row] at ⊢ h_rd_ind
+      obtain ⟨rd, h_rd_ind⟩ := h_rd_ind
       simp [
         true_and,
         h_a0,
@@ -987,29 +1224,107 @@ namespace Equivalence.Shift
         h_a2,
         h_a3,
         wrap_to_regidx,
-        h_rd_lt_32
+        h_rd_ind
       ]
-      clear h_a0 h_a1 h_a2 h_a3 h_rd_lt_32
+      clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
 
-      have h_spec := Shift.ValidRows.spec_base_Shift_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-        h_imm
+      split_ands
 
-      simp only [
-        h_opcode, Shift.ValidRows.iop_of_Shift_opcode, execute_SHIFTIOP_pure,
-        execute_RTYPE_pure
-      ] at h_spec
-      dsimp at h_spec
+      . have h_spec := Shift.ValidRows.spec_base_Shift_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
+          h_imm
 
-      convert h_spec
-      grind
+        simp only [
+          h_opcode, Shift.ValidRows.iop_of_Shift_opcode, execute_SHIFTIOP_pure,
+          execute_RTYPE_pure
+        ] at h_spec
+        dsimp at h_spec
+
+        convert h_spec
+        obtain ⟨shamt, h_shamt⟩ := h_shamt
+        simp [get_instruction_fields_row] at h_shamt
+        simp [h_shamt, Transpiler.utof, Transpiler.zero_extend_24]
+        omega
+      . simp [Transpiler.ind, regidx_to_fin]
+        rewrite [Nat.mod_eq_of_lt]
+        . simp [Nat.toNat, mul_comm]
+        . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
+          simp
+
+  lemma srli_register_properties [Field ExtF]
+    (air : Valid_VmAirWrapper_shift FBB ExtF)
+    (row : ℕ)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
+    (h_imm : air.adapter.rs2_as row 0 = 0)
+    (h_opcode : (air.core.ctx row 0).instruction.opcode = 518)
+  :
+    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
+    (∃ (shamt: BitVec 6),
+      (get_instruction_fields_row air row).rs2_ptr =
+      Transpiler.utof (Transpiler.zero_extend_24 (BitVec.extractLsb 4 0 shamt))
+    )
+  := by
+    unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
+    simp [
+      VmAirWrapper_shift_constraint_and_interaction_simplification,
+      VmAirWrapper_shift.constraints.propertiesToAssume,
+      Interaction.ReadInstructionBusEntry.operand_properties,
+      h_is_valid
+    ] at h_bus_wellformedness
+    simp [wrap_to_regidx, get_instruction_fields_row]
+    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    rewrite [h_opcode] at h_transpile
+    have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.2.1
+    cases h_cases with
+      | inl h_srli =>
+        obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srli
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          exfalso
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          simp [Transpiler.ind, regidx_to_fin]
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          split_ands
+          . by_cases h_contr : rd.1 = 0
+            . simp [h_contr] at h_rd
+            . simp [BitVec.toNat_eq_nat]
+              convert h_contr
+          . use rd
+          . use shamt
+            obtain ⟨a, ⟨_, _, _, _, _, b, _, _, _⟩⟩ := h_transpile
+            rewrite [←a.2] at b
+            rewrite [←b]
+            simp
+      | inr h_srl =>
+        exfalso
+        obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_srl
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [h_imm] at h_transpile
+          rewrite [←h_transpile.1.2] at h_transpile
+          simp at h_transpile
 
   lemma srli_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
@@ -1084,29 +1399,19 @@ namespace Equivalence.Shift
       replace h_bus_assumptions := h_bus_assumptions.1
       simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *- h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
-      replace h_imm_op_properties := (h_imm_op_properties h_imm).2.1
+    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm
       simp [SrliInput_of_Shift_instruction_fields, PureSpec.execute_SHIFTIOP_srli_pure]
-      have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
-        clear *-h_bus_wellformedness h_row h_is_valid h_opcode
-        specialize h_bus_wellformedness row h_row
-        unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
-        simp [
-          VmAirWrapper_shift_constraint_and_interaction_simplification,
-          VmAirWrapper_shift.constraints.propertiesToAssume,
-          Interaction.ReadInstructionBusEntry.operand_properties,
-          h_is_valid
-        ] at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.1
-        simp [wrap_to_regidx, get_instruction_fields_row]
-        replace h_bus_wellformedness := (h_bus_wellformedness (by omega) (by omega)).1
-        omega
-      obtain ⟨h_rd_non_zero, h_rd_lt_32⟩ := h_rd
+      have h_rd := srli_register_properties
+        air
+        row
+        h_is_valid
+        (h_bus_wellformedness row h_row)
+        h_imm
+        h_opcode
+      obtain ⟨h_rd_non_zero, h_rd_ind, h_shamt⟩ := h_rd
       simp only [dite_cond_eq_false, h_rd_non_zero]
-      simp [get_instruction_fields_row] at ⊢ h_rd_lt_32
-      replace h_rd_lt_32 := Fin.val_fin_lt.mpr h_rd_lt_32
-      simp at h_rd_lt_32
+      simp [get_instruction_fields_row] at ⊢ h_rd_ind
+      obtain ⟨rd, h_rd_ind⟩ := h_rd_ind
       simp [
         true_and,
         h_a0,
@@ -1114,29 +1419,107 @@ namespace Equivalence.Shift
         h_a2,
         h_a3,
         wrap_to_regidx,
-        h_rd_lt_32
+        h_rd_ind
       ]
-      clear h_a0 h_a1 h_a2 h_a3 h_rd_lt_32
+      clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
 
-      have h_spec := Shift.ValidRows.spec_base_Shift_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-        h_imm
+      split_ands
 
-      simp only [
-        h_opcode, Shift.ValidRows.iop_of_Shift_opcode, execute_SHIFTIOP_pure,
-        execute_RTYPE_pure
-      ] at h_spec
-      dsimp at h_spec
+      . have h_spec := Shift.ValidRows.spec_base_Shift_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
+          h_imm
 
-      convert h_spec
-      grind
+        simp only [
+          h_opcode, Shift.ValidRows.iop_of_Shift_opcode, execute_SHIFTIOP_pure,
+          execute_RTYPE_pure
+        ] at h_spec
+        dsimp at h_spec
+
+        convert h_spec
+        obtain ⟨shamt, h_shamt⟩ := h_shamt
+        simp [get_instruction_fields_row] at h_shamt
+        simp [h_shamt, Transpiler.utof, Transpiler.zero_extend_24]
+        omega
+      . simp [Transpiler.ind, regidx_to_fin]
+        rewrite [Nat.mod_eq_of_lt]
+        . simp [Nat.toNat, mul_comm]
+        . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
+          simp
+
+  lemma srai_register_properties [Field ExtF]
+    (air : Valid_VmAirWrapper_shift FBB ExtF)
+    (row : ℕ)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow air row)
+    (h_imm : air.adapter.rs2_as row 0 = 0)
+    (h_opcode : (air.core.ctx row 0).instruction.opcode = 519)
+  :
+    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
+    (∃ (shamt: BitVec 6),
+      (get_instruction_fields_row air row).rs2_ptr =
+      Transpiler.utof (Transpiler.zero_extend_24 (BitVec.extractLsb 4 0 shamt))
+    )
+  := by
+    unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
+    simp [
+      VmAirWrapper_shift_constraint_and_interaction_simplification,
+      VmAirWrapper_shift.constraints.propertiesToAssume,
+      Interaction.ReadInstructionBusEntry.operand_properties,
+      h_is_valid
+    ] at h_bus_wellformedness
+    simp [wrap_to_regidx, get_instruction_fields_row]
+    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    rewrite [h_opcode] at h_transpile
+    have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.2.1
+    cases h_cases with
+      | inl h_srai =>
+        obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srai
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          exfalso
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          simp [Transpiler.ind, regidx_to_fin]
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          split_ands
+          . by_cases h_contr : rd.1 = 0
+            . simp [h_contr] at h_rd
+            . simp [BitVec.toNat_eq_nat]
+              convert h_contr
+          . use rd
+          . use shamt
+            obtain ⟨a, ⟨_, _, _, _, _, b, _, _, _⟩⟩ := h_transpile
+            rewrite [←a.2] at b
+            rewrite [←b]
+            simp
+      | inr h_sra =>
+        exfalso
+        obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sra
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . have := Transpiler.extract_opcode h_transpile.1
+          simp at this
+          simp [this] at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [h_imm] at h_transpile
+          rewrite [←h_transpile.1.2] at h_transpile
+          simp at h_transpile
 
   lemma srai_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
@@ -1211,29 +1594,19 @@ namespace Equivalence.Shift
       replace h_bus_assumptions := h_bus_assumptions.1
       simp [h_is_valid] at h_bus_assumptions
       omega
-    . clear *-h_bus_wellformedness h_bus_assumptions h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm h_imm_op_properties
-      replace h_imm_op_properties := (h_imm_op_properties h_imm).2.1
+    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_a0 h_a1 h_a2 h_a3 h_constraints h_imm
       simp [SraiInput_of_Shift_instruction_fields, PureSpec.execute_SHIFTIOP_srai_pure]
-      have h_rd : ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧ (get_instruction_fields_row air row).rd_ptr < 32  := by
-        clear *-h_bus_wellformedness h_row h_is_valid h_opcode
-        specialize h_bus_wellformedness row h_row
-        unfold VmAirWrapper_shift.constraints.wf_propertiesToAssumePerRow at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
-        simp [
-          VmAirWrapper_shift_constraint_and_interaction_simplification,
-          VmAirWrapper_shift.constraints.propertiesToAssume,
-          Interaction.ReadInstructionBusEntry.operand_properties,
-          h_is_valid
-        ] at h_bus_wellformedness
-        replace h_bus_wellformedness := h_bus_wellformedness.1
-        simp [wrap_to_regidx, get_instruction_fields_row]
-        replace h_bus_wellformedness := (h_bus_wellformedness (by omega) (by omega)).1
-        omega
-      obtain ⟨h_rd_non_zero, h_rd_lt_32⟩ := h_rd
+      have h_rd := srai_register_properties
+        air
+        row
+        h_is_valid
+        (h_bus_wellformedness row h_row)
+        h_imm
+        h_opcode
+      obtain ⟨h_rd_non_zero, h_rd_ind, h_shamt⟩ := h_rd
       simp only [dite_cond_eq_false, h_rd_non_zero]
-      simp [get_instruction_fields_row] at ⊢ h_rd_lt_32
-      replace h_rd_lt_32 := Fin.val_fin_lt.mpr h_rd_lt_32
-      simp at h_rd_lt_32
+      simp [get_instruction_fields_row] at ⊢ h_rd_ind
+      obtain ⟨rd, h_rd_ind⟩ := h_rd_ind
       simp [
         true_and,
         h_a0,
@@ -1241,30 +1614,39 @@ namespace Equivalence.Shift
         h_a2,
         h_a3,
         wrap_to_regidx,
-        h_rd_lt_32
+        h_rd_ind
       ]
-      clear h_a0 h_a1 h_a2 h_a3 h_rd_lt_32
+      clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
 
-      have h_spec := Shift.ValidRows.spec_base_Shift_imm
-        ExtF
-        air
-        row
-        (by omega)
-        (h_constraints ⟨row, by omega⟩)
-        h_is_valid
-        (h_bus_assumptions row (by omega))
-        (h_bus_wellformedness row (by omega))
-        h_imm
+      split_ands
 
-      simp only [
-        h_opcode, Shift.ValidRows.iop_of_Shift_opcode, execute_SHIFTIOP_pure,
-        execute_RTYPE_pure
-      ] at h_spec
-      dsimp at h_spec
+      . have h_spec := Shift.ValidRows.spec_base_Shift_imm
+          ExtF
+          air
+          row
+          (by omega)
+          (h_constraints ⟨row, by omega⟩)
+          h_is_valid
+          (h_bus_assumptions row h_row)
+          (h_bus_wellformedness row h_row)
+          h_imm
 
-      convert h_spec
-      grind
+        simp only [
+          h_opcode, Shift.ValidRows.iop_of_Shift_opcode, execute_SHIFTIOP_pure,
+          execute_RTYPE_pure
+        ] at h_spec
+        dsimp at h_spec
 
+        convert h_spec
+        obtain ⟨shamt, h_shamt⟩ := h_shamt
+        simp [get_instruction_fields_row] at h_shamt
+        simp [h_shamt, Transpiler.utof, Transpiler.zero_extend_24]
+        omega
+      . simp [Transpiler.ind, regidx_to_fin]
+        rewrite [Nat.mod_eq_of_lt]
+        . simp [Nat.toNat, mul_comm]
+        . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
+          simp
 
   lemma non_imm_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)

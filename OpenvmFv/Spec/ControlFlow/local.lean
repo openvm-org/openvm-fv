@@ -20,17 +20,21 @@ namespace Local
     match op with
     | .BEQ => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) == (← (LeanRV32D.Functions.rX_bits rs2))))
     | .BNE => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) != (← (LeanRV32D.Functions.rX_bits rs2))))
-    | .BLT => (pure (LeanRV32D.Functions.zopz0zI_s (← (LeanRV32D.Functions.rX_bits rs1)) (← (LeanRV32D.Functions.rX_bits rs2))))
-    | .BGE => (pure (LeanRV32D.Functions.zopz0zKzJ_s (← (LeanRV32D.Functions.rX_bits rs1)) (← (LeanRV32D.Functions.rX_bits rs2))))
-    | .BLTU => (pure (LeanRV32D.Functions.zopz0zI_u (← (LeanRV32D.Functions.rX_bits rs1)) (← (LeanRV32D.Functions.rX_bits rs2))))
-    | .BGEU => (pure (LeanRV32D.Functions.zopz0zKzJ_u (← (LeanRV32D.Functions.rX_bits rs1)) (← (LeanRV32D.Functions.rX_bits rs2)))) ) : SailM Bool )
+    | .BLT => (pure ((← (LeanRV32D.Functions.rX_bits rs1)).toInt <b (← (LeanRV32D.Functions.rX_bits rs2)).toInt))
+    | .BGE => (pure ((← (LeanRV32D.Functions.rX_bits rs1)).toInt ≥b (← (LeanRV32D.Functions.rX_bits rs2)).toInt))
+    | .BLTU => (pure ((← (LeanRV32D.Functions.rX_bits rs1)).toNat <b (← (LeanRV32D.Functions.rX_bits rs2)).toNat))
+    | .BGEU => (pure ((← (LeanRV32D.Functions.rX_bits rs1)).toNat ≥b (← (LeanRV32D.Functions.rX_bits rs2)).toNat)) ) : SailM Bool )
   if (taken : Bool)
   then (LeanRV32D.Functions.jump_to ((← Sail.readReg Register.PC) + (LeanRV32D.Functions.sign_extend (m := 32) imm)))
   else (pure LeanRV32D.Functions.RETIRE_SUCCESS)
 
   lemma execute_BTYPE_equiv :
     execute_BTYPE = LeanRV32D.Functions.execute_BTYPE
-  := rfl
+  := by
+    unfold execute_BTYPE LeanRV32D.Functions.execute_BTYPE
+    simp [LeanRV32D.Functions.zopz0zI_s, LeanRV32D.Functions.zopz0zKzJ_s,
+          LeanRV32D.Functions.zopz0zI_u, LeanRV32D.Functions.zopz0zKzJ_u]
+    grind
 
   def jump_to (target : (BitVec 32)) : SailM ExecutionResult := Sail.SailME.run do
     match (LeanRV32D.Functions.ext_control_check_pc target) with

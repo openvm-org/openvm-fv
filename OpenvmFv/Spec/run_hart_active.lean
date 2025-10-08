@@ -3,6 +3,7 @@ import Mathlib
 import LeanRV32D
 
 import OpenvmFv.Spec.rX_bits
+import OpenvmFv.Fundamentals.Transpiler
 
 -- #eval LeanRV32D.Functions.run_hart_active
 
@@ -39,16 +40,6 @@ lemma sail_assert_equiv :
   simp
   funext check message state
   cases check <;> simp
-
-def regidx_to_fin (r: regidx): Fin 32 :=
-  match r with
-    | regidx.Regidx r => ⟨
-        r.toNat,
-        by {
-          have : (if false = true then 4 else 5) ≤ 5 := by decide
-          convert BitVec.toNat_lt_twoPow_of_le this
-        }
-      ⟩
 
 lemma regidx_non_zero (h_non_zero: ¬rd = 0):
   regidx_to_fin (regidx.Regidx rd) ∈ Finset.Icc 1 31

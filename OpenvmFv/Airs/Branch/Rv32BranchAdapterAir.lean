@@ -10,4 +10,5 @@ set_option linter.unusedVariables false
   SubAir["from_state": "ExecutionState" width := 2]
   Column["rs1_ptr"]
   Column["rs2_ptr"]
-  SubAir["reads_aux": "MemoryReadAuxCols" width := 3]
+  SubAir["reads_aux_0": "MemoryReadAuxCols" width := 3]
+  SubAir["reads_aux_1": "MemoryReadAuxCols" width := 3]
