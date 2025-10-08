@@ -186,9 +186,9 @@ namespace VmAirWrapper_branch_eq.constraints
       @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
       def constraint_9 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
-        air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux.base.prev_timestamp row 0 - 1 =
-          air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 +
-            air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
+  air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 =
+    air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+      air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_branch_eq_air_simplification]
       lemma constraint_9_of_extraction
@@ -207,8 +207,9 @@ namespace VmAirWrapper_branch_eq.constraints
       @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
       def constraint_10 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
-        air.adapter.from_state.timestamp row 0 + 1 - air.adapter.columns 7 row 0 - 1 =
-          air.adapter.columns 8 row 0 + air.adapter.columns 9 row 0 * 131072
+    air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 =
+      air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_branch_eq_air_simplification]
       lemma constraint_10_of_extraction
@@ -253,13 +254,13 @@ namespace VmAirWrapper_branch_eq.constraints
       def memoryBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
         [(2013265920 * air.core.is_valid row 0,
           [1, air.adapter.rs1_ptr row 0, air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
-            air.adapter.reads_aux.base.prev_timestamp row 0]),
+            air.adapter.reads_aux_0.base.prev_timestamp row 0]),
         (air.core.is_valid row 0,
           [1, air.adapter.rs1_ptr row 0, air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
             air.adapter.from_state.timestamp row 0]),
         (2013265920 * air.core.is_valid row 0,
           [1, air.adapter.rs2_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
-            air.adapter.columns 7 row 0]),
+            air.adapter.reads_aux_1.base.prev_timestamp row 0]),
         (air.core.is_valid row 0,
           [1, air.adapter.rs2_ptr row 0, air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0,
             air.adapter.from_state.timestamp row 0 + 1])]
@@ -278,10 +279,10 @@ namespace VmAirWrapper_branch_eq.constraints
 
       @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
-        [(air.core.is_valid row 0, [air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
-        (air.core.is_valid row 0, [air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
-        (air.core.is_valid row 0, [air.adapter.columns 8 row 0, 17]),
-        (air.core.is_valid row 0, [air.adapter.columns 9 row 0, 12])]
+        [(air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])]
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
