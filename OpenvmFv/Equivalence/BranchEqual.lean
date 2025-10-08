@@ -121,9 +121,9 @@ namespace Equivalence.BranchEqual
       pc := air.adapter.from_state.pc row 0
       next_pc := air.to_pc row 0
       opcode := air.core.expected_opcode row 0
-      prev_a_timestamp := air.adapter.reads_aux.base.prev_timestamp row 0
+      prev_a_timestamp := air.adapter.reads_aux_0.base.prev_timestamp row 0
       a_timestamp := air.adapter.from_state.timestamp row 0
-      prev_b_timestamp := air.adapter.columns 7 row 0
+      prev_b_timestamp := air.adapter.reads_aux_1.base.prev_timestamp row 0
       b_timestamp := air.adapter.from_state.timestamp row 0 + 1
       timestamp := air.adapter.from_state.timestamp row 0
       next_timestamp := air.adapter.from_state.timestamp row 0 + 2
@@ -133,10 +133,10 @@ namespace Equivalence.BranchEqual
       a := #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0]
       b := #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0]
       range_checked_vals :=
-        #v[air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_0 row 0,
-           air.adapter.reads_aux.base.timestamp_lt_aux.lower_decomp_1 row 0,
-           air.adapter.columns 8 row 0,
-           air.adapter.columns 9 row 0]
+        #v[air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0,
+           air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0,
+           air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0,
+           air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0,]
       misa := LeanRV32D.Functions.misa
       : BranchEqual_instruction_fields
     })
