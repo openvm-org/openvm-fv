@@ -47,6 +47,7 @@ import OpenvmFv.Constraints.VmAirWrapper_mulh
 import OpenvmFv.Constraints.VmAirWrapper_shift
 import OpenvmFv.Constraints.VolatileBoundaryAir
 
+import OpenvmFv.Equivalence.Auipc
 import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
@@ -111,6 +112,7 @@ import OpenvmFv.Spec.SHIFTIOP.local
 import OpenvmFv.Spec.SHIFTIOP.slli
 import OpenvmFv.Spec.SHIFTIOP.srai
 import OpenvmFv.Spec.SHIFTIOP.srli
+import OpenvmFv.Spec.Auipc
 import OpenvmFv.Spec.BaseALU
 import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.BranchLessThan
