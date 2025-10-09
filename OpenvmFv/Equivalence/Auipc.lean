@@ -33,7 +33,7 @@ namespace Equivalence.Auipc
 
   def AuipcInput_of_Auipc_instruction_fields (row : Auipc_instruction_fields) : PureSpec.AuipcInput := {
     rd := wrap_to_regidx row.rd_ptr
-    imm := BitVec.ofNat 20 row.imm.val
+    imm := BitVec.ofNat 20 (row.imm.val >>> 4)
     PC := row.pc.toNat
     : PureSpec.AuipcInput
   }
