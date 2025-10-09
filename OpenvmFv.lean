@@ -13,8 +13,13 @@ import OpenvmFv.Airs.Alu.VmAirWrapper_mulh
 import OpenvmFv.Airs.Alu.VmAirWrapper_shift
 
 import OpenvmFv.Airs.Branch.BranchEqualCoreAir
+import OpenvmFv.Airs.Branch.BranchLessThanCoreAir
+import OpenvmFv.Airs.Branch.Rv32AuipcCoreAir
 import OpenvmFv.Airs.Branch.Rv32BranchAdapterAir
+import OpenvmFv.Airs.Branch.Rv32RdWriteAdapterAir
+import OpenvmFv.Airs.Branch.VmAirWrapper_auipc
 import OpenvmFv.Airs.Branch.VmAirWrapper_branch_eq
+import OpenvmFv.Airs.Branch.VmAirWrapper_branch_lt
 
 import OpenvmFv.Airs.AccessAdapterAir
 import OpenvmFv.Airs.ExecutionState
@@ -32,7 +37,9 @@ import OpenvmFv.Constraints.PhantomAir
 import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
+import OpenvmFv.Constraints.VmAirWrapper_auipc
 import OpenvmFv.Constraints.VmAirWrapper_branch_eq
+import OpenvmFv.Constraints.VmAirWrapper_branch_lt
 import OpenvmFv.Constraints.VmAirWrapper_divrem
 import OpenvmFv.Constraints.VmAirWrapper_lt
 import OpenvmFv.Constraints.VmAirWrapper_mul
@@ -55,7 +62,9 @@ import OpenvmFv.Extraction.PhantomAir
 import OpenvmFv.Extraction.ProgramDummyAir
 import OpenvmFv.Extraction.VariableRangeCheckerAir
 import OpenvmFv.Extraction.VmAirWrapper_alu
+import OpenvmFv.Extraction.VmAirWrapper_auipc
 import OpenvmFv.Extraction.VmAirWrapper_branch_eq
+import OpenvmFv.Extraction.VmAirWrapper_branch_lt
 import OpenvmFv.Extraction.VmAirWrapper_divrem
 import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Extraction.VmAirWrapper_mul
