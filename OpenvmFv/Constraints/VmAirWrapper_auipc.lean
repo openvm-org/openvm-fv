@@ -395,8 +395,8 @@ namespace VmAirWrapper_auipc.constraints
     def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
       let imm := entry.xc
       -- imm is a 24-bit unsigned integer
-      (imm ≤ 2^12) ∧
-      -- imm is aligned to
+      (imm < 2^24) ∧
+      -- with its last four bits zeroed out
       (imm % 16 = 0)
 
     lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
@@ -479,13 +479,12 @@ namespace VmAirWrapper_auipc.constraints
           simp at h_transpile
           split_ifs at h_transpile with h_rd_not_zero
           . exfalso; grind
-          . have : data[4] = Transpiler.utof (Transpiler.zero_extend_24 (BitVec.extractLsb 31 12 imm) <<< 4) := by grind
+          . have : data[4] = Transpiler.utof (Transpiler.zero_extend_24 imm <<< 4) := by grind
             rw [this]; clear *-
-            simp [Transpiler.zero_extend_24, Transpiler.utof, Fin.le_def, Fin.ext_iff]
+            simp [Transpiler.zero_extend_24, Transpiler.utof, Fin.lt_def, Fin.ext_iff]
             rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
             simp [Nat.shiftLeft_eq_mul_pow]
-            simp [Nat.shiftRight_eq_div_pow]
-            omega
+            grind
       . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2 <;> {
           rewrite [h_op_data] at h_transpile

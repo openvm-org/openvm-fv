@@ -33,7 +33,7 @@ namespace Equivalence.Auipc
 
   def AuipcInput_of_Auipc_instruction_fields (row : Auipc_instruction_fields) : PureSpec.AuipcInput := {
     rd := wrap_to_regidx row.rd_ptr
-    imm := BitVec.ofNat 20 row.imm.val
+    imm := BitVec.ofNat 20 (row.imm.val >>> 4)
     PC := row.pc.toNat
     : PureSpec.AuipcInput
   }
@@ -271,6 +271,7 @@ namespace Equivalence.Auipc
           h_bus_wellformedness
 
       obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := auipc_rd_properties air row h_is_valid h_bus_wellformedness
+      rw [VmAirWrapper_auipc.constraints.allHold_simplified_of_allHold] at h_constraints
       simp_all [get_instruction_fields_row,
                 VmAirWrapper_auipc_constraint_and_interaction_simplification]
       split_ands

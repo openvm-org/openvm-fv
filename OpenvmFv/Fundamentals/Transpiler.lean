@@ -148,7 +148,7 @@ namespace Transpiler
       | .UTYPE (imm, rd, uop.AUIPC) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 (BitVec.extractLsb 31 12 imm)) <<< 4), 1, 0, 0, 0]))
+        else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 imm) <<< 4), 1, 0, 0, 0]))
       | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
