@@ -140,8 +140,46 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
     repeat rw [BitVec.toNat_append]; simp
     omega
   . have ub_msl : (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val < 64
+      := by
+        have ub_msl :
+          (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val < 64 ∨
+          ((503316481 ≤ (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val) ∧
+           ((air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val ≤ 503316544)) ∨
+          ((1006632961 ≤ (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val) ∧
+           ((air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val ≤ 1006633024)) ∨
+          ((1509949441 ≤ (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val) ∧
+           ((air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val ≤ 1509949504))
+        := by
+          clear *- ub_pc_msl
+          simp [Fin.val_mul] at ub_pc_msl
+          obtain ⟨ x, ⟨ eq_x, ub_x ⟩ ⟩ : ∃ x, (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val = x ∧ x < BB_prime := by simp
+          rw [eq_x] at ub_pc_msl ⊢
+          grind
+        rcases ub_msl with ub_msl | ub_msl
+        . assumption
+        . exfalso
+          simp [← VmAirWrapper_auipc.carry_1_def,
+                ← VmAirWrapper_auipc.carry_2_def,
+                ← VmAirWrapper_auipc.carry_3_def] at *
+          rcases h_cry1 <;>
+          rcases h_cry2 <;>
+          rcases h_cry3 <;>
+          simp_all <;>
+          omega
+    clear ub_pc_msl
+
+    obtain ⟨ hl, hh ⟩ :
+      air.core.intermed_val row 0 = (air.adapter.from_state.pc row 0) % 16777216 ∧
+      2013265801 * (air.adapter.from_state.pc row 0 - air.core.intermed_val row 0) = (air.adapter.from_state.pc row 0) / 16777216
     := by
-      sorry
+      have : (air.core.intermed_val row 0).val < 16777216
+        := by rw [← Rv32AuipcCoreAir.intermed_val_def]; grind
+      rw [Valid_Rv32AuipcCoreAir.pc_msl] at *
+      exact @BabyBear.inv2_24_prod_diff_div_mod
+              _
+              (air.adapter.from_state.pc row 0)
+              this
+              (by rw [mul_comm] at ub_msl; omega)
 
     have eq_pc :
       BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) =
@@ -151,8 +189,20 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
               (air.core.pc_limbs_1 row 0).val,
               (air.core.pc_msl row 0 (air.adapter.from_state.pc row 0)).val]
       := by
-        sorry
-    rw [eq_pc]; clear eq_pc
+        simp [← BitVec.toNat_inj, U32.toNat]
+        repeat rw [Nat.mod_eq_of_lt (by omega)]
+        rw [Valid_Rv32AuipcCoreAir.pc_msl] at *
+        rw [mul_comm (b := 2013265801)] at ub_msl ⊢
+        rw [hh] at ub_msl ⊢; clear hh
+        rw [← Rv32AuipcCoreAir.intermed_val_def, ← add_assoc] at hl
+        have ub_pc := assumptions.1; simp [Fin.lt_def] at ub_pc
+        clear *- ub_rd0 ub_pc ub_pc0 ub_pc1 hl
+        simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at hl
+        rw [Nat.mod_eq_of_lt (by omega)] at hl
+        symm; rw [hl, add_comm, mul_comm]
+        apply Nat.div_add_mod
+
+    rw [eq_pc]; clear eq_pc hl hh
 
     have eq_imm :
       ((BitVec.ofNat 24 (air.core.imm_limbs_0 row 0 + air.core.imm_limbs_1 row 0 * 256 + air.core.imm_limbs_2 row 0 * 65536).val) ++ 0#8).toNat =
@@ -178,17 +228,13 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
 
     clear pa_range assumptions
           ub_prev_0 ub_prev_1 ub_prev_2 ub_prev_3
-          ub_pc_msl
           eq_imm ub_imm imm_mod
 
     simp [← VmAirWrapper_auipc.carry_1_def,
           ← VmAirWrapper_auipc.carry_2_def,
           ← VmAirWrapper_auipc.carry_3_def] at *
 
-    -- Mask
-    obtain ⟨ pc3, eq_pc3 ⟩ : ∃ pc3, air.core.pc_msl row 0 (air.adapter.from_state.pc row 0) = pc3 := by simp
-    simp_all [U32.toNat]; clear eq_pc3
-
+    simp [U32.toNat]
     repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
     rcases h_cry1 <;> rcases h_cry2 <;>
     rcases h_cry3 <;> simp_all <;> omega

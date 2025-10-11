@@ -29,7 +29,7 @@ def Valid_Rv32AuipcCoreAir.intermed_val
   )
 
 @[openvm_encapsulation]
-lemma Rv32AuipcCoreAir.is_valid_def
+lemma Rv32AuipcCoreAir.intermed_val_def
   [Field F]
   (c : Valid_Rv32AuipcCoreAir F) (row rotation: ℕ)
 :
