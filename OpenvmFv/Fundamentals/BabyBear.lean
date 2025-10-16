@@ -24,16 +24,24 @@ section inverses
 
 lemma inv_255 : (465814468 : FBB) = 255⁻¹ := by native_decide
 lemma inv_256 : (2005401601 : FBB) = 256⁻¹ := by native_decide
+lemma inv_2_24 : (2013265801 : FBB) = 16777216⁻¹ := by native_decide
 
 lemma inv_255_eq_one_lr : (465814468 : FBB) * 255 = 1 := by rfl
 lemma inv_255_eq_one_rl : 255 * (465814468 : FBB) = 1 := by rfl
 lemma inv_256_eq_one_lr : (2005401601 : FBB) * 256 = 1 := by rfl
 lemma inv_256_eq_one_rl : 256 * (2005401601 : FBB) = 1 := by rfl
+lemma inv_2_24_eq_one_lr : (2013265801 : FBB) * 16777216 = 1 := by rfl
+lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
 
 @[simp] lemma inv_255_eq_255_lr : (465814468 : FBB) * x = 1 ↔ x = 255 := by rw [inv_255, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_255_eq_255_rl : x * (465814468 : FBB) = 1 ↔ x = 255 := by rw [mul_comm, inv_255_eq_255_lr]
 @[simp] lemma inv_256_eq_256_lr : (2005401601 : FBB) * x = 1 ↔ x = 256 := by rw [inv_256, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_256_eq_256_rl : x * (2005401601 : FBB) = 1 ↔ x = 256 := by rw [mul_comm, inv_256_eq_256_lr]
+@[simp] lemma inv_2_24_eq_2_24_lr : (2013265801 : FBB) * x = 1 ↔ x = 16777216 := by rw [inv_2_24, inv_mul_eq_one₀ (by simp), eq_comm]
+@[simp] lemma inv_2_24_eq_2_24_rl : x * (2013265801 : FBB) = 1 ↔ x = 16777216 := by rw [mul_comm, inv_2_24_eq_2_24_lr]
+
+lemma neg_inv_2_256 : (2005401601 : FBB) = -7864320 := by grind
+lemma neg_inv_2_24 : (2013265801 : FBB) = -120 := by grind
 
 end inverses
 
@@ -199,6 +207,119 @@ lemma inv256_prod_diff_div_mod
       := by simp [Fin.ext_iff, Fin.val_add, Fin.val_mul]; grind
     (conv => lhs; arg 2; arg 1; rw [this]); simp
     rw [mul_comm (b := 256), ← mul_assoc, inv_256_eq_one_lr]; simp
+
+lemma lt_neg
+  {x y : FBB}
+  (lb_x : 0 < x)
+  (h_lt : x < y)
+:
+  -y < -x
+:= by
+  grind
+
+lemma inv2_24_mono
+  (x y : Fin 16777216)
+  (lb_x : 0 < x)
+  (h_lt : x < y)
+:
+  (2013265801 : FBB) * (⟨ y.val, by omega⟩ : FBB) < (2013265801 : FBB) * (⟨ x.val, by omega⟩ : FBB)
+:= by
+  rw [neg_inv_2_24, neg_mul, neg_mul]
+  apply lt_neg
+  . rw [Fin.lt_def, Fin.val_mul]; simp; omega
+  . rw [Fin.lt_def, Fin.val_mul, Fin.val_mul]; simp; grind
+
+lemma inv2_24_prod_lt_2_24
+  (x : Fin 16777216)
+:
+  x = 0 ∨ (¬x = 0 ∧ 120 < (2013265801 : FBB) * (⟨ x.val, by omega⟩ : FBB) ∧ (2013265801 : FBB) * (⟨ x.val, by omega⟩ : FBB) ≤ 2013265801)
+:= by
+  by_cases lb_x : 0 < x
+  . right; constructor
+    . omega
+    . by_cases ub_x : x < 16777215
+      . split_ands
+        . have := @inv2_24_mono x 16777215 lb_x ub_x
+          simp_all; omega
+        . by_cases eq_x : x = 1
+          . simp_all
+          . have := @inv2_24_mono 1 x (by simp) (by omega)
+            simp_all; omega
+      . have eq_x : x = 16777215 := by omega
+        simp_all
+  . omega
+
+lemma inv2_24_prod_mod
+  (x : FBB)
+:
+  x % 16777216 = 0 ∨ (¬ x % 16777216 = 0 ∧ 120 < (2013265801 : FBB) * (x % 16777216) ∧ (2013265801 : FBB) * (x % 16777216) ≤ 2013265801)
+:= by
+  have := inv2_24_prod_lt_2_24 ⟨ (x % 16777216).val, by grind⟩
+  rcases this with hz | ⟨ h_nz, h_lt ⟩ <;> simp_all
+  . grind
+  . right; constructor
+    . grind
+    . simp_all [Fin.lt_def, Fin.mul_def]
+
+lemma inv2_24_prod_lt_2_24_mod_zero
+  {x : FBB}
+  (h_le : (2013265801 : FBB) * x ≤ 120)
+:
+  x % 16777216 = 0
+:= by
+  by_cases hnz : x = 0 <;> [ simp_all; skip ]
+  have h_div_mod : x = (x / 16777216) * 16777216 + x % 16777216
+  := by
+    simp [Fin.ext_iff, Fin.val_add, Fin.val_mul]
+    grind
+  rw [h_div_mod] at h_le ⊢; clear h_div_mod
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul]
+  rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+  simp [Nat.add_mod]
+  have := inv2_24_prod_mod x
+  rcases this with hz | ⟨ hnz, hmod ⟩
+  . simp [Fin.ext_iff] at hz; assumption
+  . rw [mul_add, mul_comm (b := 16777216), ← mul_assoc, inv_2_24_eq_one_lr] at h_le
+    simp at h_le
+    have ub_x_div : x / 16777216 ≤ 120 := by simp [Fin.le_def]; omega
+    suffices : 120 < x / 16777216 + 2013265801 * (x % 16777216)
+    . omega
+    . obtain ⟨ lb_mod, ub_mod ⟩ := hmod
+      rw [Fin.lt_def] at lb_mod ⊢
+      rw [Fin.le_def] at ub_mod h_le ub_x_div
+      simp_all [Fin.val_add, Fin.val_mul]
+      rw [Nat.add_mod] at h_le ⊢
+      rw [Nat.mod_eq_of_lt (a := _ / _) (by omega)] at h_le ⊢
+      by_cases hmmm : x.val / 16777216 = 120
+      . have : x = 2013265920 := by omega
+        simp_all
+      . have ub_div : x.val / 16777216 < 120 := by omega
+        clear ub_x_div hmmm
+        rw [Nat.mod_eq_of_lt (by omega)]
+        omega
+
+lemma inv2_24_prod_diff_div_mod
+  {a b : FBB}
+  (ub_a : a.val < 16777216)
+  (h_le : ((2013265801 : FBB) * (b - a)).val < 120)
+:
+  a = b % 16777216 ∧ (2013265801 : FBB) * (b - a) = b / 16777216
+:= by
+  have h_mod_zero := @inv2_24_prod_lt_2_24_mod_zero (b - a) (by omega)
+  have a_le_b : a ≤ b
+  := by
+    rw [neg_inv_2_24, neg_mul, mul_comm, ← neg_mul, neg_sub] at h_le
+    grind
+  clear h_le
+  suffices h_mod : a = b % 16777216
+  . simp_all
+    have : b = (b / 16777216 * 16777216) + b % 16777216
+      := by simp [Fin.ext_iff, Fin.val_add, Fin.val_mul]; grind
+    (conv => lhs; arg 2; arg 1; rw [this]); simp
+    rw [mul_comm (b := 16777216), ← mul_assoc, inv_2_24_eq_one_lr]; simp
+  . simp [Fin.ext_iff] at h_mod_zero
+    rw [Fin.sub_val_of_le a_le_b] at h_mod_zero
+    grind
 
 lemma mod_4_zero_bits_zero
   (a : FBB)
