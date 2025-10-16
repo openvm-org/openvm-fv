@@ -529,7 +529,7 @@ namespace VmAirWrapper_alu.constraints
 
   section properties
 
-    variable[Field ExtF]
+    variable [Field ExtF]
 
     lemma single_op
       (air : Valid_VmAirWrapper_alu FBB ExtF)

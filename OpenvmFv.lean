@@ -13,8 +13,13 @@ import OpenvmFv.Airs.Alu.VmAirWrapper_mulh
 import OpenvmFv.Airs.Alu.VmAirWrapper_shift
 
 import OpenvmFv.Airs.Branch.BranchEqualCoreAir
+import OpenvmFv.Airs.Branch.BranchLessThanCoreAir
+import OpenvmFv.Airs.Branch.Rv32AuipcCoreAir
 import OpenvmFv.Airs.Branch.Rv32BranchAdapterAir
+import OpenvmFv.Airs.Branch.Rv32RdWriteAdapterAir
+import OpenvmFv.Airs.Branch.VmAirWrapper_auipc
 import OpenvmFv.Airs.Branch.VmAirWrapper_branch_eq
+import OpenvmFv.Airs.Branch.VmAirWrapper_branch_lt
 
 import OpenvmFv.Airs.LoadStore.LoadStoreCoreAir
 import OpenvmFv.Airs.LoadStore.Rv32LoadStoreAdapterAir
@@ -36,7 +41,9 @@ import OpenvmFv.Constraints.PhantomAir
 import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
+import OpenvmFv.Constraints.VmAirWrapper_auipc
 import OpenvmFv.Constraints.VmAirWrapper_branch_eq
+import OpenvmFv.Constraints.VmAirWrapper_branch_lt
 import OpenvmFv.Constraints.VmAirWrapper_divrem
 import OpenvmFv.Constraints.VmAirWrapper_loadstore
 import OpenvmFv.Constraints.VmAirWrapper_lt
@@ -45,6 +52,7 @@ import OpenvmFv.Constraints.VmAirWrapper_mulh
 import OpenvmFv.Constraints.VmAirWrapper_shift
 import OpenvmFv.Constraints.VolatileBoundaryAir
 
+import OpenvmFv.Equivalence.Auipc
 import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
@@ -60,7 +68,9 @@ import OpenvmFv.Extraction.PhantomAir
 import OpenvmFv.Extraction.ProgramDummyAir
 import OpenvmFv.Extraction.VariableRangeCheckerAir
 import OpenvmFv.Extraction.VmAirWrapper_alu
+import OpenvmFv.Extraction.VmAirWrapper_auipc
 import OpenvmFv.Extraction.VmAirWrapper_branch_eq
+import OpenvmFv.Extraction.VmAirWrapper_branch_lt
 import OpenvmFv.Extraction.VmAirWrapper_divrem
 import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Extraction.VmAirWrapper_loadstore
@@ -108,6 +118,7 @@ import OpenvmFv.Spec.SHIFTIOP.local
 import OpenvmFv.Spec.SHIFTIOP.slli
 import OpenvmFv.Spec.SHIFTIOP.srai
 import OpenvmFv.Spec.SHIFTIOP.srli
+import OpenvmFv.Spec.Auipc
 import OpenvmFv.Spec.BaseALU
 import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.BranchLessThan
