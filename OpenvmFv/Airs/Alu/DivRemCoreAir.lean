@@ -664,7 +664,7 @@ lemma DivRemCoreAir_4_8.ctx_opcode_def
   [Field F]
   (c : Valid_DivRemCoreAir_4_8 F)
   (row rotation : ℕ)
-: c.class_offset + --opcode
+: 596 + --opcode
   (
     c.opcode_div_flag row rotation * 0 +
     c.opcode_divu_flag row rotation * 1 +

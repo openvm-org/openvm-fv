@@ -344,4 +344,97 @@ lemma mod_4_zero_bits_zero
 
 end auxiliaries
 
+namespace Circuits
+
+  lemma signed_top_byte
+    {x x_stb : FBB}
+    (ub_x : x.val < 256)
+    (ub_x_stb : (x_stb + 128).val < 256)
+    (h_msb : x = x_stb ∨ x - x_stb = 256)
+  :
+    x_stb = if 128 ≤ x.val then x - 256 else x
+  := by grind
+
+  lemma less_than
+    {x0 x1 x2 x3 y0 y1 y2 y3 dm0 dm1 dm2 dm3 diff stb_x stb_y is_signed result : FBB}
+    (ub_x0 : x0.val < 256)
+    (ub_x1 : x1.val < 256)
+    (ub_x2 : x2.val < 256)
+    (ub_x3 : x3.val < 256)
+    (ub_y0 : y0.val < 256)
+    (ub_y1 : y1.val < 256)
+    (ub_y2 : y2.val < 256)
+    (ub_y3 : y3.val < 256)
+    (b_result : result = 0 ∨ result = 1)
+    (h_stb_diff_x : x3 = stb_x ∨ x3 - stb_x = 256)
+    (h_stb_diff_y : y3 = stb_y ∨ y3 - stb_y = 256)
+    (b_dm0 : dm0 = 0 ∨ dm0 = 1)
+    (b_dm1 : dm1 = 0 ∨ dm1 = 1)
+    (b_dm2 : dm2 = 0 ∨ dm2 = 1)
+    (b_dm3 : dm3 = 0 ∨ dm3 = 1)
+    (b_sum : dm3 + dm2 + dm1 + dm0 = 0 ∨ dm3 + dm2 + dm1 + dm0 = 1)
+    (dm3_diff : dm3 = 0 ∨ diff = (stb_y - stb_x) * (2 * result - 1))
+    (dm2_diff : dm2 = 0 ∨ diff = (y2 - x2) * (2 * result - 1))
+    (dm1_diff : dm1 = 0 ∨ diff = (y1 - x1) * (2 * result - 1))
+    (dm0_diff : dm0 = 0 ∨ diff = (y0 - x0) * (2 * result - 1))
+    (sum0_result1 : dm3 + dm2 + dm1 + dm0 = 1 ∨ result = 0)
+    (sum3_diff : dm3 = 1 ∨ stb_y = stb_x)
+    (sum2_diff : dm3 + dm2 = 1 ∨ y2 = x2)
+    (sum1_diff : dm3 + dm2 + dm1 = 1 ∨ y1 = x1)
+    (sum0_diff : dm3 + dm2 + dm1 + dm0 = 1 ∨ y0 = x0)
+    (h_stb_x : (stb_x + 128 * is_signed).val < 256)
+    (h_stb_y : (stb_y + 128 * is_signed).val < 256)
+    (h_diff : dm3 + dm2 + dm1 + dm0 = 1 → (diff - 1).val < 256)
+  :
+    (is_signed = 0 → (if U32.toNat #v[x0, x1, x2, x3] < U32.toNat #v[y0, y1, y2, y3] then (1 : FBB) else 0) = result) ∧
+    (is_signed = 1 → (if U32.toInt #v[x0, x1, x2, x3] < U32.toInt #v[y0, y1, y2, y3] then (1 : FBB) else 0) = result)
+  := by
+
+    have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
+      (dm0 = 1 → dm1 = 0 ∧ dm2 = 0 ∧ dm3 = 0) ∧
+      (dm1 = 1 → dm0 = 0 ∧ dm2 = 0 ∧ dm3 = 0) ∧
+      (dm2 = 1 → dm0 = 0 ∧ dm1 = 0 ∧ dm3 = 0) ∧
+      (dm3 = 1 → dm0 = 0 ∧ dm1 = 0 ∧ dm2 = 0)
+    := by
+      clear *- b_dm0 b_dm1 b_dm2 b_dm3 b_sum
+      grind (splits := 14)
+
+    split_ands <;> intro h_signed <;>
+    rcases b_sum with h_sum | h_sum <;>
+    simp_all
+    . have : dm3 = 0 ∧ dm2 = 0 ∧ dm1 = 0 ∧ dm0 = 0 := by grind
+      have : x3 = stb_x ∧ y3 = stb_y := by grind
+      simp_all [U32.toNat]
+    . have : x3 = stb_x ∧ y3 = stb_y := by clear *- ub_x3 ub_y3 h_stb_diff_x h_stb_diff_y h_stb_x h_stb_y; grind
+      simp [U32.toNat]
+      rcases b_dm3 with h_dm3 | h_dm3
+      . rcases b_dm2 with h_dm2 | h_dm2
+        . rcases b_dm1 with h_dm1 | h_dm1
+          . rcases b_dm0 with h_dm0 | h_dm0
+            . simp_all
+            . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> grind
+          . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> grind
+        . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> grind
+      . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> grind
+    . have : dm3 = 0 ∧ dm2 = 0 ∧ dm1 = 0 ∧ dm0 = 0 := by grind
+      suffices : x3 = y3 <;> simp_all; grind
+    . have eq_msb_b := @signed_top_byte x3 stb_x ub_x3 h_stb_x h_stb_diff_x
+      have eq_msb_c := @signed_top_byte y3 stb_y ub_y3 h_stb_y h_stb_diff_y
+
+      simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
+      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+      repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
+
+      rcases b_dm3 with h_dm3 | h_dm3
+      . rcases b_dm2 with h_dm2 | h_dm2
+        . rcases b_dm1 with h_dm1 | h_dm1
+          . rcases b_dm0 with h_dm0 | h_dm0
+            . simp_all
+            . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
+          . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
+        . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
+      . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
+
+end Circuits
+
 end BabyBear

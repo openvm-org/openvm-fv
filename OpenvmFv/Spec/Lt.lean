@@ -143,7 +143,7 @@ lemma wf_propertiesToAssert
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
-           b_add, b_sub, b_is_valid, b_cmp_result, msb_b, msb_c,
+           b_slt, b_sltu, b_is_valid, b_cmp_result, msb_b, msb_c,
            b_dm3, sum3_diff, dm3_diff, b_dm2, sum2_diff, dm2_diff,
            b_dm1, sum1_diff, dm1_diff, b_dm0, sum0_diff, dm0_diff,
            b_sum, sum0_cmp1, b_rs2_as, rs2_as_imm, imm_sign, imm_sign_extend, rest ⟩ := constraints
@@ -212,7 +212,7 @@ lemma essentials
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
-           b_add, b_sub, b_is_valid, b_cmp_result, msb_b, msb_c,
+           b_slt, b_sltu, b_is_valid, b_cmp_result, msb_b, msb_c,
            b_dm3, sum3_diff, dm3_diff, b_dm2, sum2_diff, dm2_diff,
            b_dm1, sum1_diff, dm1_diff, b_dm0, sum0_diff, dm0_diff,
            b_sum, sum0_cmp1, b_rs2_as, rs2_as_imm, imm_sign, imm_sign_extend, rest ⟩ := constraints
@@ -276,7 +276,7 @@ theorem spec_base_Lt
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_lt_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
-           b_add, b_sub, b_is_valid, b_cmp_result, msb_b, msb_c,
+           b_slt, b_sltu, b_is_valid, b_cmp_result, msb_b, msb_c,
            b_dm3, sum3_diff, dm3_diff, b_dm2, sum2_diff, dm2_diff,
            b_dm1, sum1_diff, dm1_diff, b_dm0, sum0_diff, dm0_diff,
            b_sum, sum0_cmp1, rest ⟩ := constraints
@@ -304,77 +304,29 @@ theorem spec_base_Lt
     grind
   simp_all
 
+  have h_lt :=
+    @BabyBear.Circuits.less_than
+     _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+     ub_b0 ub_b1 ub_b2 ub_b3 ub_c0 ub_c1 ub_c2 ub_c3
+     b_cmp_result msb_b msb_c
+     b_dm0 b_dm1 b_dm2 b_dm3 b_sum
+     dm3_diff dm2_diff dm1_diff dm0_diff
+     sum0_cmp1
+     sum3_diff sum2_diff sum1_diff sum0_diff
+     ba0.1 ba0.2 ba1
+
   -- Branch on opcode
-  rcases opcodes with is_slt | is_sltu
+  rcases opcodes with h_opcode | h_opcode <;>
+  [
+    (specialize op0 h_opcode; simp [op0] at *);
+    (specialize op1 h_opcode; simp [op1, sop1] at *)
+  ]
   all_goals
-    simp_all [execute_RTYPE_pure, rop_of_Lt_opcode]
-    simp [← BitVec.toNat_inj, U32.toNat]
-    repeat rw [Nat.mod_eq_of_lt (by omega)]
-
-  -- SLT
-  . simp [U32.toInt, ← U32.msb_3_negative, BitVec.msb_eq_decide]
-    repeat rw [Nat.mod_eq_of_lt (by omega)]
-    rcases b_sum with h_sum | h_sum <;> simp_all
-    . -- All bytes are the same
-      have ⟨ h_dm3, h_dm2, h_dm1, h_dm0 ⟩ :
-        air.core.diff_marker_3 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧
-        air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_0 row 0 = 0
-        := by clear *- b_dm0 b_dm1 b_dm2 b_dm3 h_sum; grind
-      rw [if_neg] <;> simp_all
-      split_ifs <;> simp_all <;> grind
-    . -- One byte differs
-      -- Establish what the msb variables actually are
-      have eq_msb_b : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then (air.core.b_3 row 0) - 256 else (air.core.b_3 row 0)
-        := by clear *- ub_b3 msb_b ba0; split_ifs <;> grind
-      have eq_msb_c : air.core.c_msb_f row 0 = if 128 ≤ (air.core.c_3 row 0).val then air.core.c_3 row 0 - 256 else air.core.c_3 row 0
-        := by clear *- ub_c3 msb_c ba0; split_ifs <;> grind
-
-      -- Branch on the non-negativity of `b` and `c`
-      by_cases b_neg : 128 ≤ (air.core.b_3 row 0).val <;>
-      by_cases c_neg : 128 ≤ (air.core.c_3 row 0).val <;> simp_all
-      -- Both negative
-      . simp_all [U32.toNat]
-        rcases b_dm3 with h_dm3 | h_dm3 <;>
-        rcases b_dm2 with h_dm2 | h_dm2 <;>
-        rcases b_dm1 with h_dm1 | h_dm1 <;>
-        rcases b_cmp_result <;> simp_all <;> split_ifs <;> try grind
-      -- `b` negative, `c` positive, result always `0`
-      . rw [if_pos] <;> [ simp; skip ]
-        . rcases b_cmp_result <;> simp_all
-          rcases b_dm3 <;> simp_all <;> grind
-        . rw [if_neg (by omega)]
-          grind
-      -- `c` negative, `b` positive, result always `1`
-      . rw [if_neg] <;> [ simp; skip ]
-        . rcases b_cmp_result <;> simp_all
-          rcases b_dm3 <;> simp_all <;> grind
-        . rw [if_neg (by omega)]
-          grind
-      -- `b` anc `c` positive, effectively the SLTU case
-      . rw [if_neg (c := 128 ≤ (air.core.c_3 row 0).val)] <;> [ skip; omega ]
-        simp_all [U32.toNat]
-        rcases b_dm3 with h_dm3 | h_dm3 <;>
-        rcases b_dm2 with h_dm2 | h_dm2 <;>
-        rcases b_dm1 with h_dm1 | h_dm1 <;>
-        rcases b_cmp_result <;> simp_all <;> split_ifs <;> grind
-
-  -- SLTU
-  . -- msbs collapse
-    have ⟨ eq_msb_b, eq_msb_c ⟩ : air.core.b_msb_f row 0 = air.core.b_3 row 0 ∧ air.core.c_msb_f row 0 = air.core.c_3 row 0
-      := by clear *- ub_b3 ub_c3 msb_b msb_c ba0; grind
-    simp_all
-    rcases b_sum with h_sum | h_sum <;> simp_all
-    . -- All bytes are the same
-      have ⟨ h_dm3, h_dm2, h_dm1, h_dm0 ⟩ :
-        air.core.diff_marker_3 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧
-        air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_0 row 0 = 0
-        := by clear *- b_dm0 b_dm1 b_dm2 b_dm3 h_sum; grind
-      simp_all
-    . -- Case analysis on the byte that differs and the outcome
-      rcases b_dm3 with h_dm3 | h_dm3 <;>
-      rcases b_dm2 with h_dm2 | h_dm2 <;>
-      rcases b_dm1 with h_dm1 | h_dm1 <;>
-      rcases b_cmp_result <;> simp_all <;> split_ifs <;> grind
+    simp [execute_RTYPE_pure, rop_of_Lt_opcode, h_opcode]
+    simp [← BitVec.toNat_inj, BitVec.ofNat]
+    split_ifs at h_lt with h_is_lt <;>
+    [ rw [if_pos (by simpa)]; rw [if_neg (by aesop)] ] <;>
+    simp [U32.toNat, ← h_lt]
 
 end General
 

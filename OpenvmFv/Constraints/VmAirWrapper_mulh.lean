@@ -552,7 +552,7 @@ namespace VmAirWrapper_mulh.constraints
 
     variable[Field ExtF]
 
-lemma single_op
+    lemma single_op
       (air : Valid_VmAirWrapper_mulh FBB ExtF)
       (row : ℕ)
       (valid_row : row ≤ air.last_row)

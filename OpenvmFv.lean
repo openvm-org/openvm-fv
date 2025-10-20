@@ -116,6 +116,7 @@ import OpenvmFv.Spec.Auipc
 import OpenvmFv.Spec.BaseALU
 import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.BranchLessThan
+import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
