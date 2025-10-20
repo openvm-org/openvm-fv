@@ -137,7 +137,7 @@ lemma wf_propertiesToAssert
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ lb_imm, ub_imm, imm_mod ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_range
 
   have ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
@@ -156,6 +156,7 @@ in
 lemma essentials
 :
   (air.adapter.from_state.pc row 0).val < 1073741824 ∧
+  (air.adapter.from_state.pc row 0) % 4 = 0 ∧
   (air.to_pc row 0).val < 1073741824 ∧
   (air.to_pc row 0) % 4 = 0 ∧
   List.Forall (fun x => x.val < 256)
@@ -179,7 +180,7 @@ lemma essentials
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ lb_imm, ub_imm, imm_mod ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
   obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
@@ -197,63 +198,6 @@ lemma essentials
          ⟩ := constraints
   simp_all [Valid_BranchLessThanCoreAir_4_8.lt, Valid_BranchLessThanCoreAir_4_8.ge]
   split_ands <;> omega
-
-include
-  row_valid
-  constraints
-  assumptions
-  propertiesToAssume in
-lemma next_pc_two_last_bits_zero
-:
-  (BitVec.ofNat 32 (air.adapter.from_state.pc row 0).val +
-    BitVec.signExtend 32 (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0))))[0] = false ∧
-  (BitVec.ofNat 32 (air.adapter.from_state.pc row 0).val +
-    BitVec.signExtend 32 (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0))))[1] = false
-:= by
-  have assertions := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
-
-  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
-
-  have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
-
-  rw [Fin.ext_iff] at pa_mem
-  simp [and_assoc] at pa_mem pa_range pa_read
-  obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ lb_imm, ub_imm, imm_mod ⟩ := pa_read
-  clear pa_exec pa_range
-
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions
-  have pa_exec := assumptions.1.1.2
-  rw [BabyBear.mod_4_zero_bits_zero] at pa_exec
-  obtain ⟨ pc0, pc1 ⟩ := pa_exec
-  suffices :
-    (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0)))[0] = false ∧
-    (BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0)))[1] = false
-  . obtain ⟨ npc0, npc1 ⟩ := this
-    bv_decide
-  . obtain ⟨ x, eq_x ⟩ : exists x, BabyBear.toInt (air.core.imm row 0) = x := by simp
-    simp [eq_x] at lb_imm ub_imm imm_mod ⊢
-    clear *- lb_imm ub_imm imm_mod
-    have : x % (4 : ℤ) = (1 : ℤ) * ((BitVec.ofInt 13 x)[0]).toNat + (2 : ℤ) * (BitVec.ofInt 13 x)[1].toNat
-    := by
-      simp only [BitVec.getElem_eq_testBit_toNat]
-      simp [Nat.testBit_eq_decide_div_mod_eq]
-      by_cases h_sgn : 0 ≤ x
-      . rw [Int.emod_eq_of_lt (b := 8192) (by omega) (by omega)]
-        by_cases (x.toNat % 2 = 1) <;>
-        by_cases (x.toNat / 2 % 2 = 1) <;>
-        simp_all <;>
-        omega
-      . simp at h_sgn
-        by_cases ((x % 8192).toNat % 2 = 1) <;>
-        simp_all <;> omega
-
-    rw [this] at imm_mod; clear this
-    by_cases (BitVec.ofInt 13 x)[0] <;>
-    by_cases (BitVec.ofInt 13 x)[1] <;> simp_all
 
 include
   row_valid
@@ -330,7 +274,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_a0, ub_a1, ub_a2, ub_a3, ub_rs2, ub_b0, ub_b1, ub_b2, ub_b3 ⟩ := pa_mem
-  obtain ⟨ lb_imm, ub_imm, imm_mod ⟩ := pa_read
+  obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec
 
   -- Prepare constraints
@@ -361,7 +305,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
     . clear *- b_cmp_result; grind
     . congr
-      clear pa_range lb_imm ub_imm imm_mod
+      clear pa_range lb_imm ub_imm
       obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
       simp [← BranchLessThanCoreAir_4_8.diff_0_def,
             ← BranchLessThanCoreAir_4_8.diff_1_def,
@@ -507,7 +451,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
     . clear *- b_cmp_result; grind
     . congr
-      clear pa_range lb_imm ub_imm imm_mod
+      clear pa_range lb_imm ub_imm
       obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
       simp [← BranchLessThanCoreAir_4_8.diff_0_def,
             ← BranchLessThanCoreAir_4_8.diff_1_def,
@@ -720,7 +664,8 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
     spec_BLT_BLTU_BGE_BGEU_pc_FBB _ air row row_in_range constraints row_valid propertiesToAssume
 
   have ⟨
-    h_pc, h_next_pc,
+    h_pc, h_pc_aignment,
+    h_next_pc,
     rest
   ⟩ := BranchLessThan.ValidRows.essentials
         ExtF

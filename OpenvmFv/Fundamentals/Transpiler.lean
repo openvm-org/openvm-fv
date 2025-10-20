@@ -44,145 +44,150 @@ namespace Transpiler
     bv.toNat
 
   def transpile_op (inst : instruction) (multiplicity : FBB) (pc : FBB): Option (FBB × Vector FBB 9) :=
-    match inst with
-      | .RTYPE (rs2, rs1, rd, rop.ADD)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 512, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.SUB)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 513, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.XOR)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 514, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.OR)   =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 515, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.AND)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 516, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.SLL)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 517, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.SRL)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 518, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.SRA)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 519, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.SLT)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 520, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .RTYPE (rs2, rs1, rd, rop.SLTU) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 521, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-      | .ITYPE (imm, rs1, rd, iop.ADDI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 512, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-      | .ITYPE (imm, rs1, rd, iop.XORI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 514, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-      | .ITYPE (imm, rs1, rd, iop.ORI)   =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 515, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-      | .ITYPE (imm, rs1, rd, iop.ANDI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 516, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-      | .SHIFTIOP (shamt, rs1, rd, sop.SLLI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 517, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
-      | .SHIFTIOP (shamt, rs1, rd, sop.SRLI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 518, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
-      | .SHIFTIOP (shamt, rs1, rd, sop.SRAI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 519, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
-      | .ITYPE (imm, rs1, rd, iop.SLTI)  =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 520, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-      | .ITYPE (imm, rs1, rd, iop.SLTIU) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 521, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-      | .BTYPE (imm, rs2, rs1, bop.BEQ) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 544, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
-      | .BTYPE (imm, rs2, rs1, bop.BNE) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
-      | .BTYPE (imm, rs2, rs1, bop.BLT) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
-      | .BTYPE (imm, rs2, rs1, bop.BGE) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
-      | .BTYPE (imm, rs2, rs1, bop.BLTU) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
-      | .BTYPE (imm, rs2, rs1, bop.BGEU) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
-      | .UTYPE (imm, rd, uop.AUIPC) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 (BitVec.extractLsb 31 12 imm)) <<< 4), 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 592, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := true : mul_op}) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 593, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := false : mul_op}) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 594, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := false, signed_rs2 := false : mul_op}) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 595, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .DIV (rs2, rs1, rd, false) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 596, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .DIV (rs2, rs1, rd, true) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 597, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .REM (rs2, rs1, rd, false) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 598, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .REM (rs2, rs1, rd, true) =>
-        .some (if rd == regidx.Regidx 0
-        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 599, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | _ => .none
+    if pc % 4 = 0 then
+      match inst with
+        | .RTYPE (rs2, rs1, rd, rop.ADD)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 512, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.SUB)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 513, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.XOR)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 514, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.OR)   =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 515, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.AND)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 516, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.SLL)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 517, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.SRL)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 518, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.SRA)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 519, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.SLT)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 520, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .RTYPE (rs2, rs1, rd, rop.SLTU) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 521, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+        | .ITYPE (imm, rs1, rd, iop.ADDI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 512, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+        | .ITYPE (imm, rs1, rd, iop.XORI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 514, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+        | .ITYPE (imm, rs1, rd, iop.ORI)   =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 515, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+        | .ITYPE (imm, rs1, rd, iop.ANDI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 516, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+        | .SHIFTIOP (shamt, rs1, rd, sop.SLLI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 517, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
+        | .SHIFTIOP (shamt, rs1, rd, sop.SRLI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 518, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
+        | .SHIFTIOP (shamt, rs1, rd, sop.SRAI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 519, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
+        | .ITYPE (imm, rs1, rd, iop.SLTI)  =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 520, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+        | .ITYPE (imm, rs1, rd, iop.SLTIU) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 521, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+        | .BTYPE (imm, rs2, rs1, bop.BEQ) =>
+          .some (multiplicity, #v[pc, 544, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        | .BTYPE (imm, rs2, rs1, bop.BNE) =>
+          .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        | .BTYPE (imm, rs2, rs1, bop.BLT) =>
+          .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        | .BTYPE (imm, rs2, rs1, bop.BGE) =>
+          .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        | .BTYPE (imm, rs2, rs1, bop.BLTU) =>
+          .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        | .BTYPE (imm, rs2, rs1, bop.BGEU) =>
+          .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        | .UTYPE (imm, rd, uop.AUIPC) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 (BitVec.extractLsb 31 12 imm)) <<< 4), 1, 0, 0, 0]))
+        | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 592, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := true : mul_op}) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 593, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := false : mul_op}) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 594, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := false, signed_rs2 := false : mul_op}) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 595, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .DIV (rs2, rs1, rd, false) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 596, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .DIV (rs2, rs1, rd, true) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 597, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .REM (rs2, rs1, rd, false) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 598, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        | .REM (rs2, rs1, rd, true) =>
+          .some (if rd == regidx.Regidx 0
+          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+          else (multiplicity, #v[pc, 599, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+        -- | .LOAD (imm, rs1, rd, is_unsigned, width) =>
+        --   .some (multiplicity, #v[pc, ])
+        | _ => .none
+      else .none
 
+    lemma pc_aligned_of_some
+      (h_some : transpile_op inst mult pc = .some result)
+    :
+      pc % 4 = 0
+    := by
+      by_cases h: pc % 4 = 0
+      . exact h
+      . unfold transpile_op at h_some
+        rewrite [ite_cond_eq_false] at h_some
+        . simp at h_some
+        . simp [h]
+
+    set_option maxHeartbeats 0
     lemma transpiler_supported_opcode_types
       (h_some : transpile_op inst mult pc = .some result)
     :
@@ -195,6 +200,7 @@ namespace Transpiler
       (∃ data, inst = .DIV data) ∨
       (∃ data, inst = .REM data)
     := by
+      have h_alignment := pc_aligned_of_some h_some
       cases h: inst
       case RTYPE data => left; use data
       case ITYPE data => right; left; use data
@@ -207,8 +213,10 @@ namespace Transpiler
       all_goals {
         exfalso
         rewrite [h] at h_some
-        reduce at h_some
-        simp at h_some
+        unfold transpile_op at h_some
+        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_some
+        dsimp at h_some
+        simp only [reduceCtorEq] at h_some
       }
 
     lemma non_phantom_rd
@@ -242,6 +250,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ imm rs1 rd, inst = .ITYPE (imm, rs1, rd, iop.ADDI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.ADD) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -250,6 +259,7 @@ namespace Transpiler
         case ADD =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -264,6 +274,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -278,6 +289,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -290,6 +302,7 @@ namespace Transpiler
         case ADDI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -304,6 +317,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -317,8 +331,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -328,10 +342,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -362,6 +378,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -375,6 +392,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -390,6 +408,7 @@ namespace Transpiler
     :
       result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SUB) ∧ rd.1 ≠ 0
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -398,6 +417,7 @@ namespace Transpiler
         case SUB =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -412,6 +432,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -426,6 +447,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -439,6 +461,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -452,8 +475,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -463,10 +486,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -497,6 +522,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -510,6 +536,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -526,6 +553,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ imm rs1 rd, inst = .ITYPE (imm, rs1, rd, iop.XORI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.XOR) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -534,6 +562,7 @@ namespace Transpiler
         case XOR =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -548,6 +577,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -562,6 +592,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -574,6 +605,7 @@ namespace Transpiler
         case XORI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -588,6 +620,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -601,8 +634,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -612,10 +645,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -646,6 +681,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -659,6 +695,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -675,6 +712,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ imm rs1 rd, inst = .ITYPE (imm, rs1, rd, iop.ORI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.OR) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -683,6 +721,7 @@ namespace Transpiler
         case OR =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -697,6 +736,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -711,6 +751,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -723,6 +764,7 @@ namespace Transpiler
         case ORI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -737,6 +779,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -750,8 +793,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -761,10 +804,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -795,6 +840,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -808,6 +854,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -824,6 +871,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ imm rs1 rd, inst = .ITYPE (imm, rs1, rd, iop.ANDI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.AND) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -832,6 +880,7 @@ namespace Transpiler
         case AND =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -846,6 +895,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -860,6 +910,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -872,6 +923,7 @@ namespace Transpiler
         case ANDI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -886,6 +938,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -899,8 +952,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -910,10 +963,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -944,6 +999,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -957,6 +1013,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -973,6 +1030,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ shamt rs1 rd, inst = .SHIFTIOP (shamt, rs1, rd, sop.SLLI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SLL) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -981,6 +1039,7 @@ namespace Transpiler
         case SLL =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -995,6 +1054,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1008,6 +1068,7 @@ namespace Transpiler
         case SLLI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1022,6 +1083,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1035,6 +1097,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1048,8 +1111,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1059,10 +1122,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1093,6 +1158,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1106,6 +1172,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1122,6 +1189,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ shamt rs1 rd, inst = .SHIFTIOP (shamt, rs1, rd, sop.SRLI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SRL) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1130,6 +1198,7 @@ namespace Transpiler
         case SRL =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1144,6 +1213,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1157,6 +1227,7 @@ namespace Transpiler
         case SRLI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1171,6 +1242,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1184,6 +1256,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1197,8 +1270,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1208,10 +1281,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1242,6 +1317,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1255,6 +1331,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1271,6 +1348,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ shamt rs1 rd, inst = .SHIFTIOP (shamt, rs1, rd, sop.SRAI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SRA) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1279,6 +1357,7 @@ namespace Transpiler
         case SRA =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1293,6 +1372,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1306,6 +1386,7 @@ namespace Transpiler
         case SRAI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1320,6 +1401,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1333,6 +1415,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1346,8 +1429,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1357,10 +1440,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1391,6 +1476,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1404,6 +1490,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1420,6 +1507,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ imm rs1 rd, inst = .ITYPE (imm, rs1, rd, iop.SLTI) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SLT) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1428,6 +1516,7 @@ namespace Transpiler
         case SLT =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1442,6 +1531,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1456,6 +1546,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1468,6 +1559,7 @@ namespace Transpiler
         case SLTI =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1482,6 +1574,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1495,8 +1588,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1506,10 +1599,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1540,6 +1635,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1553,6 +1649,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1569,6 +1666,7 @@ namespace Transpiler
       (result.2[6] = 0 ∧ ∃ imm rs1 rd, inst = .ITYPE (imm, rs1, rd, iop.SLTIU) ∧ rd.1 ≠ 0) ∨
       (result.2[6] = 1 ∧ ∃ rs2 rs1 rd, inst = .RTYPE (rs2, rs1, rd, rop.SLTU) ∧ rd.1 ≠ 0)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1577,6 +1675,7 @@ namespace Transpiler
         case SLTU =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1591,6 +1690,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1605,6 +1705,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1617,6 +1718,7 @@ namespace Transpiler
         case SLTIU =>
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if
           . have := extract_opcode h_transpile
@@ -1631,6 +1733,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1644,8 +1747,8 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1655,10 +1758,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1689,6 +1794,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1702,6 +1808,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1715,8 +1822,9 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 544)
     :
-      ∃ imm rs2 rs1, imm % 4 = 0 ∧ inst = .BTYPE (imm, rs2, rs1, bop.BEQ)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BEQ)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1726,6 +1834,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1740,6 +1849,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1753,6 +1863,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1764,17 +1875,12 @@ namespace Transpiler
         cases op
         case BEQ =>
           use imm, rs2, rs1
-          rewrite [h_op_data] at h_transpile
-          unfold transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          exact ⟨h_if, h_op_data⟩
         all_goals {
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1784,10 +1890,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1818,6 +1926,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1831,6 +1940,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1844,8 +1954,9 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 545)
     :
-      ∃ imm rs2 rs1, imm % 4 = 0 ∧ inst = .BTYPE (imm, rs2, rs1, bop.BNE)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BNE)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1855,6 +1966,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1869,6 +1981,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1882,6 +1995,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1893,17 +2007,12 @@ namespace Transpiler
         cases op
         case BNE =>
           use imm, rs2, rs1
-          rewrite [h_op_data] at h_transpile
-          unfold transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          exact ⟨h_if, h_op_data⟩
         all_goals {
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -1913,10 +2022,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1947,6 +2058,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1960,6 +2072,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -1973,8 +2086,9 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 549)
     :
-      ∃ imm rs2 rs1, imm % 4 = 0 ∧ inst = .BTYPE (imm, rs2, rs1, bop.BLT)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BLT)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -1984,6 +2098,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -1998,6 +2113,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2011,6 +2127,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2022,17 +2139,12 @@ namespace Transpiler
         cases op
         case BLT =>
           use imm, rs2, rs1
-          rewrite [h_op_data] at h_transpile
-          unfold transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          exact ⟨h_if, h_op_data⟩
         all_goals {
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -2042,10 +2154,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2076,6 +2190,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2089,6 +2204,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2102,8 +2218,9 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 550)
     :
-      ∃ imm rs2 rs1, imm % 4 = 0 ∧ inst = .BTYPE (imm, rs2, rs1, bop.BGE)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BGE)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -2113,6 +2230,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -2127,6 +2245,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2140,6 +2259,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2151,17 +2271,12 @@ namespace Transpiler
         cases op
         case BGE =>
           use imm, rs2, rs1
-          rewrite [h_op_data] at h_transpile
-          unfold transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          exact ⟨h_if, h_op_data⟩
         all_goals {
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -2171,10 +2286,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2205,6 +2322,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2218,6 +2336,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2231,8 +2350,9 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 551)
     :
-      ∃ imm rs2 rs1, imm % 4 = 0 ∧ inst = .BTYPE (imm, rs2, rs1, bop.BLTU)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BLTU)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -2242,6 +2362,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -2256,6 +2377,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2269,6 +2391,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2280,17 +2403,12 @@ namespace Transpiler
         cases op
         case BLTU =>
           use imm, rs2, rs1
-          rewrite [h_op_data] at h_transpile
-          unfold transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          exact ⟨h_if, h_op_data⟩
         all_goals {
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -2300,10 +2418,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2334,6 +2454,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2347,6 +2468,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2360,8 +2482,9 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 552)
     :
-      ∃ imm rs2 rs1, imm % 4 = 0 ∧ inst = .BTYPE (imm, rs2, rs1, bop.BGEU)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BGEU)
     := by
+      have h_alignment := pc_aligned_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
       rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
@@ -2371,6 +2494,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
           . have := extract_opcode h_transpile
@@ -2385,6 +2509,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2398,6 +2523,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2409,17 +2535,12 @@ namespace Transpiler
         cases op
         case BGEU =>
           use imm, rs2, rs1
-          rewrite [h_op_data] at h_transpile
-          unfold transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          exact ⟨h_if, h_op_data⟩
         all_goals {
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile
           have := extract_opcode h_transpile
           clear * - h_opcode this
           omega
@@ -2429,10 +2550,12 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           simp at h_transpile
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2463,6 +2586,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
@@ -2476,6 +2600,7 @@ namespace Transpiler
           exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
+          rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
