@@ -101,7 +101,7 @@ lemma wf_propertiesToAssert
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
   obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_a0, ub_cry0, ub_a1, ub_cry1, ub_a2, ub_cry2, ub_a3, ub_cry3 ⟩ := pa_rtc
-  clear pa_exec pa_range
+  clear pa_range
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_mul_constraint_and_interaction_simplification] at constraints

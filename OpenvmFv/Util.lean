@@ -9,6 +9,16 @@ lemma assert_eq [Field F] (a b: F):
   (a - b = 0) = (a = b)
 := by grind
 
+-- @[openvm_encapsulation]
+lemma eq_constant_1 {T: Type} (x: T) [inst: OfNat T 1]:
+  ((@OfNat.ofNat T (nat_lit 1) inst) = x) = (x = (@OfNat.ofNat T (nat_lit 1) inst))
+:= by grind
+
+-- @[openvm_encapsulation]
+lemma eq_constant_256 {T: Type} (x: T) [inst: OfNat T 256]:
+  ((@OfNat.ofNat T (nat_lit 256) inst) = x) = (x = (@OfNat.ofNat T (nat_lit 256) inst))
+:= by grind
+
 section BusIndices
   abbrev ExecutionBus : ℕ := 0
   abbrev MemoryBus : ℕ := 1

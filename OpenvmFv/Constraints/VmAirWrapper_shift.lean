@@ -1908,48 +1908,155 @@ namespace VmAirWrapper_shift.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-    /-- The ALU-specific instance of the read-instruction bus properties -/
-    @[simp, grind]
-    instance (priority := 1001) ReadInstructionBusEntryInstanceShift
-    : Interaction.BusEntry FBB (Interaction.ReadInstructionBusEntry FBB) :=
-      let wf_prop_fun :=
-        fun (⟨_, _, _, rd, rs1, rs2, xd, rs2_as, xf, xg⟩ : Interaction.ReadInstructionBusEntry FBB) =>
-            -- rd and rs1 boundaries
-            rd.val < 32 ∧ rs1.val < 32 ∧
-            -- non-immediate rs2
-            (rs2_as = 1 → rs2.val < 32) ∧
-            -- immediate rs2
-            (rs2_as = 0 →
-              -- immediate fits 24 bits
-              rs2.val < 2 ^ 24 ∧
-              -- immediate is a zero-extended 5-bit value
-              (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat) ∧
-            -- unused parameters
-            xd = 1 ∧ xf = 0 ∧ xg = 0
-      { Interaction.ReadInstructionBusEntryInstance with
-        wf_properties := wf_prop_fun
-        assume entry := Interaction.ReadInstructionBusEntryInstance.wf_assume_cond entry → wf_prop_fun entry,
-        assert entry := Interaction.ReadInstructionBusEntryInstance.wf_assert_cond entry → wf_prop_fun entry
-      }
+    @[VmAirWrapper_shift_constraint_and_interaction_simplification]
+    def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
+      let rs2 := entry.xc
+      let rs2_as := entry.xe
+      (rs2_as = 0 →
+        -- immediate is a zero-extended 5-bit value
+        (BitVec.ofNat 24 rs2.val).toNat = (BitVec.ofNat 5 rs2.val).toNat)
+
+    lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
+      (h_bounds :
+        entry.opcode = 517 ∨
+        entry.opcode = 518 ∨
+        entry.opcode = 519
+      )
+      (h_bus : Interaction.ReadInstructionBusEntry.operand_properties entry)
+    :
+      readInstructionBus_properties entry
+    := by
+      simp [readInstructionBus_properties.eq_def]
+      simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
+      obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
+      simp [←h_data] at h_bounds ⊢ h_transpile
+      clear h_data
+      have h_supported_types := Transpiler.transpiler_supported_opcode_types h_transpile
+      have : data = #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]] := by
+        clear *-data
+        apply Vector.ext
+        intro i h_i
+        by_cases i=0; simp [*]
+        by_cases i=1; simp [*]
+        by_cases i=2; simp [*]
+        by_cases i=3; simp [*]
+        by_cases i=4; simp [*]
+        by_cases i=5; simp [*]
+        by_cases i=6; simp [*]
+        by_cases i=7; simp [*]
+        by_cases i=8; simp [*]
+        exfalso; omega
+      have h_op_1 :
+        (multiplicity, #v[data[0], 1, 0, 0, 0, 0, 0, 0, 0]) =
+        (multiplicity, #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]]) →
+        data[1] = 1 := by grind
+      have h_rs2_1 {op rd rs1 rs2}:
+        (multiplicity, #v[data[0], op, rd, rs1, rs2, 1, 1, 0, 0]) =
+        (multiplicity, #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]]) →
+        data[6] = 1 := by grind
+      rcases h_supported_types with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      . obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type -- RTYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          . exfalso
+            have : data[1] = 1 := h_op_1 h_transpile
+            simp [this] at h_bounds
+          . intro h_rs2_as; exfalso
+            have : data[6] = 1 := h_rs2_1 h_transpile
+            simp [this] at h_rs2_as
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          exfalso
+          grind
+        }
+      . obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type -- SHIFTIOP
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          . exfalso; grind
+          . intro h_rs2_as
+            have : data[4] = Transpiler.utof (Transpiler.zero_extend_24 (BitVec.extractLsb 4 0 shamt)) := by grind
+            rewrite [this]
+            simp [Transpiler.utof, Transpiler.zero_extend_24]
+            omega
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_transpile
+          rewrite [this] at h_transpile
+          dsimp at h_transpile
+          exfalso
+          grind
+        }
+      . obtain ⟨⟨imm, rs1, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          grind
+        }
+      . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2 <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          grind
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile <;> simp at h_transpile <;> grind
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed <;> {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile <;> simp at h_transpile <;> grind
+        }
+
 
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
       (h_in : entry ∈ readInstructionBus_row air row)
     :
-      entry.2.length = ReadInstructionBusEntryInstanceShift.data_length
+      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
     := by
       unfold readInstructionBus_row at *; simp_all
 
     @[VmAirWrapper_shift_constraint_and_interaction_simplification]
     def _readInstructionBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ) :=
-      let vectorised_row : List (FBB × Vector FBB ReadInstructionBusEntryInstanceShift.data_length) := by
+      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
         exact
         List.map
           (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
           (readInstructionBus_row air row).attach
-      List.map ReadInstructionBusEntryInstanceShift.deserialise vectorised_row
+      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
 
     lemma bitwiseBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_shift FBB ExtF} {row : ℕ}
@@ -1971,18 +2078,23 @@ namespace VmAirWrapper_shift.constraints
           (bitwiseBus_row air row).attach
       List.map Interaction.BitwiseBusEntryInstance.deserialise vectorised_row
 
+    @[simp]
     def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
       rowData.map Interaction.BusEntry.serialiseToList
 
+    @[simp]
     def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
       List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
 
+    @[simp]
     def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
       List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
 
+    @[simp]
     def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
       List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
 
+    @[simp]
     def busRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
     : List (FBB × List FBB) :=
       executionBus_row air row ++
@@ -1991,6 +2103,7 @@ namespace VmAirWrapper_shift.constraints
       readInstructionBus_row air row ++
       bitwiseBus_row air row
 
+    @[simp]
     def assumptionsPerRow [Field ExtF]
       (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
     : Prop :=
@@ -2000,6 +2113,7 @@ namespace VmAirWrapper_shift.constraints
       assumptions (_readInstructionBus_row air row) ∧
       assumptions (_bitwiseBus_row air row)
 
+    @[simp]
     def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
     : Prop :=
       propertiesToAssume (_executionBus_row air row) ∧
@@ -2008,6 +2122,7 @@ namespace VmAirWrapper_shift.constraints
       propertiesToAssume (_readInstructionBus_row air row) ∧
       propertiesToAssume (_bitwiseBus_row air row)
 
+    @[simp]
     def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
     : Prop :=
       propertiesToAssert (_executionBus_row air row) ∧
@@ -2019,6 +2134,15 @@ namespace VmAirWrapper_shift.constraints
   end bus_entries
 
   section auxiliaries
+
+  instance : Coe (Fin 256) FBB where
+    coe b := ⟨ b.toNat, by {
+      apply lt_trans _ (show 256 < BB_prime by trivial)
+      obtain ⟨b, h_b⟩ := b
+      dsimp
+      exact h_b
+    } ⟩
+
 
   lemma FBB_invert_shift_aux
     {x : Fin 256} {y z : FBB}

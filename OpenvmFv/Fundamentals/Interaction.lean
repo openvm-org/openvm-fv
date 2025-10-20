@@ -1,4 +1,5 @@
 import OpenvmFv.Fundamentals.BabyBear
+import OpenvmFv.Fundamentals.Transpiler
 
 import LeanZKCircuit.Interactions
 
@@ -86,12 +87,15 @@ namespace Interaction
           data_length := 2,
           data := fun ⟨_, pc, timestamp⟩ => #v[pc, timestamp],
 
-          -- Timestamps are always less than `2^29`
-          assumptions := fun ⟨multiplicity, _, timestamp⟩ =>
-                           ¬ multiplicity = 0 → timestamp < 2 ^ 29
+          -- `pc`s are always less than `2^30`,
+          -- timestamps are always less than `2^29`.
+          assumptions :=
+            fun ⟨multiplicity, pc, timestamp⟩ =>
+              ¬ multiplicity = 0 →
+                pc < 2^30 ∧ pc % 4 = 0
 
           -- An execution bus entry has no assume/prove properties
-          wf_properties := fun _ => True
+          wf_properties := fun ⟨_, pc, _⟩ => True
 
           wf_assume_cond := fun entry => entry.1 = -1,
           wf_assert_cond := fun entry => entry.1 = 1,
@@ -213,7 +217,7 @@ namespace Interaction
               val.val < 2 ^ deg.val
 
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := RangeCheckerBusEntry.deserialise FBB
 
@@ -258,9 +262,14 @@ namespace Interaction
           xg := entry.2[8]
         }
 
+      def ReadInstructionBusEntry.operand_properties (entry : ReadInstructionBusEntry FBB) : Prop :=
+        ∃ instruction data,
+          (Transpiler.transpile_op instruction entry.multiplicity entry.pc = .some data) ∧
+          (ReadInstructionBusEntry.deserialise FBB data = entry)
+
       /-- Read-instruction bus entry instance -/
       @[simp, grind]
-      instance (priority := 999) ReadInstructionBusEntryInstance
+      instance ReadInstructionBusEntryInstance
       : BusEntry FBB (ReadInstructionBusEntry FBB) :=
       {
           multiplicity := fun entry => entry.1,
@@ -273,10 +282,9 @@ namespace Interaction
           assumptions := fun _ => True
 
           -- No well-formedness properties imposed right now
-          wf_properties := fun _ => True
-
+          wf_properties := ReadInstructionBusEntry.operand_properties
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := ReadInstructionBusEntry.deserialise FBB
 
@@ -336,7 +344,7 @@ namespace Interaction
               c.val = if op = 0 then 0 else a.val ^^^ b.val
 
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := BitwiseBusEntry.deserialise FBB
 
@@ -384,7 +392,7 @@ namespace Interaction
           wf_properties := fun ⟨_, x1, x2⟩ => x1.val < 256 ∧ x2.val < 2048
 
           wf_assume_cond := fun entry => entry.1 = 1,
-          wf_assert_cond := fun _ => False,
+          wf_assert_cond := fun entry => entry.1 = -1,
 
           deserialise := RangeTupleCheckerBusEntry.deserialise FBB
 

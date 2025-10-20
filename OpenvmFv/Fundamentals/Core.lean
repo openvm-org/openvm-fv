@@ -2,10 +2,80 @@ import Mathlib
 
 set_option maxHeartbeats 1_000_000_000
 
-/-- A prime finite field has no zero divisors -/
-instance Fin.noZeroDivisors_of_prime (p : ℕ)
-    [hp : Fact (Nat.Prime (p + 1))] : NoZeroDivisors (Fin (p + 1)) := by
-  refine IsDomain.to_noZeroDivisors (ZMod (p + 1))
+namespace Fin
+
+  /-- A prime finite field has no zero divisors -/
+  instance noZeroDivisors_of_prime (p : ℕ)
+      [hp : Fact (Nat.Prime (p + 1))] : NoZeroDivisors (Fin (p + 1)) := by
+    refine IsDomain.to_noZeroDivisors (ZMod (p + 1))
+
+end Fin
+
+namespace List
+
+  lemma append_eq_append_split
+    {T : Type}
+    {a b c d : List T}
+    (h_eq : a ++ b = c ++ d)
+    (h_len_ab : a.length = c.length)
+  :
+    a = c ∧ b = d
+  := by
+    induction a generalizing b c d
+    case nil => symm at h_len_ab; simp_all
+    case cons a₀ a ih =>
+      cases c
+      case nil => grind
+      case cons c₀ c =>
+        simp_all
+        apply ih <;> grind
+
+  lemma flatMap_eq_flatMap
+    {A B C : Type}
+    {f : A → List C}
+    {g : B → List C}
+    {lf : List A}
+    {lg : List B}
+    (h_eq_fmap : flatMap f lf = flatMap g lg)
+    (h_eq_len : lf.length = lg.length)
+    (h_eq_len_fg : forall a b, (f a).length = (g b).length)
+    (idx : ℕ)
+    (h_idx : idx < lf.length)
+  :
+    f lf[idx] = g lg[idx]
+  := by
+    induction lf generalizing idx lg
+    case nil => grind
+    case cons f₀ lf ih =>
+      cases lg
+      case nil => grind
+      case cons g₀ lg =>
+        simp_all
+        have h_eq'
+        :
+          flatMap f lf = flatMap g lg
+        := by
+          apply append_eq_append_split (h_len_ab := h_eq_len_fg f₀ g₀) at h_eq_fmap
+          tauto
+        cases idx
+        case zero => simp_all
+        case succ idx =>
+          specialize @ih lg h_eq' (by grind)
+          grind
+
+  lemma forall_in_range
+    {n : ℕ}
+    {P : ℕ → Prop}
+    (m : ℕ)
+    (in_range : m < n)
+  :
+    Forall (fun n => P n) (range n) → P m
+  := by
+    induction n generalizing m
+    case zero => simp_all
+    case succ n ih => simp [range_add]; grind
+
+end List
 
 namespace BitVec
 
@@ -31,6 +101,48 @@ lemma append_eq_append_eql {m n : ℕ} {x1 y1 : BitVec m} {x2 y2 : BitVec n} :
   . specialize h_eq_bv ⟨i, by omega⟩; simp_all
     iterate 2 rw [BitVec.getElem_append (by omega)] at h_eq_bv
     simp_all
+
+/-- Characterisation of `toInt` invertibility -/
+lemma toInt_ofInt_eq_self_iff
+  {w : Nat} (hw : 0 < w) {n : Int}
+:
+  (BitVec.ofInt w n).toInt = n ↔ -2 ^ (w - 1) ≤ n ∧ n < 2 ^ (w - 1)
+:= by
+  constructor <;> intro h
+  . simp [BitVec.ofInt, BitVec.toInt] at h
+    rw [Int.max_eq_left (by omega)] at h
+    split_ifs at h with h'
+    . replace h' : (n % 2 ^ w).toNat < 2 ^ (w - 1) := by
+        rw [← mul_lt_mul_left (a := 2 ^ 1) (by omega)]
+        apply lt_of_lt_of_le
+        . exact h'
+        . rw [← pow_add]
+          apply pow_le_pow <;> omega
+      have ⟨ lb_n, ub_n ⟩ : 0 ≤ n ∧ n < 2 ^ w := by omega
+      rw [h] at *; clear h
+      simp_all
+      omega
+    . replace h' :  2 ^ (w - 1) ≤ (n % 2 ^ w).toNat := by
+        rw [← mul_le_mul_left (a := 2 ^ 1) (by omega)]
+        simp at h'; trans; rotate_left
+        . simp; exact h'
+        . rw [← pow_add]
+          apply pow_le_pow <;> omega
+      have ub_n : n < 0 := by omega
+      split_ands <;> [ skip; grind ]
+      replace h : n % 2 ^ w = n + 2 ^ w := by omega
+      rw [h] at h'
+      suffices : -2 ^ (w - 1) + 2 ^ w ≤ n + 2 ^ w
+      . omega
+      . trans 2 ^ (w - 1)
+        . simp [← Int.two_mul]
+          rw [mul_comm]
+          simp [← pow_succ]
+          have : (w - 1) + 1 = w := by omega
+          simp [this]
+        . zify at *; simp_all
+          omega
+  . apply BitVec.toInt_ofInt_eq_self <;> omega
 
 /-- Reformulation of `sshiftRight` -/
 lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
@@ -73,6 +185,15 @@ lemma xor_as_or
   have : (512 - (a + b) + 2 * (a ||| b)) % 512 = 2 * (a ||| b) - (a + b) := by omega
   rw [this] at bv_xor_as_or
   exact bv_xor_as_or
+
+lemma toInt_mod_eq_zero_of_bitvec_mod_eq_zero (bv: BitVec 13) (h: bv % 4 = 0):
+  bv.toInt % 4 = 0
+:= by
+  simp at h ⊢
+  have : (4: Int) = (4#13).toInt := rfl
+  rewrite [this]
+  apply BitVec.toInt_dvd_toInt_iff.mpr
+  bv_decide
 
 end BitVec
 
@@ -238,20 +359,11 @@ lemma div_overflow {x y : ℤ} :
         omega
   . simp_all
 
-lemma List.forall_in_range
-  {n : ℕ}
-  {P : ℕ → Prop}
-  (m : ℕ)
-  (in_range : m < n)
-:
-  List.Forall (fun n => P n) (List.range n) → P m
-:= by
-  induction n generalizing m
-  case zero => simp_all
-  case succ n ih => simp [List.range_add]; grind
+lemma ite_neg_cond (a : Prop) (b c : T) [Decidable a] : (if a then b else c) = (if !a then c else b) := by grind
 
 @[simp low] lemma to_the_right_nat_0 : 0 = a ↔ a = 0 := by omega
 @[simp low] lemma to_the_right_nat_1 : 1 = a ↔ a = 1 := by omega
 @[simp low] lemma to_the_right_nat_255 : 255 = a ↔ a = 255 := by omega
+@[simp low] lemma to_the_right_nat_256 : 256 = a ↔ a = 256 := by omega
 
 end auxiliaries

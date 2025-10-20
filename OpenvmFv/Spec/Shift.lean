@@ -145,6 +145,7 @@ section General
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- The properties that need to be proven actually hold -/
@@ -154,12 +155,16 @@ lemma wf_propertiesToAssert
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
+
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
+
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
   obtain ⟨ ba0, ba1, ba2, ba3, ba4, ba5 ⟩ := pa_bit
-  clear pa_exec pa_range
+  clear pa_range
 
   have ⟨ sop0, sop1, sop2 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
@@ -171,12 +176,14 @@ lemma wf_propertiesToAssert
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
   by_cases h_rs2_0 : air.adapter.rs2_as row 0 = 0 <;> simp_all
+  . grind
   . simp [Fin.ext_iff] at ub_rs2n_c
-    assumption
+    grind
 
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume
 in
 /-- Some properties more important than others that should
@@ -205,7 +212,7 @@ lemma essentials
   ((air.core.bit_shift_carry_2 row 0).val < 128) ∧
   ((air.core.bit_shift_carry_3 row 0).val < 128)
 := by
-  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid propertiesToAssume
+  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   clear pa_exec rest
   simp [row_valid,
@@ -216,10 +223,13 @@ lemma essentials
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
 
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
+
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2n_c, ub_rs2p_c, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
   obtain ⟨ ra0, ra1, ra2, ra3, ra4, ra5, ra6, ra7, ra8, rest ⟩ := pa_range; clear rest
   obtain ⟨ ba0, ba1, ba2, ba3, ba4, ba5 ⟩ := pa_bit
   clear pa_exec
@@ -335,6 +345,7 @@ def rop_of_Shift_opcode (opcode : FBB) : rop :=
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The constraints entail correct implementation of the SLL opcode:
     - the `b` operand read from memory; and
@@ -359,7 +370,7 @@ theorem spec_base_SLL
                  (air.core.c_3 row 0).val])
     .SLL
 := by
-  have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+  have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   simp [and_assoc] at essentials
   obtain ⟨ ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
            opcodes, b_rs2_as, h_imm, h_mul_left, h_mul_right, h_bs_0, h_bs_1, h_bs_2, h_bs_3 ⟩ := essentials
@@ -571,6 +582,7 @@ theorem spec_base_SLL
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The constraints entail correct implementation of the SRL opcode:
     - the `b` operand read from memory; and
@@ -595,7 +607,7 @@ theorem spec_base_SRL
                  (air.core.c_3 row 0).val])
     .SRL
 := by
-  have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+  have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   simp [and_assoc] at essentials
   obtain ⟨ ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
            opcodes, b_rs2_as, h_imm, h_mul_left, h_mul_right, h_bs_0, h_bs_1, h_bs_2, h_bs_3 ⟩ := essentials
@@ -1023,6 +1035,7 @@ end auxiliaries
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The constraints entail correct implementation of the SRA opcode:
     - the `b` operand read from memory; and
@@ -1048,7 +1061,7 @@ theorem spec_base_SRA
                  (air.core.c_3 row 0).val])
     .SRA
 := by
-  have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+  have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   simp [and_assoc] at essentials
   obtain ⟨ ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
            opcodes, b_rs2_as, h_imm, h_mul_left, h_mul_right, h_bs_0, h_bs_1, h_bs_2, h_bs_3 ⟩ := essentials
@@ -1521,6 +1534,7 @@ theorem spec_base_SRA
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
 /-- The constraints entail correct implementation of the
     three base Shift opcodes for:
@@ -1545,7 +1559,7 @@ theorem spec_base_Shift
                  (air.core.c_3 row 0).val])
     (rop_of_Shift_opcode (air.core.ctx row 0).instruction.opcode)
 := by
-  have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+  have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
   have opcodes : ((air.core.ctx row 0).instruction.opcode = 517 ∨
                   (air.core.ctx row 0).instruction.opcode = 518 ∨
                   (air.core.ctx row 0).instruction.opcode = 519) := by grind
@@ -1554,13 +1568,13 @@ theorem spec_base_Shift
   obtain ⟨ op0, op1, op2 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   rcases opcodes with sll | srl | sra
-  . have := @spec_base_SLL _ _ air row row_in_range constraints row_valid propertiesToAssume
+  . have := @spec_base_SLL _ _ air row row_in_range constraints row_valid assumptions propertiesToAssume
     simp_all [rop_of_Shift_opcode]
-  . have := @spec_base_SRL _ _ air row row_in_range constraints row_valid propertiesToAssume
+  . have := @spec_base_SRL _ _ air row row_in_range constraints row_valid assumptions propertiesToAssume
     simp_all [rop_of_Shift_opcode]
   . obtain ⟨ b_b_sign, b_sign_msb ⟩ := b_sign_properties _ air row row_in_range constraints row_valid propertiesToAssume
     rcases b_b_sign with hbz | hb0
-    . have := @spec_base_SRL _ _ air row row_in_range constraints row_valid propertiesToAssume
+    . have := @spec_base_SRL _ _ air row row_in_range constraints row_valid assumptions propertiesToAssume
       trans execute_RTYPE_pure
               (U32.toBV
                 #v[BitVec.ofNat 8 ↑(air.core.b_0 row 0), BitVec.ofNat 8 ↑(air.core.b_1 row 0),
@@ -1577,7 +1591,7 @@ theorem spec_base_Shift
         grind
     . simp only [rop_of_Shift_opcode, sra, Fin.reduceEq, ↓reduceIte]
       apply op2 at sra
-      have := @spec_base_SRA _ _ air row row_in_range constraints row_valid propertiesToAssume sra hb0
+      have := @spec_base_SRA _ _ air row row_in_range constraints row_valid assumptions propertiesToAssume sra hb0
       assumption
 
 end General
@@ -1587,8 +1601,9 @@ section NonImmediate
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
-/-- The non-immediate variants of the five base ALU opcodes
+/-- The non-immediate variants of the three shift opcodes
     are implemented as per the RISC-V spec -/
 theorem spec_base_Shift_non_imm
   (_ : air.adapter.rs2_as row 0 = 1)
@@ -1623,10 +1638,11 @@ def iop_of_Shift_opcode (opcode : FBB) : sop :=
 include
   row_valid
   constraints
+  assumptions
   propertiesToAssume in
-/-- The immediate variants of the five base ALU opcodes
+/-- The immediate variants of the three shift opcodes
     are implemented as per the RISC-V spec -/
-theorem spec_base_ALU_imm
+theorem spec_base_Shift_imm
   (h_imm : air.adapter.rs2_as row 0 = 0)
 :
   (U32.toBV #v[(air.core.a_0 row 0).val,
@@ -1646,11 +1662,16 @@ theorem spec_base_ALU_imm
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume'
   clear pa_exec pa_mem pa_range pa_bit
 
+
   simp [row_valid,
         VmAirWrapper_shift_constraint_and_interaction_simplification,
         VmAirWrapper_shift.constraints.propertiesToAssume] at pa_read
+
+  have opcodes := opcode_bounds air row row_in_range constraints row_valid
+  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
+
   repeat rw [Fin.ext_iff] at pa_read
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2_non_imm, ri_imm ⟩ := pa_read
 
   suffices eq_c
   : U32.toBV #v[(air.core.c_0 row 0).val,
@@ -1677,7 +1698,7 @@ theorem spec_base_ALU_imm
       grind
   . simp [*, ← BitVec.toNat_inj]
     trans (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toNat
-    . have essentials := essentials _ air row row_in_range constraints row_valid propertiesToAssume
+    . have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
       simp [h_imm, and_assoc] at essentials
       obtain ⟨ ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
                opcodes, h_rs2, imm_sign_extend, rs2_as_imm, imm_sign, imm_sign_extend' ⟩ := essentials

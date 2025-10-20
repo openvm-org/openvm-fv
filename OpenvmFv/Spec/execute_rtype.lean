@@ -2,10 +2,10 @@ import Mathlib
 
 import LeanRV32D
 
-#print LeanRV32D.Functions.execute_RTYPE
-#print LeanRV32D.Functions.run_hart_active
-#print LeanRV32D.Functions.rX_bits
-#print LeanRV32D.Functions.rX
+-- #print LeanRV32D.Functions.execute_RTYPE
+-- #print LeanRV32D.Functions.run_hart_active
+-- #print LeanRV32D.Functions.rX_bits
+-- #print LeanRV32D.Functions.rX
 
 -- #print LeanRV32D.Functions.run_hart_active
 
