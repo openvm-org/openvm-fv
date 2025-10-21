@@ -46,134 +46,144 @@ namespace Transpiler
   def transpile_op (inst : instruction) (multiplicity : FBB) (pc : FBB): Option (FBB × Vector FBB 9) :=
     if pc % 4 = 0 then
       match inst with
-        | .RTYPE (rs2, rs1, rd, rop.ADD)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 512, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.SUB)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 513, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.XOR)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 514, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.OR)   =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 515, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.AND)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 516, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.SLL)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 517, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.SRL)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 518, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.SRA)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 519, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.SLT)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 520, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .RTYPE (rs2, rs1, rd, rop.SLTU) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 521, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
-        | .ITYPE (imm, rs1, rd, iop.ADDI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 512, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-        | .ITYPE (imm, rs1, rd, iop.XORI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 514, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-        | .ITYPE (imm, rs1, rd, iop.ORI)   =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 515, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-        | .ITYPE (imm, rs1, rd, iop.ANDI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 516, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-        | .SHIFTIOP (shamt, rs1, rd, sop.SLLI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 517, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
-        | .SHIFTIOP (shamt, rs1, rd, sop.SRLI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 518, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
-        | .SHIFTIOP (shamt, rs1, rd, sop.SRAI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 519, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
-        | .ITYPE (imm, rs1, rd, iop.SLTI)  =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 520, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-        | .ITYPE (imm, rs1, rd, iop.SLTIU) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 521, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
-        | .BTYPE (imm, rs2, rs1, bop.BEQ) =>
-          .some (multiplicity, #v[pc, 544, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        | .BTYPE (imm, rs2, rs1, bop.BNE) =>
-          .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        | .BTYPE (imm, rs2, rs1, bop.BLT) =>
-          .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        | .BTYPE (imm, rs2, rs1, bop.BGE) =>
-          .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        | .BTYPE (imm, rs2, rs1, bop.BLTU) =>
-          .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        | .BTYPE (imm, rs2, rs1, bop.BGEU) =>
-          .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        | .UTYPE (imm, rd, uop.AUIPC) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 (BitVec.extractLsb 31 12 imm)) <<< 4), 1, 0, 0, 0]))
-        | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 592, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := true : mul_op}) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 593, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := false : mul_op}) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 594, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := false, signed_rs2 := false : mul_op}) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 595, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .DIV (rs2, rs1, rd, false) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 596, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .DIV (rs2, rs1, rd, true) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 597, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .REM (rs2, rs1, rd, false) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 598, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        | .REM (rs2, rs1, rd, true) =>
-          .some (if rd == regidx.Regidx 0
-          then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-          else (multiplicity, #v[pc, 599, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-        -- | .LOAD (imm, rs1, rd, is_unsigned, width) =>
-        --   .some (multiplicity, #v[pc, ])
-        | _ => .none
-      else .none
+      | .RTYPE (rs2, rs1, rd, rop.ADD)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 512, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.SUB)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 513, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.XOR)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 514, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.OR)   =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 515, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.AND)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 516, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.SLL)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 517, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.SRL)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 518, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.SRA)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 519, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.SLT)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 520, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .RTYPE (rs2, rs1, rd, rop.SLTU) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 521, ind rd, ind rs1, ind rs2, 1, 1, 0, 0]))
+      | .ITYPE (imm, rs1, rd, iop.ADDI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 512, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+      | .ITYPE (imm, rs1, rd, iop.XORI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 514, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+      | .ITYPE (imm, rs1, rd, iop.ORI)   =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 515, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+      | .ITYPE (imm, rs1, rd, iop.ANDI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 516, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+      | .SHIFTIOP (shamt, rs1, rd, sop.SLLI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 517, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
+      | .SHIFTIOP (shamt, rs1, rd, sop.SRLI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 518, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
+      | .SHIFTIOP (shamt, rs1, rd, sop.SRAI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 519, ind rd, ind rs1, utof (zero_extend_24 (BitVec.extractLsb 4 0 shamt)), 1, 0, 0, 0]))
+      | .ITYPE (imm, rs1, rd, iop.SLTI)  =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 520, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+      | .ITYPE (imm, rs1, rd, iop.SLTIU) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 521, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
+      | .BTYPE (imm, rs2, rs1, bop.BEQ) =>
+        if (imm % 4 = 0)
+        then .some (multiplicity, #v[pc, 544, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        else .none
+      | .BTYPE (imm, rs2, rs1, bop.BNE) =>
+        if (imm % 4 = 0)
+        then .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        else .none
+      | .BTYPE (imm, rs2, rs1, bop.BLT) =>
+        if (imm % 4 = 0)
+        then .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        else .none
+      | .BTYPE (imm, rs2, rs1, bop.BGE) =>
+        if (imm % 4 = 0)
+        then .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        else .none
+      | .BTYPE (imm, rs2, rs1, bop.BLTU) =>
+        if (imm % 4 = 0)
+        then .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        else .none
+      | .BTYPE (imm, rs2, rs1, bop.BGEU) =>
+        if (imm % 4 = 0)
+        then .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+        else .none
+      | .UTYPE (imm, rd, uop.AUIPC) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 imm) <<< 4), 1, 0, 0, 0]))
+      | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 592, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := true : mul_op}) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 593, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := false : mul_op}) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 594, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := false, signed_rs2 := false : mul_op}) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 595, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .DIV (rs2, rs1, rd, false) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 596, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .DIV (rs2, rs1, rd, true) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 597, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .REM (rs2, rs1, rd, false) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 598, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | .REM (rs2, rs1, rd, true) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 599, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
+      | _ => .none
+    else .none
 
     lemma pc_aligned_of_some
       (h_some : transpile_op inst mult pc = .some result)
@@ -2601,6 +2611,126 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_576
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 576)
+    :
+      ∃ imm rd, inst = .UTYPE (imm, rd, uop.AUIPC) ∧ rd.1 ≠ 0
+    := by
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          simp at h_transpile
+        . rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . symm at h_transpile; simp_all
+          . have h_rd := non_phantom_rd h_if
+            simp_all
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
             have := extract_opcode h_transpile
