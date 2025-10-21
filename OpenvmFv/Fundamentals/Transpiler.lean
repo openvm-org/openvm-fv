@@ -123,29 +123,17 @@ namespace Transpiler
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 521, ind rd, ind rs1, utof (sign_extend_24 imm), 1, 0, 0, 0]))
       | .BTYPE (imm, rs2, rs1, bop.BEQ) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 544, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
+        .some (multiplicity, #v[pc, 544, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BNE) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
+        .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BLT) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
+        .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BGE) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
+        .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BLTU) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
+        .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BGEU) =>
-        if (imm % 4 = 0)
-        then .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-        else .none
+        .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .UTYPE (imm, rd, uop.AUIPC) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
@@ -2690,7 +2678,7 @@ namespace Transpiler
         . rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           dsimp at h_transpile
-          split_ifs at h_transpile with h_if
+          split_ifs at h_transpile with h_alignment h_if
           . symm at h_transpile; simp_all
           . have h_rd := non_phantom_rd h_if
             simp_all
