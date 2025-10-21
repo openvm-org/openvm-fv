@@ -261,12 +261,10 @@ namespace Equivalence.BranchEqual
                 clear *-h_next_pc_mod_4
                 grind
               simp [this]
-            done
           . clear h_constraints h_bus_assumptions h_bus_wellformedness
             simp_all
             split_ands
             . convert h_eq
-              done
             . intro h; clear h
               rewrite [←spec_beq]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
@@ -283,7 +281,6 @@ namespace Equivalence.BranchEqual
                 clear *-h_next_pc_mod_4
                 grind
               simp [this]
-            done
         . simp [BeqOutput_matches_BranchEqual_instruction_fields,
                 BeqInput_of_BranchEqual_instruction_fields]
           simp [PureSpec.execute_BEQ_pure]
@@ -308,16 +305,83 @@ namespace Equivalence.BranchEqual
             convert h_eq
       . clear spec_beq
         intro h_bne; simp [h_bne] at spec_bne
-        simp [BneOutput_matches_BranchEqual_instruction_fields,
-              BneInput_of_BranchEqual_instruction_fields]
-        clear h_constraints h_bus_assumptions h_bus_wellformedness
-        simp [PureSpec.execute_BNE_pure]
-        simp_all
 
-        simp [← BitVec.toNat_inj, U32.toNat]
+        split_ifs at spec_bne with h_ne
 
-        sorry
+        . simp [BneOutput_matches_BranchEqual_instruction_fields,
+                BneInput_of_BranchEqual_instruction_fields]
+          simp [PureSpec.execute_BNE_pure]
+          rewrite [ite_cond_eq_true]
+          split_ands
+          . exact h_a0
+          . exact h_a1
+          . exact h_a2
+          . exact h_a3
+          . exact h_b0
+          . exact h_b1
+          . exact h_b2
+          . exact h_b3
+          . exact spec_bne.symm
+          . left
+            convert h_ne
+          . left
+            left
+            convert h_ne
+          . apply eq_true
+            left
+            convert h_ne
 
-        done
+        . simp [BneOutput_matches_BranchEqual_instruction_fields,
+                BneInput_of_BranchEqual_instruction_fields]
+          simp [PureSpec.execute_BNE_pure]
+          rewrite [ite_cond_eq_false]
+          . clear h_constraints h_bus_assumptions h_bus_wellformedness
+            split_ands
+            . exact h_a0
+            . exact h_a1
+            . exact h_a2
+            . exact h_a3
+            . exact h_b0
+            . exact h_b1
+            . exact h_b2
+            . exact h_b3
+            . exact spec_bne.symm
+            . right
+              rewrite [←spec_bne]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . left
+              right
+              rewrite [←spec_bne]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+          . clear h_constraints h_bus_assumptions h_bus_wellformedness
+            simp_all
+            split_ands
+            . convert h_ne
+            . intro h; clear h
+              rewrite [←spec_bne]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . intro h; clear h
+              rewrite [←spec_bne]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
 
 end Equivalence.BranchEqual
