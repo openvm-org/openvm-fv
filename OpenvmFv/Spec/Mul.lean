@@ -112,17 +112,14 @@ lemma wf_propertiesToAssert
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
-/-- From Lt opcode to RISC-V opcode -/
+/-- From Mul opcode to RISC-V opcode -/
 def rop_of_Mul_opcode (opcode : FBB) : mop :=
   if opcode = 592 then .MUL else .MULHUS
 
 include
   row_valid
   propertiesToAssume in
-/-- The constraints entail correct implementation of the SLL opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MUL opcode --/
 theorem spec_MUL
 :
   (U32.toBV #v[(air.core.a_0 row 0).val,

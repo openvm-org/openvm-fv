@@ -108,8 +108,14 @@ lemma toBV_toInt {x : U32} : x.toBV.toInt = x.toInt := by
   simp [toInt]; split_ifs <;> grind
 
 /-- Range of `toInt` -/
-lemma toInt_range {x : U32} : -2147483648 ≤ x.toInt ∧ x.toInt < 2147483648 := by
+lemma toInt_range (x : U32) : -2147483648 ≤ x.toInt ∧ x.toInt < 2147483648 := by
   simp [toInt]; split_ifs <;> grind
+
+lemma toInt_bmod_eq {x : U32} :
+  x.toInt.bmod 4294967296 = x.toInt
+:= by
+  have := toInt_range x
+  rw [Int.bmod_eq_of_le this.1 this.2]
 
 grind_pattern toBV_toInt => x.toBV.toInt
 grind_pattern toInt_range => x.toInt

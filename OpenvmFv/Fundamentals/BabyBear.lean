@@ -342,6 +342,40 @@ lemma mod_4_zero_bits_zero
   by_cases (BitVec.ofNat 32 ↑a)[0] <;>
   by_cases (BitVec.ofNat 32 ↑a)[1] <;> simp_all
 
+/-- Inverse of zero -/
+lemma toInt_0_inv {a b c d : FBB}
+  (ub_a : a.val < 256)
+  (ub_b : b.val < 256)
+  (ub_c : c.val < 256)
+  (ub_d : d.val < 256)
+:
+  U32.toInt #v[BitVec.ofNat 8 a, BitVec.ofNat 8 b, BitVec.ofNat 8 c, BitVec.ofNat 8 d] = 0 ↔ a = 0 ∧ b = 0 ∧ c = 0 ∧ d = 0
+:= by
+  simp [U32.toInt, U32.negative, U32.toNat]
+  omega
+
+lemma toInt_neg_1_inv {a b c d : FBB}
+  (ub_a : a.val < 256)
+  (ub_b : b.val < 256)
+  (ub_c : c.val < 256)
+  (ub_d : d.val < 256)
+:
+  U32.toInt #v[BitVec.ofNat 8 a, BitVec.ofNat 8 b, BitVec.ofNat 8 c, BitVec.ofNat 8 d] = -1 ↔ a = 255 ∧ b = 255 ∧ c = 255 ∧ d = 255
+:= by
+  simp [U32.toInt, U32.negative, U32.toNat]
+  omega
+
+lemma toInt_neg_2_pow_32_inv {a b c d : FBB}
+  (ub_a : a.val < 256)
+  (ub_b : b.val < 256)
+  (ub_c : c.val < 256)
+  (ub_d : d.val < 256)
+:
+  U32.toInt #v[BitVec.ofNat 8 a, BitVec.ofNat 8 b, BitVec.ofNat 8 c, BitVec.ofNat 8 d] = -2147483648 ↔ a = 0 ∧ b = 0 ∧ c = 0 ∧ d = 128
+:= by
+  simp [U32.toInt, U32.negative, U32.toNat]
+  omega
+
 end auxiliaries
 
 namespace Circuits
@@ -434,6 +468,151 @@ namespace Circuits
           . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
         . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
       . simp_all; rcases b_result <;> split_ifs <;> simp_all <;> omega
+
+lemma mul
+{ a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 c0 c1 c2 c3 b_ext c_ext : FBB }
+(ub_a0 : a0.val < 256)
+(ub_a1 : a1.val < 256)
+(ub_a2 : a2.val < 256)
+(ub_a3 : a3.val < 256)
+(ub_a4 : a4.val < 256)
+(ub_a5 : a5.val < 256)
+(ub_a6 : a6.val < 256)
+(ub_a7 : a7.val < 256)
+(ub_b0 : b0.val < 256)
+(ub_b1 : b1.val < 256)
+(ub_b2 : b2.val < 256)
+(ub_b3 : b3.val < 256)
+(ub_c0 : c0.val < 256)
+(ub_c1 : c1.val < 256)
+(ub_c2 : c2.val < 256)
+(ub_c3 : c3.val < 256)
+(h_msb_b : b_ext = if 128 ≤ b3.val then 255 else 0)
+(h_msb_c : c_ext = if 128 ≤ c3.val then 255 else 0)
+(ub_cry0 : (2005401601 * (b0 * c0 - a0)).val < 2048)
+(ub_cry1 : (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1)).val < 2048)
+(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1) + (b0 * c2 + b1 * c1 + b2 * c0) - a2)).val < 2048)
+(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1) + (b0 * c2 + b1 * c1 + b2 * c0) - a2) + (b0 * c3 + b1 * c2 + b2 * c1 + b3 * c0) - a3)).val < 2048)
+(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1) + (b0 * c2 + b1 * c1 + b2 * c0) - a2) + (b0 * c3 + b1 * c2 + b2 * c1 + b3 * c0) - a3) + (b1 * c3 + b2 * c2 + b3 * c1) + (b0 * c_ext + c0 * b_ext) - a4)).val < 2048)
+(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1) + (b0 * c2 + b1 * c1 + b2 * c0) - a2) + (b0 * c3 + b1 * c2 + b2 * c1 + b3 * c0) - a3) + (b1 * c3 + b2 * c2 + b3 * c1) + (b0 * c_ext + c0 * b_ext) - a4) + (b2 * c3 + b3 * c2) + (b0 * c_ext + c0 * b_ext + b1 * c_ext + c1 * b_ext) - a5)).val < 2048)
+(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1) + (b0 * c2 + b1 * c1 + b2 * c0) - a2) + (b0 * c3 + b1 * c2 + b2 * c1 + b3 * c0) - a3) + (b1 * c3 + b2 * c2 + b3 * c1) + (b0 * c_ext + c0 * b_ext) - a4) + (b2 * c3 + b3 * c2) + (b0 * c_ext + c0 * b_ext + b1 * c_ext + c1 * b_ext) - a5) + b3 * c3 + (b0 * c_ext + c0 * b_ext + b1 * c_ext + c1 * b_ext + b2 * c_ext + c2 * b_ext) - a6)).val < 2048)
+(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (b0 * c0 - a0) + (b0 * c1 + b1 * c0) - a1) + (b0 * c2 + b1 * c1 + b2 * c0) - a2) + (b0 * c3 + b1 * c2 + b2 * c1 + b3 * c0) - a3) + (b1 * c3 + b2 * c2 + b3 * c1) + (b0 * c_ext + c0 * b_ext) - a4) + (b2 * c3 + b3 * c2) + (b0 * c_ext + c0 * b_ext + b1 * c_ext + c1 * b_ext) - a5) + b3 * c3 + (b0 * c_ext + c0 * b_ext + b1 * c_ext + c1 * b_ext + b2 * c_ext + c2 * b_ext) - a6) + (b0 * c_ext + c0 * b_ext + b1 * c_ext + c1 * b_ext + b2 * c_ext + c2 * b_ext + b3 * c_ext + c3 * b_ext) - a7)).val < 2048)
+:
+  U64.toBV #v[BitVec.ofNat 8 a0, BitVec.ofNat 8 a1, BitVec.ofNat 8 a2, BitVec.ofNat 8 a3, BitVec.ofNat 8 a4, BitVec.ofNat 8 a5, BitVec.ofNat 8 a6, BitVec.ofNat 8 a7] =
+  U64.toBV #v[BitVec.ofNat 8 b0, BitVec.ofNat 8 b1, BitVec.ofNat 8 b2, BitVec.ofNat 8 b3,
+              BitVec.ofNat 8 b_ext, BitVec.ofNat 8 b_ext, BitVec.ofNat 8 b_ext, BitVec.ofNat 8 b_ext] *
+  U64.toBV #v[BitVec.ofNat 8 c0, BitVec.ofNat 8 c1, BitVec.ofNat 8 c2, BitVec.ofNat 8 c3,
+              BitVec.ofNat 8 c_ext, BitVec.ofNat 8 c_ext, BitVec.ofNat 8 c_ext, BitVec.ofNat 8 c_ext]
+:= by
+  have ub_b_ext : b_ext.val ≤ 255
+    := by rw [h_msb_b]; clear *-; split_ifs <;> simp
+  have ub_c_ext : c_ext.val ≤ 255
+    := by rw [h_msb_c]; clear *-; split_ifs <;> simp
+
+  replace ub_cry0 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
+  replace ub_cry1 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
+  replace ub_cry2 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
+  replace ub_cry3 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+  replace ub_cry4 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry4; simp]
+  replace ub_cry5 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry5; simp]
+  replace ub_cry6 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry6; simp]
+  replace ub_cry7 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry7; simp]
+
+  have ub_p00 : b0.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a0, eq_cry0 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a0 ub_cry0
+  simp [Fin.ext_iff, Fin.val_mul] at eq_a0
+  rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a0
+  rw [eq_cry0] at ub_cry1 ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
+  clear ub_cry0 eq_cry0
+
+  have ub_p01 : b0.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p10 : b1.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a1, eq_cry1 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a1 ub_cry1
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a1
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a1
+  rw [eq_cry1] at ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
+  clear ub_cry1 eq_cry1
+
+  have ub_p02 : b0.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p11 : b1.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p20 : b2.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a2, eq_cry2 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a2 ub_cry2
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a2
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a2
+  rw [eq_cry2] at ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
+  clear ub_cry2 eq_cry2
+
+  have ub_p03 : b0.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p12 : b1.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p21 : b2.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p30 : b3.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a3, eq_cry3 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a3 ub_cry3
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a3
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a3
+  rw [eq_cry3] at ub_cry4 ub_cry5 ub_cry6 ub_cry7
+  clear ub_cry3 eq_cry3
+
+  have ub_p13 : b1.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p22 : b2.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p31 : b3.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_be0 : b0.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_ce0 : c0.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a4, eq_cry4 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a4 ub_cry4
+  rw [  add_assoc (b := (b1 * c3 + b2 * c2 + b3 * c1)),
+      ← add_assoc (a := (b1 * c3 + b2 * c2 + b3 * c1))] at *
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a4
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a4
+  rw [eq_cry4] at ub_cry5 ub_cry6 ub_cry7
+  clear ub_cry4 eq_cry4
+
+  have ub_p23 : b2.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_p32 : b3.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_be1 : b1.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_ce1 : c1.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a5, eq_cry5 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a5 ub_cry5
+  rw [add_assoc (b := (b2 * c3 + b3 * c2))] at *
+  iterate 3 rw [← add_assoc (a := (b2 * c3 + b3 * c2))] at *
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a5
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a5
+  rw [eq_cry5] at ub_cry6 ub_cry7
+  clear ub_cry5 eq_cry5
+
+  have ub_p33 : b3.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_be2 : b2.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_ce2 : c2.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a6, eq_cry6 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a6 ub_cry6
+  rw [add_assoc (b := (b3 * c3))] at *
+  iterate 5 rw [← add_assoc (a := (b3 * c3))] at *
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a6
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a6
+  rw [eq_cry6] at ub_cry7
+  clear ub_cry6 eq_cry6
+
+  have ub_be3 : b3.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_ce3 : c3.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+
+  have ⟨ eq_a7, eq_cry7 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a7 ub_cry7
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a7
+  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a7
+  clear ub_cry7 eq_cry7
+
+  rw [eq_a0, eq_a1, eq_a2, eq_a3, eq_a4, eq_a5, eq_a6, eq_a7]
+
+  simp [← BitVec.toNat_inj, U64.toNat]
+  rw [Nat.DivMod.div_8 (a := _ * _), Nat.DivMod.div_16, Nat.DivMod.div_24,
+      Nat.DivMod.div_32, Nat.DivMod.div_40, Nat.DivMod.div_48]
+  rw [Nat.DivMod.join_8, Nat.DivMod.join_16, Nat.DivMod.join_24,
+      Nat.DivMod.join_32, Nat.DivMod.join_40, Nat.DivMod.join_48, Nat.DivMod.join_56]
+  repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+  ring_nf
+  omega
 
 end Circuits
 

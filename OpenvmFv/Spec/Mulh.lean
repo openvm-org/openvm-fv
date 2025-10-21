@@ -129,7 +129,7 @@ lemma wf_propertiesToAssert
   clear *- b_mulh b_mulhsu
   grind
 
-/-- From Lt opcode to RISC-V opcode -/
+/-- From Mulh opcode to RISC-V opcode -/
 def rop_of_Mulh_opcode (opcode : FBB) : mop :=
   if opcode = 593 then .MULH else
   if opcode = 594 then .MULHSU else
@@ -139,10 +139,7 @@ include
   row_valid
   constraints
   propertiesToAssume in
-/-- The constraints entail correct implementation of the MULH opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MULH opcode --/
 theorem spec_MULH
   (h_mulh : (air.core.ctx row 0).instruction.opcode = 593)
 :
@@ -335,10 +332,7 @@ include
   row_valid
   constraints
   propertiesToAssume in
-/-- The constraints entail correct implementation of the MULHSU opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MULHSU opcode --/
 theorem spec_MULHSU
   (h_mulhsu : (air.core.ctx row 0).instruction.opcode = 594)
 :
@@ -520,10 +514,7 @@ include
   row_valid
   constraints
   propertiesToAssume in
-/-- The constraints entail correct implementation of the MULHU opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MULHU opcode --/
 theorem spec_MULHU
   (h_mulhu : (air.core.ctx row 0).instruction.opcode = 595)
 :
