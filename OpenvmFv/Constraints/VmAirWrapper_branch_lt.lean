@@ -872,10 +872,9 @@ namespace VmAirWrapper_branch_lt.constraints
     def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
       let imm := entry.xc
       -- imm is a 13-bit signed integer represented as a field element
-      (-2^12 ≤ BabyBear.toInt imm) ∧ BabyBear.toInt imm < 2^12 ∧
-      -- imm is aligned
-      BabyBear.toInt imm % 4 = 0
+      (-2^12 ≤ BabyBear.toInt imm) ∧ BabyBear.toInt imm < 2^12
 
+    set_option maxHeartbeats 0 in
     lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
       (h_bounds :
         entry.opcode = 549 ∨
@@ -890,6 +889,9 @@ namespace VmAirWrapper_branch_lt.constraints
       simp [readInstructionBus_properties.eq_def]
       simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
       obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
+      have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+      rewrite [←h_data] at h_alignment
+      dsimp at h_alignment
       simp [←h_data] at h_bounds ⊢ h_transpile
       obtain h_opcode | h_opcode | h_opcode | h_opcode := h_bounds <;> [
         have := Transpiler.transpiler_opcode_549 h_transpile h_opcode;
@@ -898,12 +900,11 @@ namespace VmAirWrapper_branch_lt.constraints
         have := Transpiler.transpiler_opcode_552 h_transpile h_opcode
       ]
       all_goals {
-        obtain ⟨imm, rs2, rs1, h_imm, h_instruction⟩ := this
-        rewrite [h_instruction] at h_transpile
+        obtain ⟨imm, rs2, rs1, h_imm⟩ := this
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment), h_imm] at h_transpile
         dsimp at h_transpile
         simp [-Vector.mk_eq] at h_transpile
-        replace h_transpile := h_transpile.2
         rewrite [←h_transpile]
         simp [Transpiler.itof, BabyBear.toInt]
         split_ands
@@ -935,29 +936,6 @@ namespace VmAirWrapper_branch_lt.constraints
             simp at this
             rewrite [ite_cond_eq_false]
             . omega
-            . simp
-              omega
-        . clear *- h_imm
-          rewrite [max_eq_left (by omega)]
-          by_cases h_sign : imm.toInt ≥ 0
-          . have := @BitVec.toInt_le _ imm
-            simp at this
-            rewrite [ite_cond_eq_true]
-            . have : imm.toInt % 2013265921 = imm.toInt := by omega
-              rewrite [this]; clear this
-              refine Int.dvd_of_emod_eq_zero ?_
-              exact BitVec.toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
-            . simp
-              clear *- h_sign this
-              omega
-          . have := BitVec.le_toInt imm
-            simp at this
-            rewrite [ite_cond_eq_false]
-            . have : imm.toInt % 2013265921 = imm.toInt + 2013265921 := by omega
-              rewrite [this]; clear this
-              simp
-              refine Int.dvd_of_emod_eq_zero ?_
-              exact BitVec.toInt_mod_eq_zero_of_bitvec_mod_eq_zero _ h_imm
             . simp
               omega
       }

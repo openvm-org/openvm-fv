@@ -179,8 +179,8 @@ namespace PhantomAir.constraints
     @[simp]
     def extracted_row_constraint_list
       [Field ExtF]
-      (air : Valid_PhantomAir FBB ExtF)
-      (row : ℕ)
+      (_air : Valid_PhantomAir FBB ExtF)
+      (_row : ℕ)
     : List Prop :=
       [
     --     PhantomAir.extraction.constraint_0 air row,
@@ -203,8 +203,8 @@ namespace PhantomAir.constraints
     @[simp]
     def row_constraint_list
       [Field ExtF]
-      (air : Valid_PhantomAir FBB ExtF)
-      (row : ℕ)
+      (_air : Valid_PhantomAir FBB ExtF)
+      (_row : ℕ)
     : List Prop :=
       [
     --     constraint_0 air row,

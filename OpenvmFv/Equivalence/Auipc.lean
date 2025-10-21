@@ -180,8 +180,10 @@ namespace Equivalence.Auipc
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     obtain ⟨ imm, rd, h_instruction, h_rd ⟩ := Transpiler.transpiler_opcode_576 h_transpile.1 h_transpile.2.2.2.1
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
+    rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
