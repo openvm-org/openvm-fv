@@ -560,7 +560,7 @@ lemma mul
   have ub_p22 : b2.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
   have ub_p31 : b3.val * c1.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
   have ub_be0 : b0.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
-  have ub_ce0 : c0.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_qe0 : c0.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
   have ⟨ eq_a4, eq_cry4 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a4 ub_cry4
   rw [  add_assoc (b := (b1 * c3 + b2 * c2 + b3 * c1)),
@@ -573,7 +573,7 @@ lemma mul
   have ub_p23 : b2.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
   have ub_p32 : b3.val * c2.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
   have ub_be1 : b1.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
-  have ub_ce1 : c1.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_qe1 : c1.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
   have ⟨ eq_a5, eq_cry5 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a5 ub_cry5
   rw [add_assoc (b := (b2 * c3 + b3 * c2))] at *
@@ -585,7 +585,7 @@ lemma mul
 
   have ub_p33 : b3.val * c3.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
   have ub_be2 : b2.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
-  have ub_ce2 : c2.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_qe2 : c2.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
   have ⟨ eq_a6, eq_cry6 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a6 ub_cry6
   rw [add_assoc (b := (b3 * c3))] at *
@@ -596,7 +596,7 @@ lemma mul
   clear ub_cry6 eq_cry6
 
   have ub_be3 : b3.val * c_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
-  have ub_ce3 : c3.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
+  have ub_qe3 : c3.val * b_ext.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
   have ⟨ eq_a7, eq_cry7 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a7 ub_cry7
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a7

@@ -221,6 +221,186 @@ lemma split_nzp (a : ℤ) (P : Prop) :
     . apply ap (by omega)
     . apply an (by omega)
 
+lemma tdiv_tmod_unique_full {b c q r : ℤ} (hcnz : c ≠ 0) :
+  q = b.tdiv c ∧ r = b.tmod c ↔
+  b = q * c + r ∧
+  |r| < |c| ∧
+  (r = 0 ∨ r.sign = b.sign) := by
+  have hmod1 := @Int.tdiv_tmod_unique b c r q
+  have hmod2 := @Int.tdiv_tmod_unique' b c r q
+  rw [@eq_comm (a := q), @eq_comm (a := r), @eq_comm (a := b), add_comm, mul_comm]
+  repeat rw [Int.natCast_natAbs] at *; repeat rw [Int.abs_cases] at *
+  by_cases hb_split : 0 ≤ b
+  . simp_all; intro heq; clear hmod1 hmod2
+    constructor <;> intro ⟨ h0, h1 ⟩
+    . simp_all
+      by_cases hr_split : r = 0 <;> [ simp_all; right ]
+      rw [Int.sign_eq_one_of_pos (by omega)]
+      rw [Int.sign_eq_one_of_pos]
+      suffices : ¬ b = 0
+      . omega
+      . intro bz; simp_all
+        apply Int.split_nzp q <;> intro hq <;> [ skip; simp_all; skip ]
+        all_goals
+          have : c * q > r := by split_ifs at * <;> nlinarith
+          omega
+    . rcases h1 with rz | h_sign <;> [ omega; skip ]
+      split_ifs with hc_split <;> split_ifs at h0 with hr_split <;> simp_all
+      all_goals
+        rw [Int.sign_eq_neg_one_of_neg (by assumption)] at h_sign
+        symm at h_sign; rw [Int.sign_eq_neg_one_iff_neg] at h_sign
+        omega
+  . rw [hmod2 (by omega) hcnz]; simp_all; intro heq; clear hmod2
+    constructor <;> intro ⟨ h0, h1 ⟩
+    . constructor
+      . by_cases hr_split : r = 0 <;> [ simp_all; skip ]
+        rw [if_neg (by omega)]
+        omega
+      . by_cases hr_split : r = 0 <;> [ simp_all; right ]
+        rw [Int.sign_eq_neg_one_of_neg (by omega)]
+        rw [Int.sign_eq_neg_one_of_neg hb_split]
+    . rcases h1 with rz | h_sign <;> [ omega; skip ]
+      rw [Int.sign_eq_neg_one_of_neg hb_split] at h_sign
+      rw [Int.sign_eq_neg_one_iff_neg] at h_sign
+      rw [if_neg (by omega)] at h0
+      omega
+
+lemma tmod_range_32
+  {b c : ℤ}
+  (range_b : -2147483648 ≤ b ∧ b < 2147483648)
+  (range_c : -2147483648 ≤ c ∧ c < 2147483648)
+:
+  -2147483648 ≤ b.tmod c ∧ b.tmod c < 2147483648
+:= by
+  apply Int.split_nzp b <;> intro hb
+  rotate_left
+  . simp_all
+  rotate_right
+  . have h_sgn := Int.sign_tmod b c
+    split_ifs at h_sgn with h_dvd
+    . simp [Int.sign_cases] at h_sgn
+      grind
+    . simp [Int.sign_cases] at h_sgn
+      split_ifs at h_sgn with h_tmod; simp_all
+      split_ands <;> [ skip; omega ]
+      rw [b.tmod_eq_emod]
+      split_ifs
+      . omega
+      . apply Int.split_nzp c <;> intro hc <;> simp_all
+        . have h_abs : |c| = -c := by exact abs_of_neg hc
+          simp [h_abs]; clear h_abs
+          omega
+        . have h_abs : |c| = c := by exact abs_of_pos hc
+          simp [h_abs]; clear h_abs
+          omega
+  . have h_sgn := Int.sign_tmod b c
+    split_ifs at h_sgn with h_dvd
+    . simp [Int.sign_cases] at h_sgn
+      grind
+    . simp [Int.sign_cases] at h_sgn
+      split_ifs at h_sgn with h_tmod <;> simp_all
+      . omega
+      . split_ands <;> [ omega; skip ]
+        rw [b.tmod_eq_emod]
+        split_ifs <;> simp_all
+        next h0 h1 h2 =>
+          replace tmod : 0 < b.tmod c := by omega
+          clear h0 h1 h2 h_tmod
+          apply Int.split_nzp c <;> intro hc
+          . have := @Int.emod_lt_of_neg b c hc
+            omega
+          . simp_all
+          . have := @Int.emod_lt_of_pos b c hc
+            omega
+
+lemma tdiv_overflow_32
+  {b c : ℤ}
+  (range_b : -2147483648 ≤ b ∧ b < 2147483648)
+:
+  (2147483648 ≤ b.tdiv c ↔ b = -2147483648 ∧ c = -1)
+:= by
+  constructor <;> intro hc
+  have : (b.tdiv c).sign = 1 := by rw [Int.sign_cases, if_neg (by omega), if_neg (by omega)]
+  rw [Int.sign_tdiv] at this
+  split_ifs at this with hyp <;> [ simp_all; clear hyp ]
+  . simp [Int.sign_cases] at this
+    split_ifs at this <;> simp_all
+    . suffices : -b = 2147483648 ∧ -c = 1
+      . omega
+      . have eq : b.tdiv c = (-b).tdiv (-c) := by simp
+        rw [eq, Int.tdiv_eq_ediv_of_nonneg (by omega)] at hc
+        by_cases yone : -c = 1
+        . simp_all; omega
+        . have := @Int.ediv_lt_self_of_pos_of_ne_one (-b) (-c) (by omega) (by omega)
+          omega
+    . rw [Int.tdiv_eq_ediv_of_nonneg (by omega)] at hc
+      by_cases yone : c = 1
+      . simp_all; omega
+      . have := @Int.ediv_lt_self_of_pos_of_ne_one b c (by omega) (by omega)
+        omega
+  . simp_all
+
+lemma tdiv_range_32
+  {b c : ℤ}
+  (nzc : ¬(c = 0))
+  (nof : ¬(b = -2147483648 ∧ c = -1))
+  (range_b : -2147483648 ≤ b ∧ b < 2147483648)
+  (range_c : -2147483648 ≤ c ∧ c < 2147483648)
+:
+  -2147483648 ≤ b.tdiv c ∧ b.tdiv c < 2147483648
+:= by
+  have sgn := Int.sign_tdiv b c
+  split_ifs at sgn with h_sgn <;> zify at h_sgn
+  . grind [sign_cases]
+  . apply Int.split_nzp b <;> intro hb
+    rotate_left
+    . simp_all
+    . apply Int.split_nzp c <;> intro hc
+      . have : b.sign = 1 := by rw [← Int.sign_eq_one_iff_pos] at hb; assumption
+        have : c.sign = -1 := by rw [← Int.sign_eq_neg_one_iff_neg] at hc; assumption
+        split_ands <;> [ skip; (simp_all; omega) ]
+        rw [Int.tdiv_eq_ediv]
+        split_ifs with h_div <;> simp_all
+        . trans -b
+          . omega
+          . trans b / (-1)
+            . omega
+            . suffices : -(-(b / (-c))) ≤ -(b / -1)
+              . simp at this; omega
+              . simp; rw [← Int.ediv_neg]
+                apply Int.ediv_le_self
+                omega
+        . omega
+      . simp_all
+      . have : b.sign = 1 := by rw [← Int.sign_eq_one_iff_pos] at hb; assumption
+        have : c.sign = 1 := by rw [← Int.sign_eq_one_iff_pos] at hc; assumption
+        split_ands <;> [ (simp_all; omega); skip ]
+        rw [Int.tdiv_eq_ediv]
+        split_ifs with h_div <;> simp_all
+        . apply lt_of_le_of_lt (b := b)
+          . apply Int.ediv_le_self
+            omega
+          . omega
+        . omega
+    . apply Int.split_nzp c <;> intro hc
+      . have : b.sign = -1 := by rw [← Int.sign_eq_neg_one_iff_neg] at hb; assumption
+        have : c.sign = -1 := by rw [← Int.sign_eq_neg_one_iff_neg] at hc; assumption
+        simp_all
+        split_ands <;> [ omega; skip ]
+        . by_contra h_div; simp at h_div
+          rw [tdiv_overflow_32 range_b] at h_div
+          omega
+      . simp_all
+      . have : b.sign = -1 := by rw [← sign_eq_neg_one_iff_neg] at hb; assumption
+        have : c.sign = 1 := by rw [← Int.sign_eq_one_iff_pos] at hc; assumption
+        split_ands <;> [ skip; (simp_all; omega) ]
+        have eq : b.tdiv c = (-b).tdiv (-c) := by simp
+        rw [eq, Int.tdiv_eq_ediv_of_nonneg (by omega)]
+        clear eq; simp
+        trans (-b)
+        . apply Int.ediv_le_self; omega
+        . omega
+
 end Int
 
 namespace Nat.DivMod
@@ -263,6 +443,10 @@ lemma join_16 (a b : ℕ) :
 
 lemma join_24 (a b : ℕ) :
   a % 16777216 + (a / 16777216 + b) % 256 * 16777216 = (a + b * 16777216) % 4294967296
+    := by grind
+
+lemma join_24' (a : ℕ) :
+  a % 16777216 + (a / 16777216) % 256 * 16777216 = a % 4294967296
     := by grind
 
 lemma join_32 (a b : ℕ) :

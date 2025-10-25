@@ -908,8 +908,8 @@ namespace VmAirWrapper_divrem.constraints
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_49 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
         air.core.special_case row 0 + air.core.lt_marker_3 row 0 = 1 ∨
-    air.core.r_prime_3 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_3 row 0 * (1 - 2 * air.core.c_sign row 0) =
-      0
+          air.core.r_prime_3 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_3 row 0 * (1 - 2 * air.core.c_sign row 0) =
+            0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_49_of_extraction
@@ -928,8 +928,8 @@ namespace VmAirWrapper_divrem.constraints
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_50 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
         air.core.lt_marker_3 row 0 = 0 ∨
-    air.core.lt_diff row 0 =
-      air.core.r_prime_3 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_3 row 0 * (1 - 2 * air.core.c_sign row 0)
+          air.core.lt_diff row 0 =
+            air.core.r_prime_3 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_3 row 0 * (1 - 2 * air.core.c_sign row 0)
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_50_of_extraction
@@ -966,8 +966,8 @@ namespace VmAirWrapper_divrem.constraints
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_52 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
         air.core.special_case row 0 + air.core.lt_marker_3 row 0 + air.core.lt_marker_2 row 0 = 1 ∨
-    air.core.r_prime_2 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_2 row 0 * (1 - 2 * air.core.c_sign row 0) =
-      0
+          air.core.r_prime_2 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_2 row 0 * (1 - 2 * air.core.c_sign row 0) =
+            0
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_52_of_extraction
@@ -986,8 +986,8 @@ namespace VmAirWrapper_divrem.constraints
       @[VmAirWrapper_divrem_constraint_and_interaction_simplification]
       def constraint_53 (air : Valid_VmAirWrapper_divrem F ExtF) (row : ℕ) : Prop :=
         air.core.lt_marker_2 row 0 = 0 ∨
-    air.core.lt_diff row 0 =
-      air.core.r_prime_2 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_2 row 0 * (1 - 2 * air.core.c_sign row 0)
+          air.core.lt_diff row 0 =
+            air.core.r_prime_2 row 0 * (2 * air.core.c_sign row 0 - 1) + air.core.c_2 row 0 * (1 - 2 * air.core.c_sign row 0)
 
       @[VmAirWrapper_divrem_air_simplification]
       lemma constraint_53_of_extraction

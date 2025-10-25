@@ -8,6 +8,7 @@ import OpenvmFv.Spec.SHIFTIOP.slli
 import OpenvmFv.Spec.SHIFTIOP.srai
 import OpenvmFv.Spec.SHIFTIOP.srli
 
+set_option maxHeartbeats 1_000_000_000
 
 namespace Equivalence.Shift
 
