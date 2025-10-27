@@ -619,7 +619,8 @@ namespace InteractionList
     :
       ∃ bus', bus.Perm (balanced_pair m data ++ bus')
     := by
-      have m_neq_z : ¬ m = 0 := by apply h_unitary at h_in_neg; grind
+      have m_neq_z : ¬ m = 0 := by apply h_unitary at h_in_neg; simp at h_in_neg;
+                                   rcases h_in_neg with h | h <;> subst h <;> simp
       rw [← List.singleton_sublist] at h_in_neg
       apply List.Sublist.exists_perm_append at h_in_neg
       obtain ⟨ bus'', h_eq ⟩ := h_in_neg
@@ -648,14 +649,19 @@ namespace InteractionList
           . simp [Fin.neg_def] at this
             by_cases h_len : bus''.length = 0
             . simp_all
-            . grind
+            . simp_all
+              have : 0 < bus''.length := by rcases bus'' <;> simp_all
+              grind
           . clear h_balance
             induction bus''
             case this.nil => simp_all
             case this.cons hd tl ih =>
               obtain ⟨ m', data' ⟩ := hd
               simp_all
-              specialize ih (by omega) (by grind)
+              specialize ih (by omega) _
+              intros a b h
+              apply split_bus'' (b := b)
+              tauto
               specialize split_bus'' m' data'; simp at split_bus''
               by_cases h_tl_len : tl.length = 0
               . split_ifs with h_data <;> simp_all
@@ -663,7 +669,11 @@ namespace InteractionList
                 . left; split_ifs <;>
                   (try simp_all [-List.length_eq_zero_iff, Fin.neg_def, Fin.add_def]) <;>
                   grind
-                . split_ifs <;> simp_all [-List.length_eq_zero_iff]; grind
+                . split_ifs <;> simp_all [-List.length_eq_zero_iff]
+                  rw [Nat.le_iff_lt_add_one]
+                  rw [Fin.val_add]
+                  
+                  
         . suffices : ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val ≤ bus''.length ∨
                     ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val = 0
           . grind

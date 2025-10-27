@@ -183,6 +183,7 @@ namespace Transpiler
         else (multiplicity, #v[pc, 599, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
       | _ => .none
 
+
     lemma transpiler_supported_opcode_types
       (h_some : transpile_op inst mult pc = .some result)
     :

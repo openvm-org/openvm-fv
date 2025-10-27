@@ -13,12 +13,12 @@ pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.23.0-rc2"
+rev = "v4.25.0-rc2"
 
 [[require]]
 name = "LeanZKCircuit"
 git = "https://github.com/NethermindEth/leanzkcircuit.git"
-rev = "main"
+rev = "Ferinko/4.25.0-rc2"
 
 [[require]]
 name = "LeanRV"

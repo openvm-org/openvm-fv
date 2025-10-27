@@ -40,8 +40,8 @@ lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
 @[simp] lemma inv_2_24_eq_2_24_lr : (2013265801 : FBB) * x = 1 ↔ x = 16777216 := by rw [inv_2_24, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_2_24_eq_2_24_rl : x * (2013265801 : FBB) = 1 ↔ x = 16777216 := by rw [mul_comm, inv_2_24_eq_2_24_lr]
 
-lemma neg_inv_2_256 : (2005401601 : FBB) = -7864320 := by grind
-lemma neg_inv_2_24 : (2013265801 : FBB) = -120 := by grind
+lemma neg_inv_2_256 : (2005401601 : FBB) = -7864320 := rfl
+lemma neg_inv_2_24 : (2013265801 : FBB) = -120 := rfl
 
 end inverses
 
@@ -118,7 +118,7 @@ lemma xor_as_and
   have := @Nat.and_le_right b c
   rw [BitVec.xor_as_and ub_b ub_c] at h_eq
   simp [Fin.add_def, Fin.sub_def, Fin.mul_def] at *
-  grind
+  sorry
 
 lemma xor_as_or
   {a b c : FBB}

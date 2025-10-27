@@ -109,7 +109,7 @@ lemma toBV_toInt {x : U32} : x.toBV.toInt = x.toInt := by
 
 /-- Range of `toInt` -/
 lemma toInt_range {x : U32} : -2147483648 ≤ x.toInt ∧ x.toInt < 2147483648 := by
-  simp [toInt]; split_ifs <;> grind
+  simp [toInt, negative]; rw [←toBV_toNat]; grind
 
 grind_pattern toBV_toInt => x.toBV.toInt
 grind_pattern toInt_range => x.toInt
@@ -122,7 +122,7 @@ lemma toInt_inj {x y : U32} : x.toInt = y.toInt → x = y := by
 
 /-- `negative` in terms of `toInt` -/
 lemma negative_toInt {x : U32} : negative x ↔ ¬ 0 ≤ x.toInt := by
-  simp [toInt]; split_ifs <;> grind
+  simp [toInt, negative]; rw [←toBV_toNat]; grind
 
 /-- Reconstructing a `U32` from an `ℤ` -/
 def fromInt (z : ℤ) : U32 :=
