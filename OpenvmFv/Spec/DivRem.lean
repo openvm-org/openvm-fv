@@ -230,6 +230,8 @@ lemma wf_propertiesToAssert
     clear *- b_sc
     grind
 
+section signed
+
 lemma divrem_split
 { b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 q0 q1 q2 q3 r0 r1 r2 r3 c_ext q_ext r_ext : FBB }
 (ub_b0 : b0.val < 256)
@@ -2809,6 +2811,577 @@ theorem spec_DIVREM
                 b_rz, rest ⟩ := constraints
         clear *- b_rz h_r_zero
         simp_all
+
+end signed
+
+section unsigned
+
+attribute [-simp]
+  BabyBear.to_the_right_FBB_0
+  BabyBear.to_the_right_FBB_1
+  BabyBear.to_the_right_FBB_255
+  to_the_right_nat_0
+  to_the_right_nat_1
+  to_the_right_nat_255
+  to_the_right_nat_256
+  not_and
+
+set_option maxRecDepth 1_000_000 in
+include
+  row_valid
+  constraints
+  propertiesToAssume in
+/-- The constraints entail correct implementation of the DIVU/REMU opcode, Part 1 --/
+theorem spec_DIVUREMU_czero
+  (h_divuremu :
+    (air.core.ctx row 0).instruction.opcode = 597 ∨
+    (air.core.ctx row 0).instruction.opcode = 599)
+  (h_c_zero : air.core.zero_divisor row 0 = 1)
+:
+  (U32.toBV #v[(air.core.q_0 row 0).val,
+               (air.core.q_1 row 0).val,
+               (air.core.q_2 row 0).val,
+               (air.core.q_3 row 0).val],
+   U32.toBV #v[(air.core.r_0 row 0).val,
+               (air.core.r_1 row 0).val,
+               (air.core.r_2 row 0).val,
+               (air.core.r_3 row 0).val])
+    =
+  (execute_DIV_REM_pure
+    (U32.toBV #v[(air.core.b_0 row 0).val,
+                 (air.core.b_1 row 0).val,
+                 (air.core.b_2 row 0).val,
+                 (air.core.b_3 row 0).val])
+    (U32.toBV #v[(air.core.c_0 row 0).val,
+                 (air.core.c_1 row 0).val,
+                 (air.core.c_2 row 0).val,
+                 (air.core.c_3 row 0).val])
+    .DRU)
+:= by
+  obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
+  have ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
+
+  have ⟨ op_sum, op_div, op_rem ⟩ :
+    (air.core.opcode_divu_flag row 0 + air.core.opcode_remu_flag row 0 = 1) ∧
+    air.core.opcode_div_flag row 0 = 0 ∧
+    air.core.opcode_rem_flag row 0 = 0
+    := by grind
+
+  clear h_divuremu sop0 sop1 sop2 sop3 op0 op1 op2 op3
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
+  obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
+           ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
+  obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
+  clear pa_range
+
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  obtain ⟨ constrain_interactions,
+           b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+           b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
+           b_vnzd, h_vnzd,
+           b_rz, b_rz_r0, b_rz_r1, b_rz_r2, b_rz_r3,
+           b_vnsc, h_vnsc,
+           b_bsgn, b_csgn, h_bsgn, h_csgn, h_xor_eq,
+           b_qsgn, h_xor_qsgn_eq, h_xor_qsgn_z,
+           h_r'_0, b_lt_0, h_r'inv_0, h_lt_0,
+           h_r'_1, b_lt_1, h_r'inv_1, h_lt_1,
+           h_r'_2, b_lt_2, h_r'inv_2, h_lt_2,
+           h_r'_3, b_lt_3, h_r'inv_3, h_lt_3,
+           b_ltm_3, h_prod_3, h_diff_3,
+           b_ltm_2, h_prod_2, h_diff_2,
+           b_ltm_1, h_prod_1, h_diff_1,
+           b_ltm_0, h_prod_0, h_diff_0,
+           h_sum_sc_ltm,
+           rest ⟩ := constraints
+  clear constrain_interactions rest
+
+  have eq_sgn : air.core.signed row 0 = 0
+    := by simp [← DivRemCoreAir_4_8.signed_def, op_div, op_rem]
+  symm at h_xor_eq
+  simp_all
+  symm at h_r'_0 h_r'_1 h_r'_2 h_r'_3
+  simp_all
+  clear h_r'_0 h_r'_1 h_r'_2 h_r'_3
+
+  clear b_vnzd
+  simp [← DivRemCoreAir_4_8.valid_and_not_zero_divisor_def] at h_vnzd
+  simp [row_valid] at h_vnzd
+
+  have eq_zero_divisor :
+    air.core.zero_divisor row 0 = 1 ↔
+      air.core.c_0 row 0 = 0 ∧ air.core.c_1 row 0 = 0 ∧ air.core.c_2 row 0 = 0 ∧ air.core.c_3 row 0 = 0
+  := by
+    constructor
+    . intro h_div; simp_all
+    . intro ⟨ z_c0, z_c1, z_c2, z_c3 ⟩
+      clear *- h_vnzd z_c0 z_c1 z_c2 z_c3
+      simp [← DivRemCoreAir_4_8.c_sum_def] at h_vnzd
+      grind
+
+  simp only [execute_DIV_REM_pure, execute_DIV_REM_pure_int]
+  rw [if_pos (by simp [U32.toNat])]
+  split_ands
+  . simp [← BitVec.toNat_inj, U32.toNat]
+  . rw [← Int.ofNat_tmod, Int.toNat_natCast]
+    simp [← BitVec.toNat_inj, U32.toNat]
+    repeat rw [Nat.mod_eq_of_lt (by omega)]
+    simp [← DivRemCoreAir_4_8.carry_0,
+          ← DivRemCoreAir_4_8.carry_1,
+          ← DivRemCoreAir_4_8.carry_2,
+          ← DivRemCoreAir_4_8.carry_3] at *
+    repeat rw [mul_comm (b := 2005401601)] at *
+    simp_all
+    have : air.core.r_0 row 0 = air.core.b_0 row 0
+    := by
+      have ⟨ h_eq, _ ⟩ :=
+        @BabyBear.inv256_prod_diff_div_mod (air.core.b_0 row 0) (air.core.r_0 row 0) ub_b0 (by omega)
+      clear *- ub_r0 h_eq
+      simp_all [Fin.ext_iff]; omega
+    simp_all
+    have : air.core.r_1 row 0 = air.core.b_1 row 0
+    := by
+      have ⟨ h_eq, _ ⟩ :=
+        @BabyBear.inv256_prod_diff_div_mod (air.core.b_1 row 0) (air.core.r_1 row 0) ub_b1 (by omega)
+      clear *- ub_r1 h_eq
+      simp_all [Fin.ext_iff]; omega
+    simp_all
+    have : air.core.r_2 row 0 = air.core.b_2 row 0
+    := by
+      have ⟨ h_eq, _ ⟩ :=
+        @BabyBear.inv256_prod_diff_div_mod (air.core.b_2 row 0) (air.core.r_2 row 0) ub_b2 (by omega)
+      clear *- ub_r2 h_eq
+      simp_all [Fin.ext_iff]; omega
+    simp_all
+    have : air.core.r_3 row 0 = air.core.b_3 row 0
+    := by
+      have ⟨ h_eq, _ ⟩ :=
+        @BabyBear.inv256_prod_diff_div_mod (air.core.b_3 row 0) (air.core.r_3 row 0) ub_b3 (by omega)
+      clear *- ub_r3 h_eq
+      simp_all [Fin.ext_iff]; omega
+    simp_all
+
+set_option maxRecDepth 1_000_000 in
+include
+  row_valid
+  constraints
+  propertiesToAssume in
+/-- The constraints entail correct implementation of the DIVU/REMU opcode, Part 2 --/
+theorem spec_DIVUREMU_nczero_rzero
+  (h_divuremu :
+    (air.core.ctx row 0).instruction.opcode = 597 ∨
+    (air.core.ctx row 0).instruction.opcode = 599)
+  (h_c_zero : air.core.zero_divisor row 0 = 0)
+  (h_r_zero : air.core.r_zero row 0 = 1)
+:
+  (U32.toBV #v[(air.core.q_0 row 0).val,
+               (air.core.q_1 row 0).val,
+               (air.core.q_2 row 0).val,
+               (air.core.q_3 row 0).val],
+   U32.toBV #v[(air.core.r_0 row 0).val,
+               (air.core.r_1 row 0).val,
+               (air.core.r_2 row 0).val,
+               (air.core.r_3 row 0).val])
+    =
+  (execute_DIV_REM_pure
+    (U32.toBV #v[(air.core.b_0 row 0).val,
+                 (air.core.b_1 row 0).val,
+                 (air.core.b_2 row 0).val,
+                 (air.core.b_3 row 0).val])
+    (U32.toBV #v[(air.core.c_0 row 0).val,
+                 (air.core.c_1 row 0).val,
+                 (air.core.c_2 row 0).val,
+                 (air.core.c_3 row 0).val])
+    .DRU)
+:= by
+  obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
+  have ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
+
+  have ⟨ op_sum, op_div, op_rem ⟩ :
+    (air.core.opcode_divu_flag row 0 + air.core.opcode_remu_flag row 0 = 1) ∧
+    air.core.opcode_div_flag row 0 = 0 ∧
+    air.core.opcode_rem_flag row 0 = 0
+    := by grind
+
+  clear h_divuremu sop0 sop1 sop2 sop3 op0 op1 op2 op3
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
+  obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
+           ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
+  obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
+  clear pa_range
+
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  obtain ⟨ constrain_interactions,
+           b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+           b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
+           b_vnzd, h_vnzd,
+           b_rz, b_rz_r0, b_rz_r1, b_rz_r2, b_rz_r3,
+           b_vnsc, h_vnsc,
+           b_bsgn, b_csgn, h_bsgn, h_csgn, h_xor_eq,
+           b_qsgn, h_xor_qsgn_eq, h_xor_qsgn_z,
+           h_r'_0, b_lt_0, h_r'inv_0, h_lt_0,
+           h_r'_1, b_lt_1, h_r'inv_1, h_lt_1,
+           h_r'_2, b_lt_2, h_r'inv_2, h_lt_2,
+           h_r'_3, b_lt_3, h_r'inv_3, h_lt_3,
+           b_ltm_3, h_prod_3, h_diff_3,
+           b_ltm_2, h_prod_2, h_diff_2,
+           b_ltm_1, h_prod_1, h_diff_1,
+           b_ltm_0, h_prod_0, h_diff_0,
+           h_sum_sc_ltm,
+           rest ⟩ := constraints
+  clear constrain_interactions rest
+
+  simp [← DivRemCoreAir_4_8.carry_0,
+        ← DivRemCoreAir_4_8.carry_1,
+        ← DivRemCoreAir_4_8.carry_2,
+        ← DivRemCoreAir_4_8.carry_3,
+        ← DivRemCoreAir_4_8.carry_ext_0_def,
+        ← DivRemCoreAir_4_8.carry_ext_1_def,
+        ← DivRemCoreAir_4_8.carry_ext_2_def,
+        ← DivRemCoreAir_4_8.carry_ext_3_def,
+        ← DivRemCoreAir_4_8.b_ext_def,
+        ← DivRemCoreAir_4_8.c_ext_def,
+        ← DivRemCoreAir_4_8.q_ext_def
+        ] at *
+  repeat rw [mul_comm (b := 2005401601)] at *
+
+  have eq_sgn : air.core.signed row 0 = 0
+    := by simp [← DivRemCoreAir_4_8.signed_def, op_div, op_rem]
+  simp [eq_sgn] at *
+  symm at h_xor_eq
+  simp_all
+  symm at h_r'_0; simp [h_r'_0] at *
+  symm at h_r'_1 h_r'_2 h_r'_3
+  simp_all
+
+  clear b_vnzd
+  simp [← DivRemCoreAir_4_8.valid_and_not_zero_divisor_def] at h_vnzd
+  simp [row_valid] at h_vnzd
+
+  have eq_zero_divisor :
+    air.core.zero_divisor row 0 = 1 ↔
+      air.core.c_0 row 0 = 0 ∧ air.core.c_1 row 0 = 0 ∧ air.core.c_2 row 0 = 0 ∧ air.core.c_3 row 0 = 0
+  := by
+    constructor
+    . intro h_div; simp_all
+    . intro ⟨ z_c0, z_c1, z_c2, z_c3 ⟩
+      clear *- h_vnzd z_c0 z_c1 z_c2 z_c3
+      simp [← DivRemCoreAir_4_8.c_sum_def] at h_vnzd
+      grind
+  simp [h_c_zero] at eq_zero_divisor
+
+  have h_bv_eq :=
+    @divrem_split
+      (air.core.b_0 row 0) (air.core.b_1 row 0) (air.core.b_2 row 0) (air.core.b_3 row 0) 0 0 0 0
+      (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+      (air.core.q_0 row 0) (air.core.q_1 row 0) (air.core.q_2 row 0) (air.core.q_3 row 0)
+      0 0 0 0
+      0 0 0
+      ub_b0 ub_b1 ub_b2 ub_b3 (by simp) (by simp) (by simp) (by simp)
+      ub_c0 ub_c1 ub_c2 ub_c3 ub_q0 ub_q1 ub_q2 ub_q3
+      (by simp) (by simp) (by simp) (by simp)
+      (by simp) (by simp) (by simp)
+      (by clear *- ub_cq0; simp; assumption)
+      (by clear *- ub_cq1; simp; assumption)
+      (by clear *- ub_cq2; simp; assumption)
+      (by clear *- ub_cq3; simp; assumption)
+      (by clear *- ub_cr0; simp; assumption)
+      (by clear *- ub_cr1; simp; assumption)
+      (by clear *- ub_cr2; simp; assumption)
+      (by clear *- ub_cr3; simp; assumption)
+  clear ub_cq0 ub_cq1 ub_cq2 ub_cq3 ub_cr0 ub_cr1 ub_cr2 ub_cr3
+
+  simp [← BitVec.toNat_inj, U64.toNat] at h_bv_eq
+  repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)] at h_bv_eq
+  rw [Nat.mod_eq_of_lt] at h_bv_eq
+  rotate_left
+  . apply lt_of_le_of_lt (b := 4294967295 * 4294967295)
+    . apply mul_le_mul <;> omega
+    . simp
+  . simp only [execute_DIV_REM_pure, execute_DIV_REM_pure_int]
+    rw [if_neg (by simp [U32.toNat]; clear *- ub_c0 ub_c1 ub_c2 ub_c3 eq_zero_divisor h_c_zero; grind)]
+    rw [← Int.ofNat_tmod, ← Int.ofNat_tdiv, Int.toNat_natCast, Int.toNat_natCast]
+    simp [← BitVec.toNat_inj, U32.toNat]
+    repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+    rw [Nat.mod_eq_of_lt (b := 4294967296)]
+    rw [Nat.mod_eq_of_lt (b := 4294967296)]
+    simp [h_bv_eq]
+    clear *- ub_c0 ub_c1 ub_c2 ub_c3 ub_q0 ub_q1 ub_q2 ub_q3 eq_zero_divisor
+    . rw [Nat.mul_div_cancel_left]
+      omega
+    . trans (((air.core.c_0 row 0) : ℕ) + ↑(air.core.c_1 row 0) * 256 + ↑(air.core.c_2 row 0) * 65536 + ↑(air.core.c_3 row 0) * 16777216)
+      . apply Nat.mod_lt
+        clear *- ub_c0 ub_c1 ub_c2 ub_c3 eq_zero_divisor
+        omega
+      . omega
+    . apply lt_of_le_of_lt
+      . apply Nat.div_le_self
+      . omega
+
+set_option maxRecDepth 1_000_000 in
+include
+  row_valid
+  constraints
+  propertiesToAssume in
+/-- The constraints entail correct implementation of the DIV/REM opcode, Part 3 --/
+theorem spec_DIVUREMU_nczero_nrzero
+  (h_divuremu :
+    (air.core.ctx row 0).instruction.opcode = 597 ∨
+    (air.core.ctx row 0).instruction.opcode = 599)
+  (h_c_zero : air.core.zero_divisor row 0 = 0)
+  (h_r_zero : air.core.r_zero row 0 = 0)
+:
+  (U32.toBV #v[(air.core.q_0 row 0).val,
+               (air.core.q_1 row 0).val,
+               (air.core.q_2 row 0).val,
+               (air.core.q_3 row 0).val],
+   U32.toBV #v[(air.core.r_0 row 0).val,
+               (air.core.r_1 row 0).val,
+               (air.core.r_2 row 0).val,
+               (air.core.r_3 row 0).val])
+    =
+  (execute_DIV_REM_pure
+    (U32.toBV #v[(air.core.b_0 row 0).val,
+                 (air.core.b_1 row 0).val,
+                 (air.core.b_2 row 0).val,
+                 (air.core.b_3 row 0).val])
+    (U32.toBV #v[(air.core.c_0 row 0).val,
+                 (air.core.c_1 row 0).val,
+                 (air.core.c_2 row 0).val,
+                 (air.core.c_3 row 0).val])
+    .DRU)
+:= by
+  obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
+  have ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
+
+  have ⟨ op_sum, op_div, op_rem ⟩ :
+    (air.core.opcode_divu_flag row 0 + air.core.opcode_remu_flag row 0 = 1) ∧
+    air.core.opcode_div_flag row 0 = 0 ∧
+    air.core.opcode_rem_flag row 0 = 0
+    := by grind
+
+  clear h_divuremu sop0 sop1 sop2 sop3 op0 op1 op2 op3
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
+  obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
+           ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
+  obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
+  clear pa_range
+
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  obtain ⟨ constrain_interactions,
+           b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+           b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
+           b_vnzd, h_vnzd,
+           b_rz, b_rz_r0, b_rz_r1, b_rz_r2, b_rz_r3,
+           b_vnsc, h_vnsc,
+           b_bsgn, b_csgn, h_bsgn, h_csgn, h_xor_eq,
+           b_qsgn, h_xor_qsgn_eq, h_xor_qsgn_z,
+           h_r'_0, b_lt_0, h_r'inv_0, h_lt_0,
+           h_r'_1, b_lt_1, h_r'inv_1, h_lt_1,
+           h_r'_2, b_lt_2, h_r'inv_2, h_lt_2,
+           h_r'_3, b_lt_3, h_r'inv_3, h_lt_3,
+           b_ltm_3, h_prod_3, h_diff_3,
+           b_ltm_2, h_prod_2, h_diff_2,
+           b_ltm_1, h_prod_1, h_diff_1,
+           b_ltm_0, h_prod_0, h_diff_0,
+           h_sum_sc_ltm,
+           rest ⟩ := constraints
+  clear constrain_interactions rest
+
+  simp [← DivRemCoreAir_4_8.carry_0,
+        ← DivRemCoreAir_4_8.carry_1,
+        ← DivRemCoreAir_4_8.carry_2,
+        ← DivRemCoreAir_4_8.carry_3,
+        ← DivRemCoreAir_4_8.carry_ext_0_def,
+        ← DivRemCoreAir_4_8.carry_ext_1_def,
+        ← DivRemCoreAir_4_8.carry_ext_2_def,
+        ← DivRemCoreAir_4_8.carry_ext_3_def,
+        ← DivRemCoreAir_4_8.b_ext_def,
+        ← DivRemCoreAir_4_8.c_ext_def,
+        ← DivRemCoreAir_4_8.q_ext_def
+        ] at *
+  repeat rw [mul_comm (b := 2005401601)] at *
+
+  have eq_sgn : air.core.signed row 0 = 0
+    := by simp [← DivRemCoreAir_4_8.signed_def, op_div, op_rem]
+  simp [eq_sgn] at *
+  symm at h_xor_eq
+  simp_all
+  symm at h_r'_0; simp [h_r'_0] at *
+  symm at h_r'_1 h_r'_2 h_r'_3
+  simp_all
+
+  clear b_vnzd
+  simp [← DivRemCoreAir_4_8.valid_and_not_zero_divisor_def] at h_vnzd
+  simp [row_valid] at h_vnzd
+
+  have eq_zero_divisor :
+    air.core.zero_divisor row 0 = 1 ↔
+      air.core.c_0 row 0 = 0 ∧ air.core.c_1 row 0 = 0 ∧ air.core.c_2 row 0 = 0 ∧ air.core.c_3 row 0 = 0
+  := by
+    constructor
+    . intro h_div; simp_all
+    . intro ⟨ z_c0, z_c1, z_c2, z_c3 ⟩
+      clear *- h_vnzd z_c0 z_c1 z_c2 z_c3
+      simp [← DivRemCoreAir_4_8.c_sum_def] at h_vnzd
+      grind
+  simp [h_c_zero] at eq_zero_divisor
+
+  have h_bv_eq :=
+    @divrem_split
+      (air.core.b_0 row 0) (air.core.b_1 row 0) (air.core.b_2 row 0) (air.core.b_3 row 0) 0 0 0 0
+      (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+      (air.core.q_0 row 0) (air.core.q_1 row 0) (air.core.q_2 row 0) (air.core.q_3 row 0)
+      (air.core.r_0 row 0) (air.core.r_1 row 0) (air.core.r_2 row 0) (air.core.r_3 row 0)
+      0 0 0
+      ub_b0 ub_b1 ub_b2 ub_b3 (by simp) (by simp) (by simp) (by simp)
+      ub_c0 ub_c1 ub_c2 ub_c3 ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3
+      (by simp) (by simp) (by simp)
+      ub_cq0 ub_cq1 ub_cq2 ub_cq3
+      (by clear *- ub_cr0; simp; assumption)
+      (by clear *- ub_cr1; simp; assumption)
+      (by clear *- ub_cr2; simp; assumption)
+      (by clear *- ub_cr3; simp; assumption)
+  clear ub_cq0 ub_cq1 ub_cq2 ub_cq3 ub_cr0 ub_cr1 ub_cr2 ub_cr3
+
+  simp [← BitVec.toNat_inj, U64.toNat] at h_bv_eq
+  repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)] at h_bv_eq
+  rw [Nat.mod_eq_of_lt] at h_bv_eq
+  rotate_left
+  . apply lt_of_le_of_lt (b := 4294967295 * 4294967295 + 4294967295)
+    . apply add_le_add
+      . apply mul_le_mul <;> omega
+      . omega
+    . simp
+
+  simp only [execute_DIV_REM_pure, execute_DIV_REM_pure_int]
+  rw [if_neg (by simp [U32.toNat]; clear *- ub_c0 ub_c1 ub_c2 ub_c3 eq_zero_divisor h_c_zero; grind)]
+  rw [← Int.ofNat_tmod, ← Int.ofNat_tdiv, Int.toNat_natCast, Int.toNat_natCast]
+  simp [← BitVec.toNat_inj, U32.toNat]
+  repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+  rw [Nat.mod_eq_of_lt (b := 4294967296)]
+  rw [Nat.mod_eq_of_lt (b := 4294967296)]
+  . rw [eq_comm, eq_comm (b := _ % _)]
+    rw [Nat.div_mod_unique (by omega)]
+    split_ands
+    . omega
+    . rw [← DivRemCoreAir_4_8.valid_and_not_special_case_def,
+          ← DivRemCoreAir_4_8.special_case_def] at *
+      simp_all
+
+      have h_lt :=
+        @BabyBear.Circuits.less_than
+          (air.core.r_0 row 0) (air.core.r_1 row 0) (air.core.r_2 row 0) (air.core.r_3 row 0)
+          (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+          (air.core.lt_marker_0 row 0) (air.core.lt_marker_1 row 0) (air.core.lt_marker_2 row 0) (air.core.lt_marker_3 row 0)
+          (air.core.lt_diff row 0)
+          (air.core.r_3 row 0) (air.core.c_3 row 0)
+          0
+          ((air.core.lt_marker_3 row 0) + (air.core.lt_marker_2 row 0) + (air.core.lt_marker_1 row 0) + (air.core.lt_marker_0 row 0))
+          ub_r0 ub_r1 ub_r2 ub_r3
+          ub_c0 ub_c1 ub_c2 ub_c3
+          (by right; assumption)
+          (by simp) (by simp)
+          b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3
+          (by right; assumption)
+          (by simp [h_sum_sc_ltm]; clear *- h_diff_3; grind)
+          (by simp [h_sum_sc_ltm]; clear *- h_diff_2; grind)
+          (by simp [h_sum_sc_ltm]; clear *- h_diff_1; grind)
+          (by simp [h_sum_sc_ltm]; clear *- h_diff_0; grind)
+          (by left; assumption)
+          (by clear *- h_prod_3; grind)
+          (by clear *- h_prod_2; grind)
+          (by clear *- h_prod_1; grind)
+          (by left; assumption)
+          (by simpa) (by simpa)
+          (by simp [h_diff])
+      simp_all
+
+      simp [U32.toNat] at h_lt
+      omega
+  . trans (((air.core.c_0 row 0) : ℕ) + ↑(air.core.c_1 row 0) * 256 + ↑(air.core.c_2 row 0) * 65536 + ↑(air.core.c_3 row 0) * 16777216)
+    . apply Nat.mod_lt
+      clear *- ub_c0 ub_c1 ub_c2 ub_c3 eq_zero_divisor
+      omega
+    . omega
+  . apply lt_of_le_of_lt
+    . apply Nat.div_le_self
+    . omega
+
+include
+  row_valid
+  constraints
+  propertiesToAssume in
+/-- The constraints entail correct implementation of the DIV/REM opcode, gathered --/
+theorem spec_DIVUREMU
+  (h_divrem :
+    (air.core.ctx row 0).instruction.opcode = 597 ∨
+    (air.core.ctx row 0).instruction.opcode = 599)
+:
+  (U32.toBV #v[(air.core.q_0 row 0).val,
+               (air.core.q_1 row 0).val,
+               (air.core.q_2 row 0).val,
+               (air.core.q_3 row 0).val],
+   U32.toBV #v[(air.core.r_0 row 0).val,
+               (air.core.r_1 row 0).val,
+               (air.core.r_2 row 0).val,
+               (air.core.r_3 row 0).val])
+    =
+  (execute_DIV_REM_pure
+    (U32.toBV #v[(air.core.b_0 row 0).val,
+                 (air.core.b_1 row 0).val,
+                 (air.core.b_2 row 0).val,
+                 (air.core.b_3 row 0).val])
+    (U32.toBV #v[(air.core.c_0 row 0).val,
+                 (air.core.c_1 row 0).val,
+                 (air.core.c_2 row 0).val,
+                 (air.core.c_3 row 0).val])
+    .DRU)
+:= by
+  by_cases h_c_zero : air.core.zero_divisor row 0 = 1
+  . apply spec_DIVUREMU_czero <;> assumption
+  . have : air.core.zero_divisor row 0 = 0 := by
+      rw [allHold_simplified_of_allHold] at constraints
+      simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+      obtain ⟨ constrain_interactions,
+              b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+              b_zd, rest ⟩ := constraints
+      clear *- b_zd h_c_zero
+      simp_all
+    . by_cases h_r_zero : air.core.r_zero row 0 = 1
+      . apply spec_DIVUREMU_nczero_rzero <;> assumption
+      . apply spec_DIVUREMU_nczero_nrzero <;> try assumption
+        rw [allHold_simplified_of_allHold] at constraints
+        simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+        obtain ⟨ constrain_interactions,
+                b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+                b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
+                b_vnzd, h_vnzd,
+                b_rz, rest ⟩ := constraints
+        clear *- b_rz h_r_zero
+        simp_all
+
+end unsigned
 
 end General
 
