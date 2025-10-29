@@ -1530,7 +1530,7 @@ theorem spec_DIVREM_nczero_nsc_rzero
           omega
         simp [zq0, zq1, zq2, zq3] at hub hlb h_bv_eq ⊢
         rcases b_qext with h_qext | h_qext
-        . assumption
+        . grind
         . exfalso
           simp [h_qext] at hub hlb h_bv_eq
           simp [U64.toInt, U64.negative, U64.toNat] at hub hlb h_bv_eq
