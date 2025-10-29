@@ -410,398 +410,403 @@ lemma divrem_quot_rem_sign
 :
   q_ext = U32.ext #v[q0.val, q1.val, q2.val, q3.val] true ∧ b_ext = U32.ext #v[r0.val, r1.val, r2.val, r3.val] true
 := by
-  have h_bv_eq :=
-    @divrem_split
-      b0 b1 b2 b3 b_ext b_ext b_ext b_ext
-      c0 c1 c2 c3
-      q0 q1 q2 q3
-      r0 r1 r2 r3
-      c_ext q_ext b_ext
-      ub_b0 ub_b1 ub_b2 ub_b3 ub_be ub_be ub_be ub_be
-      ub_c0 ub_c1 ub_c2 ub_c3 ub_q0 ub_q1 ub_q2 ub_q3
-      ub_r0 ub_r1 ub_r2 ub_r3
-      ub_ce ub_qe ub_be
-      ub_cry0 ub_cry1 ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
+  sorry
+  -- have h_bv_eq :=
+  --   @divrem_split
+  --     b0 b1 b2 b3 b_ext b_ext b_ext b_ext
+  --     c0 c1 c2 c3
+  --     q0 q1 q2 q3
+  --     r0 r1 r2 r3
+  --     c_ext q_ext b_ext
+  --     ub_b0 ub_b1 ub_b2 ub_b3 ub_be ub_be ub_be ub_be
+  --     ub_c0 ub_c1 ub_c2 ub_c3 ub_q0 ub_q1 ub_q2 ub_q3
+  --     ub_r0 ub_r1 ub_r2 ub_r3
+  --     ub_ce ub_qe ub_be
+  --     ub_cry0 ub_cry1 ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
 
-  have : U64.toBV
-          #v[BitVec.ofNat 8 ↑b0, BitVec.ofNat 8 ↑b1, BitVec.ofNat 8 ↑b2, BitVec.ofNat 8 ↑b3, BitVec.ofNat 8 ↑b_ext,
-             BitVec.ofNat 8 ↑b_ext, BitVec.ofNat 8 ↑b_ext, BitVec.ofNat 8 ↑b_ext] =
-         U64.toBV (U32.extend #v[b0, b1, b2, b3] true)
-  := by
-    simp [U32.extend, h_b_ext, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
-    split_ifs <;> congr
-  rw [this] at h_bv_eq; clear this
+  -- have : U64.toBV
+  --         #v[BitVec.ofNat 8 ↑b0, BitVec.ofNat 8 ↑b1, BitVec.ofNat 8 ↑b2, BitVec.ofNat 8 ↑b3, BitVec.ofNat 8 ↑b_ext,
+  --            BitVec.ofNat 8 ↑b_ext, BitVec.ofNat 8 ↑b_ext, BitVec.ofNat 8 ↑b_ext] =
+  --        U64.toBV (U32.extend #v[b0, b1, b2, b3] true)
+  -- := by
+  --   simp [U32.extend, h_b_ext, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
+  --   split_ifs <;> congr
+  -- rw [this] at h_bv_eq; clear this
 
-  have : U64.toBV
-          #v[BitVec.ofNat 8 ↑c0, BitVec.ofNat 8 ↑c1, BitVec.ofNat 8 ↑c2, BitVec.ofNat 8 ↑c3, BitVec.ofNat 8 ↑c_ext,
-             BitVec.ofNat 8 ↑c_ext, BitVec.ofNat 8 ↑c_ext, BitVec.ofNat 8 ↑c_ext] =
-         U64.toBV (U32.extend #v[c0, c1, c2, c3] true)
-  := by
-    simp [U32.extend, h_c_ext, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
-    split_ifs <;> congr
-  rw [this] at h_bv_eq; clear this
+  -- have : U64.toBV
+  --         #v[BitVec.ofNat 8 ↑c0, BitVec.ofNat 8 ↑c1, BitVec.ofNat 8 ↑c2, BitVec.ofNat 8 ↑c3, BitVec.ofNat 8 ↑c_ext,
+  --            BitVec.ofNat 8 ↑c_ext, BitVec.ofNat 8 ↑c_ext, BitVec.ofNat 8 ↑c_ext] =
+  --        U64.toBV (U32.extend #v[c0, c1, c2, c3] true)
+  -- := by
+  --   simp [U32.extend, h_c_ext, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
+  --   split_ifs <;> congr
+  -- rw [this] at h_bv_eq; clear this
 
-  clear ub_cry0 ub_cry1 ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
+  -- clear ub_cry0 ub_cry1 ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
 
-  simp [← BitVec.toInt_inj] at h_bv_eq
+  -- simp [← BitVec.toInt_inj] at h_bv_eq
 
-  have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[b0, b1, b2, b3]
-  have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[c0, c1, c2, c3]
+  -- have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[b0, b1, b2, b3]
+  -- have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[c0, c1, c2, c3]
 
-  rw [h_bv_eq] at lb_b ub_b
+  -- rw [h_bv_eq] at lb_b ub_b
 
-  have mod_b : b0.val % 256 = b0 ∧ b1.val % 256 = b1 ∧ b2.val % 256 = b2 ∧ b3.val % 256 = b3 := by omega
-  simp [mod_b] at *
-  have mod_c : c0.val % 256 = c0 ∧ c1.val % 256 = c1 ∧ c2.val % 256 = c2 ∧ c3.val % 256 = c3 := by omega
-  simp [mod_c] at *
-  have mod_q : q0.val % 256 = q0 ∧ q1.val % 256 = q1 ∧ q2.val % 256 = q2 ∧ q3.val % 256 = q3 := by omega
-  simp [mod_q] at *
-  have mod_r : r0.val % 256 = r0 ∧ r1.val % 256 = r1 ∧ r2.val % 256 = r2 ∧ r3.val % 256 = r3 := by omega
-  simp [mod_r] at *
-  clear mod_b mod_c mod_q mod_r
+  -- have mod_b : b0.val % 256 = b0 ∧ b1.val % 256 = b1 ∧ b2.val % 256 = b2 ∧ b3.val % 256 = b3 := by omega
+  -- simp [mod_b] at *
+  -- have mod_c : c0.val % 256 = c0 ∧ c1.val % 256 = c1 ∧ c2.val % 256 = c2 ∧ c3.val % 256 = c3 := by omega
+  -- simp [mod_c] at *
+  -- have mod_q : q0.val % 256 = q0 ∧ q1.val % 256 = q1 ∧ q2.val % 256 = q2 ∧ q3.val % 256 = q3 := by omega
+  -- simp [mod_q] at *
+  -- have mod_r : r0.val % 256 = r0 ∧ r1.val % 256 = r1 ∧ r2.val % 256 = r2 ∧ r3.val % 256 = r3 := by omega
+  -- simp [mod_r] at *
+  -- clear mod_b mod_c mod_q mod_r
 
-  simp [U32.toInt] at *
-  unfold U32.ext at *
-  simp [U32.negative] at *
-  simp [U32.toNat] at *
+  -- simp [U32.toInt] at *
+  -- unfold U32.ext at *
+  -- simp [U32.negative] at *
+  -- simp [U32.toNat] at *
 
-  have simp_mul : forall x, 4294967296 ≤ 2 * x ↔ 2147483648 ≤ x := by omega
-  simp [simp_mul] at *; clear simp_mul
-  clear mod_b mod_c mod_r
+  -- have simp_mul : forall x, 4294967296 ≤ 2 * x ↔ 2147483648 ≤ x := by omega
+  -- simp [simp_mul] at *; clear simp_mul
+  -- clear mod_b mod_c mod_r
 
-  by_cases h_q_nz_n : (q0 : ℕ) + ↑q1 * 256 + ↑q2 * 65536 + ↑q3 * 16777216 = 0
-  . simp at h_q_nz_n
-    simp [h_q_nz_n] at *
-    simp [h_q_ext] at *
-    conv at ub_b =>
-      lhs; arg 1; arg 1
-      simp [U64.toInt, U64.negative, U64.toNat]
-    conv at lb_b =>
-      rhs; arg 1; arg 1
-      simp [U64.toInt, U64.negative, U64.toNat]
-    conv at h_bv_eq =>
-      rhs; arg 1; arg 1
-      simp [U64.toInt, U64.negative, U64.toNat]
-    simp [U64.toInt_bmod_eq] at h_bv_eq ub_b lb_b
-    simp [U64.toInt, U64.negative, U64.toNat] at h_bv_eq ub_b lb_b
-    split_ifs at h_b_ext with h_cond_bext
-    . simp_all [-BabyBear.to_the_right_FBB_255]
-      split_ifs at lb_b <;> omega
-    . simp_all [-BabyBear.to_the_right_FBB_0]
-      split_ifs at ub_b <;> omega
-  . zify at h_q_nz_n
-    rw [if_neg (by split_ifs <;> omega)] at h_q_ext
-    split_ifs at h_b_ext with h_cond_bext <;>
-    split_ifs at h_c_ext with h_cond_cext
-    -- `b` and `c` both negative
-    . simp_all [-BabyBear.to_the_right_FBB_255]
-      clear lb_c ub_c h_bv_eq
-      conv at lb_b =>
-        rhs; arg 1; arg 1; arg 2
-        simp [U64.toInt, U64.negative, U64.toNat]
-        rw [if_neg (by omega)]
-        simp
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b
-      conv at ub_b =>
-        lhs; arg 1; arg 1; arg 2
-        simp [U64.toInt, U64.negative, U64.toNat]
-        rw [if_neg (by omega)]
-        simp
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at ub_b
-      have ⟨ lb_cx, ub_cx ⟩ :
-        -2147483648 ≤ (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 ∧
-        (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 < 0
-      := by omega
-      have ⟨ lb_qx, ub_qx ⟩ :
-        0 < (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 ∧
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 < 4294967296
-      := by omega
-      have ⟨ lb_r, ub_r ⟩ :
-        0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
-        (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
-      := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
-      clear h_cond_bext h_cond_cext h_b_ext h_c_ext h_q_ext h_q_nz_n h_c_nz
-      clear h_c_ext h_q_ext
-      obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 := by simp
-      suffices :
-        q < 2147483648 ∧
-        2147483648 ≤ (r0 : ℤ) + ↑r1 * 256 + ↑r2 * 65536 + ↑r3 * 16777216
-      . rw [eq_q] at this; zify at this ⊢; clear *- this ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3; omega
-      . rw [← eq_q] at lb_b ub_b lb_qx ub_qx; clear eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
-        rw [if_pos (by omega)] at lb_b ub_b
-        obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 := by simp
-        simp [← eq_c] at *; clear ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3 eq_c
-        simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b; clear h_b_ext
-        rw [if_pos (by omega)] at lb_b ub_b
-        have h_eq :
-          c * q + (↑↑r0 % 256 + ↑↑r1 % 256 * 256 + ↑↑r2 % 256 * 65536 + ↑↑r3 % 256 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616) =
-          c * q + (↑↑r0 + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 - 4294967296)
-          := by omega
-        rw [h_eq] at lb_b ub_b; clear h_eq ub_b0 ub_b1 ub_b2 ub_b3 b0 b1 b2 b3
-        obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 := by simp
-        simp [← eq_r] at *; clear h_r_nz ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3 eq_r
-        by_cases h_q : q < 2147483648
-        . simp [h_q]
-          have ⟨ lb_prod, ub_prod ⟩ :
-            -2147483648 * 2147483647 ≤ c * q ∧ c * q ≤ -1
-          := by split_ands <;> nlinarith
-          simp at lb_prod
-          rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-          omega
-        . exfalso
-          simp at h_q
-          have ⟨ lb_prod, ub_prod ⟩ :
-            -2147483648 * 4294967295 ≤ c * q ∧ c * q ≤ -2147483648
-          := by split_ands <;> nlinarith
-          simp at lb_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            -9223372034707292160 + (1 - 4294967296) ≤ c * q + (r - 4294967296) ∧ c * q + (r - 4294967296) ≤ -2147483648 + (4294967295 - 4294967296)
-          := by omega
-          simp at lb_exp ub_exp
-          clear lb_prod ub_prod
-          by_cases ub_exp' : -9223372036854775808 ≤ c * q + (r - 4294967296)
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
-    -- `b` is negative, `c` is positive
-    . simp_all [-BabyBear.to_the_right_FBB_255]
-      clear h_bv_eq
-      conv at lb_b =>
-        rhs; arg 1; arg 1; arg 2
-        simp [U64.toInt, U64.negative, U64.toNat]
-        rw [if_pos (by omega)]
-        simp
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b
-      conv at ub_b =>
-        lhs; arg 1; arg 1; arg 2
-        simp [U64.toInt, U64.negative, U64.toNat]
-        rw [if_pos (by omega)]
-        simp
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at ub_b
-      have h_eq :
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616 =
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296
-        := by omega
-      simp [h_eq] at lb_b ub_b; clear h_eq
-      have ⟨ lb_qx, ub_qx ⟩ :
-        -4294967295 ≤ (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 ∧
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 < 0
-      := by omega
-      have ⟨ lb_r, ub_r ⟩ :
-        0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
-        (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
-      := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
-      clear h_cond_bext h_b_ext h_c_ext h_q_ext h_q_nz_n
-      clear h_c_ext h_q_ext
-      obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 := by simp
-      obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 := by simp
-      simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b; clear h_b_ext
-      rw [if_neg (by omega)] at lb_b ub_b h_c_nz ub_c lb_c
-      rw [if_pos (by omega)] at lb_b ub_b
-      clear h_cond_cext
-      have h_eq :
-        (r0 : ℤ) % 256 + ↑↑r1 % 256 * 256 + ↑↑r2 % 256 * 65536 + ↑↑r3 % 256 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616 =
-        (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 - 4294967296
-        := by omega
-      simp [h_eq] at lb_b ub_b; clear h_eq
-      obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 - 4294967296 := by simp
-      suffices : -2147483648 ≤ q ∧ -2147483648 ≤ r
-      . rw [eq_q, eq_r] at this; zify at this ⊢; clear *- this ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3; omega
-      . replace lb_c : 0 < c := by clear *- eq_c h_c_nz; rw [eq_c]; omega
-        clear h_r_nz
-        rw [← eq_c] at ub_c lb_b ub_b h_c_nz; clear eq_c ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3
-        rw [← eq_q] at lb_qx ub_qx lb_b ub_b; clear eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
-        have ⟨ lb_rx, ub_rx ⟩ : -4294967295 ≤ r ∧ r < 0 := by omega
-        rw [← eq_r] at lb_b ub_b; clear lb_r ub_r eq_r ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3
-        by_cases h_r : -2147483648 ≤ r
-        . simp [h_r]
-          clear h_c_nz lb_rx
-          by_contra h_q; simp at h_q
-          have ⟨ lb_prod, ub_prod ⟩ :
-            -2147483647 * 4294967295 ≤ c * q ∧ c * q ≤ -2147483649
-          := by split_ands <;> nlinarith
-          simp at lb_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            -9223372030412324865 - 2147483648 ≤ c * q + r ∧ c * q + r ≤ -2147483650
-          := by omega
-          simp at lb_exp
-          clear ub_prod lb_prod
-          by_cases ub_exp' : -9223372036854775808 ≤ c * q + r
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
-        . exfalso
-          simp at h_r
-          clear h_c_nz ub_rx
-          have ⟨ lb_prod, ub_prod ⟩ :
-            -2147483647 * 4294967295 ≤ c * q ∧ c * q ≤ -1
-          := by split_ands <;> nlinarith
-          simp at lb_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            -9223372030412324865 - 4294967295 ≤ c * q + r ∧ c * q + r ≤ -2147483650
-          := by omega
-          simp at lb_exp
-          clear ub_prod lb_prod
-          by_cases ub_exp' : -9223372036854775808 ≤ c * q + r
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
-    -- `b` is positive, `c` is negative
-    . simp_all [-BabyBear.to_the_right_FBB_255]
-      clear h_bv_eq
-      conv at lb_b =>
-        rhs; arg 1; arg 1; arg 2
-        simp [U64.toInt, U64.negative, U64.toNat]
-        rw [if_pos (by omega)]
-        simp
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b
-      conv at ub_b =>
-        lhs; arg 1; arg 1; arg 2
-        simp [U64.toInt, U64.negative, U64.toNat]
-        rw [if_pos (by omega)]
-        simp
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at ub_b
-      have h_eq :
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616 =
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296
-        := by omega
-      simp [h_eq] at lb_b ub_b; clear h_eq
-      have ⟨ lb_cx, ub_cx ⟩ :
-        -2147483648 ≤ (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 ∧
-        (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 < 0
-      := by omega
-      clear lb_c ub_c
-      have ⟨ lb_qx, ub_qx ⟩ :
-        -4294967295 ≤ (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 ∧
-        (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 < 0
-      := by omega
-      have ⟨ lb_r, ub_r ⟩ :
-        0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
-        (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
-      := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
-      clear h_cond_bext h_b_ext h_c_ext h_q_ext h_q_nz_n
-      clear h_c_ext h_q_ext
-      obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 := by simp
-      obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 := by simp
-      simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b; clear h_b_ext
-      rw [if_pos (by omega)] at lb_b ub_b h_c_nz
-      rw [if_neg (by omega)] at lb_b ub_b
-      clear h_cond_cext
-      have h_eq :
-        (r0 : ℤ) % 256 + ↑↑r1 % 256 * 256 + ↑↑r2 % 256 * 65536 + ↑↑r3 % 256 * 16777216 - 0 =
-        (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216
-        := by omega
-      simp [h_eq] at lb_b ub_b; clear h_eq
-      obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 := by simp
-      suffices : -2147483648 ≤ q ∧ r < 2147483648
-      . rw [eq_q, eq_r] at this; zify at this ⊢; clear *- this ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3; omega
-      . clear h_r_nz
-        rw [← eq_c] at lb_cx ub_cx lb_b ub_b h_c_nz; clear eq_c ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3
-        rw [← eq_q] at lb_qx ub_qx lb_b ub_b; clear eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
-        have ⟨ lb_rx, ub_rx ⟩ : 0 < r ∧ r < 4294967296 := by omega
-        rw [← eq_r] at lb_b ub_b; clear lb_r ub_r eq_r ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3
-        by_cases h_r : r < 2147483648
-        . simp [h_r]
-          clear h_c_nz ub_rx
-          by_contra h_q; simp at h_q
-          have ⟨ lb_prod, ub_prod ⟩ :
-            2147483648 < c * q ∧ c * q ≤ 2147483648 * 4294967295
-          := by split_ands <;> nlinarith
-          simp at ub_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            2147483649 < c * q + r ∧ c * q + r < 2147483648 * 4294967295 + 2147483648
-          := by omega
-          simp at ub_exp
-          clear ub_prod lb_prod
-          by_cases ub_exp' : -9223372036854775808 ≤ c * q + r
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
-        . exfalso
-          simp at h_r
-          clear h_c_nz lb_rx
-          have ⟨ lb_prod, ub_prod ⟩ :
-            1 ≤ c * q ∧ c * q ≤ 2147483648 * 4294967295
-          := by split_ands <;> nlinarith
-          simp at ub_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            2147483649 ≤ c * q + r ∧ c * q + r ≤ 2147483648 * 4294967295 + 4294967295
-          := by omega
-          simp at ub_exp
-          clear ub_prod lb_prod
-          by_cases ub_exp' : c * q + r < 9223372036854775808
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
-    -- `b` and `c` both positive
-    . simp_all [-BabyBear.to_the_right_FBB_0]
-      clear h_bv_eq
-      simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b
-      repeat rw [if_neg (by omega)] at lb_b ub_b
-      simp at lb_b ub_b
-      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b ub_b
-      repeat clear h_b_ext h_c_ext h_q_ext
-      have ⟨ lb_r, ub_r ⟩ :
-        0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
-        (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
-      := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
-      clear h_cond_bext h_r_nz
-      obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 := by simp
-      obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 := by simp
-      obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 := by simp
-      suffices : q < 2147483648 ∧ r < 2147483648
-      . rw [eq_q, eq_r] at this; zify at this ⊢; clear *- this; omega
-      . rw [if_neg (by omega)] at h_c_nz ub_c lb_c
-        replace lb_c : 0 < c := by clear *- h_c_nz eq_c ub_c0 ub_c1 ub_c2 ub_c3; rw [eq_c]; omega
-        have lb_q : 0 < q := by clear *- eq_q h_q_nz_n ub_q0 ub_q1 ub_q2 ub_q3; rw [eq_q]; omega
-        have ub_q : q < 4294967296 := by clear *- eq_q ub_q0 ub_q1 ub_q2 ub_q3; rw [eq_q]; omega
-        rw [← eq_c] at ub_c lb_b ub_b; clear h_cond_cext h_c_nz eq_c ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3
-        rw [← eq_q] at lb_b ub_b; clear h_q_nz_n eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
-        rw [← eq_r] at lb_b ub_b lb_r ub_r; clear eq_r ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3
-        by_cases h_r : r < 2147483648
-        . simp [h_r]
-          by_contra h_q; simp at h_q
-          have ⟨ lb_prod, ub_prod ⟩ :
-            2147483648 ≤ c * q ∧ c * q ≤ 2147483647 * 4294967295
-          := by split_ands <;> nlinarith
-          simp at ub_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            2147483649 ≤ c * q + r ∧ c * q + r < 2147483647 * 4294967295 + 2147483648
-          := by omega
-          simp at ub_exp
-          clear ub_prod lb_prod
-          by_cases ub_exp' : c * q + r < 9223372036854775808
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
-        . exfalso
-          simp at h_r
-          clear lb_r
-          have ⟨ lb_prod, ub_prod ⟩ :
-            1 ≤ c * q ∧ c * q ≤ 2147483647 * 4294967295
-          := by split_ands <;> nlinarith
-          simp at ub_prod
-          have ⟨ lb_exp, ub_exp ⟩ :
-            2147483649 ≤ c * q + r ∧ c * q + r ≤ 2147483647 * 4294967295 + 4294967295
-          := by omega
-          simp at ub_exp
-          clear ub_prod lb_prod
-          by_cases ub_exp' : c * q + r < 9223372036854775808
-          . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
-            omega
-          . simp [Int.bmod_def] at *
-            omega
+  -- by_cases h_q_nz_n : (q0 : ℕ) + ↑q1 * 256 + ↑q2 * 65536 + ↑q3 * 16777216 = 0
+  -- . simp at h_q_nz_n
+  --   simp [h_q_nz_n] at *
+  --   simp [h_q_ext] at *
+  --   conv at ub_b =>
+  --     lhs; arg 1; arg 1
+  --     simp [U64.toInt, U64.negative, U64.toNat]
+  --   conv at lb_b =>
+  --     rhs; arg 1; arg 1
+  --     simp [U64.toInt, U64.negative, U64.toNat]
+  --   conv at h_bv_eq =>
+  --     rhs; arg 1; arg 1
+  --     simp [U64.toInt, U64.negative, U64.toNat]
+  --   simp [U64.toInt_bmod_eq] at h_bv_eq ub_b lb_b
+  --   simp [U64.toInt, U64.negative, U64.toNat] at h_bv_eq ub_b lb_b
+  --   split_ifs at h_b_ext with h_cond_bext
+  --   . simp_all [-BabyBear.to_the_right_FBB_255]
+  --     split_ifs at lb_b <;> omega
+  --   . simp_all [-BabyBear.to_the_right_FBB_0]
+  --     split_ifs at ub_b <;> omega
+  -- . zify at h_q_nz_n
+  --   rw [if_neg (by split_ifs <;> omega)] at h_q_ext
+  --   split_ifs at h_b_ext with h_cond_bext <;>
+  --   split_ifs at h_c_ext with h_cond_cext
+  --   -- `b` and `c` both negative
+  --   . simp_all [-BabyBear.to_the_right_FBB_255]
+  --     clear lb_c ub_c h_bv_eq
+  --     conv at lb_b =>
+  --       rhs; arg 1; arg 1; arg 2
+  --       simp [U64.toInt, U64.negative, U64.toNat]
+  --       rw [if_neg (by omega)]
+  --       simp
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b
+  --     conv at ub_b =>
+  --       lhs; arg 1; arg 1; arg 2
+  --       simp [U64.toInt, U64.negative, U64.toNat]
+  --       rw [if_neg (by omega)]
+  --       simp
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at ub_b
+  --     have ⟨ lb_cx, ub_cx ⟩ :
+  --       -2147483648 ≤ (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 ∧
+  --       (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 < 0
+  --     := by omega
+  --     have ⟨ lb_qx, ub_qx ⟩ :
+  --       0 < (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 ∧
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 < 4294967296
+  --     := by omega
+  --     have ⟨ lb_r, ub_r ⟩ :
+  --       0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
+  --       (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
+  --     := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
+  --     clear h_cond_bext h_cond_cext h_b_ext h_c_ext h_q_ext h_q_nz_n h_c_nz
+  --     clear h_c_ext h_q_ext
+  --     obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 := by simp
+  --     suffices :
+  --       q < 2147483648 ∧
+  --       2147483648 ≤ (r0 : ℤ) + ↑r1 * 256 + ↑r2 * 65536 + ↑r3 * 16777216
+  --     . rw [eq_q] at this; zify at this ⊢; clear *- this ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3; omega
+  --     . rw [← eq_q] at lb_b ub_b lb_qx ub_qx; clear eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
+  --       rw [if_pos (by omega)] at lb_b ub_b
+  --       obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 := by simp
+  --       simp [← eq_c] at *; clear ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3 eq_c
+  --       simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b; clear h_b_ext
+  --       rw [if_pos (by omega)] at lb_b ub_b
+  --       have h_eq :
+  --         c * q + (↑↑r0 % 256 + ↑↑r1 % 256 * 256 + ↑↑r2 % 256 * 65536 + ↑↑r3 % 256 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616) =
+  --         c * q + (↑↑r0 + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 - 4294967296)
+  --         := by omega
+  --       rw [h_eq] at lb_b ub_b; clear h_eq ub_b0 ub_b1 ub_b2 ub_b3 b0 b1 b2 b3
+  --       obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 := by simp
+  --       simp [← eq_r] at *; clear h_r_nz ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3 eq_r
+  --       by_cases h_q : q < 2147483648
+  --       . simp [h_q]
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           -2147483648 * 2147483647 ≤ c * q ∧ c * q ≤ -1
+  --         := by split_ands <;> nlinarith
+  --         simp at lb_prod
+  --         rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --         omega
+  --       . exfalso
+  --         simp at h_q
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           -2147483648 * 4294967295 ≤ c * q ∧ c * q ≤ -2147483648
+  --         := by split_ands <;> nlinarith
+  --         simp at lb_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           -9223372034707292160 + (1 - 4294967296) ≤ c * q + (r - 4294967296) ∧ c * q + (r - 4294967296) ≤ -2147483648 + (4294967295 - 4294967296)
+  --         := by omega
+  --         simp at lb_exp ub_exp
+  --         clear lb_prod ub_prod
+  --         by_cases ub_exp' : -9223372036854775808 ≤ c * q + (r - 4294967296)
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
+  --   -- `b` is negative, `c` is positive
+  --   . simp_all [-BabyBear.to_the_right_FBB_255]
+  --     clear h_bv_eq
+  --     conv at lb_b =>
+  --       rhs; arg 1; arg 1; arg 2
+  --       simp [U64.toInt, U64.negative, U64.toNat]
+  --       rw [if_pos (by omega)]
+  --       simp
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b
+  --     conv at ub_b =>
+  --       lhs; arg 1; arg 1; arg 2
+  --       simp [U64.toInt, U64.negative, U64.toNat]
+  --       rw [if_pos (by omega)]
+  --       simp
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at ub_b
+  --     have h_eq :
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616 =
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296
+  --       := by omega
+  --     simp [h_eq] at lb_b ub_b; clear h_eq
+  --     have ⟨ lb_qx, ub_qx ⟩ :
+  --       -4294967295 ≤ (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 ∧
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 < 0
+  --     := by omega
+  --     have ⟨ lb_r, ub_r ⟩ :
+  --       0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
+  --       (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
+  --     := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
+  --     clear h_cond_bext h_b_ext h_c_ext h_q_ext h_q_nz_n
+  --     clear h_c_ext h_q_ext
+  --     obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 := by simp
+  --     obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 := by simp
+  --     simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b; clear h_b_ext
+  --     rw [if_neg (by omega)] at lb_b ub_b h_c_nz ub_c lb_c
+  --     rw [if_pos (by omega)] at lb_b ub_b
+  --     clear h_cond_cext
+  --     have h_eq :
+  --       (r0 : ℤ) % 256 + ↑↑r1 % 256 * 256 + ↑↑r2 % 256 * 65536 + ↑↑r3 % 256 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616 =
+  --       (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 - 4294967296
+  --       := by omega
+  --     simp [h_eq] at lb_b ub_b; clear h_eq
+  --     obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 - 4294967296 := by simp
+  --     suffices : -2147483648 ≤ q ∧ -2147483648 ≤ r
+  --     . rw [eq_q, eq_r] at this; zify at this ⊢; clear *- this ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3; omega
+  --     . replace lb_c : 0 < c := by clear *- eq_c h_c_nz; rw [eq_c]; omega
+  --       clear h_r_nz
+  --       rw [← eq_c] at ub_c lb_b ub_b h_c_nz; clear eq_c ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3
+  --       rw [← eq_q] at lb_qx ub_qx lb_b ub_b; clear eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
+  --       have ⟨ lb_rx, ub_rx ⟩ : -4294967295 ≤ r ∧ r < 0 := by omega
+  --       rw [← eq_r] at lb_b ub_b; clear lb_r ub_r eq_r ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3
+  --       by_cases h_r : -2147483648 ≤ r
+  --       . simp [h_r]
+  --         clear h_c_nz lb_rx
+  --         by_contra h_q; simp at h_q
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           -2147483647 * 4294967295 ≤ c * q ∧ c * q ≤ -2147483649
+  --         := by split_ands <;> nlinarith
+  --         simp at lb_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           -9223372030412324865 - 2147483648 ≤ c * q + r ∧ c * q + r ≤ -2147483650
+  --         := by omega
+  --         simp at lb_exp
+  --         clear ub_prod lb_prod
+  --         by_cases ub_exp' : -9223372036854775808 ≤ c * q + r
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
+  --       . exfalso
+  --         simp at h_r
+  --         clear h_c_nz ub_rx
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           -2147483647 * 4294967295 ≤ c * q ∧ c * q ≤ -1
+  --         := by split_ands <;> nlinarith
+  --         simp at lb_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           -9223372030412324865 - 4294967295 ≤ c * q + r ∧ c * q + r ≤ -2147483650
+  --         := by omega
+  --         simp at lb_exp
+  --         clear ub_prod lb_prod
+  --         by_cases ub_exp' : -9223372036854775808 ≤ c * q + r
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
+  --   -- `b` is positive, `c` is negative
+  --   . simp_all [-BabyBear.to_the_right_FBB_255]
+  --     clear h_bv_eq
+  --     conv at lb_b =>
+  --       rhs; arg 1; arg 1; arg 2
+  --       simp [U64.toInt, U64.negative, U64.toNat]
+  --       rw [if_pos (by omega)]
+  --       simp
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b
+  --     conv at ub_b =>
+  --       lhs; arg 1; arg 1; arg 2
+  --       simp [U64.toInt, U64.negative, U64.toNat]
+  --       rw [if_pos (by omega)]
+  --       simp
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at ub_b
+  --     have h_eq :
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 + 1095216660480 + 280375465082880 + 71776119061217280 + 18374686479671623680 - 18446744073709551616 =
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296
+  --       := by omega
+  --     simp [h_eq] at lb_b ub_b; clear h_eq
+  --     have ⟨ lb_cx, ub_cx ⟩ :
+  --       -2147483648 ≤ (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 ∧
+  --       (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 < 0
+  --     := by omega
+  --     clear lb_c ub_c
+  --     have ⟨ lb_qx, ub_qx ⟩ :
+  --       -4294967295 ≤ (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 ∧
+  --       (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 < 0
+  --     := by omega
+  --     have ⟨ lb_r, ub_r ⟩ :
+  --       0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
+  --       (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
+  --     := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
+  --     clear h_cond_bext h_b_ext h_c_ext h_q_ext h_q_nz_n
+  --     clear h_c_ext h_q_ext
+  --     obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 - 4294967296 := by simp
+  --     obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 - 4294967296 := by simp
+  --     simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b; clear h_b_ext
+  --     rw [if_pos (by omega)] at lb_b ub_b h_c_nz
+  --     rw [if_neg (by omega)] at lb_b ub_b
+  --     clear h_cond_cext
+  --     have h_eq :
+  --       (r0 : ℤ) % 256 + ↑↑r1 % 256 * 256 + ↑↑r2 % 256 * 65536 + ↑↑r3 % 256 * 16777216 - 0 =
+  --       (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216
+  --       := by omega
+  --     simp [h_eq] at lb_b ub_b; clear h_eq
+  --     obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 := by simp
+  --     suffices : -2147483648 ≤ q ∧ r < 2147483648
+  --     . rw [eq_q, eq_r] at this; zify at this ⊢; clear *- this ub_q0 ub_q1 ub_q2 ub_q3 ub_r0 ub_r1 ub_r2 ub_r3; omega
+  --     . clear h_r_nz
+  --       rw [← eq_c] at lb_cx ub_cx lb_b ub_b h_c_nz; clear eq_c ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3
+  --       rw [← eq_q] at lb_qx ub_qx lb_b ub_b; clear eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
+  --       have ⟨ lb_rx, ub_rx ⟩ : 0 < r ∧ r < 4294967296 := by omega
+  --       rw [← eq_r] at lb_b ub_b; clear lb_r ub_r eq_r ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3
+  --       by_cases h_r : r < 2147483648
+  --       . simp [h_r]
+  --         clear h_c_nz ub_rx
+  --         by_contra h_q; simp at h_q
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           2147483648 < c * q ∧ c * q ≤ 2147483648 * 4294967295
+  --         := by split_ands <;> nlinarith
+  --         simp at ub_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           2147483649 < c * q + r ∧ c * q + r < 2147483648 * 4294967295 + 2147483648
+  --         := by omega
+  --         simp at ub_exp
+  --         clear ub_prod lb_prod
+  --         by_cases ub_exp' : -9223372036854775808 ≤ c * q + r
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
+  --       . exfalso
+  --         simp at h_r
+  --         clear h_c_nz lb_rx
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           1 ≤ c * q ∧ c * q ≤ 2147483648 * 4294967295
+  --         := by split_ands <;> nlinarith
+  --         simp at ub_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           2147483649 ≤ c * q + r ∧ c * q + r ≤ 2147483648 * 4294967295 + 4294967295
+  --         := by omega
+  --         simp at ub_exp
+  --         clear ub_prod lb_prod
+  --         by_cases ub_exp' : c * q + r < 9223372036854775808
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
+  --   -- `b` and `c` both positive
+  --   . simp_all [-BabyBear.to_the_right_FBB_0]
+  --     clear h_bv_eq
+  --     simp [U64.toInt, U64.negative, U64.toNat] at lb_b ub_b
+  --     repeat rw [if_neg (by omega)] at lb_b ub_b
+  --     simp at lb_b ub_b
+  --     repeat rw [Int.emod_eq_of_lt (by omega) (by omega)] at lb_b ub_b
+  --     repeat clear h_b_ext h_c_ext h_q_ext
+  --     have ⟨ lb_r, ub_r ⟩ :
+  --       0 < (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 ∧
+  --       (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 < 4294967296
+  --     := by clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_r_nz; omega
+  --     clear h_cond_bext h_r_nz
+  --     obtain ⟨ c, eq_c ⟩ : exists c, c = (c0 : ℤ) + ↑↑c1 * 256 + ↑↑c2 * 65536 + ↑↑c3 * 16777216 := by simp
+  --     obtain ⟨ q, eq_q ⟩ : exists q, q = (q0 : ℤ) + ↑↑q1 * 256 + ↑↑q2 * 65536 + ↑↑q3 * 16777216 := by simp
+  --     obtain ⟨ r, eq_r ⟩ : exists r, r = (r0 : ℤ) + ↑↑r1 * 256 + ↑↑r2 * 65536 + ↑↑r3 * 16777216 := by simp
+  --     suffices : q < 2147483648 ∧ r < 2147483648
+  --     . rw [eq_q, eq_r] at this; zify at this ⊢; clear *- this; omega
+  --     . rw [if_neg (by omega)] at h_c_nz ub_c lb_c
+  --       replace lb_c : 0 < c := by clear *- h_c_nz eq_c ub_c0 ub_c1 ub_c2 ub_c3; rw [eq_c]; omega
+  --       have lb_q : 0 < q := by clear *- eq_q h_q_nz_n ub_q0 ub_q1 ub_q2 ub_q3; rw [eq_q]; omega
+  --       have ub_q : q < 4294967296 := by clear *- eq_q ub_q0 ub_q1 ub_q2 ub_q3; rw [eq_q]; omega
+  --       rw [← eq_c] at ub_c lb_b ub_b; clear h_cond_cext h_c_nz eq_c ub_c0 ub_c1 ub_c2 ub_c3 c0 c1 c2 c3
+  --       rw [← eq_q] at lb_b ub_b; clear h_q_nz_n eq_q ub_q0 ub_q1 ub_q2 ub_q3 q0 q1 q2 q3
+  --       rw [← eq_r] at lb_b ub_b lb_r ub_r; clear eq_r ub_r0 ub_r1 ub_r2 ub_r3 r0 r1 r2 r3
+  --       by_cases h_r : r < 2147483648
+  --       . simp [h_r]
+  --         by_contra h_q; simp at h_q
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           2147483648 ≤ c * q ∧ c * q ≤ 2147483647 * 4294967295
+  --         := by split_ands <;> nlinarith
+  --         simp at ub_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           2147483649 ≤ c * q + r ∧ c * q + r < 2147483647 * 4294967295 + 2147483648
+  --         := by omega
+  --         simp at ub_exp
+  --         clear ub_prod lb_prod
+  --         by_cases ub_exp' : c * q + r < 9223372036854775808
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
+  --       . exfalso
+  --         simp at h_r
+  --         clear lb_r
+  --         have ⟨ lb_prod, ub_prod ⟩ :
+  --           1 ≤ c * q ∧ c * q ≤ 2147483647 * 4294967295
+  --         := by split_ands <;> nlinarith
+  --         simp at ub_prod
+  --         have ⟨ lb_exp, ub_exp ⟩ :
+  --           2147483649 ≤ c * q + r ∧ c * q + r ≤ 2147483647 * 4294967295 + 4294967295
+  --         := by omega
+  --         simp at ub_exp
+  --         clear ub_prod lb_prod
+  --         by_cases ub_exp' : c * q + r < 9223372036854775808
+  --         . rw [Int.bmod_eq_of_le (by omega) (by omega)] at lb_b ub_b
+  --           omega
+  --         . simp [Int.bmod_def] at *
+  --           omega
 
 attribute [-simp]
   BabyBear.to_the_right_FBB_0
   BabyBear.to_the_right_FBB_1
   BabyBear.to_the_right_FBB_255
+  to_the_right_nat_0
+  to_the_right_nat_1
+  to_the_right_nat_255
+  to_the_right_nat_256
   not_and
 
 set_option maxRecDepth 1_000_000 in
@@ -1957,133 +1962,134 @@ theorem spec_DIVREM_nczero_nsc_nrzero
         then 0
         else if air.core.b_ext row 0 = air.core.c_ext row 0 then 0 else 255
     := by
-      sorry
-      -- clear ub_cq0 ub_cq1 ub_cq2 ub_cq3 ub_cr0 ub_cr1 ub_cr2 ub_cr3
-      -- by_cases hqz : air.core.nonzero_q row 0 = 0 <;> simp [hqz] at h_xor_qsgn_eq
-      -- . rw [if_pos]
-      --   rotate_left
-      --   . simp [← DivRemCoreAir_4_8.nonzero_q_def] at *
-      --     simp [U32.toInt, U32.negative, U32.toNat]
-      --     split_ifs <;> grind
-      --   . rcases b_qsgn with hqs | hqs
-      --     . rw [← DivRemCoreAir_4_8.q_ext_def]; simp [hqs]
-      --     . exfalso
-      --       simp [← DivRemCoreAir_4_8.q_ext_def,
-      --             ← DivRemCoreAir_4_8.nonzero_q_def] at *
-      --       obtain ⟨ zq0, zq1, zq2, zq3 ⟩ :
-      --         air.core.q_0 row 0 = 0 ∧ air.core.q_1 row 0 = 0 ∧
-      --         air.core.q_2 row 0 = 0 ∧ air.core.q_3 row 0 = 0
-      --         := by clear *- ub_q0 ub_q1 ub_q2 ub_q3 hqz; grind
-      --       simp [hqs] at *
-      --       simp [← h_xor_qsgn_z] at *
-      --       simp_all
+      clear ub_cq0 ub_cq1 ub_cq2 ub_cq3 ub_cr0 ub_cr1 ub_cr2 ub_cr3
+      by_cases hqz : air.core.nonzero_q row 0 = 0 <;> simp [hqz] at h_xor_qsgn_eq
+      . rw [if_pos]
+        rotate_left
+        . simp [← DivRemCoreAir_4_8.nonzero_q_def] at *
+          simp [U32.toInt, U32.negative, U32.toNat]
+          split_ifs <;> grind
+        . rcases b_qsgn with hqs | hqs
+          . rw [← DivRemCoreAir_4_8.q_ext_def]; simp [hqs]
+          . exfalso
+            simp [← DivRemCoreAir_4_8.q_ext_def,
+                  ← DivRemCoreAir_4_8.nonzero_q_def] at *
+            obtain ⟨ zq0, zq1, zq2, zq3 ⟩ :
+              air.core.q_0 row 0 = 0 ∧ air.core.q_1 row 0 = 0 ∧
+              air.core.q_2 row 0 = 0 ∧ air.core.q_3 row 0 = 0
+              := by clear *- ub_q0 ub_q1 ub_q2 ub_q3 hqz; grind
+            simp [hqs] at *
+            simp [← h_xor_qsgn_z] at *
+            simp_all
 
-      --       have : U64.toBV #v[BitVec.ofNat 8 ↑(air.core.b_0 row 0), BitVec.ofNat 8 ↑(air.core.b_1 row 0), BitVec.ofNat 8 ↑(air.core.b_2 row 0), BitVec.ofNat 8 ↑(air.core.b_3 row 0),
-      --                          BitVec.ofNat 8 (air.core.b_ext row 0), BitVec.ofNat 8 (air.core.b_ext row 0), BitVec.ofNat 8 (air.core.b_ext row 0), BitVec.ofNat 8 (air.core.b_ext row 0)] =
-      --              U64.toBV (U32.extend #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] true)
-      --       := by
-      --         simp [U32.extend, ← b_sign_is_bsgn, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
-      --         split_ifs <;> congr
-      --       rw [this] at h_bv_eq; clear this
-      --       have : U64.toBV #v[BitVec.ofNat 8 ↑(air.core.c_0 row 0), BitVec.ofNat 8 ↑(air.core.c_1 row 0), BitVec.ofNat 8 ↑(air.core.c_2 row 0), BitVec.ofNat 8 ↑(air.core.c_3 row 0),
-      --                          BitVec.ofNat 8 (air.core.c_ext row 0), BitVec.ofNat 8 (air.core.c_ext row 0), BitVec.ofNat 8 (air.core.c_ext row 0), BitVec.ofNat 8 (air.core.c_ext row 0)] =
-      --              U64.toBV (U32.extend #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] true)
-      --       := by
-      --         simp [U32.extend, ← c_sign_is_csgn, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
-      --         split_ifs <;> congr
-      --       rw [this] at h_bv_eq; clear this
+            have : U64.toBV #v[BitVec.ofNat 8 ↑(air.core.b_0 row 0), BitVec.ofNat 8 ↑(air.core.b_1 row 0), BitVec.ofNat 8 ↑(air.core.b_2 row 0), BitVec.ofNat 8 ↑(air.core.b_3 row 0),
+                               BitVec.ofNat 8 (air.core.b_ext row 0), BitVec.ofNat 8 (air.core.b_ext row 0), BitVec.ofNat 8 (air.core.b_ext row 0), BitVec.ofNat 8 (air.core.b_ext row 0)] =
+                   U64.toBV (U32.extend #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] true)
+            := by
+              simp [U32.extend, ← b_sign_is_bsgn, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
+              split_ifs <;> congr
+            rw [this] at h_bv_eq; clear this
+            have : U64.toBV #v[BitVec.ofNat 8 ↑(air.core.c_0 row 0), BitVec.ofNat 8 ↑(air.core.c_1 row 0), BitVec.ofNat 8 ↑(air.core.c_2 row 0), BitVec.ofNat 8 ↑(air.core.c_3 row 0),
+                               BitVec.ofNat 8 (air.core.c_ext row 0), BitVec.ofNat 8 (air.core.c_ext row 0), BitVec.ofNat 8 (air.core.c_ext row 0), BitVec.ofNat 8 (air.core.c_ext row 0)] =
+                   U64.toBV (U32.extend #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] true)
+            := by
+              simp [U32.extend, ← c_sign_is_csgn, U32.ext, U32.negative, U32.toNat, BitVec.ofNat]
+              split_ifs <;> congr
+            rw [this] at h_bv_eq; clear this
 
-      --       conv at h_bv_eq =>
-      --         rhs; arg 1; arg 2
-      --         simp [U64.toBV, U64.negative, U64.toNat]
+            conv at h_bv_eq =>
+              rhs; arg 1; arg 2
+              simp [U64.toBV, U64.negative, U64.toNat]
 
-      --       simp [← BitVec.toInt_inj] at h_bv_eq
-      --       simp [← DivRemCoreAir_4_8.b_ext_def,
-      --             ← DivRemCoreAir_4_8.c_ext_def] at *
+            simp [← BitVec.toInt_inj] at h_bv_eq
+            simp [← DivRemCoreAir_4_8.b_ext_def,
+                  ← DivRemCoreAir_4_8.c_ext_def] at *
 
-      --       rcases b_bsgn with b_sgn | b_sgn <;>
-      --       rcases b_csgn with c_sgn | c_sgn <;>
-      --       simp_all
+            rcases b_bsgn with b_sgn | b_sgn <;>
+            rcases b_csgn with c_sgn | c_sgn <;>
+            simp_all
 
-      --       . have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)]
-      --         have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
+            . have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)]
+              have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
 
-      --         obtain ⟨ b, eq_b ⟩ : exists b, U32.toInt #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] = b := by simp
-      --         rw [eq_b] at h_bv_eq ub_b lb_b
-      --         obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
-      --         rw [eq_c] at h_bv_eq ub_c lb_c
+              obtain ⟨ b, eq_b ⟩ : exists b, U32.toInt #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] = b := by simp
+              rw [eq_b] at h_bv_eq ub_b lb_b
+              obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
+              rw [eq_c] at h_bv_eq ub_c lb_c
 
-      --         have ub_c' : ¬ 0 ≤ c
-      --         := by
-      --           rw [← eq_c, ← U32.negative_toInt]
-      --           simp [U32.ext] at c_sign_is_csgn
-      --           assumption
-      --         simp at ub_c'
+              have ub_c' : ¬ 0 ≤ c
+              := by
+                rw [← eq_c, ← U32.negative_toInt]
+                simp [U32.ext] at c_sign_is_csgn
+                assumption
+              simp at ub_c'
 
-      --         simp [U64.toInt, U64.negative, U64.toNat] at h_bv_eq
-      --         rw [if_neg (by omega)] at h_bv_eq
-      --         rw [h_bv_eq] at lb_b ub_b
-      --         rw [Int.bmod_def] at lb_b ub_b
-      --         split_ifs at ub_b with h_if
-      --         . clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_if lb_b ub_b ub_c' lb_c
-      --           omega
-      --         . clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_if lb_b ub_b ub_c' lb_c
-      --           omega
+              simp [U64.toInt, U64.negative, U64.toNat] at h_bv_eq
+              rw [if_neg (by omega)] at h_bv_eq
+              rw [h_bv_eq] at lb_b ub_b
+              rw [Int.bmod_def] at lb_b ub_b
+              split_ifs at ub_b with h_if
+              . clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_if lb_b ub_b ub_c' lb_c
+                simp_all
+                repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)] at lb_b ub_b h_if
+                sorry
+              . clear *- ub_r0 ub_r1 ub_r2 ub_r3 h_if lb_b ub_b ub_c' lb_c
+                simp_all
+                sorry
+            . have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)]
+              have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
 
-      --       . have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)]
-      --         have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
+              obtain ⟨ b, eq_b ⟩ : exists b, U32.toInt #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] = b := by simp
+              rw [eq_b] at h_bv_eq ub_b lb_b
+              obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
+              rw [eq_c] at h_bv_eq ub_c lb_c
 
-      --         obtain ⟨ b, eq_b ⟩ : exists b, U32.toInt #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] = b := by simp
-      --         rw [eq_b] at h_bv_eq ub_b lb_b
-      --         obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
-      --         rw [eq_c] at h_bv_eq ub_c lb_c
+              have lb_c'' : ¬ ¬ 0 ≤ c
+              := by
+                rw [← eq_c, ← U32.negative_toInt]
+                simp [U32.ext] at c_sign_is_csgn
+                assumption
+              simp at lb_c''; clear lb_c
 
-      --         have lb_c'' : ¬ ¬ 0 ≤ c
-      --         := by
-      --           rw [← eq_c, ← U32.negative_toInt]
-      --           simp [U32.ext] at c_sign_is_csgn
-      --           assumption
-      --         simp at lb_c''; clear lb_c
+              have lb_c' : 0 < c
+              := by
+                suffices : ¬ (c = 0)
+                . clear *- lb_c'' this; omega
+                . clear *- eq_zero_divisor ub_c0 ub_c1 ub_c2 ub_c3 eq_c
+                  rw [← eq_c]; intro hz
+                  simp [U32.toInt, U32.negative, U32.toNat] at hz
+                  split_ifs at hz <;> grind
+              clear lb_c''
 
-      --         have lb_c' : 0 < c
-      --         := by
-      --           suffices : ¬ (c = 0)
-      --           . clear *- lb_c'' this; omega
-      --           . clear *- eq_zero_divisor ub_c0 ub_c1 ub_c2 ub_c3 eq_c
-      --             rw [← eq_c]; intro hz
-      --             simp [U32.toInt, U32.negative, U32.toNat] at hz
-      --             split_ifs at hz <;> grind
-      --         clear lb_c''
+              have ub_b' : ¬ 0 ≤ b
+              := by
+                rw [← eq_b, ← U32.negative_toInt]
+                simp [U32.ext] at b_sign_is_bsgn
+                assumption
+              simp at ub_b'; clear ub_b
 
-      --         have ub_b' : ¬ 0 ≤ b
-      --         := by
-      --           rw [← eq_b, ← U32.negative_toInt]
-      --           simp [U32.ext] at b_sign_is_bsgn
-      --           assumption
-      --         simp at ub_b'; clear ub_b
-
-      --         simp [U64.toInt, U64.negative, U64.toNat] at h_bv_eq
-      --         rw [if_pos (by omega)] at h_bv_eq
-      --         iterate 3 (rw [add_assoc] at h_bv_eq; simp at h_bv_eq)
-      --         rw [add_sub_assoc] at h_bv_eq; simp at h_bv_eq
-      --         repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)] at h_bv_eq
-      --         simp [Int.bmod_def] at h_bv_eq
-      --         rw [if_neg] at h_bv_eq
-      --         . simp [h_bv_eq] at lb_b
-      --           clear *- ub_r0 ub_r1 ub_r2 ub_r3 lb_b lb_c' ub_c
-      --           omega
-      --         . clear *- ub_r0 ub_r1 ub_r2 ub_r3 lb_b lb_c' ub_c
-      --           omega
-      -- . rw [← h_xor_eq] at h_xor_qsgn_eq
-      --   simp [← DivRemCoreAir_4_8.q_ext_def,
-      --         ← DivRemCoreAir_4_8.b_ext_def,
-      --         ← DivRemCoreAir_4_8.c_ext_def,
-      --         ← DivRemCoreAir_4_8.nonzero_q_def] at *
-      --   clear *- b_bsgn b_csgn h_xor_qsgn_eq b_sign_is_bsgn c_sign_is_csgn hqz ub_q0 ub_q1 ub_q2 ub_q3
-      --   rw [if_neg]
-      --   . grind
-      --   . simp [U32.toInt, U32.negative, U32.toNat]
-      --     split_ifs <;> grind
+              simp [U64.toInt, U64.negative, U64.toNat] at h_bv_eq
+              rw [if_pos (by omega)] at h_bv_eq
+              iterate 3 (rw [add_assoc] at h_bv_eq; simp at h_bv_eq)
+              rw [add_sub_assoc] at h_bv_eq; simp at h_bv_eq
+              repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)] at h_bv_eq
+              simp [Int.bmod_def] at h_bv_eq
+              rw [if_neg] at h_bv_eq
+              . simp [h_bv_eq] at lb_b
+                clear *- ub_r0 ub_r1 ub_r2 ub_r3 lb_b lb_c' ub_c
+                sorry
+              . clear *- ub_r0 ub_r1 ub_r2 ub_r3 lb_b lb_c' ub_c
+                sorry
+      . rw [← h_xor_eq] at h_xor_qsgn_eq
+        simp [← DivRemCoreAir_4_8.q_ext_def,
+              ← DivRemCoreAir_4_8.b_ext_def,
+              ← DivRemCoreAir_4_8.c_ext_def,
+              ← DivRemCoreAir_4_8.nonzero_q_def] at *
+        clear *- b_bsgn b_csgn h_xor_qsgn_eq b_sign_is_bsgn c_sign_is_csgn hqz ub_q0 ub_q1 ub_q2 ub_q3
+        rw [if_neg]
+        . grind
+        . simp [U32.toInt, U32.negative, U32.toNat]
+          split_ifs <;> grind
 
     have ⟨ q_sign_is_qsgn, r_sign_is_rsgn ⟩  :=
       @divrem_quot_rem_sign
@@ -2146,6 +2152,7 @@ theorem spec_DIVREM_nczero_nsc_nrzero
       simp [U32.toInt, U32.negative, U32.toNat] at hz
       clear *- hz ub_c0 ub_c1 ub_c2 ub_c3 eq_zero_divisor
       omega
+
     . -- First condition
       have cond1 :
         U32.toInt
@@ -2161,39 +2168,38 @@ theorem spec_DIVREM_nczero_nsc_nrzero
           #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0),
             BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)]
       := by
-        sorry
-        -- have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)]
-        -- have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
-        -- have ⟨ lb_q, ub_q ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)]
-        -- have ⟨ lb_r, ub_r ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)]
-        -- obtain ⟨ b, eq_b ⟩ : exists b, U32.toInt #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] = b := by simp
-        -- rw [eq_b] at h_bv_eq lb_b ub_b h_scase ⊢
-        -- obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
-        -- rw [eq_c] at h_bv_eq lb_c ub_c h_scase ⊢
-        -- obtain ⟨ q, eq_q ⟩ : exists q, U32.toInt #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)] = q := by simp
-        -- rw [eq_q] at h_bv_eq lb_q ub_q ⊢
-        -- obtain ⟨ r, eq_r ⟩ : exists r, U32.toInt #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)] = r := by simp
-        -- rw [eq_r] at h_bv_eq lb_r ub_r ⊢
-        -- have h_c_nz : ¬ c = 0
-        -- := by
-        --   rw [← eq_c]; clear *- aux_c_nzero ub_c0 ub_c1 ub_c2 ub_c3
-        --   intro hz; apply aux_c_nzero
-        --   simp [U32.toInt, U32.negative, U32.toNat] at *
-        --   split_ifs <;> simp_all <;> grind
-        -- have h_r_nz : ¬ r = 0
-        -- := by
-        --   rw [← eq_r]; clear *- aux_r_nzero ub_r0 ub_r1 ub_r2 ub_r3
-        --   intro hz; apply aux_r_nzero
-        --   simp [U32.toInt, U32.negative, U32.toNat] at *
-        --   split_ifs <;> simp_all <;> grind
-        -- -- h_scase
-        -- clear *- h_scase lb_b lb_c lb_q lb_r ub_b ub_c ub_q ub_r h_c_nz h_r_nz h_bv_eq
-        -- rw [mul_comm]; subst b
-        -- have ⟨ lb_prod, ub_prod ⟩ :
-        --   -2147483648 * 2147483647 ≤ c * q ∧ c * q ≤ (-2147483648) * (-2147483648)
-        --   := by split_ands <;> nlinarith
-        -- simp at lb_prod ub_prod
-        -- rw [Int.bmod_eq_of_le (by omega) (by omega)]
+        have ⟨ lb_b, ub_b ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)]
+        have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
+        have ⟨ lb_q, ub_q ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)]
+        have ⟨ lb_r, ub_r ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)]
+        obtain ⟨ b, eq_b ⟩ : exists b, U32.toInt #v[BitVec.ofNat 8 (air.core.b_0 row 0), BitVec.ofNat 8 (air.core.b_1 row 0), BitVec.ofNat 8 (air.core.b_2 row 0), BitVec.ofNat 8 (air.core.b_3 row 0)] = b := by simp
+        rw [eq_b] at h_bv_eq lb_b ub_b h_scase ⊢
+        obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
+        rw [eq_c] at h_bv_eq lb_c ub_c h_scase ⊢
+        obtain ⟨ q, eq_q ⟩ : exists q, U32.toInt #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)] = q := by simp
+        rw [eq_q] at h_bv_eq lb_q ub_q ⊢
+        obtain ⟨ r, eq_r ⟩ : exists r, U32.toInt #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)] = r := by simp
+        rw [eq_r] at h_bv_eq lb_r ub_r ⊢
+        have h_c_nz : ¬ c = 0
+        := by
+          rw [← eq_c]; clear *- aux_c_nzero ub_c0 ub_c1 ub_c2 ub_c3
+          intro hz; apply aux_c_nzero
+          simp [U32.toInt, U32.negative, U32.toNat] at *
+          split_ifs <;> simp_all <;> grind
+        have h_r_nz : ¬ r = 0
+        := by
+          rw [← eq_r]; clear *- aux_r_nzero ub_r0 ub_r1 ub_r2 ub_r3
+          intro hz; apply aux_r_nzero
+          simp [U32.toInt, U32.negative, U32.toNat] at *
+          split_ifs <;> simp_all <;> grind
+        -- h_scase
+        clear *- h_scase lb_b lb_c lb_q lb_r ub_b ub_c ub_q ub_r h_c_nz h_r_nz h_bv_eq
+        rw [mul_comm]; subst b
+        have ⟨ lb_prod, ub_prod ⟩ :
+          -2147483648 * 2147483647 ≤ c * q ∧ c * q ≤ (-2147483648) * (-2147483648)
+          := by split_ands <;> nlinarith
+        simp at lb_prod ub_prod
+        rw [Int.bmod_eq_of_le (by omega) (by omega)]
 
       simp [cond1]; rw [← cond1]
       clear h_bv_eq eb ec eq er
@@ -2206,7 +2212,478 @@ theorem spec_DIVREM_nczero_nsc_nrzero
           #v[BitVec.ofNat 8 ↑(air.core.c_0 row 0), BitVec.ofNat 8 ↑(air.core.c_1 row 0),
              BitVec.ofNat 8 ↑(air.core.c_2 row 0), BitVec.ofNat 8 ↑(air.core.c_3 row 0)]|
       := by
-        sorry
+        have ⟨ hlm0, hlm1, hlm2, hlm3 ⟩ :
+          ((air.core.lt_marker_0 row 0) = 1 → (air.core.lt_marker_1 row 0) = 0 ∧ (air.core.lt_marker_2 row 0) = 0 ∧ (air.core.lt_marker_3 row 0) = 0) ∧
+          ((air.core.lt_marker_1 row 0) = 1 → (air.core.lt_marker_0 row 0) = 0 ∧ (air.core.lt_marker_2 row 0) = 0 ∧ (air.core.lt_marker_3 row 0) = 0) ∧
+          ((air.core.lt_marker_2 row 0) = 1 → (air.core.lt_marker_0 row 0) = 0 ∧ (air.core.lt_marker_1 row 0) = 0 ∧ (air.core.lt_marker_3 row 0) = 0) ∧
+          ((air.core.lt_marker_3 row 0) = 1 → (air.core.lt_marker_0 row 0) = 0 ∧ (air.core.lt_marker_1 row 0) = 0 ∧ (air.core.lt_marker_2 row 0) = 0)
+        := by
+          clear *- b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3 h_sum_sc_ltm
+          grind (splits := 14)
+
+        have ⟨ ub_r'0, ub_r'1, ub_r'2, ub_r'3 ⟩ :
+          (air.core.r_prime_0 row 0).val < 256 ∧ (air.core.r_prime_1 row 0).val < 256 ∧
+          (air.core.r_prime_2 row 0).val < 256 ∧ (air.core.r_prime_3 row 0).val < 256
+        := by
+          have h_xor : air.core.sign_xor row 0 = 0 ∨ air.core.sign_xor row 0 = 1
+            := by clear *- b_bsgn b_csgn h_xor_eq; grind
+          rcases h_xor with h_xor | h_xor <;> simp [h_xor] at *
+          . rw [← h_r'_0, ← h_r'_1, ← h_r'_2, ← h_r'_3]
+            clear *- ub_r0 ub_r1 ub_r2 ub_r3
+            simp_all
+          . clear *- b_lt_0 b_lt_1 b_lt_2 b_lt_3
+                     h_r'inv_0 h_r'inv_1 h_r'inv_2 h_r'inv_3
+                     h_lt_0 h_lt_1 h_lt_2 h_lt_3
+                     ub_r0 ub_r1 ub_r2 ub_r3
+            simp [← DivRemCoreAir_4_8.carry_lt_0_def,
+                  ← DivRemCoreAir_4_8.carry_lt_1_def,
+                  ← DivRemCoreAir_4_8.carry_lt_2_def,
+                  ← DivRemCoreAir_4_8.carry_lt_3_def] at *
+            have ub0 : ¬ (air.core.r_prime_0 row 0 - 256 = 0)  := by intro hz; simp_all
+            have ub1 : ¬ (air.core.r_prime_1 row 0 - 256 = 0)  := by intro hz; simp_all
+            have ub2 : ¬ (air.core.r_prime_2 row 0 - 256 = 0)  := by intro hz; simp_all
+            have ub3 : ¬ (air.core.r_prime_3 row 0 - 256 = 0)  := by intro hz; simp_all
+            rw [sub_eq_zero] at ub0 ub1 ub2 ub3
+            clear h_r'inv_0 h_r'inv_1 h_r'inv_2 h_r'inv_3
+            rcases h_lt_0 <;> rcases h_lt_1 <;>
+            rcases h_lt_2 <;> rcases h_lt_3 <;>
+            simp_all <;> omega
+
+        have h_nonono_r : ¬ (air.core.r_0 row 0 = 0 ∧ air.core.r_1 row 0 = 0 ∧ air.core.r_2 row 0 = 0 ∧ air.core.r_3 row 0 = 128)
+        := by
+          intro h_yesyessyes_r
+          simp_all
+          replace r_sign_is_rsgn : air.core.b_sign row 0 = 1
+          := by
+            clear *- r_sign_is_rsgn
+            simp [U32.ext, U32.negative, U32.toNat] at r_sign_is_rsgn
+            rw [← DivRemCoreAir_4_8.b_ext_def] at r_sign_is_rsgn
+            grind
+          simp_all
+          symm at h_xor_eq
+          rcases b_csgn with b_csgn | b_csgn
+          . simp [b_csgn] at h_xor_eq
+            simp [← DivRemCoreAir_4_8.carry_lt_0_def,
+                  ← DivRemCoreAir_4_8.carry_lt_1_def,
+                  ← DivRemCoreAir_4_8.carry_lt_2_def,
+                  ← DivRemCoreAir_4_8.carry_lt_3_def] at *
+            simp_all
+            have : air.core.r_prime_0 row 0 = 0 := by clear *- ub_r'0 h_lt_0; grind
+            simp [this] at *
+            have : air.core.r_prime_1 row 0 = 0 := by clear *- ub_r'1 h_lt_1; grind
+            simp [this] at *
+            have : air.core.r_prime_2 row 0 = 0 := by clear *- ub_r'2 h_lt_2; grind
+            simp [this] at *
+            have : air.core.r_prime_3 row 0 = 128 := by clear *- ub_r'3 b_lt_3; grind
+            simp [this] at *
+            simp_all
+            rcases b_ltm_0 with hlt0 | hlt0
+            . rcases b_ltm_1 with hlt1 | hlt1
+              . rcases b_ltm_2 with hlt2 | hlt2
+                . simp_all
+                  clear *- c_sign_is_csgn h_diff b_csgn ub_c3
+                  simp [U32.ext, ← U32.msb_3_negative, BitVec.msb_eq_decide] at c_sign_is_csgn
+                  rw [← DivRemCoreAir_4_8.c_ext_def] at c_sign_is_csgn
+                  simp_all
+                  grind
+                . simp_all
+                  have : air.core.c_3 row 0 = 128 := by clear *- ub_c3 h_prod_3; grind
+                  simp_all
+              . simp_all
+                have : air.core.c_3 row 0 = 128 := by clear *- ub_c3 h_prod_3; grind
+                simp_all
+            . simp_all
+              have : air.core.c_3 row 0 = 128 := by clear *- ub_c3 h_prod_3; grind
+              simp_all
+          . have h_neg_one : (2013265920 : FBB) = (-1 : FBB) := by decide
+            simp [b_csgn] at h_xor_eq
+            simp [h_xor_eq] at h_r'_0 h_r'_1 h_r'_2 h_r'_3
+            symm at h_r'_0 h_r'_1 h_r'_2 h_r'_3
+            simp [← DivRemCoreAir_4_8.carry_lt_0_def,
+                  ← DivRemCoreAir_4_8.carry_lt_1_def,
+                  ← DivRemCoreAir_4_8.carry_lt_2_def,
+                  ← DivRemCoreAir_4_8.carry_lt_3_def] at *
+            clear h_r'inv_0 h_r'inv_1 h_r'inv_2 h_r'inv_3
+                  b_lt_0 b_lt_1 b_lt_2 b_lt_3
+                  h_lt_0 h_lt_1 h_lt_2 h_lt_3
+            simp_all
+            rcases b_ltm_0 with hlt0 | hlt0
+            . rcases b_ltm_1 with hlt1 | hlt1
+              . rcases b_ltm_2 with hlt2 | hlt2
+                . simp_all
+                  clear *- c_sign_is_csgn h_diff b_csgn ub_c3
+                  simp [U32.ext, ← U32.msb_3_negative, BitVec.msb_eq_decide] at c_sign_is_csgn
+                  rw [← DivRemCoreAir_4_8.c_ext_def] at c_sign_is_csgn
+                  simp_all
+                  grind
+                . simp_all
+                  have : air.core.c_3 row 0 = 128 := by clear *- ub_c3 h_prod_3; grind
+                  simp_all
+                  clear *- ub_c2 h_diff
+                  grind
+              . simp_all
+                have : air.core.c_3 row 0 = 128 := by clear *- ub_c3 h_prod_3; grind
+                simp_all
+                clear *- ub_c1 h_diff
+                grind
+            . simp_all
+              have : air.core.c_3 row 0 = 128 := by clear *- ub_c3 h_prod_3; grind
+              simp_all
+              clear *- ub_c0 h_diff
+              grind
+
+        obtain ⟨ msb_b, msb_c ⟩ := h_signed_msb
+        have h_c_sign : air.core.c_sign row 0 = if 0 ≤ U32.toInt #v[BitVec.ofNat 8 ↑(air.core.c_0 row 0), BitVec.ofNat 8 ↑(air.core.c_1 row 0), BitVec.ofNat 8 ↑(air.core.c_2 row 0), BitVec.ofNat 8 ↑(air.core.c_3 row 0)] then 0 else 1
+        := by
+          simp [U32.toInt, ← U32.msb_3_negative, BitVec.msb_eq_decide]
+          split_ifs with hif1 hif2 hif2
+          . simp [U32.toNat] at hif2; omega
+          . clear *- ub_c3 msb_c hif1 b_csgn
+            rw [Nat.mod_eq_of_lt (by omega)] at hif1
+            grind
+          . clear *- ub_c3 msb_c hif1 b_csgn
+            rw [Nat.mod_eq_of_lt (by omega)] at hif1
+            grind
+          . simp [U32.toNat] at hif2; omega
+
+        have h_r_sign : air.core.b_sign row 0 = if 0 ≤ U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0), BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)] then 0 else 1
+        := by
+          clear *- r_sign_is_rsgn
+          simp [U32.ext, ← DivRemCoreAir_4_8.b_ext_def, U32.negative_toInt] at r_sign_is_rsgn
+          split_ifs with h_if
+          . rw [if_neg (by omega)] at r_sign_is_rsgn
+            omega
+          . rw [if_pos (by omega)] at r_sign_is_rsgn
+            omega
+
+        split_ifs at h_c_sign with sgn_c <;>
+        split_ifs at h_r_sign with sgn_r
+        . rw [abs_of_nonneg sgn_c, abs_of_nonneg sgn_r]
+          simp [h_c_sign, h_r_sign] at *
+          simp [← h_xor_eq] at *
+          symm at h_r'_0 h_r'_1 h_r'_2 h_r'_3
+          simp_all
+
+          have h_lt :=
+            @BabyBear.Circuits.less_than
+              (air.core.r_0 row 0) (air.core.r_1 row 0) (air.core.r_2 row 0) (air.core.r_3 row 0)
+              (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+              (air.core.lt_marker_0 row 0) (air.core.lt_marker_1 row 0) (air.core.lt_marker_2 row 0) (air.core.lt_marker_3 row 0)
+              (air.core.lt_diff row 0)
+              (air.core.r_3 row 0) (air.core.c_3 row 0)
+              0
+              ((air.core.lt_marker_3 row 0) + (air.core.lt_marker_2 row 0) + (air.core.lt_marker_1 row 0) + (air.core.lt_marker_0 row 0))
+              ub_r0 ub_r1 ub_r2 ub_r3
+              ub_c0 ub_c1 ub_c2 ub_c3
+              (by right; assumption)
+              (by simp) (by simp)
+              b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3
+              (by right; assumption)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_3; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_2; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_1; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_0; grind)
+              (by left; assumption)
+              (by clear *- h_prod_3; grind)
+              (by clear *- h_prod_2; grind)
+              (by clear *- h_prod_1; grind)
+              (by left; assumption)
+              (by simpa) (by simpa)
+              (by simp [h_diff])
+
+          simp [h_sum_sc_ltm] at h_lt
+          simp [U32.toInt]
+          rw [if_neg (by rw [U32.negative_toInt]; simpa)]
+          rw [if_neg (by rw [U32.negative_toInt]; simpa)]
+          clear *- h_lt; simp [U32.toNat] at *; omega
+
+        . simp at sgn_r
+          rw [abs_of_nonneg sgn_c, abs_of_neg sgn_r]
+          simp [h_c_sign, h_r_sign] at *
+          simp [← h_xor_eq] at *
+
+          have h_opp :
+            -U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0), BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)] =
+             U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_prime_0 row 0), BitVec.ofNat 8 ↑(air.core.r_prime_1 row 0), BitVec.ofNat 8 ↑(air.core.r_prime_2 row 0), BitVec.ofNat 8 ↑(air.core.r_prime_3 row 0)]
+          := by
+            clear *- b_lt_0 b_lt_1 b_lt_2 b_lt_3
+                     h_lt_0 h_lt_1 h_lt_2 h_lt_3
+                     ub_r0 ub_r1 ub_r2 ub_r3
+                     ub_r'0 ub_r'1 ub_r'2 ub_r'3
+                     h_nonono_r
+            simp [U32.toInt, ← U32.msb_3_negative, BitVec.msb_eq_decide]
+            simp [← DivRemCoreAir_4_8.carry_lt_0_def,
+                  ← DivRemCoreAir_4_8.carry_lt_1_def,
+                  ← DivRemCoreAir_4_8.carry_lt_2_def,
+                  ← DivRemCoreAir_4_8.carry_lt_3_def] at *
+            rcases h_lt_0 with h0 | h0
+            . simp_all
+              by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+              . rw [if_pos (by omega)]
+                rw [if_neg (by omega)]
+                simp [U32.toNat]
+                repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                omega
+              . rw [if_neg (by omega)]
+                rw [if_pos (by omega)]
+                simp [U32.toNat]
+                repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                omega
+            . have hr0 : air.core.r_0 row 0 = 0 := by clear *- ub_r0 b_lt_0 h0; grind
+              rcases h_lt_1 with h1 | h1
+              . simp_all
+                by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+                . rw [if_pos (by omega)]
+                  rw [if_neg (by omega)]
+                  simp [U32.toNat]
+                  repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                  omega
+                . rw [if_neg (by omega)]
+                  rw [if_pos (by omega)]
+                  simp [U32.toNat]
+                  repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                  omega
+              . have hr1 : air.core.r_1 row 0 = 0 := by clear *- ub_r1 b_lt_1 hr0 h0 h1; grind
+                rcases h_lt_2 with h2 | h2
+                . simp_all
+                  by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+                  . rw [if_pos (by omega)]
+                    rw [if_neg (by omega)]
+                    simp [U32.toNat]
+                    repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                    omega
+                  . rw [if_neg (by omega)]
+                    rw [if_pos (by omega)]
+                    simp [U32.toNat]
+                    repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                    omega
+                . have hr2 : air.core.r_2 row 0 = 0 := by clear *- ub_r2 b_lt_2 hr0 hr1 h0 h1 h2; grind
+                  rcases h_lt_3 with h3 | h3
+                  . simp_all
+                    by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+                    . rw [if_pos (by omega)]
+                      by_cases hr'3 : 128 ≤ (air.core.r_prime_3 row 0).val
+                      . rw [if_pos (by omega)]
+                        simp [U32.toNat]
+                        repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                        have : air.core.r_3 row 0 = 128 ∧ air.core.r_prime_3 row 0 = 128 := by omega
+                        simp_all
+                      . rw [if_neg (by omega)]
+                        simp [U32.toNat]
+                        repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                        omega
+                    . rw [if_neg (by omega)]
+                      rw [if_pos (by omega)]
+                      simp [U32.toNat]
+                      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                      omega
+                  . simp [U32.toNat]
+                    repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                    simp_all
+                    grind
+
+          have h_lt :=
+            @BabyBear.Circuits.less_than
+              (air.core.r_prime_0 row 0) (air.core.r_prime_1 row 0) (air.core.r_prime_2 row 0) (air.core.r_prime_3 row 0)
+              (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+              (air.core.lt_marker_0 row 0) (air.core.lt_marker_1 row 0) (air.core.lt_marker_2 row 0) (air.core.lt_marker_3 row 0)
+              (air.core.lt_diff row 0)
+              (air.core.r_prime_3 row 0) (air.core.c_3 row 0)
+              0
+              ((air.core.lt_marker_3 row 0) + (air.core.lt_marker_2 row 0) + (air.core.lt_marker_1 row 0) + (air.core.lt_marker_0 row 0))
+              ub_r'0 ub_r'1 ub_r'2 ub_r'3
+              ub_c0 ub_c1 ub_c2 ub_c3
+              (by right; assumption)
+              (by simp) (by simp)
+              b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3
+              (by right; assumption)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_3; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_2; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_1; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_0; grind)
+              (by left; assumption)
+              (by clear *- h_prod_3; grind)
+              (by clear *- h_prod_2; grind)
+              (by clear *- h_prod_1; grind)
+              (by left; assumption)
+              (by simpa) (by simpa)
+              (by simp [h_diff])
+
+          simp [h_sum_sc_ltm] at h_lt
+          rw [h_opp]
+          simp [U32.toInt]
+          rw [if_neg (by rw [U32.negative_toInt]; clear *- sgn_r h_opp; omega)]
+          rw [if_neg (by rw [U32.negative_toInt]; simpa)]
+          clear *- h_lt; simp [U32.toNat] at *; omega
+
+        . simp at sgn_c
+          rw [abs_of_neg sgn_c, abs_of_nonneg sgn_r]
+          simp [h_c_sign, h_r_sign] at *
+          simp [← h_xor_eq] at *
+
+          have h_opp :
+            -U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0), BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)] =
+             U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_prime_0 row 0), BitVec.ofNat 8 ↑(air.core.r_prime_1 row 0), BitVec.ofNat 8 ↑(air.core.r_prime_2 row 0), BitVec.ofNat 8 ↑(air.core.r_prime_3 row 0)]
+          := by
+            clear *- b_lt_0 b_lt_1 b_lt_2 b_lt_3
+                     h_lt_0 h_lt_1 h_lt_2 h_lt_3
+                     ub_r0 ub_r1 ub_r2 ub_r3
+                     ub_r'0 ub_r'1 ub_r'2 ub_r'3
+                     h_nonono_r
+            simp [U32.toInt, ← U32.msb_3_negative, BitVec.msb_eq_decide]
+            simp [← DivRemCoreAir_4_8.carry_lt_0_def,
+                  ← DivRemCoreAir_4_8.carry_lt_1_def,
+                  ← DivRemCoreAir_4_8.carry_lt_2_def,
+                  ← DivRemCoreAir_4_8.carry_lt_3_def] at *
+            rcases h_lt_0 with h0 | h0
+            . simp_all
+              by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+              . rw [if_pos (by omega)]
+                rw [if_neg (by omega)]
+                simp [U32.toNat]
+                repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                omega
+              . rw [if_neg (by omega)]
+                rw [if_pos (by omega)]
+                simp [U32.toNat]
+                repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                omega
+            . have hr0 : air.core.r_0 row 0 = 0 := by clear *- ub_r0 b_lt_0 h0; grind
+              rcases h_lt_1 with h1 | h1
+              . simp_all
+                by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+                . rw [if_pos (by omega)]
+                  rw [if_neg (by omega)]
+                  simp [U32.toNat]
+                  repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                  omega
+                . rw [if_neg (by omega)]
+                  rw [if_pos (by omega)]
+                  simp [U32.toNat]
+                  repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                  omega
+              . have hr1 : air.core.r_1 row 0 = 0 := by clear *- ub_r1 b_lt_1 hr0 h0 h1; grind
+                rcases h_lt_2 with h2 | h2
+                . simp_all
+                  by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+                  . rw [if_pos (by omega)]
+                    rw [if_neg (by omega)]
+                    simp [U32.toNat]
+                    repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                    omega
+                  . rw [if_neg (by omega)]
+                    rw [if_pos (by omega)]
+                    simp [U32.toNat]
+                    repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                    omega
+                . have hr2 : air.core.r_2 row 0 = 0 := by clear *- ub_r2 b_lt_2 hr0 hr1 h0 h1 h2; grind
+                  rcases h_lt_3 with h3 | h3
+                  . simp_all
+                    by_cases hr3 : 128 ≤ (air.core.r_3 row 0).val
+                    . rw [if_pos (by omega)]
+                      by_cases hr'3 : 128 ≤ (air.core.r_prime_3 row 0).val
+                      . rw [if_pos (by omega)]
+                        simp [U32.toNat]
+                        repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                        have : air.core.r_3 row 0 = 128 ∧ air.core.r_prime_3 row 0 = 128 := by omega
+                        simp_all
+                      . rw [if_neg (by omega)]
+                        simp [U32.toNat]
+                        repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                        omega
+                    . rw [if_neg (by omega)]
+                      rw [if_pos (by omega)]
+                      simp [U32.toNat]
+                      repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                      omega
+                  . simp [U32.toNat]
+                    repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+                    simp_all
+                    grind
+
+          have h_lt :=
+            @BabyBear.Circuits.less_than
+              (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+              (air.core.r_prime_0 row 0) (air.core.r_prime_1 row 0) (air.core.r_prime_2 row 0) (air.core.r_prime_3 row 0)
+              (air.core.lt_marker_0 row 0) (air.core.lt_marker_1 row 0) (air.core.lt_marker_2 row 0) (air.core.lt_marker_3 row 0)
+              (air.core.lt_diff row 0)
+              (air.core.c_3 row 0) (air.core.r_prime_3 row 0)
+              0
+              ((air.core.lt_marker_3 row 0) + (air.core.lt_marker_2 row 0) + (air.core.lt_marker_1 row 0) + (air.core.lt_marker_0 row 0))
+              ub_c0 ub_c1 ub_c2 ub_c3
+              ub_r'0 ub_r'1 ub_r'2 ub_r'3
+              (by right; assumption)
+              (by simp) (by simp)
+              b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3
+              (by right; assumption)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_3; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_2; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_1; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_0; grind)
+              (by left; assumption)
+              (by clear *- h_prod_3; grind)
+              (by clear *- h_prod_2; grind)
+              (by clear *- h_prod_1; grind)
+              (by left; assumption)
+              (by simpa) (by simpa)
+              (by simp [h_diff])
+
+          simp [h_sum_sc_ltm] at h_lt
+          apply lt_neg_of_lt_neg
+          rw [h_opp]
+          simp [U32.toInt]
+          rw [if_pos (by rw [U32.negative_toInt]; simpa)]
+          rw [if_pos]
+          . clear *- h_lt; simp [U32.toNat] at *; omega
+          . rw [U32.negative_toInt]
+            clear *- sgn_r h_opp aux_r_nzero ub_r0 ub_r1 ub_r2 ub_r3
+            simp [← h_opp]
+            by_contra hz; simp at hz
+            have : U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0), BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)] = 0
+              := by omega
+            rw [BabyBear.toInt_0_inv ub_r0 ub_r1 ub_r2 ub_r3] at this
+            simp_all; apply aux_r_nzero; clear *-
+            simp [U32.toInt, U32.negative, U32.toNat]
+
+        . simp at sgn_c sgn_r
+          rw [abs_of_neg sgn_c, abs_of_neg sgn_r]
+          simp [h_c_sign, h_r_sign] at *
+          simp [← h_xor_eq] at *
+          symm at h_r'_0 h_r'_1 h_r'_2 h_r'_3
+          simp_all
+
+          have h_lt :=
+            @BabyBear.Circuits.less_than
+              (air.core.c_0 row 0) (air.core.c_1 row 0) (air.core.c_2 row 0) (air.core.c_3 row 0)
+              (air.core.r_0 row 0) (air.core.r_1 row 0) (air.core.r_2 row 0) (air.core.r_3 row 0)
+              (air.core.lt_marker_0 row 0) (air.core.lt_marker_1 row 0) (air.core.lt_marker_2 row 0) (air.core.lt_marker_3 row 0)
+              (air.core.lt_diff row 0)
+              (air.core.c_3 row 0) (air.core.r_3 row 0)
+              0
+              ((air.core.lt_marker_3 row 0) + (air.core.lt_marker_2 row 0) + (air.core.lt_marker_1 row 0) + (air.core.lt_marker_0 row 0))
+              ub_c0 ub_c1 ub_c2 ub_c3
+              ub_r0 ub_r1 ub_r2 ub_r3
+              (by right; assumption)
+              (by simp) (by simp)
+              b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3
+              (by right; assumption)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_3; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_2; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_1; grind)
+              (by simp [h_sum_sc_ltm]; clear *- h_diff_0; grind)
+              (by left; assumption)
+              (by clear *- h_prod_3; grind)
+              (by clear *- h_prod_2; grind)
+              (by clear *- h_prod_1; grind)
+              (by left; assumption)
+              (by simpa) (by simpa)
+              (by simp [h_diff])
+
+          simp [h_sum_sc_ltm] at h_lt
+          simp [U32.toInt]
+          rw [if_pos (by rw [U32.negative_toInt]; simpa)]
+          rw [if_pos (by rw [U32.negative_toInt]; simpa)]
+          clear *- h_lt; simp [U32.toNat] at *; omega
 
       simp [cond2]
       clear b_ltm_0 b_ltm_1 b_ltm_2 b_ltm_3
@@ -2217,69 +2694,131 @@ theorem spec_DIVREM_nczero_nsc_nrzero
             b_lt_0 b_lt_1 b_lt_2 b_lt_3
             h_r'_0 h_r'_1 h_r'_2 h_r'_3
 
-      . apply Int.split_nzp (U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0),
-                                        BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)]) <;> intro h_r_sgn
-        . right
-          simp [Int.sign_cases, h_r_sgn]
-          intro hb; exfalso
-          rw [← b_sign_is_bsgn] at r_sign_is_rsgn
-          simp [U32.ext, U32.negative_toInt] at r_sign_is_rsgn
-          clear *- h_r_sgn hb r_sign_is_rsgn
-          simp_all
-        . left; assumption
-        . right
-          simp [Int.sign_cases]
-          rw [← b_sign_is_bsgn] at r_sign_is_rsgn
-          simp [U32.ext, U32.negative_toInt] at r_sign_is_rsgn
-          iterate 2 rw [if_neg (by clear *- h_r_sgn r_sign_is_rsgn; omega)]
-          rw [if_neg (by clear *- h_r_sgn r_sign_is_rsgn; omega)] at r_sign_is_rsgn
-          split_ifs at r_sign_is_rsgn with hb
-          . simp [hb]; intro hzb
-            rw [BabyBear.toInt_0_inv] at hzb <;> [ skip; assumption; assumption; assumption; assumption ]
-            simp [hzb] at cond1
-            conv at cond1 =>
-              lhs; simp [U32.toInt, U32.negative, U32.toNat]
-            have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
-            obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
-            rw [eq_c] at cond1 cond2 lb_c ub_c
-            have ⟨ lb_q, ub_q ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)]
-            obtain ⟨ q, eq_q ⟩ : exists q, U32.toInt #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)] = q := by simp
-            rw [eq_q] at cond1 lb_q ub_q
-            have ⟨ lb_r, ub_r ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)]
-            obtain ⟨ r, eq_r ⟩ : exists r, U32.toInt #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)] = r := by simp
-            rw [eq_r] at cond1 cond2 lb_r ub_r
-            have h_c_nz : ¬ c = 0
-            := by
-              rw [← eq_c]; clear *- aux_c_nzero ub_c0 ub_c1 ub_c2 ub_c3
-              intro hz; apply aux_c_nzero
-              simp [U32.toInt, U32.negative, U32.toNat] at *
-              split_ifs <;> simp_all
-            have h_r_nz : ¬ r = 0
-            := by
-              rw [← eq_r]; clear *- aux_r_nzero ub_r0 ub_r1 ub_r2 ub_r3
-              intro hz; apply aux_r_nzero
-              simp [U32.toInt, U32.negative, U32.toNat] at *
-              split_ifs <;> simp_all
-            clear *- lb_c lb_q lb_r ub_c ub_q ub_r h_c_nz h_r_nz cond1 cond2
-            (have eq_r : r = -(q * c) := by omega); subst r
-            apply Int.split_nzp c <;> intro hc
-            . rw [abs_of_neg hc] at cond2
-              clear ub_c h_c_nz cond1
-              apply Int.split_nzp q <;> intro hq
-              . rw [abs_of_nonpos (by nlinarith)] at cond2
-                nlinarith
-              . simp_all
-              . rw [abs_of_nonneg (by nlinarith)] at cond2
-                nlinarith
-            . apply h_c_nz; exact hc
-            . rw [abs_of_pos hc] at cond2
-              clear ub_c h_c_nz cond1
-              apply Int.split_nzp q <;> intro hq
-              . rw [abs_of_nonneg (by nlinarith)] at cond2
-                nlinarith
-              . simp_all
-              . rw [abs_of_nonpos (by nlinarith)] at cond2
-                nlinarith
+
+      apply Int.split_nzp (U32.toInt #v[BitVec.ofNat 8 ↑(air.core.r_0 row 0), BitVec.ofNat 8 ↑(air.core.r_1 row 0),
+                                          BitVec.ofNat 8 ↑(air.core.r_2 row 0), BitVec.ofNat 8 ↑(air.core.r_3 row 0)]) <;> intro h_r_sgn
+      . right
+        simp [Int.sign_cases, h_r_sgn]
+        intro hb; exfalso
+        rw [← b_sign_is_bsgn] at r_sign_is_rsgn
+        simp [U32.ext, U32.negative_toInt] at r_sign_is_rsgn
+        clear *- h_r_sgn hb r_sign_is_rsgn
+        simp_all
+      . left; assumption
+      . right
+        simp [Int.sign_cases]
+        rw [← b_sign_is_bsgn] at r_sign_is_rsgn
+        simp [U32.ext, U32.negative_toInt] at r_sign_is_rsgn
+        iterate 2 rw [if_neg (by clear *- h_r_sgn r_sign_is_rsgn; omega)]
+        rw [if_neg (by clear *- h_r_sgn r_sign_is_rsgn; omega)] at r_sign_is_rsgn
+        split_ifs at r_sign_is_rsgn with hb
+        . simp [hb]; intro hzb
+          rw [BabyBear.toInt_0_inv] at hzb <;> [ skip; assumption; assumption; assumption; assumption ]
+          simp [hzb] at cond1
+          conv at cond1 =>
+            lhs; simp [U32.toInt, U32.negative, U32.toNat]
+          have ⟨ lb_c, ub_c ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)]
+          obtain ⟨ c, eq_c ⟩ : exists c, U32.toInt #v[BitVec.ofNat 8 (air.core.c_0 row 0), BitVec.ofNat 8 (air.core.c_1 row 0), BitVec.ofNat 8 (air.core.c_2 row 0), BitVec.ofNat 8 (air.core.c_3 row 0)] = c := by simp
+          rw [eq_c] at cond1 cond2 lb_c ub_c
+          have ⟨ lb_q, ub_q ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)]
+          obtain ⟨ q, eq_q ⟩ : exists q, U32.toInt #v[BitVec.ofNat 8 (air.core.q_0 row 0), BitVec.ofNat 8 (air.core.q_1 row 0), BitVec.ofNat 8 (air.core.q_2 row 0), BitVec.ofNat 8 (air.core.q_3 row 0)] = q := by simp
+          rw [eq_q] at cond1 lb_q ub_q
+          have ⟨ lb_r, ub_r ⟩ := U32.toInt_range #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)]
+          obtain ⟨ r, eq_r ⟩ : exists r, U32.toInt #v[BitVec.ofNat 8 (air.core.r_0 row 0), BitVec.ofNat 8 (air.core.r_1 row 0), BitVec.ofNat 8 (air.core.r_2 row 0), BitVec.ofNat 8 (air.core.r_3 row 0)] = r := by simp
+          rw [eq_r] at cond1 cond2 lb_r ub_r
+          have h_c_nz : ¬ c = 0
+          := by
+            rw [← eq_c]; clear *- aux_c_nzero ub_c0 ub_c1 ub_c2 ub_c3
+            intro hz; apply aux_c_nzero
+            simp [U32.toInt, U32.negative, U32.toNat] at *
+            split_ifs <;> simp_all
+          have h_r_nz : ¬ r = 0
+          := by
+            rw [← eq_r]; clear *- aux_r_nzero ub_r0 ub_r1 ub_r2 ub_r3
+            intro hz; apply aux_r_nzero
+            simp [U32.toInt, U32.negative, U32.toNat] at *
+            split_ifs <;> simp_all
+          clear *- lb_c lb_q lb_r ub_c ub_q ub_r h_c_nz h_r_nz cond1 cond2
+          (have eq_r : r = -(q * c) := by omega); subst r
+          apply Int.split_nzp c <;> intro hc
+          . rw [abs_of_neg hc] at cond2
+            clear ub_c h_c_nz cond1
+            apply Int.split_nzp q <;> intro hq
+            . rw [abs_of_nonpos (by nlinarith)] at cond2
+              nlinarith
+            . simp_all
+            . rw [abs_of_nonneg (by nlinarith)] at cond2
+              nlinarith
+          . apply h_c_nz; exact hc
+          . rw [abs_of_pos hc] at cond2
+            clear ub_c h_c_nz cond1
+            apply Int.split_nzp q <;> intro hq
+            . rw [abs_of_nonneg (by nlinarith)] at cond2
+              nlinarith
+            . simp_all
+            . rw [abs_of_nonpos (by nlinarith)] at cond2
+              nlinarith
+
+include
+  row_valid
+  constraints
+  propertiesToAssume in
+/-- The constraints entail correct implementation of the DIV/REM opcode, gathered --/
+theorem spec_DIVREM
+  (h_divrem :
+    (air.core.ctx row 0).instruction.opcode = 596 ∨
+    (air.core.ctx row 0).instruction.opcode = 598)
+:
+  (U32.toBV #v[(air.core.q_0 row 0).val,
+               (air.core.q_1 row 0).val,
+               (air.core.q_2 row 0).val,
+               (air.core.q_3 row 0).val],
+   U32.toBV #v[(air.core.r_0 row 0).val,
+               (air.core.r_1 row 0).val,
+               (air.core.r_2 row 0).val,
+               (air.core.r_3 row 0).val])
+    =
+  (execute_DIV_REM_pure
+    (U32.toBV #v[(air.core.b_0 row 0).val,
+                 (air.core.b_1 row 0).val,
+                 (air.core.b_2 row 0).val,
+                 (air.core.b_3 row 0).val])
+    (U32.toBV #v[(air.core.c_0 row 0).val,
+                 (air.core.c_1 row 0).val,
+                 (air.core.c_2 row 0).val,
+                 (air.core.c_3 row 0).val])
+    .DRS)
+:= by
+  by_cases h_c_zero : air.core.zero_divisor row 0 = 1
+  . apply spec_DIVREM_czero <;> assumption
+  . have : air.core.zero_divisor row 0 = 0 := by
+      rw [allHold_simplified_of_allHold] at constraints
+      simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+      obtain ⟨ constrain_interactions,
+              b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+              b_zd, rest ⟩ := constraints
+      clear *- b_zd h_c_zero
+      simp_all
+    by_cases h_scase :
+      (U32.toInt
+        #v[BitVec.ofNat 8 ↑(air.core.b_0 row 0), BitVec.ofNat 8 ↑(air.core.b_1 row 0),
+           BitVec.ofNat 8 ↑(air.core.b_2 row 0), BitVec.ofNat 8 ↑(air.core.b_3 row 0)] = -2147483648 ∧
+       U32.toInt
+        #v[BitVec.ofNat 8 ↑(air.core.c_0 row 0), BitVec.ofNat 8 ↑(air.core.c_1 row 0),
+           BitVec.ofNat 8 ↑(air.core.c_2 row 0), BitVec.ofNat 8 ↑(air.core.c_3 row 0)] = -1)
+    . apply spec_DIVREM_nczero_sc <;> assumption
+    . by_cases h_r_zero : air.core.r_zero row 0 = 1
+      . apply spec_DIVREM_nczero_nsc_rzero <;> assumption
+      . apply spec_DIVREM_nczero_nsc_nrzero <;> try assumption
+        rw [allHold_simplified_of_allHold] at constraints
+        simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+        obtain ⟨ constrain_interactions,
+                b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
+                b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
+                b_vnzd, h_vnzd,
+                b_rz, rest ⟩ := constraints
+        clear *- b_rz h_r_zero
+        simp_all
 
 end General
 
