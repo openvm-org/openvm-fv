@@ -169,13 +169,27 @@ lemma not_mem_iff_isNone {s : PreSail.SequentialState RegisterType Sail.trivialC
 lemma not_mem_iff_eq_none {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource} :
   r ∉ s ↔ s.regs.get? r = .none := by grind
 
-@[grind .]
+@[grind ., mono]
 lemma write_reg_state_mono {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource}
   (h : r ∈ s) : r ∈ (write_reg_state s Register.nextPC v) := by
   unfold write_reg_state
   grind
 
 attribute [local grind .] EStateM.pure Sail.readReg PreSail.readReg bind EStateM.bind
+
+@[simp, grind =]
+lemma throwThe_eq_error {α} {e : Sail.Error exception} :
+  throwThe (m := (PreSail.PreSailM RegisterType Sail.trivialChoiceSource exception)) (α := α) _ e =
+  EStateM.Result.error e := rfl
+
+lemma mem_of_readReg_eq_ok (h : Sail.readReg r s = EStateM.Result.ok valout s) : r ∈ s := by
+  unfold Sail.readReg PreSail.readReg at h
+  unfold_projs at h; simp [EStateM.bind] at h
+  rw [mem_iff_isSome]
+  set X := s.regs.get? r
+  rcases X
+  grind
+  grind
 
 -- NOTE: Sail.readReg = .Ok - we know the access was ok, no need to monad-dance.
 
