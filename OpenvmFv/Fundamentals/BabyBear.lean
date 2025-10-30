@@ -117,8 +117,16 @@ lemma xor_as_and
   have := @Nat.and_le_left b c
   have := @Nat.and_le_right b c
   rw [BitVec.xor_as_and ub_b ub_c] at h_eq
-  simp [Fin.add_def, Fin.sub_def, Fin.mul_def] at *
-  sorry
+  by_contra! contra
+  by_cases h : a.1 < 256
+  · grind
+  · by_cases eq : 2 * a.1 < 2013265921
+    · simp only [
+        Fin.add_def, Fin.isValue, Fin.mul_def, Fin.coe_ofNat_eq_mod, Nat.reduceMod,
+        Fin.sub_def, Nat.add_mod_mod] at h_eq
+      rw [Nat.mod_eq_of_lt eq, Nat.mod_eq_of_lt (by grind)] at h_eq
+      grind
+    · grind
 
 lemma xor_as_or
   {a b c : FBB}
@@ -139,8 +147,7 @@ lemma inv256_prod_lt_256
 :
   x = 0 ∨ (¬x = 0 ∧ 7864320 < (2005401601 : FBB) * (⟨ x.val, by omega⟩ : FBB) ∧ (2005401601 : FBB) * (⟨ x.val, by omega⟩ : FBB) ≤ 2005401601)
 := by
-  simp [Fin.lt_def, Fin.val_mul]
-  fin_cases x <;> simp
+  fin_cases x <;> decide
 
 lemma inv256_prod_mod
   (x : FBB)

@@ -7,26 +7,20 @@ import OpenvmFv.Fundamentals.Transpiler
 
 -- #eval LeanRV32D.Functions.run_hart_active
 
-@[simp]
+@[simp, grind =]
 lemma pure_equiv :
   @pure (PreSail.PreSailM RegisterType Sail.trivialChoiceSource exception) EStateM.instMonad.toPure T val =
   λ s => EStateM.Result.ok val s
-:= by
-  unfold pure EStateM.instMonad EStateM.pure
-  dsimp
+:= rfl
 
-@[simp]
+@[simp, grind =]
 lemma throw_equiv :
   @throw (Sail.Error exception) (PreSail.PreSailM RegisterType Sail.trivialChoiceSource exception)
   (instMonadExceptOfMonadExceptOf (Sail.Error exception)
     (PreSail.PreSailM RegisterType Sail.trivialChoiceSource exception))
   T error =
   λ s_1 => EStateM.Result.error error s_1
-:= by
-  unfold throw instMonadExceptOfMonadExceptOf
-  unfold throwThe MonadExceptOf.throw
-  unfold EStateM.instMonadExceptOfOfBacktrackable EStateM.throw
-  dsimp
+:= rfl
 
 @[simp]
 lemma sail_assert_equiv :
@@ -36,49 +30,17 @@ lemma sail_assert_equiv :
     then EStateM.Result.ok () state
     else EStateM.Result.error (Sail.Error.Assertion msg) state
 := by
-  unfold Sail.assert PreSail.assert
-  simp
   funext check message state
-  cases check <;> simp
+  cases check <;> simp [Sail.assert, PreSail.assert]
 
 lemma regidx_non_zero (h_non_zero: ¬rd = 0):
   regidx_to_fin (regidx.Regidx rd) ∈ Finset.Icc 1 31
 := by
-  by_cases rd = 0; simp_all
-  by_cases h: rd = 1; rewrite [h]; decide
-  by_cases h: rd = 2; rewrite [h]; decide
-  by_cases h: rd = 3; rewrite [h]; decide
-  by_cases h: rd = 4; rewrite [h]; decide
-  by_cases h: rd = 5; rewrite [h]; decide
-  by_cases h: rd = 6; rewrite [h]; decide
-  by_cases h: rd = 7; rewrite [h]; decide
-  by_cases h: rd = 8; rewrite [h]; decide
-  by_cases h: rd = 9; rewrite [h]; decide
-  by_cases h: rd = 10; rewrite [h]; decide
-  by_cases h: rd = 11; rewrite [h]; decide
-  by_cases h: rd = 12; rewrite [h]; decide
-  by_cases h: rd = 13; rewrite [h]; decide
-  by_cases h: rd = 14; rewrite [h]; decide
-  by_cases h: rd = 15; rewrite [h]; decide
-  by_cases h: rd = 16; rewrite [h]; decide
-  by_cases h: rd = 17; rewrite [h]; decide
-  by_cases h: rd = 18; rewrite [h]; decide
-  by_cases h: rd = 19; rewrite [h]; decide
-  by_cases h: rd = 20; rewrite [h]; decide
-  by_cases h: rd = 21; rewrite [h]; decide
-  by_cases h: rd = 22; rewrite [h]; decide
-  by_cases h: rd = 23; rewrite [h]; decide
-  by_cases h: rd = 24; rewrite [h]; decide
-  by_cases h: rd = 25; rewrite [h]; decide
-  by_cases h: rd = 26; rewrite [h]; decide
-  by_cases h: rd = 27; rewrite [h]; decide
-  by_cases h: rd = 28; rewrite [h]; decide
-  by_cases h: rd = 29; rewrite [h]; decide
-  by_cases h: rd = 30; rewrite [h]; decide
-  by_cases h: rd = 31; rewrite [h]; decide
-  exfalso
-  have : rd < 32 := by grind
-  grind
+  dsimp [regidx_to_fin] at rd ⊢
+  rw [Finset.mem_Icc]
+  rcases rd with ⟨⟨v, hv⟩⟩
+  have : v ≠ 0 := by aesop
+  grind [= Fin.le_iff_val_le_val]
 
 def fin_to_x_reg (r : Fin 32) : Option Register :=
   match r with
@@ -123,16 +85,12 @@ lemma readReg_state
 :
   Sail.readReg reg state = EStateM.Result.ok reg_val state
 := by
+  obtain ⟨regs⟩ := state
   unfold Sail.readReg PreSail.readReg
   unfold bind Monad.toBind EStateM.instMonad EStateM.bind EStateM.pure
-  dsimp
-  obtain ⟨regs⟩ := state
   unfold MonadState.get instMonadStateOfMonadStateOf
   unfold getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get
-  dsimp
-  dsimp at h
-  rewrite [h]
-  dsimp
+  simp [h]
 
 lemma readReg_fail
   (h: state.regs.get? reg = .none)
@@ -150,32 +108,22 @@ def write_reg_state
   (register: Register)
   (value: RegisterType register)
 : PreSail.SequentialState RegisterType Sail.trivialChoiceSource := {
-    regs := state.regs.insert register value,
-    choiceState := state.choiceState,
-    mem := state.mem,
-    tags := state.tags,
-    cycleCount := state.cycleCount,
-    sailOutput := state.sailOutput
+    state with regs := state.regs.insert register value
   }
 
 lemma writeReg_state_success:
   (Sail.writeReg register value state) =
   EStateM.Result.ok PUnit.unit (write_reg_state state register value)
-:= by
-  unfold Sail.writeReg PreSail.writeReg modify modifyGet instMonadStateOfMonadStateOf
-  dsimp
-  unfold modifyGet instMonadStateOfMonadStateOf MonadStateOf.modifyGet EStateM.instMonadStateOf EStateM.modifyGet
-  dsimp
-  rfl
+:= rfl
 
+@[simp, grind =]
 lemma writeReg_read_same
   (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
 :
   (write_reg_state state register value).regs.get? register = Option.some value
-:= by
-  unfold write_reg_state
-  grind
+:= Std.ExtDHashMap.get?_insert_self
 
+@[simp]
 lemma writeReg_write_same
   (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
 :
@@ -186,15 +134,10 @@ lemma writeReg_write_same
   =
   write_reg_state state register value2
 := by
-  simp [
-    write_reg_state,
-  ]
-  apply Std.ExtDHashMap.ext_get?
-  intro reg
-  by_cases h: reg = register
-  . grind
-  . grind
+  simp only [write_reg_state, PreSail.SequentialState.mk.injEq, and_self, and_true]
+  exact Std.ExtDHashMap.ext_get? (by grind)
 
+@[grind ←]
 lemma writeReg_read_diff
   (h: state.regs.get? register1 = .some value1)
   (h_neq: register1 ≠ register2)
@@ -204,7 +147,51 @@ lemma writeReg_read_diff
   unfold write_reg_state
   grind
 
-set_option maxHeartbeats 0
+@[simp, grind =]
+lemma get_write_reg_state :
+  get (m := (PreSail.PreSailM RegisterType Sail.trivialChoiceSource exception)) s =
+  EStateM.Result.ok s s := rfl
+
+instance a : Membership Register (PreSail.SequentialState RegisterType Sail.trivialChoiceSource) where
+  mem s reg := reg ∈ s.regs
+
+@[grind _=_]
+lemma mem_iff_isSome {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource} :
+  r ∈ s ↔ (s.regs.get? r).isSome := by dsimp [(·∈·)]; grind
+
+grind_pattern Option.isNone_iff_eq_none => o.isNone
+
+@[grind _=_]
+lemma not_mem_iff_isNone {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource} :
+  r ∉ s ↔ (s.regs.get? r).isNone := by rw [mem_iff_isSome, Option.isSome_iff_ne_none]; simp
+
+@[grind _=_]
+lemma not_mem_iff_eq_none {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource} :
+  r ∉ s ↔ s.regs.get? r = .none := by grind
+
+@[grind .]
+lemma write_reg_state_mono {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource}
+  (h : r ∈ s) : r ∈ (write_reg_state s Register.nextPC v) := by
+  unfold write_reg_state
+  grind
+
+attribute [local grind .] EStateM.pure Sail.readReg PreSail.readReg bind EStateM.bind
+
+-- NOTE: Sail.readReg = .Ok - we know the access was ok, no need to monad-dance.
+
+open Sail PreSail in
+@[grind .]
+lemma state_eq_of_readReg_eq_ok_of_ne
+  (h : Sail.readReg r s = EStateM.Result.ok valout s)
+  (h₁ : r ≠ Register.nextPC) :
+  Sail.readReg r (write_reg_state s Register.nextPC valin) =
+  EStateM.Result.ok valout (write_reg_state s Register.nextPC valin) := by
+  unfold Sail.readReg PreSail.readReg
+  unfold_projs; simp [EStateM.bind]
+  simp only [Sail.readReg, PreSail.readReg, bind, EStateM.bind, get_write_reg_state, pure_equiv,
+    throw_equiv] at h
+  grind  
+
 lemma read_xreg_write_reg_state_nextPC
   (r1 : Fin 32)
   (h: read_xreg r1 state = EStateM.Result.ok read_val state)
@@ -214,272 +201,8 @@ lemma read_xreg_write_reg_state_nextPC
     read_val
     (write_reg_state state Register.nextPC write_val)
 := by
-  unfold read_xreg
-  unfold pure EStateM.instMonad EStateM.pure
-  fin_cases r1
-  . simp_all [read_xreg, pure, EStateM.pure]
-  all_goals (
-    simp
-    simp [read_xreg, Sail.readReg, PreSail.readReg] at h
-    unfold bind Monad.toBind EStateM.instMonad EStateM.bind EStateM.pure at h
-    dsimp at h
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at h
-    dsimp at h
-    simp [Sail.readReg, PreSail.readReg]
-    unfold bind Monad.toBind EStateM.instMonad EStateM.bind EStateM.pure
-    dsimp
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get
-    dsimp
-    simp [write_reg_state]
-  )
-  . have h_x1 : (state.regs.insert Register.nextPC write_val).get? Register.x1 = state.regs.get? Register.x1 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x1 = .some val := by
-      cases h_get: state.regs.get? Register.x1
-      . simp [h_get] at h
-      . simp
-    simp [h_x1]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x2 : (state.regs.insert Register.nextPC write_val).get? Register.x2 = state.regs.get? Register.x2 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x2 = .some val := by
-      cases h_get: state.regs.get? Register.x2
-      . simp [h_get] at h
-      . simp
-    simp [h_x2]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x3 : (state.regs.insert Register.nextPC write_val).get? Register.x3 = state.regs.get? Register.x3 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x3 = .some val := by
-      cases h_get: state.regs.get? Register.x3
-      . simp [h_get] at h
-      . simp
-    simp [h_x3]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x4 : (state.regs.insert Register.nextPC write_val).get? Register.x4 = state.regs.get? Register.x4 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x4 = .some val := by
-      cases h_get: state.regs.get? Register.x4
-      . simp [h_get] at h
-      . simp
-    simp [h_x4]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x5 : (state.regs.insert Register.nextPC write_val).get? Register.x5 = state.regs.get? Register.x5 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x5 = .some val := by
-      cases h_get: state.regs.get? Register.x5
-      . simp [h_get] at h
-      . simp
-    simp [h_x5]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x6 : (state.regs.insert Register.nextPC write_val).get? Register.x6 = state.regs.get? Register.x6 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x6 = .some val := by
-      cases h_get: state.regs.get? Register.x6
-      . simp [h_get] at h
-      . simp
-    simp [h_x6]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x7 : (state.regs.insert Register.nextPC write_val).get? Register.x7 = state.regs.get? Register.x7 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x7 = .some val := by
-      cases h_get: state.regs.get? Register.x7
-      . simp [h_get] at h
-      . simp
-    simp [h_x7]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x8 : (state.regs.insert Register.nextPC write_val).get? Register.x8 = state.regs.get? Register.x8 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x8 = .some val := by
-      cases h_get: state.regs.get? Register.x8
-      . simp [h_get] at h
-      . simp
-    simp [h_x8]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x9 : (state.regs.insert Register.nextPC write_val).get? Register.x9 = state.regs.get? Register.x9 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x9 = .some val := by
-      cases h_get: state.regs.get? Register.x9
-      . simp [h_get] at h
-      . simp
-    simp [h_x9]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x10 : (state.regs.insert Register.nextPC write_val).get? Register.x10 = state.regs.get? Register.x10 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x10 = .some val := by
-      cases h_get: state.regs.get? Register.x10
-      . simp [h_get] at h
-      . simp
-    simp [h_x10]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x11 : (state.regs.insert Register.nextPC write_val).get? Register.x11 = state.regs.get? Register.x11 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x11 = .some val := by
-      cases h_get: state.regs.get? Register.x11
-      . simp [h_get] at h
-      . simp
-    simp [h_x11]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x12 : (state.regs.insert Register.nextPC write_val).get? Register.x12 = state.regs.get? Register.x12 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x12 = .some val := by
-      cases h_get: state.regs.get? Register.x12
-      . simp [h_get] at h
-      . simp
-    simp [h_x12]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x13 : (state.regs.insert Register.nextPC write_val).get? Register.x13 = state.regs.get? Register.x13 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x13 = .some val := by
-      cases h_get: state.regs.get? Register.x13
-      . simp [h_get] at h
-      . simp
-    simp [h_x13]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x14 : (state.regs.insert Register.nextPC write_val).get? Register.x14 = state.regs.get? Register.x14 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x14 = .some val := by
-      cases h_get: state.regs.get? Register.x14
-      . simp [h_get] at h
-      . simp
-    simp [h_x14]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x15 : (state.regs.insert Register.nextPC write_val).get? Register.x15 = state.regs.get? Register.x15 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x15 = .some val := by
-      cases h_get: state.regs.get? Register.x15
-      . simp [h_get] at h
-      . simp
-    simp [h_x15]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x16 : (state.regs.insert Register.nextPC write_val).get? Register.x16 = state.regs.get? Register.x16 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x16 = .some val := by
-      cases h_get: state.regs.get? Register.x16
-      . simp [h_get] at h
-      . simp
-    simp [h_x16]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x17 : (state.regs.insert Register.nextPC write_val).get? Register.x17 = state.regs.get? Register.x17 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x17 = .some val := by
-      cases h_get: state.regs.get? Register.x17
-      . simp [h_get] at h
-      . simp
-    simp [h_x17]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x18 : (state.regs.insert Register.nextPC write_val).get? Register.x18 = state.regs.get? Register.x18 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x18 = .some val := by
-      cases h_get: state.regs.get? Register.x18
-      . simp [h_get] at h
-      . simp
-    simp [h_x18]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x19 : (state.regs.insert Register.nextPC write_val).get? Register.x19 = state.regs.get? Register.x19 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x19 = .some val := by
-      cases h_get: state.regs.get? Register.x19
-      . simp [h_get] at h
-      . simp
-    simp [h_x19]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x20 : (state.regs.insert Register.nextPC write_val).get? Register.x20 = state.regs.get? Register.x20 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x20 = .some val := by
-      cases h_get: state.regs.get? Register.x20
-      . simp [h_get] at h
-      . simp
-    simp [h_x20]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x21 : (state.regs.insert Register.nextPC write_val).get? Register.x21 = state.regs.get? Register.x21 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x21 = .some val := by
-      cases h_get: state.regs.get? Register.x21
-      . simp [h_get] at h
-      . simp
-    simp [h_x21]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x22 : (state.regs.insert Register.nextPC write_val).get? Register.x22 = state.regs.get? Register.x22 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x22 = .some val := by
-      cases h_get: state.regs.get? Register.x22
-      . simp [h_get] at h
-      . simp
-    simp [h_x22]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x23 : (state.regs.insert Register.nextPC write_val).get? Register.x23 = state.regs.get? Register.x23 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x23 = .some val := by
-      cases h_get: state.regs.get? Register.x23
-      . simp [h_get] at h
-      . simp
-    simp [h_x23]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x24 : (state.regs.insert Register.nextPC write_val).get? Register.x24 = state.regs.get? Register.x24 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x24 = .some val := by
-      cases h_get: state.regs.get? Register.x24
-      . simp [h_get] at h
-      . simp
-    simp [h_x24]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x25 : (state.regs.insert Register.nextPC write_val).get? Register.x25 = state.regs.get? Register.x25 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x25 = .some val := by
-      cases h_get: state.regs.get? Register.x25
-      . simp [h_get] at h
-      . simp
-    simp [h_x25]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x26 : (state.regs.insert Register.nextPC write_val).get? Register.x26 = state.regs.get? Register.x26 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x26 = .some val := by
-      cases h_get: state.regs.get? Register.x26
-      . simp [h_get] at h
-      . simp
-    simp [h_x26]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x27 : (state.regs.insert Register.nextPC write_val).get? Register.x27 = state.regs.get? Register.x27 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x27 = .some val := by
-      cases h_get: state.regs.get? Register.x27
-      . simp [h_get] at h
-      . simp
-    simp [h_x27]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x28 : (state.regs.insert Register.nextPC write_val).get? Register.x28 = state.regs.get? Register.x28 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x28 = .some val := by
-      cases h_get: state.regs.get? Register.x28
-      . simp [h_get] at h
-      . simp
-    simp [h_x28]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x29 : (state.regs.insert Register.nextPC write_val).get? Register.x29 = state.regs.get? Register.x29 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x29 = .some val := by
-      cases h_get: state.regs.get? Register.x29
-      . simp [h_get] at h
-      . simp
-    simp [h_x29]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x30 : (state.regs.insert Register.nextPC write_val).get? Register.x30 = state.regs.get? Register.x30 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x30 = .some val := by
-      cases h_get: state.regs.get? Register.x30
-      . simp [h_get] at h
-      . simp
-    simp [h_x30]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
-  . have h_x31 : (state.regs.insert Register.nextPC write_val).get? Register.x31 = state.regs.get? Register.x31 := by grind
-    have h_val : ∃ val, state.regs.get? Register.x31 = .some val := by
-      cases h_get: state.regs.get? Register.x31
-      . simp [h_get] at h
-      . simp
-    simp [h_x31]
-    obtain ⟨val, h_val⟩ := h_val
-    simp_all
+  unfold read_xreg at h ⊢
+  fin_cases r1 <;> grind
 
 lemma sail_assert_eq_pure_of_cond_eq_true :
   c = true → Sail.assert c s =
@@ -1376,7 +1099,7 @@ lemma dispatchInterrupt_none
 
   unfold bind Monad.toBind EStateM.instMonad
   dsimp
-  unfold EStateM.bind EStateM.pure
+  unfold EStateM.bind
   dsimp
 
   simp [readReg_state, *]
@@ -1453,7 +1176,7 @@ lemma translationMode
 
   unfold bind Monad.toBind EStateM.instMonad
   dsimp
-  unfold EStateM.bind EStateM.pure
+  unfold EStateM.bind
   dsimp
 
   by_cases h: cur_privilege_val == Privilege.Machine
