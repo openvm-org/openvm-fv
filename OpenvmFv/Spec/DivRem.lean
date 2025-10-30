@@ -184,8 +184,7 @@ lemma wf_propertiesToAssert
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
+  clear pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -229,6 +228,55 @@ lemma wf_propertiesToAssert
           row_valid]
     clear *- b_sc
     grind
+
+set_option maxRecDepth 1_000_000 in
+include
+  row_valid
+  constraints
+  assumptions
+  propertiesToAssume
+in
+/-- Some properties more important than others that should
+    be easily accessible -/
+lemma essentials
+:
+  (air.adapter.from_state.pc row 0).val + 4 < 1073741824 ∧
+  (air.core.a row 0 0).val < 256 ∧ (air.core.a row 0 1).val < 256 ∧ (air.core.a row 0 2).val < 256 ∧ (air.core.a row 0 3).val < 256 ∧
+  (air.core.b_0 row 0).val < 256 ∧ (air.core.b_1 row 0).val < 256 ∧ (air.core.b_2 row 0).val < 256 ∧ (air.core.b_3 row 0).val < 256 ∧
+  (air.core.c_0 row 0).val < 256 ∧ (air.core.c_1 row 0).val < 256 ∧ (air.core.c_2 row 0).val < 256 ∧ (air.core.c_3 row 0).val < 256 ∧
+  (((air.core.ctx row 0).instruction.opcode = 596 ∨ (air.core.ctx row 0).instruction.opcode = 597) →
+      air.core.a row 0 0 = air.core.q_0 row 0 ∧ air.core.a row 0 1 = air.core.q_1 row 0 ∧ air.core.a row 0 2 = air.core.q_2 row 0 ∧ air.core.a row 0 3 = air.core.q_3 row 0) ∧
+  (((air.core.ctx row 0).instruction.opcode = 598 ∨ (air.core.ctx row 0).instruction.opcode = 599) →
+      air.core.a row 0 0 = air.core.r_0 row 0 ∧ air.core.a row 0 1 = air.core.r_1 row 0 ∧ air.core.a row 0 2 = air.core.r_2 row 0 ∧ air.core.a row 0 3 = air.core.r_3 row 0)
+:= by
+  have props_asrt := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
+
+  obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
+  have ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
+  clear constraints
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
+           ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
+  clear pa_bit pa_read
+
+  simp_all [VmAirWrapper_divrem_constraint_and_interaction_simplification,
+            wf_propertiesToAssertPerRow,
+            propertiesToAssert]
+
+  simp [← DivRemCoreAir_4_8.a_0_def,
+        ← DivRemCoreAir_4_8.a_1_def,
+        ← DivRemCoreAir_4_8.a_2_def,
+        ← DivRemCoreAir_4_8.a_3_def]
+
+  split_ands
+  . clear *- assumptions; grind
+  . intro h_op; rcases h_op with h_op | h_op <;> simp_all
+  . intro h_op; rcases h_op with h_op | h_op <;> simp_all
 
 section signed
 
@@ -857,11 +905,10 @@ theorem spec_DIVREM_czero
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -1015,11 +1062,10 @@ theorem spec_DIVREM_nczero_sc
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -1272,11 +1318,10 @@ theorem spec_DIVREM_nczero_nsc_rzero
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -1771,11 +1816,10 @@ theorem spec_DIVREM_nczero_nsc_nrzero
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -2874,11 +2918,10 @@ theorem spec_DIVUREMU_czero
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -3016,11 +3059,10 @@ theorem spec_DIVUREMU_nczero_rzero
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
@@ -3180,11 +3222,10 @@ theorem spec_DIVUREMU_nczero_nrzero
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
-  obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   obtain ⟨ h_signed_msb, h_diff ⟩ := pa_bit
-  clear pa_range
+  clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
   simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
