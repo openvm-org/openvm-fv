@@ -51,7 +51,9 @@ import OpenvmFv.Equivalence.Auipc
 import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
+import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.Lt
+-- import OpenvmFv.Equivalence.Mulh
 import OpenvmFv.Equivalence.Shift
 
 import OpenvmFv.Extraction.AccessAdapterAir_2
@@ -89,6 +91,11 @@ import OpenvmFv.Spec.ControlFlow.bltu
 import OpenvmFv.Spec.ControlFlow.bne
 import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
+import OpenvmFv.Spec.DIVREM.div
+import OpenvmFv.Spec.DIVREM.divu
+import OpenvmFv.Spec.DIVREM.local
+import OpenvmFv.Spec.DIVREM.rem
+import OpenvmFv.Spec.DIVREM.remu
 import OpenvmFv.Spec.ITYPE.addi
 import OpenvmFv.Spec.ITYPE.andi
 import OpenvmFv.Spec.ITYPE.local
@@ -97,6 +104,10 @@ import OpenvmFv.Spec.ITYPE.xori
 import OpenvmFv.Spec.ITYPE.slti
 import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.JAL.execute_jal
+import OpenvmFv.Spec.MULH.local
+import OpenvmFv.Spec.MULH.mulh
+import OpenvmFv.Spec.MULH.mulhsu
+import OpenvmFv.Spec.MULH.mulhu
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.and
 import OpenvmFv.Spec.RTYPE.local
