@@ -129,7 +129,44 @@ lemma wf_propertiesToAssert
   clear *- b_mulh b_mulhsu
   grind
 
-/-- From Lt opcode to RISC-V opcode -/
+set_option maxRecDepth 1_000_000 in
+include
+  row_valid
+  constraints
+  assumptions
+  propertiesToAssume
+in
+/-- Some properties more important than others that should
+    be easily accessible -/
+lemma essentials
+:
+  (air.adapter.from_state.pc row 0).val + 4 < 1073741824 ∧
+  (air.core.a_0 row 0).val < 256 ∧ (air.core.a_1 row 0).val < 256 ∧ (air.core.a_2 row 0).val < 256 ∧ (air.core.a_3 row 0).val < 256 ∧
+  (air.core.b_0 row 0).val < 256 ∧ (air.core.b_1 row 0).val < 256 ∧ (air.core.b_2 row 0).val < 256 ∧ (air.core.b_3 row 0).val < 256 ∧
+  (air.core.c_0 row 0).val < 256 ∧ (air.core.c_1 row 0).val < 256 ∧ (air.core.c_2 row 0).val < 256 ∧ (air.core.c_3 row 0).val < 256
+:= by
+  have props_asrt := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
+
+  obtain ⟨ sop0, sop1, sop2 ⟩ := single_op air row row_in_range constraints
+  have ⟨ op0, op1, op2 ⟩ := op_from_opcode air row row_in_range constraints row_valid
+  clear constraints
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  obtain ⟨ ub_q0, ub_cq0, ub_q1, ub_cq1, ub_q2, ub_cq2, ub_q3, ub_cq3,
+           ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
+  clear pa_bit pa_read
+
+  simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification,
+            wf_propertiesToAssertPerRow,
+            propertiesToAssert]
+
+  clear *- assumptions; grind
+
+/-- From Mulh opcode to RISC-V opcode -/
 def rop_of_Mulh_opcode (opcode : FBB) : mop :=
   if opcode = 593 then .MULH else
   if opcode = 594 then .MULHSU else
@@ -139,10 +176,7 @@ include
   row_valid
   constraints
   propertiesToAssume in
-/-- The constraints entail correct implementation of the MULH opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MULH opcode --/
 theorem spec_MULH
   (h_mulh : (air.core.ctx row 0).instruction.opcode = 593)
 :
@@ -244,7 +278,8 @@ theorem spec_MULH
 
   have ⟨ eq_a1, eq_cry1 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a1 ub_cry1
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a1
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a1
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a1
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a1
   rw [eq_cry1] at ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry1 eq_cry1
 
@@ -254,7 +289,9 @@ theorem spec_MULH
 
   have ⟨ eq_a2, eq_cry2 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a2 ub_cry2
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a2
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a2
   rw [eq_cry2] at ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry2 eq_cry2
 
@@ -265,7 +302,10 @@ theorem spec_MULH
 
   have ⟨ eq_a3, eq_cry3 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a3 ub_cry3
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a3
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a3
   rw [eq_cry3] at ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry3 eq_cry3
 
@@ -279,7 +319,11 @@ theorem spec_MULH
   rw [  add_assoc (b := (b1 * c3 + b2 * c2 + b3 * c1)),
       ← add_assoc (a := (b1 * c3 + b2 * c2 + b3 * c1))] at *
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a4
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
   rw [eq_cry4] at ub_cry5 ub_cry6 ub_cry7
   clear ub_cry4 eq_cry4
 
@@ -292,7 +336,12 @@ theorem spec_MULH
   rw [add_assoc (b := (b2 * c3 + b3 * c2))] at *
   iterate 3 rw [← add_assoc (a := (b2 * c3 + b3 * c2))] at *
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a5
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
   rw [eq_cry5] at ub_cry6 ub_cry7
   clear ub_cry5 eq_cry5
 
@@ -304,7 +353,14 @@ theorem spec_MULH
   rw [add_assoc (b := (b3 * c3))] at *
   iterate 5 rw [← add_assoc (a := (b3 * c3))] at *
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a6
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+
   rw [eq_cry6] at ub_cry7
   clear ub_cry6 eq_cry6
 
@@ -313,7 +369,14 @@ theorem spec_MULH
 
   have ⟨ eq_a7, eq_cry7 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a7 ub_cry7
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a7
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
   clear ub_cry7 eq_cry7
 
   rw [eq_a4, eq_a5, eq_a6, eq_a7]
@@ -335,10 +398,7 @@ include
   row_valid
   constraints
   propertiesToAssume in
-/-- The constraints entail correct implementation of the MULHSU opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MULHSU opcode --/
 theorem spec_MULHSU
   (h_mulhsu : (air.core.ctx row 0).instruction.opcode = 594)
 :
@@ -434,7 +494,8 @@ theorem spec_MULHSU
 
   have ⟨ eq_a1, eq_cry1 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a1 ub_cry1
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a1
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a1
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a1
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a1
   rw [eq_cry1] at ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry1 eq_cry1
 
@@ -444,7 +505,9 @@ theorem spec_MULHSU
 
   have ⟨ eq_a2, eq_cry2 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a2 ub_cry2
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a2
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a2
   rw [eq_cry2] at ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry2 eq_cry2
 
@@ -455,7 +518,10 @@ theorem spec_MULHSU
 
   have ⟨ eq_a3, eq_cry3 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a3 ub_cry3
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a3
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a3
   rw [eq_cry3] at ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry3 eq_cry3
 
@@ -467,7 +533,11 @@ theorem spec_MULHSU
   have ⟨ eq_a4, eq_cry4 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a4 ub_cry4
   rw [add_assoc (b := (b1 * c3 + b2 * c2 + b3 * c1))] at *
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a4
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
   rw [eq_cry4] at ub_cry5 ub_cry6 ub_cry7
   clear ub_cry4 eq_cry4
 
@@ -479,7 +549,12 @@ theorem spec_MULHSU
   rw [add_assoc (b := (b2 * c3 + b3 * c2))] at *
   rw [← add_assoc (a := (b2 * c3 + b3 * c2))] at *
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a5
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
   rw [eq_cry5] at ub_cry6 ub_cry7
   clear ub_cry5 eq_cry5
 
@@ -490,7 +565,13 @@ theorem spec_MULHSU
   rw [add_assoc (b := (b3 * c3))] at *
   iterate 2 rw [← add_assoc (a := (b3 * c3))] at *
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a6
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
   rw [eq_cry6] at ub_cry7
   clear ub_cry6 eq_cry6
 
@@ -498,7 +579,14 @@ theorem spec_MULHSU
 
   have ⟨ eq_a7, eq_cry7 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a7 ub_cry7
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a7
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
   clear ub_cry7 eq_cry7
 
   rw [eq_a4, eq_a5, eq_a6, eq_a7]
@@ -520,10 +608,7 @@ include
   row_valid
   constraints
   propertiesToAssume in
-/-- The constraints entail correct implementation of the MULHU opcode:
-    - the `b` operand read from memory; and
-    - the `c` operand as per the circuit
---/
+/-- The constraints entail correct implementation of the MULHU opcode --/
 theorem spec_MULHU
   (h_mulhu : (air.core.ctx row 0).instruction.opcode = 595)
 :
@@ -606,7 +691,8 @@ theorem spec_MULHU
 
   have ⟨ eq_a1, eq_cry1 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a1 ub_cry1
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a1
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a1
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a1
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a1
   rw [eq_cry1] at ub_cry2 ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry1 eq_cry1
 
@@ -616,7 +702,9 @@ theorem spec_MULHU
 
   have ⟨ eq_a2, eq_cry2 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a2 ub_cry2
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a2
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a2
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a2
   rw [eq_cry2] at ub_cry3 ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry2 eq_cry2
 
@@ -627,7 +715,10 @@ theorem spec_MULHU
 
   have ⟨ eq_a3, eq_cry3 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a3 ub_cry3
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a3
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a3
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a3
   rw [eq_cry3] at ub_cry4 ub_cry5 ub_cry6 ub_cry7
   clear ub_cry3 eq_cry3
 
@@ -637,7 +728,11 @@ theorem spec_MULHU
 
   have ⟨ eq_a4, eq_cry4 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a4 ub_cry4
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a4
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a4
   rw [eq_cry4] at ub_cry5 ub_cry6 ub_cry7
   clear ub_cry4 eq_cry4
 
@@ -646,7 +741,12 @@ theorem spec_MULHU
 
   have ⟨ eq_a5, eq_cry5 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a5 ub_cry5
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a5
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a5
   rw [eq_cry5] at ub_cry6 ub_cry7
   clear ub_cry5 eq_cry5
 
@@ -654,13 +754,25 @@ theorem spec_MULHU
 
   have ⟨ eq_a6, eq_cry6 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a6 ub_cry6
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a6
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
+  rw [Nat.mod_eq_of_lt (a := (((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a6
   rw [eq_cry6] at ub_cry7
   clear ub_cry6 eq_cry6
 
   have ⟨ eq_a7, eq_cry7 ⟩ := BabyBear.inv256_prod_diff_div_mod ub_a7 ub_cry7
   simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at eq_a7
-  repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := _ * _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := _ * _ / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (_ * _ / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((_ * _ / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := ((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
+  rw [Nat.mod_eq_of_lt (a := (((((_ * _ / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) / 256 + _) (b := 2013265921) (by omega)] at eq_a7
   clear ub_cry7 eq_cry7
 
   rw [eq_a4, eq_a5, eq_a6, eq_a7]

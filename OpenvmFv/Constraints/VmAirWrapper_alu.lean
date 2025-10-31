@@ -684,7 +684,7 @@ namespace VmAirWrapper_alu.constraints
       (h_bounds :
         entry.opcode = 512 ∨
         entry.opcode = 513 ∨
-         entry.opcode = 514 ∨
+        entry.opcode = 514 ∨
         entry.opcode = 515 ∨
         entry.opcode = 516
       )

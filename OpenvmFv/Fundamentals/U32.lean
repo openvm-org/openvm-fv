@@ -6,6 +6,8 @@ import OpenvmFv.Fundamentals.Core
 @[reducible] def U32 := Vector (BitVec 8) NUM_LIMBS
 @[reducible] def U64 := Vector (BitVec 8) (2 * NUM_LIMBS)
 
+set_option maxHeartbeats 1_000_000_000
+
 namespace U32
 
 /-- `U32` as a vector of its constituents -/
@@ -108,8 +110,14 @@ lemma toBV_toInt {x : U32} : x.toBV.toInt = x.toInt := by
   simp [toInt]; split_ifs <;> grind
 
 /-- Range of `toInt` -/
-lemma toInt_range {x : U32} : -2147483648 ≤ x.toInt ∧ x.toInt < 2147483648 := by
+lemma toInt_range (x : U32) : -2147483648 ≤ x.toInt ∧ x.toInt < 2147483648 := by
   simp [toInt]; split_ifs <;> grind
+
+lemma toInt_bmod_eq {x : U32} :
+  x.toInt.bmod 4294967296 = x.toInt
+:= by
+  have := toInt_range x
+  rw [Int.bmod_eq_of_le this.1 this.2]
 
 grind_pattern toBV_toInt => x.toBV.toInt
 grind_pattern toInt_range => x.toInt
@@ -205,6 +213,66 @@ lemma toNat_inj {x y : U64} : x.toNat = y.toNat → x = y := by
 
 end toNat
 
+section negative
+
+grind_pattern BitVec.msb_eq_decide => x.msb
+
+/-- Negativity -/
+@[grind →]
+def negative (x : U64) := ¬ (2 * x.toNat < 18446744073709551616)
+instance : Decidable (negative x) := by unfold negative; infer_instance
+
+/-- `msb` is `negative` -/
+@[simp]
+lemma toBV_msb_negative {x : U64} : x.toBV.msb = x.negative := by grind
+
+/-- `msb` of top byte is the same as `negative` -/
+@[simp] lemma msb_3_negative {x : U64} : x[7].msb = x.negative := by
+  simp [← toBV_msb_negative]; grind
+
+grind_pattern toBV_msb_negative => x.toBV.msb
+grind_pattern msb_3_negative => x[7].msb
+
+end negative
+
+section toInt_fromInt
+
+attribute [local grind →] BitVec.toInt
+
+/-- From `U64` to `ℤ` -/
+@[grind →]
+def toInt (x : U64) : ℤ := x.toNat - (if x.negative then 18446744073709551616 else 0)
+
+/-- `toBV` compatibility with `toInt` -/
+@[simp]
+lemma toBV_toInt {x : U64} : x.toBV.toInt = x.toInt := by
+  simp [toInt]; split_ifs <;> grind
+
+/-- Range of `toInt` -/
+lemma toInt_range (x : U64) : -9223372036854775808 ≤ x.toInt ∧ x.toInt < 9223372036854775808 := by
+  simp [toInt]; split_ifs <;> grind
+
+lemma toInt_bmod_eq {x : U64} :
+  x.toInt.bmod 18446744073709551616 = x.toInt
+:= by
+  have := toInt_range x
+  rw [Int.bmod_eq_of_le this.1 this.2]
+
+grind_pattern toBV_toInt => x.toBV.toInt
+grind_pattern toInt_range => x.toInt
+
+/-- Injectivity of `toInt` -/
+@[simp, grind →]
+lemma toInt_inj {x y : U64} : x.toInt = y.toInt → x = y := by
+  rw [← toBV_toInt, ← toBV_toInt, BitVec.toInt_inj]
+  exact toBV_inj
+
+/-- `negative` in terms of `toInt` -/
+lemma negative_toInt {x : U64} : negative x ↔ ¬ 0 ≤ x.toInt := by
+  simp [toInt]; split_ifs <;> grind
+
+end toInt_fromInt
+
 end U64
 
 namespace U32
@@ -218,7 +286,7 @@ namespace U32
     lemma zero_le_ext w with_sign : 0 ≤ ext w with_sign := by grind
     lemma ext_le_255 w with_sign : ext w with_sign ≤ 255 := by grind
 
-    /-- Sign-extension to 128 bits -/
+    /-- Sign-extension to 64 bits -/
     def extend (w : U32) (with_sign : Bool) : U64 :=
       let ext := ext w with_sign
       #v[w[0], w[1], w[2], w[3], ext, ext, ext, ext]
@@ -240,6 +308,14 @@ namespace U32
                      List.getElem_toArray, List.getElem_cons_zero, List.getElem_cons_succ,
                      BitVec.toNat_ofNat, Nat.reducePow, Nat.reduceMod]
           omega
+
+    @[simp]
+    lemma extend_toInt {w : U32}
+    :
+      (w.extend true).toInt = w.toInt
+    := by
+      simp [extend, ext, U64.toInt, toInt, U64.negative, negative, U64.toNat, toNat]
+      split_ifs <;> simp_all <;> omega
 
   end extend
 

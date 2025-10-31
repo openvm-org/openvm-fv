@@ -372,40 +372,24 @@ namespace VmAirWrapper_mul.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-    /-- The MUL-extension-specific instance of the read-instruction bus properties -/
-    @[simp, grind]
-    instance (priority := 1001) ReadInstructionBusEntryInstanceShift
-    : Interaction.BusEntry FBB (Interaction.ReadInstructionBusEntry FBB) :=
-      let wf_prop_fun :=
-        fun (⟨_, _, _, rd, rs1, rs2, xd, rs2_as, xf, xg⟩ : Interaction.ReadInstructionBusEntry FBB) =>
-            -- rd and rs1 boundaries
-            rd.val < 32 ∧ rs1.val < 32 ∧ rs2.val < 32 ∧
-            -- unused parameters
-            xd = 1 ∧ rs2_as = 0 ∧ xf = 0 ∧ xg = 0
-      { Interaction.ReadInstructionBusEntryInstance with
-        wf_properties := wf_prop_fun
-        assume entry := Interaction.ReadInstructionBusEntryInstance.wf_assume_cond entry → wf_prop_fun entry,
-        assert entry := Interaction.ReadInstructionBusEntryInstance.wf_assert_cond entry → wf_prop_fun entry
-      }
-
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_mul FBB ExtF} {row : ℕ}
       (h_in : entry ∈ readInstructionBus_row air row)
     :
-      entry.2.length = ReadInstructionBusEntryInstanceShift.data_length
+      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
     := by
       unfold readInstructionBus_row at *; simp_all
 
     @[VmAirWrapper_mul_constraint_and_interaction_simplification]
     def _readInstructionBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_mul FBB ExtF) (row : ℕ) :=
-      let vectorised_row : List (FBB × Vector FBB ReadInstructionBusEntryInstanceShift.data_length) := by
+      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
         exact
         List.map
           (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
           (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
           (readInstructionBus_row air row).attach
-      List.map ReadInstructionBusEntryInstanceShift.deserialise vectorised_row
+      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
 
     lemma rangeTupleCheckerBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_mul FBB ExtF} {row : ℕ}
