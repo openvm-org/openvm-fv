@@ -112,6 +112,37 @@ lemma wf_propertiesToAssert
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
+set_option maxRecDepth 1_000_000 in
+include
+  row_valid
+  constraints
+  assumptions
+  propertiesToAssume
+in
+/-- Some properties more important than others that should
+    be easily accessible -/
+lemma essentials
+:
+  (air.adapter.from_state.pc row 0).val + 4 < 1073741824 ∧
+  (air.core.a_0 row 0).val < 256 ∧ (air.core.a_1 row 0).val < 256 ∧ (air.core.a_2 row 0).val < 256 ∧ (air.core.a_3 row 0).val < 256 ∧
+  (air.core.b_0 row 0).val < 256 ∧ (air.core.b_1 row 0).val < 256 ∧ (air.core.b_2 row 0).val < 256 ∧ (air.core.b_3 row 0).val < 256 ∧
+  (air.core.c_0 row 0).val < 256 ∧ (air.core.c_1 row 0).val < 256 ∧ (air.core.c_2 row 0).val < 256 ∧ (air.core.c_3 row 0).val < 256
+:= by
+  have props_asrt := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc ⟩ := propertiesToAssume
+  simp [row_valid, VmAirWrapper_mul_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read
+  repeat rw [Fin.ext_iff] at pa_mem
+  simp [and_assoc] at pa_mem pa_range pa_read
+  obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
+  clear pa_rtc pa_read
+
+  simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification,
+            wf_propertiesToAssertPerRow,
+            propertiesToAssert]
+
+  clear *- assumptions; grind
+
 /-- From Mul opcode to RISC-V opcode -/
 def rop_of_Mul_opcode (opcode : FBB) : mop :=
   if opcode = 592 then .MUL else .MULHUS

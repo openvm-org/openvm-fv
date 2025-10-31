@@ -53,7 +53,8 @@ import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.Lt
--- import OpenvmFv.Equivalence.Mulh
+import OpenvmFv.Equivalence.Mul
+import OpenvmFv.Equivalence.Mulh
 import OpenvmFv.Equivalence.Shift
 
 import OpenvmFv.Extraction.AccessAdapterAir_2
@@ -105,6 +106,7 @@ import OpenvmFv.Spec.ITYPE.slti
 import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.MULH.local
+import OpenvmFv.Spec.MULH.mul
 import OpenvmFv.Spec.MULH.mulh
 import OpenvmFv.Spec.MULH.mulhsu
 import OpenvmFv.Spec.MULH.mulhu
