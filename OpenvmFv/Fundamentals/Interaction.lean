@@ -281,7 +281,7 @@ namespace Interaction
           -- No assumptions
           assumptions := fun _ => True
 
-          -- No well-formedness properties imposed right now
+          -- Well formedness entirely derived from the fact that the entries come from the transpiler
           wf_properties := ReadInstructionBusEntry.operand_properties
           wf_assume_cond := fun entry => entry.1 = 1,
           wf_assert_cond := fun entry => entry.1 = -1,

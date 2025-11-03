@@ -1,3 +1,5 @@
+import Lean
+
 import OpenvmFv.Spec.run_hart_active
 
 namespace Local
@@ -435,8 +437,16 @@ namespace Local
     --   done
     -- done
 
+  set_option hygiene false
+  open Lean Elab Tactic
+  elab "get_inaccessible" names: binderIdent,* : tactic => do
+    let x := λ g => Lean.Elab.Tactic.renameInaccessibles g names
+    let y ← popMainGoal
+    let z ← x y
+    pushGoal z
+
   example
-    (h_rd: read_xreg (regidx_to_fin rd) state = EStateM.Result.ok rd_val state')
+    (h_rd: read_xreg (regidx_to_fin rd) state = EStateM.Result.ok rd_val state)
     (h_alignment: (split_misaligned_pure (virtaddr.Virtaddr (rd_val + offset))) = (1,4))
     {satp : BitVec 32}
     (h_status: Sail.readReg Register.mstatus state = EStateM.Result.ok status state)
@@ -473,19 +483,21 @@ namespace Local
     simp [h_alignment]
     unfold_projs
     simp! [Lean.Loop.forIn]
-    generalize @Lean.Loop.forIn.loop✝ _ _ = x
+    get_inaccessible a
+
+    -- generalize _ (_ : Unit → _) _ = x
 
 
 
 
-    by_cases h_split: (split_misaligned_pure (virtaddr.Virtaddr (rd_val + offset))) = (1,4)
-    . simp [w, w'] at *
-      rewrite [h_split]
-      simp
+    -- by_cases h_split: (split_misaligned_pure (virtaddr.Virtaddr (rd_val + offset))) = (1,4)
+    -- . simp [w, w'] at *
+    --   rewrite [h_split]
+    --   simp
 
-      done
-    . done
-    done
+    --   done
+    -- . done
+    -- done
 
 
   example :

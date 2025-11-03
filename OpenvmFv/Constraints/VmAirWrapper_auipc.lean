@@ -408,7 +408,8 @@ namespace VmAirWrapper_auipc.constraints
       simp [readInstructionBus_properties.eq_def]
       simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
       obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
-      simp [←h_data] at h_bounds ⊢ h_transpile
+      have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+      simp [←h_data] at h_bounds ⊢ h_transpile h_alignment
       clear h_data
       have h_supported_types := Transpiler.transpiler_supported_opcode_types h_transpile
       have : data = #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]] := by
@@ -425,7 +426,7 @@ namespace VmAirWrapper_auipc.constraints
         by_cases i=7; simp [*]
         by_cases i=8; simp [*]
         exfalso; omega
-      rcases h_supported_types with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_supported_types with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       . obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type -- RTYPE
         cases op <;> {
           rewrite [h_op_data] at h_transpile
@@ -509,6 +510,13 @@ namespace VmAirWrapper_auipc.constraints
           dsimp at h_transpile
           split_ifs at h_transpile <;> simp at h_transpile <;> grind
         }
+      . obtain ⟨⟨imm, rs1, rd, is_unsigned, w⟩, h_op_data⟩ := h_type -- LOAD
+        rewrite [h_op_data] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+        exfalso
+        dsimp at h_transpile
+        grind
 
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_auipc FBB ExtF} {row : ℕ}
