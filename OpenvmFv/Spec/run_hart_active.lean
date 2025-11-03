@@ -222,6 +222,22 @@ lemma state_eq_of_readReg_eq_ok_of_ne
   EStateM.Result.ok valout (write_reg_state s r₂ valin) := by
   grind
 
+-- 1. Monads need APIs...
+-- 1.a. State properties as MonadF a b c = sorry
+-- 1.b. Unfold MonadF
+-- 1.c. steal RHS
+-- 1.d. +simp +grind=...
+
+-- 2. Reasoning about memory - reduce everything to membership,
+--    because all 'reasonable' operations over memory preserve membership,
+--    i.e. they are monotonic
+
+-- 3. Now we can automate memory proofs with either `grind` or the faster
+--    `mono` - note, that `mono` + `Mem` stemmed from the idea that:
+-- match (f s).regs.get? r with
+-- | .some val => ...
+-- | .none => ...
+
 lemma read_xreg_write_reg_state_nextPC
   (r1 : Fin 32)
   (h: read_xreg r1 state = EStateM.Result.ok read_val state)
