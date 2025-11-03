@@ -176,35 +176,51 @@ lemma write_reg_state_mono {s : PreSail.SequentialState RegisterType Sail.trivia
   grind
 
 attribute [local grind .] EStateM.pure Sail.readReg PreSail.readReg bind EStateM.bind
+attribute [local grind _=_ ] Std.ExtDHashMap.get?_eq_some_get
 
 @[simp, grind =]
 lemma throwThe_eq_error {α} {e : Sail.Error exception} :
   throwThe (m := (PreSail.PreSailM RegisterType Sail.trivialChoiceSource exception)) (α := α) _ e =
   EStateM.Result.error e := rfl
 
+@[grind .]
 lemma mem_of_readReg_eq_ok (h : Sail.readReg r s = EStateM.Result.ok valout s) : r ∈ s := by
   unfold Sail.readReg PreSail.readReg at h
   unfold_projs at h; simp [EStateM.bind] at h
   rw [mem_iff_isSome]
   set X := s.regs.get? r
-  rcases X
-  grind
+  rcases X <;> grind
+
+@[grind .]
+lemma readReg_of_mem (h : r ∈ s) :
+  Sail.readReg r s = EStateM.Result.ok (s.regs.get r h) s := by
+  unfold Sail.readReg PreSail.readReg
+  simp only [bind]
   grind
 
--- NOTE: Sail.readReg = .Ok - we know the access was ok, no need to monad-dance.
+@[simp, mono]
+lemma mem_of_write : r ∈ write_reg_state s r valin := by
+  simp only [(·∈·), write_reg_state]
+  grind
+
+@[simp, grind =]
+lemma mem_state_iff_mem_regs_state
+  {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource} : r ∈ s.regs ↔ r ∈ s := by
+  rfl
+
+@[grind .]
+lemma readReg_write_reg_state_of_mem (h : r ∈ s) :
+  Sail.readReg r s = EStateM.Result.ok (s.regs.get r (by grind)) s := by
+  grind
 
 open Sail PreSail in
 @[grind .]
 lemma state_eq_of_readReg_eq_ok_of_ne
-  (h : Sail.readReg r s = EStateM.Result.ok valout s)
-  (h₁ : r ≠ Register.nextPC) :
-  Sail.readReg r (write_reg_state s Register.nextPC valin) =
-  EStateM.Result.ok valout (write_reg_state s Register.nextPC valin) := by
-  unfold Sail.readReg PreSail.readReg
-  unfold_projs; simp [EStateM.bind]
-  simp only [Sail.readReg, PreSail.readReg, bind, EStateM.bind, get_write_reg_state, pure_equiv,
-    throw_equiv] at h
-  grind  
+  (h : Sail.readReg r₁ s = EStateM.Result.ok valout s)
+  (h₁ : r₁ ≠ r₂) :
+  Sail.readReg r₁ (write_reg_state s r₂ valin) =
+  EStateM.Result.ok valout (write_reg_state s r₂ valin) := by
+  grind
 
 lemma read_xreg_write_reg_state_nextPC
   (r1 : Fin 32)
