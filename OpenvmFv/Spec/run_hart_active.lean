@@ -1506,7 +1506,20 @@ lemma sail_get_slice_int_in_range
   simp [BitVec.extractLsb']
   rw [Nat.mod_eq_of_lt (by omega)]
 
-set_option maxHeartbeats 0
+@[grind =]
+lemma wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (h : rd < 32) :
+  LeanRV32D.Functions.wX_bits (regidx.Regidx (BitVec.ofNat 5 rd)) data state =
+  LeanRV32D.Functions.wX (regno.Regno rd) data state :=
+  suffices LeanRV32D.Functions.wX (regno.Regno (rd % 32)) data state = _ by simpa
+  by rw [Nat.mod_eq_of_lt h]
+
+lemma wX_wagh :
+  LeanRV32D.Functions.wX (regno.Regno rd) data state = sorry := by
+  unfold LeanRV32D.Functions.wX
+  dsimp
+  
+
+-- set_option maxHeartbeats 0
 lemma wX_write_xreg_equiv
   (data)
   (state)
@@ -1517,18 +1530,16 @@ lemma wX_write_xreg_equiv
   LeanRV32D.Functions.wX_bits rd_idx data state =
   write_xreg rd data state
 := by
-  unfold LeanRV32D.Functions.wX_bits
-  simp [h_rd]
-  obtain ⟨rd, h_rd_range⟩ := rd
-  obtain ⟨h_rd_low, h_rd_high⟩ := Finset.mem_Icc.mp h_rd_range
-  rewrite [Nat.mod_eq_of_lt (by {simp; omega})]
+  rw [h_rd, wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (by grind [Finset.mem_Icc])]
+  rcases rd with ⟨rd, hrd⟩
+  obtain ⟨h₁, h₂⟩ := Finset.mem_Icc.1 hrd
   unfold LeanRV32D.Functions.wX
   dsimp
   simp [LeanRV32D.Functions.regval_into_reg]
   simp [
     LeanRV32D.Functions.xreg_write_callback,
     LeanRV32D.Functions.to_bits,
-    sail_get_slice_int_in_range rd h_rd_high,
+    sail_get_slice_int_in_range rd (show rd ≤ 31 by grind [Finset.mem_Icc]),
     LeanRV32D.Functions.xreg_full_write_callback,
     LeanRV32D.Functions.reg_name_forwards,
     LeanRV32D.Functions.encdec_reg_forwards,
