@@ -1343,7 +1343,6 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     simp [U32.toBV]
     rw [← BitVec.toNat_inj]
     repeat rw [BitVec.toNat_add]
-    repeat rw [BitVec.toNat_mul]
     simp
     rw [Nat.mod_eq_of_lt (by omega)]
     repeat (rw [BitVec.toNat_append]; simp; rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)])
@@ -1352,8 +1351,8 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     repeat rw [Nat.shiftLeft_eq_mul_pow]
     ring_nf
     trans
-      (((air.adapter.limbs_01 row 0).val + (air.adapter.imm row 0).val)) +
-       ((air.adapter.limbs_23 row 0).val + (air.adapter.imm_extended_limb row 0).val) * 65536) % 4294967296
+      (((air.adapter.limbs_01 row 0 + air.adapter.imm row 0).val) +
+       ((air.adapter.limbs_23 row 0 + air.adapter.imm_extended_limb row 0).val) * 65536) % 4294967296
     . have ub_l01 : air.adapter.limbs_01 row 0 < 65536
         := by rw [← Rv32LoadStoreAdapterAir.limbs_01_def]; grind
       have ub_l23 : air.adapter.limbs_23 row 0 < 65536
@@ -1370,23 +1369,28 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
         omega
       . rw [sub_eq_zero] at h_carry_def
         replace h_carry'_def := eq_add_of_sub_eq h_carry'_def
-        symm at h_carry_def
-        simp [Fin.ext_iff, Fin.val_add] at h_carry'_def
-        repeat rw [Nat.mod_eq_of_lt (by omega)] at h_carry'_def
-        rw [h_carry_def, h_carry'_def]
+        rw [← h_carry_def, h_carry'_def]
+        simp [Fin.val_add, Fin.val_mul]
+        repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
         ring_nf
         rw [Nat.mod_eq_sub_mod (by omega)]
         omega
       . rw [sub_eq_zero] at h_carry'_def
         replace h_carry_def := eq_add_of_sub_eq h_carry_def
-        symm at h_carry'_def
-        simp [Fin.ext_iff, Fin.val_add] at h_carry_def
-        repeat rw [Nat.mod_eq_of_lt (by omega)] at h_carry_def
-        rw [h_carry_def, h_carry'_def]
+        rw [h_carry_def, ← h_carry'_def]
         ring_nf
-        rw [Nat.mod_eq_sub_mod (by omega)]
+        simp [Fin.val_add, Fin.val_mul]
+        repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
         omega
-
+      . replace h_carry_def := eq_add_of_sub_eq h_carry_def
+        replace h_carry'_def := eq_add_of_sub_eq h_carry'_def
+        replace h_carry'_def := eq_sub_of_add_eq h_carry'_def
+        rw [h_carry_def, h_carry'_def]
+        simp [Fin.val_add, Fin.val_mul]
+        rw [Fin.sub_val_of_le (by omega)]
+        simp [Fin.val_add]
+        repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+        omega
     . rw [← Rv32LoadStoreAdapterAir.limbs_01_def, ← Rv32LoadStoreAdapterAir.limbs_23_def]
       simp [Fin.val_add, Fin.val_mul]
       repeat rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
@@ -1412,6 +1416,12 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
 
 
 #exit
+
+
+
+
+
+
 
   : (air.adapter.mem_ptr row 0).val =
     (BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0)) +
