@@ -171,11 +171,11 @@ lemma not_mem_iff_eq_none {s : PreSail.SequentialState RegisterType Sail.trivial
 
 @[grind ., mono]
 lemma write_reg_state_mono {s : PreSail.SequentialState RegisterType Sail.trivialChoiceSource}
-  (h : r ∈ s) : r ∈ (write_reg_state s Register.nextPC v) := by
+  (h : r ∈ s) : r ∈ write_reg_state s r' v := by
   unfold write_reg_state
   grind
 
-attribute [local grind .] EStateM.pure Sail.readReg PreSail.readReg bind EStateM.bind
+attribute [local grind =] EStateM.pure Sail.readReg PreSail.readReg bind EStateM.bind
 attribute [local grind _=_ ] Std.ExtDHashMap.get?_eq_some_get
 
 @[simp, grind =]
@@ -221,22 +221,6 @@ lemma state_eq_of_readReg_eq_ok_of_ne
   Sail.readReg r₁ (write_reg_state s r₂ valin) =
   EStateM.Result.ok valout (write_reg_state s r₂ valin) := by
   grind
-
--- 1. Monads need APIs...
--- 1.a. State properties as MonadF a b c = sorry
--- 1.b. Unfold MonadF
--- 1.c. steal RHS
--- 1.d. +simp +grind=...
-
--- 2. Reasoning about memory - reduce everything to membership,
---    because all 'reasonable' operations over memory preserve membership,
---    i.e. they are monotonic
-
--- 3. Now we can automate memory proofs with either `grind` or the faster
---    `mono` - note, that `mono` + `Mem` stemmed from the idea that:
--- match (f s).regs.get? r with
--- | .some val => ...
--- | .none => ...
 
 lemma read_xreg_write_reg_state_nextPC
   (r1 : Fin 32)
