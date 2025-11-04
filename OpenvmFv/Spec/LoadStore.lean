@@ -1219,6 +1219,349 @@ namespace Load
     ] at h_bus_wellformedness
     exact Fin.lt_def.mpr h_bus_wellformedness.1.2.2.2.2
 
+  lemma rs1_lower_half_range [Field ExtF]
+    (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row: ℕ)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  : air.adapter.rs1_data_0 row 0 + air.adapter.rs1_data_1 row 0 * 256 < 65536
+  := by
+    have h_data_0 := rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    have h_data_1 := rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    clear *- h_data_0 h_data_1
+    grind
+
+  lemma imm_range_of_opcode_528 [Field ExtF]
+    (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row: ℕ)
+    (h_opcode : air.core.expected_opcode row 0 = 528)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  : air.adapter.imm row 0 < 65536
+  := by
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get readInstructionBus properties specifically
+    simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      h_is_valid,
+      Interaction.ReadInstructionBusEntry.operand_properties
+    ] at h_bus_wellformedness
+    obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    have := Transpiler.transpiler_opcode_528 h_transpile
+    simp [h_data.2.2.1, h_opcode] at this
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    obtain
+      ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
+      ⟨h_needs_write, imm, rs1, h_instruction⟩
+      := this
+    all_goals {
+      rewrite [←h_data.2.2.2.2.2.1]
+      rewrite [h_instruction] at h_transpile
+      unfold Transpiler.transpile_op at h_transpile
+      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      dsimp at h_transpile
+      simp [-Vector.mk_eq] at h_transpile
+      simp [
+        ←h_transpile.2,
+        Transpiler.sign_extend_16,
+        Transpiler.utof,
+        Fin.lt_def
+      ]
+      rewrite [Nat.mod_eq_of_lt (by omega)]
+      omega
+    }
+
+  lemma imm_sign_extend_of_opcode_528 [Field ExtF]
+    (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row: ℕ)
+    (h_opcode: air.core.expected_opcode row 0 = 528)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  : BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0)) =
+    BitVec.ofNat 16 (air.adapter.imm_extended_limb row 0) ++
+    BitVec.ofNat 16 (air.adapter.imm row 0)
+  := by
+    simp [
+      Valid_Rv32LoadStoreAdapterAir.imm_extended_limb,
+      imm_sign_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode,
+      Fin.val_mul
+    ]
+    rewrite [Nat.mod_eq_of_lt]
+    . simp [BitVec.ofNat_mul]
+      by_cases h_msb: (BitVec.ofNat 16 ↑(air.adapter.imm row 0)).msb
+      all_goals {
+        simp [h_msb]
+        bv_decide
+      }
+    . cases (BitVec.ofNat 16 ↑(air.adapter.imm row 0)).msb <;> simp
+
+  lemma aux_1 : (
+      BitVec.setWidth 32 (BitVec.ofNat 8 a) * 16777216 +
+      BitVec.setWidth 24 (BitVec.ofNat 8 b) * 65536 +
+      BitVec.setWidth 16 (BitVec.ofNat 8 c) * 256 +
+      BitVec.ofNat 8 d
+    ) = (
+      BitVec.ofNat 8 a ++
+      BitVec.ofNat 8 b ++
+      BitVec.ofNat 8 c ++
+      BitVec.ofNat 8 d
+    )
+  := by
+    rewrite [
+      BitVec.append_assoc,
+      BitVec.append_assoc,
+    ]
+    simp [add_assoc]
+    have h1 : (
+      BitVec.setWidth 16 (BitVec.ofNat 8 c) * 256 +
+      BitVec.ofNat 8 d
+    ) = (
+      BitVec.ofNat 8 c ++
+      BitVec.ofNat 8 d
+    ) := by bv_decide
+    have h2 (bv: BitVec 16): (
+      BitVec.setWidth 24 (BitVec.ofNat 8 b) * 65536 +
+      bv
+    ) = (
+      BitVec.ofNat 8 b ++
+      bv
+    ) := by bv_decide
+    have h3 (bv: BitVec 24): (
+      BitVec.setWidth 32 (BitVec.ofNat 8 a) * 16777216 +
+      bv
+    ) = (
+      BitVec.ofNat 8 a ++
+      bv
+    ) := by bv_decide
+    rewrite [←h1, ←h2, ←h3]
+    simp
+    rewrite [BitVec.toNat_eq]
+    simp
+    rewrite [@Nat.mod_eq_of_lt _ 65536 (by omega)]
+    rw [@Nat.mod_eq_of_lt _ 16777216 (by omega)]
+
+
+
+
+  example [Field ExtF]
+    (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row: ℕ)
+    (h_opcode: air.core.expected_opcode row 0 = 528)
+    (h_row: row ≤ air.last_row)
+    (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  : (air.adapter.mem_ptr row 0).toNat =
+    (BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0)) +
+    (
+      BitVec.ofNat 8 (air.adapter.rs1_data_3 row 0) ++
+      BitVec.ofNat 8 (air.adapter.rs1_data_2 row 0) ++
+      BitVec.ofNat 8 (air.adapter.rs1_data_1 row 0) ++
+      BitVec.ofNat 8 (air.adapter.rs1_data_0 row 0)
+    )).toNat
+  := by
+    have h_carry_def := Rv32LoadStoreAdapterAir.carry_def air.adapter row 0
+    have h_carry'_def := Rv32LoadStoreAdapterAir.carry'_def air.adapter row 0
+    have h_mem_ptr_def := Rv32LoadStoreAdapterAir.mem_ptr_def air.adapter row 0
+    have h_rs1_data_0 := rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    have h_rs1_data_1 := rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    have h_rs1_data_2 := rs1_data_2_range air row h_is_valid h_bus_wellformedness
+    have h_rs1_data_3 := rs1_data_3_range air row h_is_valid h_bus_wellformedness
+    have h_imm_range := imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_mem_ptr_0_range := mem_ptr_limbs_0_range_of_opcode_528 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+    have h_mem_ptr_1_range := mem_ptr_limbs_1_range_of_opcode_528 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+    simp at h_mem_ptr_0_range h_mem_ptr_1_range
+    rewrite [show 2013235201 = air.adapter.inv by rfl] at h_carry_def h_carry'_def
+    rewrite [←h_carry_def] at h_carry'_def
+    have h_carry'_boolean := carry'_boolean_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    simp [
+      ←h_carry'_def,
+      sub_eq_zero,
+      Valid_Rv32LoadStoreAdapterAir.imm_extended_limb,
+      inv_65536,
+    ] at h_carry'_boolean
+    have : (air.adapter.limbs_23 row 0 + air.adapter.imm_sign row 0 * 65535 +
+        (air.adapter.limbs_01 row 0 + air.adapter.imm row 0 - air.adapter.mem_ptr_limbs_0 row 0) * air.adapter.inv -
+      air.adapter.mem_ptr_limbs_1 row 0 =
+    65536) = (air.adapter.limbs_23 row 0 + air.adapter.imm_sign row 0 * 65535 +
+        (air.adapter.limbs_01 row 0 + air.adapter.imm row 0 - air.adapter.mem_ptr_limbs_0 row 0) * air.adapter.inv -
+      65536 =
+    air.adapter.mem_ptr_limbs_1 row 0)
+    := by
+      grind
+    rewrite [this] at h_carry'_boolean; clear this
+    simp [show air.adapter.inv ≠ 0 by simp[Valid_Rv32LoadStoreAdapterAir.inv]] at h_carry'_boolean
+    have h_carry_boolean := carry_boolean_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    simp [
+      ←h_carry_def,
+      sub_eq_zero,
+      show air.adapter.inv ≠ 0 by simp[Valid_Rv32LoadStoreAdapterAir.inv],
+      inv_65536
+    ] at h_carry_boolean
+    have : (
+        air.adapter.limbs_01 row 0 +
+        air.adapter.imm row 0 -
+        air.adapter.mem_ptr_limbs_0 row 0 =
+        65536
+      ) = (
+        air.adapter.limbs_01 row 0 +
+        air.adapter.imm row 0 -
+        65536 =
+        air.adapter.mem_ptr_limbs_0 row 0
+      )
+    := by grind
+    rewrite [this] at h_carry_boolean; clear this
+    simp [
+      Valid_Rv32LoadStoreAdapterAir.limbs_01,
+      Valid_Rv32LoadStoreAdapterAir.limbs_23
+    ] at h_carry_boolean h_carry'_boolean
+    simp [
+      imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness,
+      Valid_Rv32LoadStoreAdapterAir.imm_extended_limb,
+      Valid_Rv32LoadStoreAdapterAir.mem_ptr
+    ]
+    have h_imm_sign_boolean := imm_sign_boolean_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have : (
+        (BitVec.setWidth 32 (BitVec.ofNat 16 ↑(air.adapter.imm_sign row 0 * 65535))) * 65536#32 +
+        BitVec.setWidth 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))
+      ) = (
+        BitVec.ofNat 16 ↑(air.adapter.imm_sign row 0 * 65535) ++
+        BitVec.ofNat 16 ↑(air.adapter.imm row 0)
+      )
+    := by bv_decide
+    rewrite [←this]; clear this
+    simp
+
+    ) := by bv_decide
+    rewrite [←this]; clear this
+
+
+
+
+
+
+
+  example [Field ExtF]
+    (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row: ℕ)
+    (h_opcode: air.core.expected_opcode row 0 = 528)
+    (h_row: row ≤ air.last_row)
+    (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  : (air.adapter.mem_ptr_limbs_0 row 0).toNat =
+    (BitVec.ofNat 16 (air.adapter.imm row 0) +
+    (BitVec.ofNat 8 (air.adapter.rs1_data_1 row 0) ++
+    BitVec.ofNat 8 (air.adapter.rs1_data_0 row 0))).toNat
+  := by
+    have h_carry := carry_boolean_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_rs1_data_0 := rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    have h_rs1_data_1 := rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    have h_imm_range := imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    unfold Valid_Rv32LoadStoreAdapterAir.carry at h_carry
+    have :
+      BitVec.ofNat 16 (air.adapter.rs1_data_0 row 0 + air.adapter.rs1_data_1 row 0 * 256: FBB) =
+      BitVec.ofNat 8 (air.adapter.rs1_data_1 row 0) ++
+      BitVec.ofNat 8 (air.adapter.rs1_data_0 row 0)
+    := by
+      have :
+        (BitVec.setWidth 16 (BitVec.ofNat 8 (air.adapter.rs1_data_0 row 0))) +
+        (BitVec.setWidth 16 (BitVec.ofNat 8 (air.adapter.rs1_data_1 row 0))) * 256 =
+        BitVec.ofNat 8 (air.adapter.rs1_data_1 row 0) ++
+        BitVec.ofNat 8 (air.adapter.rs1_data_0 row 0)
+      := by bv_decide
+      rewrite [←this]; clear this
+      rewrite [Fin.val_add, Fin.val_mul]
+      simp
+      rewrite [
+        Nat.mod_eq_of_lt (by omega),
+        BitVec.ofNat_add
+      ]
+      congr 3
+      . rewrite [BitVec.toNat_eq]
+        simp
+        omega
+      . simp
+        rw [
+          Nat.mod_eq_of_lt (by omega),
+          Nat.mod_eq_of_lt (by omega)
+        ]
+    have h_mem_ptr_0 := mem_ptr_limbs_0_range_of_opcode_528 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+    simp at h_mem_ptr_0
+    obtain h_carry | h_carry := h_carry
+    . simp [Valid_Rv32LoadStoreAdapterAir.inv, sub_eq_zero] at h_carry
+      rewrite [←h_carry]
+      unfold Valid_Rv32LoadStoreAdapterAir.limbs_01
+      rewrite [←this]; clear this
+      simp
+      rewrite [add_comm]
+      simp [←h_carry] at h_mem_ptr_0
+      rewrite [add_comm] at h_mem_ptr_0
+      simp [Valid_Rv32LoadStoreAdapterAir.limbs_01] at h_mem_ptr_0
+      rewrite [Nat.mod_eq_of_lt]
+      . simp [
+          Fin.val_add,
+          Fin.val_mul
+        ]
+        rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
+      . simp [
+          Fin.val_add,
+          Fin.val_mul
+        ]
+        rewrite [Nat.mod_eq_of_lt (by omega)]
+        rewrite [Fin.lt_def] at h_mem_ptr_0
+        simp at h_mem_ptr_0
+        convert h_mem_ptr_0
+        grind
+    . simp [inv_65536] at h_carry
+      apply eq_add_of_sub_eq at h_carry
+      have h_carry :
+        air.adapter.mem_ptr_limbs_0 row 0 % 65536 =
+        (air.adapter.limbs_01 row 0 + air.adapter.imm row 0) % 65536
+      := by
+        rewrite [
+          h_carry,
+          Fin.mod_def,
+          Fin.mod_def
+        ]
+        simp
+        rewrite [
+          Nat.mod_eq_of_lt,
+          Fin.val_add,
+          @Nat.mod_eq_of_lt _ BB_prime,
+          Nat.add_mod
+        ]
+        simp
+        rw [Nat.mod_eq_of_lt]
+        . convert h_mem_ptr_0
+        . omega
+        . convert (Fin.lt_def.mp h_mem_ptr_0)
+      simp
+      simp [Fin.mod_def] at h_carry
+      rewrite [Nat.mod_eq_of_lt] at h_carry
+      rewrite [h_carry, Fin.val_add, add_comm]
+      rewrite [@Nat.mod_eq_of_lt _ BB_prime]
+      . congr 2
+        rewrite [←this]
+        simp [Valid_Rv32LoadStoreAdapterAir.limbs_01]
+        simp [
+          Fin.val_add,
+          Fin.val_mul
+        ]
+        rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
+      . simp [
+          Valid_Rv32LoadStoreAdapterAir.limbs_01,
+          Fin.val_add,
+          Fin.val_mul
+        ]
+        rewrite [Nat.mod_eq_of_lt (by omega)]
+        apply Fin.lt_def.mp at h_rs1_data_0
+        apply Fin.lt_def.mp at h_rs1_data_1
+        apply Fin.lt_def.mp at h_imm_range
+        omega
+      . apply Fin.lt_def.mp at h_mem_ptr_0
+        convert h_mem_ptr_0
+
+
   lemma mem_ptr_eq_rs1_plus_imm_of_opcode_528 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)

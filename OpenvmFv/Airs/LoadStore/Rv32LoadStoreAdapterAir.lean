@@ -144,7 +144,7 @@ def Valid_Rv32LoadStoreAdapterAir.mem_ptr
   c.mem_ptr_limbs_1 row rotation * 65536
 
 @[openvm_encapsulation]
-lemma Rv32LoadStoreAdapterAir.mem_ptr
+lemma Rv32LoadStoreAdapterAir.mem_ptr_def
   [Field F]
   (c : Valid_Rv32LoadStoreAdapterAir F)
   (row rotation : ℕ)
