@@ -1551,6 +1551,16 @@ def wX_reg (n : ℕ) : {r : Register // RegisterType r = BitVec 32} :=
 @[simp]
 lemma registerType_wX_reg {n : ℕ} : RegisterType (wX_reg n) = BitVec 32 := (wX_reg n).2
 
+def write_xreg' (reg : Finset.Icc 1 31) (val : BitVec 32) : SailM Unit :=
+  Sail.writeReg (wX_reg reg.1) (cast registerType_wX_reg.symm val) 
+
+@[simp]
+lemma write_xreg_eq_write_xreg' : write_xreg reg val = write_xreg' reg val := by
+  unfold write_xreg' write_xreg
+  simp [wX_reg]
+  rcases reg with ⟨reg, hreg⟩
+  fin_cases hreg <;> simp
+
 @[simp]
 lemma regval_into_reg_eq_id {x} : LeanRV32D.Functions.regval_into_reg x = x := rfl
 
@@ -1576,7 +1586,6 @@ lemma wX_of_ne_zero (h : r.1 ≠ 0) :
       xreg_write_callback (regidx.Regidx (to_bits (l := 5) r.1)) in_v) state := by
   aesop (add simp _root_.wX)
 
--- set_option maxHeartbeats 0
 lemma wX_write_xreg_equiv
   (data)
   (state)
@@ -1589,70 +1598,8 @@ lemma wX_write_xreg_equiv
 := by
   rw [h_rd, wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (by grind [Finset.mem_Icc]), wX_eq_wX]
   rcases rd with ⟨rd, hrd⟩
-  rw [wX_of_ne_zero (by grind [Finset.mem_Icc])]
-  
-  -- unfold wX
-  -- obtain ⟨h₁, h₂⟩ := Finset.mem_Icc.1 hrd
-  -- dsimp
-
-  -- unfold LeanRV32D.Functions.wX
-  -- dsimp
-  -- simp [LeanRV32D.Functions.regval_into_reg]
-  -- simp [
-  --   LeanRV32D.Functions.xreg_write_callback,
-  --   LeanRV32D.Functions.to_bits,
-  --   sail_get_slice_int_in_range rd (show rd ≤ 31 by grind [Finset.mem_Icc]),
-  --   LeanRV32D.Functions.xreg_full_write_callback,
-  --   LeanRV32D.Functions.reg_name_forwards,
-  --   LeanRV32D.Functions.encdec_reg_forwards,
-  --   LeanRV32D.Functions.zero_extend,
-  --   Sail.BitVec.zeroExtend,
-  --   LeanRV32D.Functions.get_config_use_abi_names,
-  --   LeanRV32D.Functions.not,
-  --   LeanRV32D.Functions.encdec_reg_forwards_matches,
-  --   LeanRV32D.Functions.reg_arch_name_raw_forwards
-  -- ]
-  -- unfold EStateM.instMonad EStateM.pure
-  -- dsimp
-  -- unfold EStateM.bind
-  -- unfold write_xreg
-  -- simp [Sail.writeReg, PreSail.writeReg]
-  -- unfold modify modifyGet instMonadStateOfMonadStateOf MonadStateOf.modifyGet EStateM.instMonadStateOf EStateM.modifyGet
-  -- dsimp
-
-  -- by_cases rd = 0 ; simp_all
-  -- by_cases rd = 1 ; simp_all
-  -- by_cases rd = 2 ; simp_all
-  -- by_cases rd = 3 ; simp_all
-  -- by_cases rd = 4 ; simp_all
-  -- by_cases rd = 5 ; simp_all
-  -- by_cases rd = 6 ; simp_all
-  -- by_cases rd = 7 ; simp_all
-  -- by_cases rd = 8 ; simp_all
-  -- by_cases rd = 9 ; simp_all
-  -- by_cases rd = 10 ; simp_all
-  -- by_cases rd = 11 ; simp_all
-  -- by_cases rd = 12 ; simp_all
-  -- by_cases rd = 13 ; simp_all
-  -- by_cases rd = 14 ; simp_all
-  -- by_cases rd = 15 ; simp_all
-  -- by_cases rd = 16 ; simp_all
-  -- by_cases rd = 17 ; simp_all
-  -- by_cases rd = 18 ; simp_all
-  -- by_cases rd = 19 ; simp_all
-  -- by_cases rd = 20 ; simp_all
-  -- by_cases rd = 21 ; simp_all
-  -- by_cases rd = 22 ; simp_all
-  -- by_cases rd = 23 ; simp_all
-  -- by_cases rd = 24 ; simp_all
-  -- by_cases rd = 25 ; simp_all
-  -- by_cases rd = 26 ; simp_all
-  -- by_cases rd = 27 ; simp_all
-  -- by_cases rd = 28 ; simp_all
-  -- by_cases rd = 29 ; simp_all
-  -- by_cases rd = 30 ; simp_all
-  -- by_cases rd = 31 ; simp_all
-  -- omega
+  rw [wX_of_ne_zero (by grind [Finset.mem_Icc]), write_xreg_eq_write_xreg']
+  congr
 
 lemma wX_write_xreg_equiv'
   (data)
