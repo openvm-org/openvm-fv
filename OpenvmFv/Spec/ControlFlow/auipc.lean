@@ -51,7 +51,7 @@ namespace PureSpec
     -- unfold to functional structure
     unfold bind Monad.toBind EStateM.instMonad
     dsimp
-    unfold EStateM.bind EStateM.pure
+    unfold EStateM.bind
     dsimp
 
 
@@ -71,7 +71,7 @@ namespace PureSpec
 
     unfold bind Monad.toBind EStateM.instMonad
     dsimp
-    unfold EStateM.bind EStateM.pure
+    unfold EStateM.bind
     dsimp
 
     simp [LeanRV32D.Functions.get_arch_pc]
