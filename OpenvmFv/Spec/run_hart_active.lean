@@ -1513,11 +1513,68 @@ lemma wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (h : rd < 32) :
   suffices LeanRV32D.Functions.wX (regno.Regno (rd % 32)) data state = _ by simpa
   by rw [Nat.mod_eq_of_lt h]
 
-lemma wX_wagh :
-  LeanRV32D.Functions.wX (regno.Regno rd) data state = sorry := by
-  unfold LeanRV32D.Functions.wX
-  dsimp
-  
+def wX_reg (n : ℕ) : {r : Register // RegisterType r = BitVec 32} :=
+  match n with
+  | 1 => ⟨.x1, rfl⟩
+  | 2 => ⟨.x2, rfl⟩
+  | 3 => ⟨.x3, rfl⟩
+  | 4 => ⟨.x4, rfl⟩
+  | 5 => ⟨.x5, rfl⟩
+  | 6 => ⟨.x6, rfl⟩
+  | 7 => ⟨.x7, rfl⟩
+  | 8 => ⟨.x8, rfl⟩
+  | 9 => ⟨.x9, rfl⟩
+  | 10 => ⟨.x10, rfl⟩
+  | 11 => ⟨.x11, rfl⟩
+  | 12 => ⟨.x12, rfl⟩
+  | 13 => ⟨.x13, rfl⟩
+  | 14 => ⟨.x14, rfl⟩
+  | 15 => ⟨.x15, rfl⟩
+  | 16 => ⟨.x16, rfl⟩
+  | 17 => ⟨.x17, rfl⟩
+  | 18 => ⟨.x18, rfl⟩
+  | 19 => ⟨.x19, rfl⟩
+  | 20 => ⟨.x20, rfl⟩
+  | 21 => ⟨.x21, rfl⟩
+  | 22 => ⟨.x22, rfl⟩
+  | 23 => ⟨.x23, rfl⟩
+  | 24 => ⟨.x24, rfl⟩
+  | 25 => ⟨.x25, rfl⟩
+  | 26 => ⟨.x26, rfl⟩
+  | 27 => ⟨.x27, rfl⟩
+  | 28 => ⟨.x28, rfl⟩
+  | 29 => ⟨.x29, rfl⟩
+  | 30 => ⟨.x30, rfl⟩
+  | 31 => ⟨.x31, rfl⟩
+  | 0 | _ + 32 => ⟨.x31, rfl⟩
+
+@[simp]
+lemma registerType_wX_reg {n : ℕ} : RegisterType (wX_reg n) = BitVec 32 := (wX_reg n).2
+
+@[simp]
+lemma regval_into_reg_eq_id {x} : LeanRV32D.Functions.regval_into_reg x = x := rfl
+
+open LeanRV32D Functions in
+def wX (typ_0 : regno) (in_v : BitVec 32) : SailM Unit := do
+  let .Regno r : regno := typ_0
+  unless r == 0 do
+    Sail.writeReg (wX_reg r) (cast registerType_wX_reg.symm in_v)
+    xreg_write_callback (regidx.Regidx (to_bits (l := 5) r)) in_v
+
+@[simp, grind =]
+lemma wX_eq_wX :
+  LeanRV32D.Functions.wX typ_0 in_v state = wX typ_0 in_v state := by
+  unfold LeanRV32D.Functions.wX wX
+  rcases typ_0 with ⟨typ⟩
+  iterate 32 rcases typ with _ | typ <;> [rfl; skip]
+  simp [wX_reg]
+
+open LeanRV32D Functions in
+lemma wX_of_ne_zero (h : r.1 ≠ 0) :
+  _root_.wX r in_v state =
+  (do Sail.writeReg (wX_reg r.1) (cast registerType_wX_reg.symm in_v)
+      xreg_write_callback (regidx.Regidx (to_bits (l := 5) r.1)) in_v) state := by
+  aesop (add simp _root_.wX)
 
 -- set_option maxHeartbeats 0
 lemma wX_write_xreg_equiv
@@ -1530,7 +1587,85 @@ lemma wX_write_xreg_equiv
   LeanRV32D.Functions.wX_bits rd_idx data state =
   write_xreg rd data state
 := by
+  rw [h_rd, wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (by grind [Finset.mem_Icc]), wX_eq_wX]
+  rcases rd with ⟨rd, hrd⟩
+  rw [wX_of_ne_zero (by grind [Finset.mem_Icc])]
+  
+  -- unfold wX
+  -- obtain ⟨h₁, h₂⟩ := Finset.mem_Icc.1 hrd
+  -- dsimp
+
+  -- unfold LeanRV32D.Functions.wX
+  -- dsimp
+  -- simp [LeanRV32D.Functions.regval_into_reg]
+  -- simp [
+  --   LeanRV32D.Functions.xreg_write_callback,
+  --   LeanRV32D.Functions.to_bits,
+  --   sail_get_slice_int_in_range rd (show rd ≤ 31 by grind [Finset.mem_Icc]),
+  --   LeanRV32D.Functions.xreg_full_write_callback,
+  --   LeanRV32D.Functions.reg_name_forwards,
+  --   LeanRV32D.Functions.encdec_reg_forwards,
+  --   LeanRV32D.Functions.zero_extend,
+  --   Sail.BitVec.zeroExtend,
+  --   LeanRV32D.Functions.get_config_use_abi_names,
+  --   LeanRV32D.Functions.not,
+  --   LeanRV32D.Functions.encdec_reg_forwards_matches,
+  --   LeanRV32D.Functions.reg_arch_name_raw_forwards
+  -- ]
+  -- unfold EStateM.instMonad EStateM.pure
+  -- dsimp
+  -- unfold EStateM.bind
+  -- unfold write_xreg
+  -- simp [Sail.writeReg, PreSail.writeReg]
+  -- unfold modify modifyGet instMonadStateOfMonadStateOf MonadStateOf.modifyGet EStateM.instMonadStateOf EStateM.modifyGet
+  -- dsimp
+
+  -- by_cases rd = 0 ; simp_all
+  -- by_cases rd = 1 ; simp_all
+  -- by_cases rd = 2 ; simp_all
+  -- by_cases rd = 3 ; simp_all
+  -- by_cases rd = 4 ; simp_all
+  -- by_cases rd = 5 ; simp_all
+  -- by_cases rd = 6 ; simp_all
+  -- by_cases rd = 7 ; simp_all
+  -- by_cases rd = 8 ; simp_all
+  -- by_cases rd = 9 ; simp_all
+  -- by_cases rd = 10 ; simp_all
+  -- by_cases rd = 11 ; simp_all
+  -- by_cases rd = 12 ; simp_all
+  -- by_cases rd = 13 ; simp_all
+  -- by_cases rd = 14 ; simp_all
+  -- by_cases rd = 15 ; simp_all
+  -- by_cases rd = 16 ; simp_all
+  -- by_cases rd = 17 ; simp_all
+  -- by_cases rd = 18 ; simp_all
+  -- by_cases rd = 19 ; simp_all
+  -- by_cases rd = 20 ; simp_all
+  -- by_cases rd = 21 ; simp_all
+  -- by_cases rd = 22 ; simp_all
+  -- by_cases rd = 23 ; simp_all
+  -- by_cases rd = 24 ; simp_all
+  -- by_cases rd = 25 ; simp_all
+  -- by_cases rd = 26 ; simp_all
+  -- by_cases rd = 27 ; simp_all
+  -- by_cases rd = 28 ; simp_all
+  -- by_cases rd = 29 ; simp_all
+  -- by_cases rd = 30 ; simp_all
+  -- by_cases rd = 31 ; simp_all
+  -- omega
+
+lemma wX_write_xreg_equiv'
+  (data)
+  (state)
+  (rd_idx : regidx)
+  (rd : Finset.Icc 1 31)
+  (h_rd : rd_idx = regidx.Regidx (BitVec.ofNat 5 rd))
+:
+  LeanRV32D.Functions.wX_bits rd_idx data state =
+  write_xreg rd data state
+:= by
   rw [h_rd, wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (by grind [Finset.mem_Icc])]
+  -- rw [wX_eq]
   rcases rd with ⟨rd, hrd⟩
   obtain ⟨h₁, h₂⟩ := Finset.mem_Icc.1 hrd
   unfold LeanRV32D.Functions.wX
