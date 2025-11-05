@@ -1596,10 +1596,11 @@ lemma wX_write_xreg_equiv
   LeanRV32D.Functions.wX_bits rd_idx data state =
   write_xreg rd data state
 := by
-  rw [h_rd, wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (by grind [Finset.mem_Icc]), wX_eq_wX]
-  rcases rd with ⟨rd, hrd⟩
-  rw [wX_of_ne_zero (by grind [Finset.mem_Icc]), write_xreg_eq_write_xreg']
-  congr
+  rw [
+    h_rd, wX_bits_Regidx_ofNat_5_eq_wX_of_lt_32 (by grind [Finset.mem_Icc]), wX_eq_wX,
+    wX_of_ne_zero (by grind [Finset.mem_Icc]), write_xreg_eq_write_xreg'
+  ]
+  rfl
 
 lemma wX_write_xreg_equiv'
   (data)
