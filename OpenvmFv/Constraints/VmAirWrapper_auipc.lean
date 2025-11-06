@@ -411,112 +411,45 @@ namespace VmAirWrapper_auipc.constraints
       have h_alignment := Transpiler.pc_aligned_of_some h_transpile
       simp [←h_data] at h_bounds ⊢ h_transpile h_alignment
       clear h_data
-      have h_supported_types := Transpiler.transpiler_supported_opcode_types h_transpile
-      have : data = #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]] := by
-        clear *-data
-        apply Vector.ext
-        intro i h_i
-        by_cases i=0; simp [*]
-        by_cases i=1; simp [*]
-        by_cases i=2; simp [*]
-        by_cases i=3; simp [*]
-        by_cases i=4; simp [*]
-        by_cases i=5; simp [*]
-        by_cases i=6; simp [*]
-        by_cases i=7; simp [*]
-        by_cases i=8; simp [*]
-        exfalso; omega
-      rcases h_supported_types with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
-      . obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type -- RTYPE
-        cases op <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          simp at h_transpile
-          rewrite [this] at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile
-          . exfalso; grind
-          . grind
-        }
-      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
-        cases op <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          simp at h_transpile
-          rewrite [this] at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile
-          . exfalso; grind
-          . grind
-        }
-      . obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type -- SHIFTIOP
-        cases op <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          simp at h_transpile
-          rewrite [this] at h_transpile
-          dsimp at h_transpile
-          exfalso; grind
-        }
-      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
-        cases op <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          simp at h_transpile
-          rewrite [this] at h_transpile
-          dsimp at h_transpile
-          exfalso
-          grind
-        }
-      . obtain ⟨⟨imm, rs1, op⟩, h_op_data⟩ := h_type -- UTYPE
-        cases op
-        . rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          exfalso
-          dsimp at h_transpile
-          grind
-        . rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          simp at h_transpile
-          split_ifs at h_transpile with h_rd_not_zero
-          . exfalso; grind
-          . have : data[4] = Transpiler.utof (Transpiler.zero_extend_24 imm <<< 4) := by grind
-            rw [this]; clear *-
-            simp [Transpiler.zero_extend_24, Transpiler.utof, Fin.lt_def, Fin.ext_iff]
-            rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
-            simp [Nat.shiftLeft_eq_mul_pow]
-            grind
-      . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
-        cases high <;> cases signed_rs1 <;> cases signed_rs2 <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          exfalso
-          dsimp at h_transpile
-          grind
-        }
-      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
-        cases signed <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          exfalso
-          dsimp at h_transpile
-          split_ifs at h_transpile <;> simp at h_transpile <;> grind
-        }
-      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
-        cases signed <;> {
-          rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          exfalso
-          dsimp at h_transpile
-          split_ifs at h_transpile <;> simp at h_transpile <;> grind
-        }
-      . obtain ⟨⟨imm, rs1, rd, is_unsigned, w⟩, h_op_data⟩ := h_type -- LOAD
-        rewrite [h_op_data] at h_transpile
+      have := Transpiler.transpiler_opcode_576 h_transpile h_bounds
+      split_ands
+      . obtain ⟨imm, rd, h_instruction, h_rd⟩ := this
+        rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-        exfalso
         dsimp at h_transpile
-        grind
+        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+        split_ifs at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile] at h_bounds
+          simp at h_bounds
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile]
+          simp [Transpiler.zero_extend_24, Transpiler.utof]
+          rewrite [show (16777216: FBB) = ↑(16777216: ℕ) by trivial, Fin.lt_def]
+          simp
+          rewrite [Nat.mod_eq_of_lt (by omega)]
+          apply Nat.mod_lt
+          trivial
+      . obtain ⟨imm, rd, h_instruction, h_rd⟩ := this
+        rewrite [h_instruction] at h_transpile
+        unfold Transpiler.transpile_op at h_transpile
+        dsimp at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+        split_ifs at h_transpile
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile] at h_bounds
+          simp at h_bounds
+        . simp [-Vector.mk_eq] at h_transpile
+          rewrite [←h_transpile]
+          simp [
+            Transpiler.utof, Transpiler.zero_extend_24, Fin.mod_def,
+            Nat.shiftLeft_eq
+          ]
+          rewrite [
+            @Nat.mod_eq_of_lt _ 16777216 (by omega),
+            @Nat.mod_eq_of_lt _ 2013265921 (by omega),
+          ]
+          omega
 
     lemma readInstructionBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_auipc FBB ExtF} {row : ℕ}
