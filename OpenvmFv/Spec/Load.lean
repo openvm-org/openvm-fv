@@ -1423,8 +1423,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
 
   def memory_of_instruction
     (imm : BitVec 12) (rs1 rd :  regidx)
-    (rs1_data read_data : U32)
-    (prev_data : Vector FBB 4)
+    (rs1_data read_data prev_data : Vector FBB 4)
     (rs1_prev_timestamp : FBB)
     (read_prev_timestamp : FBB)
     (write_prev_timestamp : FBB)
@@ -1455,7 +1454,12 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       (-1,
         [
           2,
-          (BitVec.signExtend 32 imm + rs1_data.toBV).toNat,
+          (BitVec.signExtend 32 imm +
+           U32.toBV #v[
+            (rs1_data[0]).val,
+            (rs1_data[1]).val,
+            (rs1_data[2]).val,
+            (rs1_data[3]).val]).toNat,
           read_data[0].toNat,
           read_data[1].toNat,
           read_data[2].toNat,
@@ -1466,7 +1470,12 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       (1,
         [
           2,
-          (BitVec.signExtend 32 imm + rs1_data.toBV).toNat,
+          (BitVec.signExtend 32 imm +
+           U32.toBV #v[
+            (rs1_data[0]).val,
+            (rs1_data[1]).val,
+            (rs1_data[2]).val,
+            (rs1_data[3]).val]).toNat,
           read_data[0].toNat,
           read_data[1].toNat,
           read_data[2].toNat,
@@ -1607,8 +1616,6 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
              #v[(air.core.prev_data_0 row 0).val, (air.core.prev_data_1 row 0).val, (air.core.prev_data_2 row 0).val, (air.core.prev_data_3 row 0).val]
       simp [show (2013265920 :FBB) = -1 by native_decide,
             *]
-      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-      simp
       clear h_bus_wellformedness'
       split_ands
       . grind
@@ -1655,8 +1662,6 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
         omega
       simp [show (2013265920 :FBB) = -1 by native_decide,
             *]
-      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-      simp
       split_ands
       . rfl
       . simp [Transpiler.utof, Transpiler.sign_extend_16, Transpiler.sign_of]
@@ -1677,11 +1682,5 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
         rw [← this]
         rw [← h_eq]
         omega
-      -- all_goals
-      --   rw [Nat.mod_eq_of_lt] <;> [ simp; skip ]
-      -- . sorry
-      -- . sorry
-      -- . sorry
-      -- . sorry
 
 end Load
