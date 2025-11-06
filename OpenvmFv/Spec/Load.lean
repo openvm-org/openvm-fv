@@ -1512,6 +1512,9 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     unfold VmAirWrapper_loadstore.constraints.executionBus_row
     simp [h_is_valid, Valid_VmAirWrapper_loadstore.to_pc]
 
+  attribute [-simp]
+    Fin.natCast_eq_zero
+
   lemma bus_interface [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
@@ -1520,7 +1523,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid: air.core.is_valid row 0 = 1)
-  : ∃ imm rs1 rd rs1_data read_data prev_data rs1_prev_timestamp read_prev_timestamp write_prev_timestamp timestamp,
+  : ∃ pc imm rs1 rd rs1_data read_data prev_data rs1_prev_timestamp read_prev_timestamp write_prev_timestamp timestamp,
     VmAirWrapper_loadstore.constraints.readInstructionBus_row air row =
     readInstruction_of_instruction pc imm rs1 rd ∧
     VmAirWrapper_loadstore.constraints.memoryBus_row air row =
@@ -1537,6 +1540,134 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       timestamp
     -- we may want to add extra constraints about the timestamps in here too
   := by
-    sorry
+    have h_bus_wellformedness' := h_bus_wellformedness.2.2.2
+    simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      h_is_valid,
+      Interaction.ReadInstructionBusEntry.operand_properties
+    ] at h_bus_wellformedness'
+    obtain ⟨ inst, a, b, h_transpile, h_a, h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8 ⟩ := h_bus_wellformedness'
+    have := Transpiler.transpiler_opcode_528 h_transpile (by simp; grind)
+    simp [*] at this
+    have h_eq_b : b = #v[b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]]
+      := by clear *-; ext i h_i; interval_cases i <;> simp
+    simp [h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8] at h_eq_b
+
+    have h_imm_range := imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_imm_ext_range := imm_extend_range_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_sign := imm_sign_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode
+    have h_mem_as := mem_as_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode
+    have h_load_val := expected_load_val_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_store_val := expected_store_val_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_expected_val := expected_val_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_write_ptr := write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_read_as := read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_read_ptr := read_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_write_as := write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+
+    have h_wd_0 := write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_wd_0 := write_data_1_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_wd_0 := write_data_2_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_wd_0 := write_data_3_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+
+    have h_bus_wellformedness' := h_bus_wellformedness.2.1
+    simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      h_is_valid,
+      show (2013265920: FBB) = -1 by decide
+    ] at h_bus_wellformedness'
+
+    obtain real | phantom := this
+    . obtain ⟨ h_needs_write, ⟨ imm, rs1, rd, h_inst, h_nz⟩  ⟩ := real
+      -- Transpilation
+      subst inst; unfold Transpiler.transpile_op at h_transpile
+      simp at h_transpile; obtain ⟨ h_pc, h_a', h_eq_b' ⟩ := h_transpile
+      symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
+      obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
+      unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
+             readInstruction_of_instruction
+             VmAirWrapper_loadstore.constraints.memoryBus_row
+             memory_of_instruction
+      exists air.adapter.from_state.pc row 0, imm, rs1, rd,
+             #v[(air.adapter.rs1_data_0 row 0).val, (air.adapter.rs1_data_1 row 0).val, (air.adapter.rs1_data_2 row 0).val, (air.adapter.rs1_data_3 row 0).val],
+             #v[(air.core.read_data_0 row 0).val, (air.core.read_data_1 row 0).val, (air.core.read_data_2 row 0).val, (air.core.read_data_3 row 0).val],
+             #v[(air.core.prev_data_0 row 0).val, (air.core.prev_data_1 row 0).val, (air.core.prev_data_2 row 0).val, (air.core.prev_data_3 row 0).val]
+      have h_eq_ind : forall reg, Transpiler.ind reg = 4 * ↑reg.1.toNat
+      := by
+        intro reg
+        simp [Transpiler.ind, regidx_to_fin]
+        have : reg.1.toNat < 2^5
+          := by apply BitVec.toNat_lt_twoPow_of_le; simp
+        simp [Fin.ext_iff, Fin.val_mul]
+        omega
+      simp [show (2013265920 :FBB) = -1 by native_decide,
+            *]
+      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+      simp
+
+#exit
+
+      split_ands
+      . grind
+      . simp [Transpiler.utof, Transpiler.sign_extend_16, Transpiler.sign_of]
+        rw [Nat.mod_eq_of_lt (by omega)]
+        simp [Fin.ext_iff]; congr 2
+        simp [BitVec.msb_signExtend]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    -- unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
+    --        readInstruction_of_instruction
+    --        VmAirWrapper_loadstore.constraints.memoryBus_row
+    --        memory_of_instruction
+    -- simp [show (2013265920 :FBB) = -1 by native_decide,
+    --       *]
+    -- -- pc
+    -- use air.adapter.from_state.pc row 0; simp
+    -- -- constraints
+    -- have h_constraints' := h_constraints
+    -- rw [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
+    -- simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
+    -- simp [*] at h_constraints'
+    --
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 end Load
