@@ -1541,7 +1541,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       read_prev_timestamp
       write_prev_timestamp
       timestamp ∧
-    (air.adapter.needs_write row 0 = 1 →
+    (rd.1 ≠ 0 →
       prev_data[0].val < 256 ∧
       prev_data[1].val < 256 ∧
       prev_data[2].val < 256 ∧
