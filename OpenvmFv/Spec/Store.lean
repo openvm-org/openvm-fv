@@ -2,7 +2,7 @@ import Mathlib
 
 import OpenvmFv.Constraints.VmAirWrapper_loadstore
 
-namespace Load
+namespace Store
 
   lemma inv_2
     (core: Valid_LoadStoreCoreAir_4 FBB)
@@ -1212,7 +1212,7 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     . cases (BitVec.ofNat 16 ↑(air.adapter.imm row 0)).msb <;> simp
 
   set_option maxHeartbeats 1_000_000_000 in
-  example [Field ExtF]
+  lemma mem_ptr_eq_imm_plus_rs1 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
     (h_opcode: air.core.expected_opcode row 0 = 531)
@@ -1314,125 +1314,214 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     unfold VmAirWrapper_loadstore.constraints.executionBus_row
     simp [h_is_valid, Valid_VmAirWrapper_loadstore.to_pc]
 
-  lemma memoryBus_row_of_opcode_531 [Field ExtF]
+  def readInstruction_of_instruction
+    (pc : FBB)
+    (imm : BitVec 12) (rs1 rs2 : regidx)
+  : List (FBB × List FBB) := [
+    (
+      1, [
+        pc,
+        531,
+        Transpiler.ind rs2,
+        Transpiler.ind rs1,
+        Transpiler.utof (Transpiler.sign_extend_16 imm),
+        1,
+        2,
+        1,
+        Transpiler.sign_of imm
+      ]
+    )
+  ]
+
+  def memory_of_instruction
+    (imm : BitVec 12) (rs1 rs2 : regidx)
+    (rs1_data read_data prev_data : U32)
+    (rs1_prev_timestamp : FBB)
+    (read_prev_timestamp : FBB)
+    (write_prev_timestamp : FBB)
+    (timestamp : FBB)
+  : List (FBB × List FBB) := [
+      (-1,
+        [
+          1,
+          4 * rs1.1.toNat,
+          rs1_data[0].toNat,
+          rs1_data[1].toNat,
+          rs1_data[2].toNat,
+          rs1_data[3].toNat,
+          rs1_prev_timestamp
+        ]
+      ),
+      (1,
+        [
+          1,
+          4 * rs1.1.toNat,
+          rs1_data[0].toNat,
+          rs1_data[1].toNat,
+          rs1_data[2].toNat,
+          rs1_data[3].toNat,
+          timestamp
+        ]
+      ),
+      (-1,
+        [
+          1,
+          4 * rs2.1.toNat,
+          read_data[0].toNat,
+          read_data[1].toNat,
+          read_data[2].toNat,
+          read_data[3].toNat,
+          read_prev_timestamp
+        ]
+      ),
+      (1,
+        [
+          1,
+          4 * rs2.1.toNat,
+          read_data[0].toNat,
+          read_data[1].toNat,
+          read_data[2].toNat,
+          read_data[3].toNat,
+          timestamp + 1
+        ]
+      ),
+      (-1,
+        [
+          2,
+          (BitVec.signExtend 32 imm + rs1_data.toBV).toNat,
+          prev_data[0].toNat,
+          prev_data[1].toNat,
+          prev_data[2].toNat,
+          prev_data[3].toNat,
+          write_prev_timestamp
+        ]
+      ),
+      (1,
+        [
+          2,
+          (BitVec.signExtend 32 imm + rs1_data.toBV).toNat,
+          read_data[0].toNat,
+          read_data[1].toNat,
+          read_data[2].toNat,
+          read_data[3].toNat,
+          timestamp + 2
+        ]
+      )
+    ]
+
+  attribute [-simp]
+    Fin.natCast_eq_zero
+
+  set_option maxHeartbeats 1_000_000 in
+  lemma bus_interface [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
     (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
+    (h_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid: air.core.is_valid row 0 = 1)
-  : VmAirWrapper_loadstore.constraints.memoryBus_row air row = sorry
-    -- [
-    --   (-1,
-    --     [
-    --       1, air.adapter.rs1_ptr row 0,
-    --       air.adapter.rs1_data_0 row 0, air.adapter.rs1_data_1 row 0, air.adapter.rs1_data_2 row 0, air.adapter.rs1_data_3 row 0,
-    --       air.adapter.rs1_aux_cols.base.prev_timestamp row 0
-    --     ]
-    --   ),
-    --   (1,
-    --     [
-    --       1, air.adapter.rs1_ptr row 0,
-    --       air.adapter.rs1_data_0 row 0, air.adapter.rs1_data_1 row 0, air.adapter.rs1_data_2 row 0, air.adapter.rs1_data_3 row 0,
-    --       air.adapter.from_state.timestamp row 0
-    --     ]
-    --   ),
-    --   (-1,
-    --     [
-    --       air.adapter.mem_as row 0, air.adapter.mem_ptr row 0,
-    --       air.core.read_data_0 row 0, air.core.read_data_1 row 0, air.core.read_data_2 row 0, air.core.read_data_3 row 0,
-    --       air.adapter.read_data_aux.base.prev_timestamp row 0
-    --     ]
-    --   ),
-    --   (1,
-    --     [
-    --       air.adapter.mem_as row 0, air.adapter.mem_ptr row 0,
-    --       air.core.read_data_0 row 0, air.core.read_data_1 row 0, air.core.read_data_2 row 0, air.core.read_data_3 row 0,
-    --       air.adapter.from_state.timestamp row 0 + 1
-    --     ]
-    --   ),
-    --   (if air.adapter.rd_rs2_ptr row 0 = 0 then 0 else -1,
-    --     [
-    --       1, air.adapter.rd_rs2_ptr row 0,
-    --       air.core.prev_data_0 row 0, air.core.prev_data_1 row 0, air.core.prev_data_2 row 0, air.core.prev_data_3 row 0,
-    --       air.adapter.write_base_aux.prev_timestamp row 0
-    --     ]
-    --   ),
-    --   (if air.adapter.rd_rs2_ptr row 0 = 0 then 0 else 1,
-    --     [
-    --       1, air.adapter.rd_rs2_ptr row 0,
-    --       air.core.read_data_0 row 0, air.core.read_data_1 row 0, air.core.read_data_2 row 0, air.core.read_data_3 row 0,
-    --       air.adapter.from_state.timestamp row 0 + 2
-    --     ]
-    --   )
-    -- ]
+  : ∃ pc imm rs1 rd rs1_data read_data prev_data rs1_prev_timestamp read_prev_timestamp write_prev_timestamp timestamp,
+    VmAirWrapper_loadstore.constraints.readInstructionBus_row air row =
+    readInstruction_of_instruction pc imm rs1 rd ∧
+    VmAirWrapper_loadstore.constraints.memoryBus_row air row =
+    memory_of_instruction
+      imm
+      rs1
+      rd
+      rs1_data
+      read_data
+      prev_data
+      rs1_prev_timestamp
+      read_prev_timestamp
+      write_prev_timestamp
+      timestamp
+    -- we may want to add extra constraints about the timestamps in here too
   := by
-    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 --read instruction bus
+    have h_bus_wellformedness' := h_bus_wellformedness.2.2.2
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ReadInstructionBusEntry.operand_properties
-    ] at h_bus_wellformedness
-    obtain ⟨
-      instruction,
-      multiplicity,
-      data,
-      h_transpile,
-      h_multiplicity,
-      h_from_pc,
-      h_opcode',
-      h_rd,
-      h_rs1,
-      h_imm,
-      h_5,
-      h_mem_as,
-      h_needs_write,
-      h_imm_sign
-    ⟩ := h_bus_wellformedness
-    have h_instruction := Transpiler.transpiler_opcode_531 h_transpile
-    simp [h_opcode', h_opcode] at h_instruction
-    unfold VmAirWrapper_loadstore.constraints.memoryBus_row
+    ] at h_bus_wellformedness'
+    obtain ⟨ inst, a, b, h_transpile, h_a, h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8 ⟩ := h_bus_wellformedness'
+    have := Transpiler.transpiler_opcode_531 h_transpile (by simp; grind)
+    simp [*] at this
+    have h_eq_b : b = #v[b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]]
+      := by clear *-; ext i h_i; interval_cases i <;> simp
+    simp [h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8] at h_eq_b
+
+    have h_imm_range := imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_imm_ext_range := imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_sign := imm_sign_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
+    have h_mem_as := mem_as_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
+    -- have h_load_val := expected_load_val_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_store_val := expected_store_val_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_expected_val := expected_val_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_write_ptr := write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_read_as := read_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_read_ptr := read_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_write_as := write_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+
+    have h_wd_0 := write_data_0_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_wd_1 := write_data_1_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_wd_2 := write_data_2_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have h_wd_3 := write_data_3_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+
+    have h_bus_wellformedness' := h_bus_wellformedness.2.1
     simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      read_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      read_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      write_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      write_data_0_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      write_data_1_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      write_data_2_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      write_data_3_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid,
-      show (2013265920: FBB) = -1 by grind
-    ]
-    have h_alignment := Transpiler.pc_aligned_of_some h_transpile
-    obtain
-      ⟨h_needs_write', imm, rs1, rd, h_instruction, h_rd'⟩ |
-      ⟨h_needs_write', im, rs1, h_instruction⟩ := h_instruction
-    all_goals (
-      rewrite [h_instruction] at h_transpile
-      unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-      dsimp at h_transpile
-      simp [-Vector.mk_eq] at h_transpile
-    )
-    . simp [
-        ←h_rd,
-        ←h_rs1,
-        ←h_mem_as,
-        ←h_needs_write,
-        ←h_transpile.2
-      ]
-      rewrite [ite_cond_eq_false]
+      show (2013265920: FBB) = -1 by decide
+    ] at h_bus_wellformedness'
 
-      done
-    . done
-    -- split_ifs with h_rd
-    -- . simp[(needs_write_of_rd_0 air row h_bus_wellformedness h_is_valid h_opcode).mp h_rd]
-    --   grind
-    -- . simp[(needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode).mp h_rd]
-    --   grind
+    have h_eq_ind : forall reg, Transpiler.ind reg = 4 * ↑reg.1.toNat
+    := by
+      intro reg
+      simp [Transpiler.ind, regidx_to_fin]
+      have : reg.1.toNat < 2^5
+        := by apply BitVec.toNat_lt_twoPow_of_le; simp
+      simp [Fin.ext_iff, Fin.val_mul]
+      omega
 
+    obtain ⟨ imm, rs2, rs1, h_inst ⟩ := this
+    -- Transpilation
+    subst inst; unfold Transpiler.transpile_op at h_transpile
+    simp at h_transpile; obtain ⟨ h_pc, h_a', h_eq_b' ⟩ := h_transpile
+    symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
+    obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
+    -- Rest
+    unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
+            readInstruction_of_instruction
+            VmAirWrapper_loadstore.constraints.memoryBus_row
+            memory_of_instruction
+    exists air.adapter.from_state.pc row 0, imm, rs1, rs2,
+            #v[(air.adapter.rs1_data_0 row 0).val, (air.adapter.rs1_data_1 row 0).val, (air.adapter.rs1_data_2 row 0).val, (air.adapter.rs1_data_3 row 0).val],
+            #v[(air.core.read_data_0 row 0).val, (air.core.read_data_1 row 0).val, (air.core.read_data_2 row 0).val, (air.core.read_data_3 row 0).val],
+            #v[(air.core.prev_data_0 row 0).val, (air.core.prev_data_1 row 0).val, (air.core.prev_data_2 row 0).val, (air.core.prev_data_3 row 0).val]
+    simp [show (2013265920 :FBB) = -1 by native_decide, *]
+    repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+    simp
+    clear h_bus_wellformedness'
+    split_ands
+    . simp [Transpiler.utof, Transpiler.sign_extend_16, Transpiler.sign_of]
+      rw [Nat.mod_eq_of_lt (by omega)]
+      simp [Fin.ext_iff]; congr 2
+      simp [BitVec.msb_signExtend]
+    . simp [Fin.ext_iff]
+      have h_eq := mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [← BitVec.toNat_inj] at h_eq
+      rw [Nat.mod_eq_of_lt (a := (air.adapter.mem_ptr row 0).val) (by omega)] at h_eq
+      have : (BitVec.signExtend 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))).toNat = (BitVec.signExtend 32 imm).toNat
+      := by
+        congr 1
+        rw [h_imm]
+        simp [Transpiler.utof, Transpiler.sign_extend_16]
+        rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+        grind
+      rw [← this]
+      rw [← h_eq]
+      omega
 
-
-end Load
+end Store
