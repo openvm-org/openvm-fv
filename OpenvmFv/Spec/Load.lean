@@ -1423,7 +1423,8 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
 
   def memory_of_instruction
     (imm : BitVec 12) (rs1 rd :  regidx)
-    (rs1_data read_data prev_data : U32)
+    (rs1_data read_data : U32)
+    (prev_data : Vector FBB 4)
     (rs1_prev_timestamp : FBB)
     (read_prev_timestamp : FBB)
     (write_prev_timestamp : FBB)
@@ -1515,12 +1516,14 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
   attribute [-simp]
     Fin.natCast_eq_zero
 
+  set_option maxHeartbeats 1_000_000 in
   lemma bus_interface [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
     (h_opcode: air.core.expected_opcode row 0 = 528)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
+    (h_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid: air.core.is_valid row 0 = 1)
   : ∃ pc imm rs1 rd rs1_data read_data prev_data rs1_prev_timestamp read_prev_timestamp write_prev_timestamp timestamp,
@@ -1577,6 +1580,15 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       show (2013265920: FBB) = -1 by decide
     ] at h_bus_wellformedness'
 
+    have h_eq_ind : forall reg, Transpiler.ind reg = 4 * ↑reg.1.toNat
+    := by
+      intro reg
+      simp [Transpiler.ind, regidx_to_fin]
+      have : reg.1.toNat < 2^5
+        := by apply BitVec.toNat_lt_twoPow_of_le; simp
+      simp [Fin.ext_iff, Fin.val_mul]
+      omega
+
     obtain real | phantom := this
     . obtain ⟨ h_needs_write, ⟨ imm, rs1, rd, h_inst, h_nz⟩  ⟩ := real
       -- Transpilation
@@ -1584,11 +1596,52 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       simp at h_transpile; obtain ⟨ h_pc, h_a', h_eq_b' ⟩ := h_transpile
       symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
       obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
+      -- Rest
       unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
              readInstruction_of_instruction
              VmAirWrapper_loadstore.constraints.memoryBus_row
              memory_of_instruction
       exists air.adapter.from_state.pc row 0, imm, rs1, rd,
+             #v[(air.adapter.rs1_data_0 row 0).val, (air.adapter.rs1_data_1 row 0).val, (air.adapter.rs1_data_2 row 0).val, (air.adapter.rs1_data_3 row 0).val],
+             #v[(air.core.read_data_0 row 0).val, (air.core.read_data_1 row 0).val, (air.core.read_data_2 row 0).val, (air.core.read_data_3 row 0).val],
+             #v[(air.core.prev_data_0 row 0).val, (air.core.prev_data_1 row 0).val, (air.core.prev_data_2 row 0).val, (air.core.prev_data_3 row 0).val]
+      simp [show (2013265920 :FBB) = -1 by native_decide,
+            *]
+      repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
+      simp
+      clear h_bus_wellformedness'
+      split_ands
+      . grind
+      . simp [Transpiler.utof, Transpiler.sign_extend_16, Transpiler.sign_of]
+        rw [Nat.mod_eq_of_lt (by omega)]
+        simp [Fin.ext_iff]; congr 2
+        simp [BitVec.msb_signExtend]
+      . simp [Fin.ext_iff]
+        have h_eq := mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+        simp [← BitVec.toNat_inj] at h_eq
+        rw [Nat.mod_eq_of_lt (a := (air.adapter.mem_ptr row 0).val) (by omega)] at h_eq
+        have : (BitVec.signExtend 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))).toNat = (BitVec.signExtend 32 imm).toNat
+        := by
+          congr 1
+          rw [h_imm]
+          simp [Transpiler.utof, Transpiler.sign_extend_16]
+          rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+          grind
+        rw [← this]
+        rw [← h_eq]
+        omega
+    . obtain ⟨ h_needs_write, ⟨ imm, rs1, h_inst ⟩  ⟩ := phantom
+      -- Transpilation
+      subst inst; unfold Transpiler.transpile_op at h_transpile
+      simp at h_transpile; obtain ⟨ h_pc, h_a', h_eq_b' ⟩ := h_transpile
+      symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
+      obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
+      rw [if_pos (by grind)] at h_needs_write
+      unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
+             readInstruction_of_instruction
+             VmAirWrapper_loadstore.constraints.memoryBus_row
+             memory_of_instruction
+      exists air.adapter.from_state.pc row 0, imm, rs1, (regidx.Regidx 0),
              #v[(air.adapter.rs1_data_0 row 0).val, (air.adapter.rs1_data_1 row 0).val, (air.adapter.rs1_data_2 row 0).val, (air.adapter.rs1_data_3 row 0).val],
              #v[(air.core.read_data_0 row 0).val, (air.core.read_data_1 row 0).val, (air.core.read_data_2 row 0).val, (air.core.read_data_3 row 0).val],
              #v[(air.core.prev_data_0 row 0).val, (air.core.prev_data_1 row 0).val, (air.core.prev_data_2 row 0).val, (air.core.prev_data_3 row 0).val]
@@ -1604,70 +1657,31 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
             *]
       repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
       simp
-
-#exit
-
       split_ands
-      . grind
+      . rfl
       . simp [Transpiler.utof, Transpiler.sign_extend_16, Transpiler.sign_of]
         rw [Nat.mod_eq_of_lt (by omega)]
         simp [Fin.ext_iff]; congr 2
         simp [BitVec.msb_signExtend]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    -- unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
-    --        readInstruction_of_instruction
-    --        VmAirWrapper_loadstore.constraints.memoryBus_row
-    --        memory_of_instruction
-    -- simp [show (2013265920 :FBB) = -1 by native_decide,
-    --       *]
-    -- -- pc
-    -- use air.adapter.from_state.pc row 0; simp
-    -- -- constraints
-    -- have h_constraints' := h_constraints
-    -- rw [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
-    -- simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
-    -- simp [*] at h_constraints'
-    --
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      . simp [Fin.ext_iff]
+        have h_eq := mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+        simp [← BitVec.toNat_inj] at h_eq
+        rw [Nat.mod_eq_of_lt (a := (air.adapter.mem_ptr row 0).val) (by omega)] at h_eq
+        have : (BitVec.signExtend 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))).toNat = (BitVec.signExtend 32 imm).toNat
+        := by
+          congr 1
+          rw [h_imm]
+          simp [Transpiler.utof, Transpiler.sign_extend_16]
+          rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+          grind
+        rw [← this]
+        rw [← h_eq]
+        omega
+      -- all_goals
+      --   rw [Nat.mod_eq_of_lt] <;> [ simp; skip ]
+      -- . sorry
+      -- . sorry
+      -- . sorry
+      -- . sorry
 
 end Load
