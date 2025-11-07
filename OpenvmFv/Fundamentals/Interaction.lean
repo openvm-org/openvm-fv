@@ -672,8 +672,8 @@ namespace InteractionList
                 . split_ifs <;> simp_all [-List.length_eq_zero_iff]
                   rw [Nat.le_iff_lt_add_one]
                   rw [Fin.val_add]
-                  
-                  
+                  simp; apply Nat.mod_lt
+                  omega
         . suffices : ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val ≤ bus''.length ∨
                     ((List.map Prod.fst (List.filter (fun x ↦ x.2 == data) bus'')).sum).val = 0
           . grind
@@ -955,10 +955,6 @@ namespace InteractionList
       case cons hd tl ihs =>
         obtain ⟨ dr', ds' ⟩ := hd
         simp_all [recv_data, rising_bus, rising_pair]
-        rcases h_in with _ | h_tl <;> [ simp_all; right ]
-        obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
-        specialize ihs l dr'' ds'' h_in'' eq_l
-        grind
 
     /-- All positive entries in a timestamp bus come from the sends -/
     lemma pos_ones_in_send_data
@@ -974,10 +970,6 @@ namespace InteractionList
       case cons hd tl ihs =>
         obtain ⟨ dr', ds' ⟩ := hd
         simp_all [send_data, rising_bus, rising_pair]
-        rcases h_in with _ | h_tl <;> [ simp_all; right ]
-        obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
-        specialize ihs l dr'' ds'' h_in'' eq_l
-        grind
 
     /-- Reconstructing receive data from a rising bus -/
     lemma recv_data_from_rising_bus
@@ -1273,7 +1265,7 @@ namespace InteractionList
           have ⟨ bus_r, h_perm_r ⟩ := unitary_extract_balancer (m := -1) (data := rdata) this h_balance h_len_bus (by grind)
           simp [balanced_pair] at *
           suffices : (-1, ldata) ∈ bus ++ [(-1, rdata)] ∧ (1, rdata) ∈ (1, ldata) :: (bus ++ [(-1, rdata)])
-          . grind
+          . simp at this; tauto
           . grind
 
     /-- A non-empty rising bus is never balanced -/

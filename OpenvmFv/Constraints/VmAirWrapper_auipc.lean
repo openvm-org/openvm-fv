@@ -434,8 +434,14 @@ namespace VmAirWrapper_auipc.constraints
           rewrite [this] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile
-          . exfalso; grind
-          . grind
+          . exfalso
+            injection h_transpile with eq₁ eq₂
+            have : data[1] = 1 := by simp at eq₂; tauto
+            rw [this] at h_bounds; cases h_bounds
+          . injection h_transpile with eq₁ eq₂
+            simp at eq₂; replace eq₂ := eq₂.1
+            rw [h_bounds] at eq₂
+            cases eq₂
         }
       . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
         cases op <;> {
@@ -445,8 +451,14 @@ namespace VmAirWrapper_auipc.constraints
           rewrite [this] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile
-          . exfalso; grind
-          . grind
+          . exfalso
+            injection h_transpile with eq₁ eq₂
+            have : data[1] = 1 := by simp at eq₂; tauto
+            rw [this] at h_bounds; cases h_bounds
+          . injection h_transpile with eq₁ eq₂
+            simp at eq₂; replace eq₂ := eq₂.1
+            rw [h_bounds] at eq₂
+            cases eq₂
         }
       . obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type -- SHIFTIOP
         cases op <;> {
@@ -455,7 +467,16 @@ namespace VmAirWrapper_auipc.constraints
           simp at h_transpile
           rewrite [this] at h_transpile
           dsimp at h_transpile
-          exfalso; grind
+          exfalso
+          split_ifs at h_transpile
+          . exfalso
+            injection h_transpile with eq₁ eq₂
+            have : data[1] = 1 := by simp at eq₂; tauto
+            rw [this] at h_bounds; cases h_bounds
+          . injection h_transpile with eq₁ eq₂
+            simp at eq₂; replace eq₂ := eq₂.1
+            rw [h_bounds] at eq₂
+            cases eq₂
         }
       . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
         cases op <;> {
@@ -465,7 +486,10 @@ namespace VmAirWrapper_auipc.constraints
           rewrite [this] at h_transpile
           dsimp at h_transpile
           exfalso
-          grind
+          rcases h_transpile with ⟨_, h_transpile⟩
+          simp at h_transpile
+          rw [h_bounds] at h_transpile
+          tauto
         }
       . obtain ⟨⟨imm, rs1, op⟩, h_op_data⟩ := h_type -- UTYPE
         cases op
@@ -478,7 +502,10 @@ namespace VmAirWrapper_auipc.constraints
           unfold Transpiler.transpile_op at h_transpile
           simp at h_transpile
           split_ifs at h_transpile with h_rd_not_zero
-          . exfalso; grind
+          . exfalso
+            injection h_transpile with eq₁ eq₂
+            have : data[1] = 1 := by rw [this] at eq₂; simp at eq₂; tauto
+            rw [this] at h_bounds; cases h_bounds
           . have : data[4] = Transpiler.utof (Transpiler.zero_extend_24 imm <<< 4) := by grind
             rw [this]; clear *-
             simp [Transpiler.zero_extend_24, Transpiler.utof, Fin.lt_def, Fin.ext_iff]
@@ -490,8 +517,17 @@ namespace VmAirWrapper_auipc.constraints
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
-          dsimp at h_transpile
-          grind
+          simp at h_transpile
+          try (
+          split_ifs at h_transpile
+          . injection h_transpile with eq₁ eq₂
+            have : data[1] = 1 := by rw [this] at eq₂; simp at eq₂; tauto
+            rw [this] at h_bounds; cases h_bounds
+          . injection h_transpile with eq₁ eq₂
+            rw [this] at eq₂; simp at eq₂; replace eq₂ := eq₂.1
+            rw [h_bounds] at eq₂
+            cases eq₂
+          )
         }
       . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
         cases signed <;> {
@@ -499,7 +535,8 @@ namespace VmAirWrapper_auipc.constraints
           unfold Transpiler.transpile_op at h_transpile
           exfalso
           dsimp at h_transpile
-          split_ifs at h_transpile <;> simp at h_transpile <;> grind
+          split_ifs at h_transpile <;> simp at h_transpile <;>
+            (rw [this] at h_transpile; simp at h_transpile; rw [h_bounds] at h_transpile; tauto)
         }
       . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
         cases signed <;> {
@@ -507,7 +544,8 @@ namespace VmAirWrapper_auipc.constraints
           unfold Transpiler.transpile_op at h_transpile
           exfalso
           dsimp at h_transpile
-          split_ifs at h_transpile <;> simp at h_transpile <;> grind
+          split_ifs at h_transpile <;> simp at h_transpile <;>
+            (rw [this] at h_transpile; simp at h_transpile; rw [h_bounds] at h_transpile; tauto)
         }
 
     lemma readInstructionBus_row_length [Field ExtF]

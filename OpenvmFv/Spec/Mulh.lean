@@ -127,7 +127,8 @@ lemma wf_propertiesToAssert
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
   clear *- b_mulh b_mulhsu
-  grind
+  rcases b_mulh with h₁ | h₁ <;> rcases b_mulhsu with h₂ | h₂ <;> rw [h₁, h₂] <;> simp
+  rintro ⟨⟩
 
 /-- From Lt opcode to RISC-V opcode -/
 def rop_of_Mulh_opcode (opcode : FBB) : mop :=

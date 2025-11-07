@@ -61,23 +61,25 @@ namespace PureSpec
       readReg_state h_input_pc,
       writeReg_state_success,
       ←Local.execute_equiv,
-      Local.execute.eq_def
+      Local.execute.eq_def,
+      -write_xreg_eq_write_xreg'
     ]
 
     have (x : BitVec 32) : Sail.BitVec.addInt x 4 = x + 4 := rfl
-    simp [this]
+    simp [this, -write_xreg_eq_write_xreg']
 
     simp [
       ←Local.execute_SHIFTIOP_equiv,
       Local.execute_SHIFTIOP.eq_def,
-      bind, EStateM.instMonad, EStateM.bind
+      bind, EStateM.instMonad, EStateM.bind,
+      -write_xreg_eq_write_xreg'
     ]
 
     rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by simp [regidx_to_fin])]
     rewrite [read_xreg_write_reg_state_nextPC _ h_input_r1]
-    simp [EStateM.pure]
+    simp [-write_xreg_eq_write_xreg']
 
-    simp [execute_SHIFTIOP_srai_pure]
+    simp [execute_SHIFTIOP_srai_pure, -write_xreg_eq_write_xreg']
 
     obtain ⟨rd⟩ := rd
     by_cases h_zero: rd = 0
@@ -95,19 +97,18 @@ namespace PureSpec
           ⟨(regidx_to_fin (regidx.Regidx rd)).val, Finset.mem_Icc.mpr ⟨h_low, h_high⟩⟩
           (by simp [regidx_to_fin])
       ]
-      simp [regidx_to_fin]
-      rewrite [dite_cond_eq_false]
-      . simp [
-          h_input_rd, regidx_to_fin, h_input_imm,
-          LeanRV32D.Functions.shift_bits_right_arith,
-          LeanRV32D.Functions.shift_right_arith,
-          Sail.BitVec.extractLsb,
-          log2_xlen,
-          Local.sign_extend_equiv
-        ]
-        congr
-        grind
-      . simp [regidx_to_fin] at *
-        omega
+      simp [regidx_to_fin, -write_xreg_eq_write_xreg']
+      rewrite [dite_cond_eq_false (by simp [regidx_to_fin] at *; omega)]
+      simp [
+        h_input_rd, regidx_to_fin, h_input_imm,
+        LeanRV32D.Functions.shift_bits_right_arith,
+        LeanRV32D.Functions.shift_right_arith,
+        Sail.BitVec.extractLsb,
+        log2_xlen,
+        Local.sign_extend_equiv,
+        -write_xreg_eq_write_xreg'
+      ]
+      congr
+      grind
 
 end PureSpec

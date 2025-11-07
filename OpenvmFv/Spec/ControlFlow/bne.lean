@@ -107,7 +107,6 @@ namespace PureSpec
         by_cases h_success : (execute_BNE_pure bne_input).success
         . simp [execute_BNE_pure, h_eq, h_throws, h_input_imm] at h_success
           rw [ite_cond_eq_false, ite_cond_eq_false, ite_cond_eq_false]
-          . grind
           all_goals cases h_success <;> simp [*]
         . simp [execute_BNE_pure, h_eq, h_throws, h_input_imm] at h_success
           rw [ite_cond_eq_true, ite_cond_eq_true, ite_cond_eq_true]
