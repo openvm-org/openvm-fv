@@ -7,8 +7,8 @@ import OpenvmFv.Fundamentals.Interaction
 
 import LeanZKCircuit.Interactions
 
-set_option maxHeartbeats 1_000_000_000
-set_option synthInstance.maxHeartbeats 1_000_000
+-- set_option maxHeartbeats 1_000_000_000
+-- set_option synthInstance.maxHeartbeats 1_000_000
 
 variable (ExtF : Type) [Field ExtF]
 variable (air : Valid_VmAirWrapper_mulh FBB ExtF)
@@ -22,7 +22,6 @@ open VmAirWrapper_mulh.constraints
 
 variable (row_not_valid : air.core.is_valid row 0 = 0)
 
-set_option maxRecDepth 1_000_000 in
 include
   row_in_range
 in
@@ -109,24 +108,64 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
-  repeat rw [Fin.ext_iff] at pa_mem
-  simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
+  simp only [propertiesToAssume, Interaction.ExecutionBusEntryInstance, Fin.isValue,
+    Lean.Grind.Fin.pow_succ, pow_one, Fin.reduceMul, implies_true, Vector.toList_mk,
+    _executionBus_row, Interaction.ExecutionBusEntryInstance.eq_1, Lean.Grind.Fin.pow_zero,
+    executionBus_row.eq_1, List.attach_cons, row_valid, List.attach_nil, List.map_nil,
+    List.map_cons, Interaction.ExecutionBusEntry.deserialise, Vector.getElem_mk,
+    List.getElem_toArray, List.getElem_cons_zero, List.getElem_cons_succ, List.Forall.eq_3, id_eq,
+    List.Forall, and_self, Interaction.MemoryBusEntryInstance, Nat.reducePow, _memoryBus_row,
+    Interaction.MemoryBusEntryInstance.eq_1, memoryBus_row.eq_1, mul_one,
+    Interaction.MemoryBusEntry.deserialise, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_ofNat,
+    Nat.one_mod, Nat.cast_one, Fin.cast_val_eq_self, Nat.one_lt_ofNat, true_and,
+    BabyBear.to_the_right_FBB_1, BabyBear.eq_neg_eq_zero, one_ne_zero, IsEmpty.forall_iff, and_true,
+    Interaction.RangeCheckerBusEntryInstance, _rangeCheckerBus_row,
+    Interaction.RangeCheckerBusEntryInstance.eq_1, rangeCheckerBus_row.eq_1,
+    Interaction.RangeCheckerBusEntry.deserialise, Nat.reduceMod, Nat.reduceLT, forall_const,
+    ReadInstructionBusEntryInstanceShift, Interaction.ReadInstructionBusEntryInstance,
+    Interaction.ReadInstructionBusEntryInstance.eq_1, _readInstructionBus_row,
+    ReadInstructionBusEntryInstanceShift.eq_1, readInstructionBus_row.eq_1,
+    Interaction.ReadInstructionBusEntry.deserialise, Nat.zero_mod, Nat.cast_zero, List.forall_cons,
+    Interaction.RangeTupleCheckerBusEntryInstance, _rangeTupleCheckerBus_row,
+    Interaction.RangeTupleCheckerBusEntryInstance.eq_1, rangeTupleCheckerBus_row.eq_1,
+    Interaction.RangeTupleCheckerBusEntry.deserialise] at pa_exec pa_mem pa_range pa_read pa_rtc
+  simp only [Fin.ext_iff] at pa_mem
+  simp only [Fin.isValue, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Fin.coe_neg_one, forall_const,
+    and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
   obtain ⟨ ri_rd, ri_rs1, ri_rs2 ⟩ := pa_read
   obtain ⟨ ub_am0, ub_cm0, ub_am1, ub_cm1, ub_am2, ub_cm2, ub_am3, ub_cm3,
            ub_a0, ub_cry0, ub_a1, ub_cry1, ub_a2, ub_cry2, ub_a3, ub_cry3 ⟩ := pa_rtc
-  clear pa_range pa_bit
-
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
+  simp only [allHold_simplified, row_constraint_list, constraint_0, Fin.isValue, constraint_1,
+    constraint_2, constraint_3, constraint_4, constraint_5, constraint_6, constraint_7,
+    constraint_8, constraint_9, constraint_10, List.Forall] at constraints
   obtain ⟨ constrain_interactions,
            b_mulh, b_mulhsu, rest ⟩ := constraints
-  clear constrain_interactions
-  simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification,
-            wf_propertiesToAssertPerRow,
-            propertiesToAssert]
-  clear *- b_mulh b_mulhsu
+  simp_all only [Fin.isValue, one_ne_zero, or_true, false_or, true_and, wf_propertiesToAssertPerRow,
+    propertiesToAssert, Interaction.ExecutionBusEntryInstance, Lean.Grind.Fin.pow_succ, pow_one,
+    Fin.reduceMul, implies_true, Vector.toList_mk, _executionBus_row,
+    Interaction.ExecutionBusEntryInstance.eq_1, Lean.Grind.Fin.pow_zero, executionBus_row.eq_1,
+    List.attach_cons, List.attach_nil, List.map_nil, List.map_cons,
+    Interaction.ExecutionBusEntry.deserialise, Vector.getElem_mk, List.getElem_toArray,
+    List.getElem_cons_zero, List.getElem_cons_succ, List.Forall.eq_3, id_eq, List.Forall, and_self,
+    Interaction.MemoryBusEntryInstance, Nat.reducePow, _memoryBus_row,
+    Interaction.MemoryBusEntryInstance.eq_1, memoryBus_row.eq_1, mul_one,
+    Interaction.MemoryBusEntry.deserialise, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_ofNat,
+    Nat.one_mod, Nat.cast_one, Fin.cast_val_eq_self, Fin.reduceEq, Nat.one_lt_ofNat,
+    Interaction.RangeCheckerBusEntryInstance, _rangeCheckerBus_row,
+    Interaction.RangeCheckerBusEntryInstance.eq_1, rangeCheckerBus_row.eq_1,
+    Interaction.RangeCheckerBusEntry.deserialise, BabyBear.to_the_right_FBB_1,
+    BabyBear.eq_neg_eq_zero, Nat.reduceMod, Nat.reduceLT,
+    ReadInstructionBusEntryInstanceShift, Interaction.ReadInstructionBusEntryInstance,
+    Interaction.ReadInstructionBusEntryInstance.eq_1, _readInstructionBus_row,
+    ReadInstructionBusEntryInstanceShift.eq_1, readInstructionBus_row.eq_1,
+    Interaction.ReadInstructionBusEntry.deserialise, Nat.zero_mod, Nat.cast_zero, List.forall_cons,
+    Interaction.RangeTupleCheckerBusEntryInstance, _rangeTupleCheckerBus_row,
+    Interaction.RangeTupleCheckerBusEntryInstance.eq_1, rangeTupleCheckerBus_row.eq_1,
+    Interaction.RangeTupleCheckerBusEntry.deserialise, Interaction.BitwiseBusEntryInstance,
+    _bitwiseBus_row, Interaction.BitwiseBusEntryInstance.eq_1, bitwiseBus_row.eq_1,
+    Interaction.BitwiseBusEntry.deserialise, zero_ne_one, or_false, ↓reduceIte, and_true]
   rcases b_mulh with h₁ | h₁ <;> rcases b_mulhsu with h₂ | h₂ <;> rw [h₁, h₂] <;> simp
   rintro ⟨⟩
 
@@ -135,6 +174,9 @@ def rop_of_Mulh_opcode (opcode : FBB) : mop :=
   if opcode = 593 then .MULH else
   if opcode = 594 then .MULHSU else
   if opcode = 595 then .MULHU else .MULHUS
+
+set_option maxHeartbeats 1_000_000_000
+set_option synthInstance.maxHeartbeats 1_000_000
 
 include
   row_valid
@@ -331,6 +373,8 @@ theorem spec_MULH
   subst b3 c3
   ring_nf
   omega
+
+#exit
 
 include
   row_valid
