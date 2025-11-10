@@ -3,6 +3,7 @@ import OpenvmFv.Spec.Load.local
 
 
 namespace Local
+
   lemma run_vmem_read_of_width_4'
     (offset : BitVec 32)
     (data₀ data₁ data₂ data₃ : BitVec 8)
@@ -45,14 +46,11 @@ namespace Local
   have hmem₃' : s.mem[(reg_val.toNat + offset.toNat) % 4294967296 + 3]? = some data₃ := by
     rwa [Nat.mod_eq_of_lt]; clear *- h_does_fit; omega
 
-  simp? [
+  simp [
     Nat.reduceMul, vmem_read',
     Sail.SailME.run,
-    h_reg_val,
-    h_aligned,
     LeanRV32D.Functions.ext_data_get_addr,
-    bind_pure_comp, map_pure,
-    liftM_map, bind_map_left,
+    bind_pure_comp,
     Bool.false_eq_true, ↓reduceIte,
     LeanRV32D.Functions.plat_enable_misaligned_access,
     LeanRV32D.Functions.split_misaligned,
@@ -69,10 +67,9 @@ namespace Local
     LeanRV32D.Functions.misaligned_order,
     LeanRV32D.Functions.sys_misaligned_order_decreasing,
     Int.toNat_zero, Int.pred_toNat,
-    Int.toNat_natCast_add_one, Prod.mk.eta, map_bind,
-    Functor.map_map, pure_bind, ExceptT.run_bind, ExceptT.run_monadLift, monadLift_self, ExceptT.run_map,
-    bind_assoc, EStateM.run_bind,
-    EStateM.run, Functor.map, EStateM.map,
+    Int.toNat_natCast_add_one, Prod.mk.eta,
+    pure_bind, bind_assoc,
+    EStateM.run, Functor.map,
     ExceptT.map, ExceptT.mk, ExceptT.run,
     liftM, monadLift, MonadLift.monadLift, ExceptT.lift
   ]
@@ -127,10 +124,23 @@ namespace Local
   simp [
     EStateM.bind,
     LeanRV32D.Functions.within_phys_mem,
+  ]
+
+  simp only [
     h_plat_ram_base,
     h_plat_rom_base,
     h_plat_ram_size,
-    h_plat_rom_size
+    h_plat_rom_size,
+    Nat.reducePow,
+    Nat.add_one_sub_one,
+    BitVec.toNat_ofNat,
+    CharP.cast_eq_zero,
+    Nat.reduceMod,
+    Nat.cast_ofNat,
+    zero_add,
+    BitVec.ofNat_eq_ofNat,
+    decide_true,
+    ↓dreduceIte,
   ]
   rewrite [ite_cond_eq_true _ _ (by simp; omega)]
 
@@ -142,7 +152,7 @@ namespace Local
     PreSail.readBytes,
     PreSail.readByte
   ]
-  unfold get  instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf
+  unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf
   dsimp [EStateM.get]
 
   have h_mod (n: ℕ) : n % 4294967296 % 17179869184 = n % 4294967296 := by omega
@@ -217,6 +227,7 @@ namespace Local
       LeanRV32D.Functions.extend_value, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend
     ]
     aesop
+
 end Local
 
 
