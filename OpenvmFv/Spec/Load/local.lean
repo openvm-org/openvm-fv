@@ -14,7 +14,7 @@ namespace Local
           (pure LeanRV32D.Functions.RETIRE_SUCCESS))
       | .Err e => (pure e)
 
-  lemma execute_UTYPE_equiv :
+  lemma execute_LOAD_equiv :
     execute_LOAD = LeanRV32D.Functions.execute_LOAD
   := rfl
 

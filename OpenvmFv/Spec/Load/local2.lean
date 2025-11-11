@@ -174,7 +174,9 @@ namespace Local
     Int.sub
   ]
 
-  example
+  lemma execute_LOAD_simplified
+    (s)
+    (rd : regidx)
     (data₀ data₁ data₂ data₃ : BitVec 8)
     (h_aligned : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + (BitVec.signExtend 32 imm))) 4 = true)
     (h_reg_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok reg_val s)
@@ -228,108 +230,9 @@ namespace Local
     ]
     aesop
 
+  lemma execute_load_instruction:
+    LeanRV32D.Functions.execute (instruction.LOAD (imm, rs1, rd, is_unsigned, width)) =
+    LeanRV32D.Functions.execute_LOAD imm rs1 rd is_unsigned width
+  := rfl
+
 end Local
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#print LeanRV32D.Functions.ext_data_get_addr
-#print LeanRV32D.Functions.vmem_read
-
-noncomputable def vmem_read (rs : regidx) (offset : (BitVec 32)) (width : Nat) (acc : (AccessType Unit)) (aq : Bool) (rl : Bool) (res : Bool) : SailM (Result (BitVec (8 * width)) ExecutionResult) := SailME.run do
-  let vaddr ← (( do
-    match (← (ext_data_get_addr rs offset acc width)) with
-    | .Ext_DataAddr_OK vaddr => (pure vaddr)
-    | .Ext_DataAddr_Error e =>
-      SailME.throw ((Err (Ext_DataAddr_Check_Failure e)) : (Result (BitVec (8 * width)) ExecutionResult))
-    ) : SailME (Result (BitVec (8 * width)) ExecutionResult) virtaddr )
-  if (res : Bool)
-  then
-    (do
-      if ((not (is_aligned_vaddr vaddr width)) : Bool)
-      then
-        SailME.throw ((Err (Memory_Exception (vaddr, (E_Load_Addr_Align ())))) : (Result (BitVec (8 * width)) ExecutionResult))
-      else (pure ()))
-  else
-    (do
-      if ((check_misaligned vaddr width) : Bool)
-      then
-        SailME.throw ((Err (Memory_Exception (vaddr, (E_Load_Addr_Align ())))) : (Result (BitVec (8 * width)) ExecutionResult))
-      else (pure ()))
-  let (n, bytes) ← do (split_misaligned vaddr width)
-  let data := (zeros (n := ((8 *i n) *i bytes)))
-  let (first, last, step) := (misaligned_order n)
-  let i : Nat := first
-  let finished : Bool := false
-  let vaddr := (bits_of_virtaddr vaddr)
-  let (data, finished, i) ← (( do
-    let mut loop_vars := (data, finished, i)
-    repeat
-      let (data, finished, i) := loop_vars
-      loop_vars ← do
-        let offset := i
-        let vaddr := (BitVec.addInt vaddr (offset *i bytes))
-        let data ← (( do
-          match (← (translateAddr (Virtaddr vaddr) acc)) with
-          | .Err (e, _) =>
-            SailME.throw ((Err (Memory_Exception ((Virtaddr vaddr), e))) : (Result (BitVec (8 * width)) ExecutionResult))
-          | .Ok (paddr, _) =>
-            (do
-              match (← (mem_read acc paddr bytes aq rl res)) with
-              | .Err e =>
-                SailME.throw ((Err (Memory_Exception ((Virtaddr vaddr), e))) : (Result (BitVec (8 * width)) ExecutionResult))
-              | .Ok v =>
-                (do
-                  if (res : Bool)
-                  then (load_reservation (bits_of_physaddr paddr))
-                  else (pure ())
-                  (pure (Sail.BitVec.updateSubrange data (((8 *i (offset +i 1)) *i bytes) -i 1)
-                      ((8 *i offset) *i bytes) v)))) ) : SailME
-          (Result (BitVec (8 * width)) ExecutionResult) (BitVec (8 * n * bytes)) )
-        let (finished, i) : (Bool × Nat) :=
-          if ((offset == last) : Bool)
-          then
-            (let finished : Bool := true
-            (finished, i))
-          else
-            (let i : Nat := (offset +i step)
-            (finished, i))
-        (pure (data, finished, i))
-    until (λ (data, finished, i) => finished) loop_vars
-    (pure loop_vars) ) : SailME (Result (BitVec (8 * width)) ExecutionResult)
-    ((BitVec (8 * n * bytes)) × Bool × Nat) )
-  (pure (Ok data))
-
-noncomputable def execute_LOAD (imm : (BitVec 12)) (rs1 : regidx) (rd : regidx) (is_unsigned : Bool) (width: ℕ) : SailM ExecutionResult := do
-    let offset : xlenbits := (LeanRV32D.Functions.sign_extend (m := 32) imm)
-    Sail.assert (width ≤b LeanRV32D.Functions.xlen_bytes) "extensions/I/base_insts.sail:287.28-287.29"
-    match (← (LeanRV32D.Functions.vmem_read rs1 offset width (AccessType.Read LeanRV32D.Functions.Data) false false false)) with
-      | .Ok data =>
-        (do
-          (LeanRV32D.Functions.wX_bits rd (LeanRV32D.Functions.extend_value is_unsigned data))
-          (pure LeanRV32D.Functions.RETIRE_SUCCESS))
-      | .Err e => (pure e)
-
-lemma execute_LOAD_equiv:
-  execute_LOAD =
-  LeanRV32D.Functions.execute_LOAD
-:= by
-  sorry
