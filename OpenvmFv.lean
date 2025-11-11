@@ -104,6 +104,7 @@ import OpenvmFv.Spec.ITYPE.slti
 import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.Load.local2
+import OpenvmFv.Spec.Load.lw
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.and
 import OpenvmFv.Spec.RTYPE.local
