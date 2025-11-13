@@ -885,13 +885,18 @@ namespace Equivalence.LoadStore
     simp [get_instruction_fields_row] at h_opcode
     simp [
       LwOutput_matches_LoadStore_instruction_fields,
-      get_instruction_fields_row
+      get_instruction_fields_row,
+      -BitVec.toNat_add
     ]
+    rw [BitVec.toNat_add]
+    simp
+
     rewrite [allHold_allRows] at h_constraints
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_assumptions row h_row
     specialize h_bus_wellformedness row h_row
     simp [LwInput_of_LoadStore_instruction_fields, PureSpec.execute_LOAD_lw_pure]
+
     split_ands
     . exact lw_spec_of_get_instruction_fields_part_1 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
     . exact lw_spec_of_get_instruction_fields_part_2 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
@@ -926,17 +931,28 @@ namespace Equivalence.LoadStore
       have h_imm_sign_extend := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
       rewrite [h_imm_sign_extend] at h_mem_ptr
       rewrite [BitVec.toNat_eq] at h_mem_ptr
+      simp [-BitVec.toNat_add] at h_mem_ptr
+      rw [BitVec.toNat_add] at h_mem_ptr
       simp at h_mem_ptr
       rewrite [Nat.mod_eq_of_lt (by omega)] at h_mem_ptr
       rewrite [h_mem_ptr]; clear h_mem_ptr
       congr
-      simp [U32.toNat]
+      simp only [
+        U32.toNat,
+        Vector.getElem_mk,
+        List.getElem_toArray,
+        List.getElem_cons_zero,
+        List.getElem_cons_succ
+      ]
+      repeat rw [BitVec.toNat_ofFin]
+      simp
       have (x y: ℕ) :
         (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
         (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
         (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
       := by bv_decide
       rewrite [←this]; clear this
+      rw [BitVec.toNat_add]
       simp
       have (x: ℕ) :
         x % 65536 =
@@ -1053,14 +1069,17 @@ namespace Equivalence.LoadStore
           bv1 ++ bv2
         := by bv_decide
         rewrite [←this]
-        congr <;> {
-          unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
-          simp [BitVec.ofNat]
-          refine BitVec.eq_of_toNat_eq ?_
-          simp
-          omega
-          done
-        }
+        congr
+        . simp [
+            ← BitVec.toNat_inj,
+            - BitVec.toNat_ofFin
+          ]
+          rw [BitVec.toNat_ofFin]
+        . simp [
+            ← BitVec.toNat_inj,
+            - BitVec.toNat_ofFin
+          ]
+          rw [BitVec.toNat_ofFin]
       . have := Nat.div_add_mod (air.adapter.imm row 0).val 256
         have :
           BitVec.ofNat 16 (air.adapter.imm row 0).val =
@@ -1090,6 +1109,13 @@ namespace Equivalence.LoadStore
           done
         }
       done
+
+
+    all_goals
+      sorry
+
+#exit
+
     . have := Load.imm_sign_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode
       rewrite [this]; clear this
       simp [U32.toBV]
