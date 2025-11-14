@@ -235,4 +235,92 @@ namespace Local
     LeanRV32D.Functions.execute_LOAD imm rs1 rd is_unsigned width
   := rfl
 
+  lemma execute_STORE_simplified
+    (s)
+    (rd : regidx)
+    (data₀ data₁ data₂ data₃ : BitVec 8)
+    (h_aligned : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (rs1_val + (BitVec.signExtend 32 imm))) 4 = true)
+    (h_rs1_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok rs1_val s)
+    (h_rs2_val : LeanRV32D.Functions.rX_bits rs2 s = EStateM.Result.ok rs2_val s)
+    (h_mstatus: Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
+    (h_cur_privilege: Sail.readReg Register.cur_privilege s = EStateM.Result.ok Privilege.Machine s)
+    (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
+    (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
+    (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok (BitVec.ofNat 34 (2^32 - 1)) s)
+    (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
+    (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
+    (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
+    -- (h_does_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 < 2^32)
+    -- (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
+    -- (hmem₁ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
+    -- (hmem₂ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 2]? = some data₂)
+    -- (hmem₃ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 3]? = some data₃)
+  :
+    LeanRV32D.Functions.execute_STORE imm rs2 rs1 4 s =
+    sorry
+  := by
+    simp [
+      LeanRV32D.Functions.execute_STORE,
+      LeanRV32D.Functions.xlen_bytes,
+      h_rs2_val,
+      LeanRV32D.Functions.Data,
+      LeanRV32D.Functions.vmem_write,
+      LeanRV32D.Functions.ext_data_get_addr
+    ]
+    unfold liftM monadLift instMonadLiftTOfMonadLift MonadLift.monadLift ExceptT.instMonadLift ExceptT.lift Functor.map ExceptT.mk EStateM.instMonad EStateM.map
+    dsimp
+    simp [Sail.SailME.run, ExceptT.run]
+    unfold bind ExceptT.instMonad ExceptT.bind EStateM.bind ExceptT.mk ExceptT.bindCont ExceptT.pure EStateM.pure ExceptT.mk
+    dsimp
+    simp [
+      h_rs1_val,
+      LeanRV32D.Functions.check_misaligned,
+      LeanRV32D.Functions.plat_enable_misaligned_access,
+      ←Local.vmem_write_addr'_equiv,
+      Local.vmem_write_addr',
+      LeanRV32D.Functions.split_misaligned,
+      LeanRV32D.Functions.sign_extend,
+      Sail.BitVec.signExtend,
+      h_aligned
+    ]
+    unfold liftM monadLift instMonadLiftTOfMonadLift MonadLift.monadLift ExceptT.instMonadLift ExceptT.lift ExceptT.mk Functor.map EStateM.instMonad EStateM.map ExceptT.instMonad ExceptT.bind EStateM.bind ExceptT.bindCont ExceptT.map ExceptT.mk bind
+    dsimp [Sail.SailME.run, ExceptT.run, untilFuelM, untilFuelM.go]
+    unfold bind EStateM.instMonad EStateM.bind
+    dsimp
+
+    have h_fetch : (AccessType.Write () != AccessType.InstructionFetch ()) = true := rfl
+    have h_machine : (Privilege.Machine == Privilege.Machine) = true := rfl
+    have h_satp_bare : (SATPMode.Bare == SATPMode.Bare) = true := rfl
+
+    have h_pmp_check := pmp_check_machine_write rs1_val (BitVec.signExtend 32 imm) 4 s
+    simp [EStateM.run] at h_pmp_check
+
+    simp [
+      LeanRV32D.Functions.translateAddr,
+      h_mstatus,
+      h_cur_privilege,
+      LeanRV32D.Functions.effectivePrivilege,
+      h_fetch,
+      LeanRV32D.Functions._get_Mstatus_MPRV,
+      Sail.BitVec.extractLsb,
+      h_mprv_disabled,
+      LeanRV32D.Functions.translationMode,
+      h_machine,
+      h_satp_bare,
+      LeanRV32D.Functions.mem_write_ea,
+      LeanRV32D.Functions.write_kind_of_flags,
+      LeanRV32D.Functions.mem_write_value,
+      LeanRV32D.Functions.mem_write_value_meta,
+      LeanRV32D.Functions.mem_write_value_priv_meta,
+      LeanRV32D.Functions.checked_mem_write,
+      LeanRV32D.Functions.default_write_acc,
+      LeanRV32D.Functions.Data,
+      LeanRV32D.Functions.phys_access_check,
+      LeanRV32D.Functions.sys_pmp_count,
+    ]
+    done
+
+
 end Local

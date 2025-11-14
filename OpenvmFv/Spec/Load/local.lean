@@ -724,4 +724,60 @@ namespace Local
   --   . simp [h_width]
   --     done
 
+  noncomputable def vmem_write_addr'
+    (vaddr : virtaddr) (width : Nat) (data : (BitVec (8 * width)))
+    (acc : (AccessType Unit)) (aq : Bool) (rl : Bool) (res : Bool)
+  : SailM (Sail.Result Bool ExecutionResult) := Sail.SailME.run do
+    let (n, bytes) ← do (LeanRV32D.Functions.split_misaligned vaddr width)
+    let (first, last, step) := (LeanRV32D.Functions.misaligned_order n)
+    let i : Nat := first
+    let finished : Bool := false
+    let write_success : Bool := true
+    let vaddr := (LeanRV32D.Functions.bits_of_virtaddr vaddr)
+    let (_finished, _i, write_success) ← (( do
+      let loop_vars ← untilFuelM (fuel := n) (λ (_data, finished, _i) => (pure finished)) (finished, i, write_success)
+        fun (finished, i, write_success) => do
+          let offset := i
+          let vaddr := (Sail.BitVec.addInt vaddr (offset *i bytes))
+          let write_success ← (( do
+            match (← (LeanRV32D.Functions.translateAddr (virtaddr.Virtaddr vaddr) acc)) with
+            | .Err (e, _) =>
+              Sail.SailME.throw ((Sail.Err (ExecutionResult.Memory_Exception ((virtaddr.Virtaddr vaddr), e))) : (Sail.Result Bool ExecutionResult))
+            | .Ok (paddr, _) =>
+              (do
+                if ((res && (not (match_reservation (LeanRV32D.Functions.bits_of_physaddr paddr)))) : Bool)
+                then (pure false)
+                else
+                  (do
+                    match (← (LeanRV32D.Functions.mem_write_ea paddr bytes aq rl res)) with
+                    | .Err e =>
+                      Sail.SailME.throw ((Sail.Err (ExecutionResult.Memory_Exception ((virtaddr.Virtaddr vaddr), e))) : (Sail.Result Bool ExecutionResult))
+                    | .Ok () =>
+                      (do
+                        let write_value :=
+                          (Sail.BitVec.extractLsb data (((8 *i (offset +i 1)) *i bytes) -i 1)
+                            ((8 *i offset) *i bytes))
+                        match (← (LeanRV32D.Functions.mem_write_value paddr bytes write_value aq rl res)) with
+                        | .Err e =>
+                          Sail.SailME.throw ((Sail.Err (ExecutionResult.Memory_Exception ((virtaddr.Virtaddr vaddr), e))) : (Sail.Result Bool ExecutionResult))
+                        | .Ok s => (pure (write_success && s))))) ) : Sail.SailME
+            (Sail.Result Bool ExecutionResult) Bool )
+          let (finished, i) : (Bool × Nat) :=
+            if ((offset == last) : Bool)
+            then
+              (let finished : Bool := true
+              (finished, i))
+            else
+              (let i : Nat := (offset +i step)
+              (finished, i))
+          (pure (finished, i, write_success))
+      (pure loop_vars) ) : Sail.SailME (Sail.Result Bool ExecutionResult) (Bool × Nat × Bool) )
+    (pure (Sail.Ok write_success))
+
+  lemma vmem_write_addr'_equiv :
+    vmem_write_addr' =
+    LeanRV32D.Functions.vmem_write_addr
+  := by
+    sorry
+
 end Local
