@@ -546,7 +546,7 @@ namespace Local
           )
         )
         width
-        (AccessType.Write Data)
+        (AccessType.Write ())
         Privilege.Machine
       ) s = EStateM.Result.ok none s
   := by

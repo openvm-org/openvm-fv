@@ -237,8 +237,6 @@ namespace Local
 
   lemma execute_STORE_simplified
     (s)
-    (rd : regidx)
-    (data₀ data₁ data₂ data₃ : BitVec 8)
     (h_aligned : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (rs1_val + (BitVec.signExtend 32 imm))) 4 = true)
     (h_rs1_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok rs1_val s)
     (h_rs2_val : LeanRV32D.Functions.rX_bits rs2 s = EStateM.Result.ok rs2_val s)
@@ -252,14 +250,21 @@ namespace Local
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    -- (h_does_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 < 2^32)
-    -- (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
-    -- (hmem₁ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
-    -- (hmem₂ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 2]? = some data₂)
-    -- (hmem₃ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 3]? = some data₃)
+    (h_does_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 < 2^32)
   :
     LeanRV32D.Functions.execute_STORE imm rs2 rs1 4 s =
-    sorry
+    EStateM.Result.ok (ExecutionResult.Retire_Success ()) {
+      regs := s.regs,
+      choiceState := s.choiceState,
+      tags := s.tags,
+      cycleCount := s.cycleCount,
+      sailOutput := s.sailOutput
+      mem :=
+        ((((s.mem.insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat) (BitVec.extractLsb 7 0 rs2_val)
+        ).insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat + 1) (BitVec.extractLsb 15 8 rs2_val))
+        ).insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat + 2) (BitVec.extractLsb 23 16 rs2_val)
+        ).insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat + 3) (BitVec.extractLsb 31 24 rs2_val)
+    }
   := by
     simp [
       LeanRV32D.Functions.execute_STORE,
@@ -319,8 +324,73 @@ namespace Local
       LeanRV32D.Functions.Data,
       LeanRV32D.Functions.phys_access_check,
       LeanRV32D.Functions.sys_pmp_count,
+      LeanRV32D.Functions.bits_of_virtaddr,
+      h_pmp_check,
+      LeanRV32D.Functions.within_mmio_writable,
+      LeanRV32D.Functions.get_config_rvfi,
+      LeanRV32D.Functions.within_clint,
+      h_clint_base,
+      h_clint_size,
+      LeanRV32D.Functions.within_htif_writable,
+      h_htif_tohost_base
     ]
-    done
+
+    rewrite [ite_cond_eq_false _ _ (by simp; omega)]
+    simp only [
+      LeanRV32D.Functions.within_phys_mem,
+      LeanRV32D.Functions.zero_extend,
+      Sail.BitVec.zeroExtend,
+      Sail.BitVec.addInt,
+      h_plat_ram_base,
+      h_plat_rom_base,
+      h_plat_ram_size,
+      h_plat_rom_size,
+      decide_true,
+      ↓dreduceIte,
+      pure_equiv,
+      BitVec.ofInt_ofNat,
+      BitVec.add_zero,
+      BitVec.truncate_eq_setWidth,
+      BitVec.toNat_setWidth,
+      BitVec.toNat_add,
+      Nat.reducePow,
+      Int.natCast_emod,
+      Nat.cast_add,
+      Nat.cast_ofNat,
+      Bool.and_eq_true,
+      decide_eq_true_eq,
+      bind_equiv,
+      BitVec.ofNat_eq_ofNat,
+      Nat.add_one_sub_one,
+      BitVec.toNat_ofNat,
+      Nat.zero_mod,
+    ]
+    rewrite [ite_cond_eq_true _ _ (by simp; omega)]
+    simp [
+      LeanRV32D.Functions.phys_mem_write,
+      LeanRV32D.Functions.write_ram,
+      Sail.sail_mem_write,
+      PreSail.sail_mem_write,
+      LeanRV32D.Functions.misaligned_order,
+      LeanRV32D.Functions.sys_misaligned_order_decreasing
+    ]
+
+    rewrite [
+      Nat.mod_eq_of_lt (by omega),
+      Nat.mod_eq_of_lt (by omega)
+    ]
+
+    simp [
+      PreSail.writeBytes,
+      PreSail.writeByte
+    ]
+
+    unfold modify modifyGet instMonadStateOfMonadStateOf MonadStateOf.modifyGet EStateM.instMonadStateOf EStateM.modifyGet ExceptT.pure ExceptT.mk EStateM.pure
+    dsimp
+
+    have (bv : BitVec 32) : BitVec.extractLsb 31 0 bv = bv := by simp [BitVec.extractLsb]
+    simp [this]
+    rfl
 
 
 end Local
