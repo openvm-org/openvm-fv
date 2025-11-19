@@ -1,5 +1,5 @@
 import OpenvmFv.Spec.run_hart_active
-import OpenvmFv.Spec.Load.local
+import OpenvmFv.Spec.LoadStore.local
 
 
 namespace Local
@@ -392,5 +392,9 @@ namespace Local
     simp [this]
     rfl
 
+  lemma execute_store_instruction:
+    LeanRV32D.Functions.execute (instruction.STORE (imm, rs2, rs1, width)) =
+    LeanRV32D.Functions.execute_STORE imm rs2 rs1 width
+  := rfl
 
 end Local

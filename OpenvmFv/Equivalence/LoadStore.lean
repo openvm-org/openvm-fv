@@ -1,5 +1,7 @@
-import OpenvmFv.Spec.Load.lw
+import OpenvmFv.Spec.LoadStore.lw
+import OpenvmFv.Spec.LoadStore.sw
 import OpenvmFv.Spec.Load
+import OpenvmFv.Spec.Store
 
 namespace Equivalence.LoadStore
 
@@ -128,6 +130,25 @@ namespace Equivalence.LoadStore
     : PureSpec.LwInput
   }
 
+  def SwInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.SwInput := {
+    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    imm := BabyBear.toBV32 row.imm
+    r2 := BitVec.ofFin (wrap_to_regidx row.rd)
+    r1_val := BabyBear.toBV32 row.rs1_val
+    r2_val := BabyBear.toBV32 row.prev_read_data
+    PC := row.pc.toNat
+    mstatus := config.mstatus
+    cur_privilege := config.cur_privielge
+    plat_clint_base := config.plat_clint_base
+    plat_clint_size := config.plat_clint_size
+    plat_ram_base := config.plat_ram_base
+    plat_ram_size := config.plat_ram_size
+    plat_rom_base := config.plat_rom_base
+    plat_rom_size := config.plat_rom_size
+    htif_tohost_base := config.htif_tohost_base
+    : PureSpec.SwInput
+  }
+
   def LwOutput_matches_LoadStore_instruction_fields (row : LoadStore_instruction_fields) (lw_output : PureSpec.LwOutput) : Prop :=
     BabyBear.isU32 row.imm ∧
     BabyBear.isU32 row.rs1_val ∧
@@ -152,6 +173,29 @@ namespace Equivalence.LoadStore
         BabyBear.toBV32 row.write_data = rd_val ∧
         rd.1.toNat * 4 = row.rd.toNat ∧
         row.needs_write = 1
+
+  def SwOutput_matches_LoadStore_instruction_fields (row : LoadStore_instruction_fields) (sw_output : PureSpec.SwOutput) : Prop :=
+    BabyBear.isU32 row.imm ∧
+    BabyBear.isU32 row.rs1_val ∧
+    BabyBear.isU32 row.prev_read_data ∧
+    BabyBear.isU32 row.read_data ∧
+    row.needs_write = 1 ∧
+    sw_output.nextPC = row.next_pc.toNat ∧
+    row.read_address_space = 1 ∧
+    row.read_ptr = row.rd ∧
+    row.write_address_space = row.memory_address_space ∧
+    row.write_ptr.val = (BabyBear.toBV32 row.imm + BabyBear.toBV32 row.rs1_val).toNat ∧
+    sw_output.data0.1 = row.write_ptr.val ∧
+    row.prev_read_data = row.read_data ∧
+    BitVec.signExtend 32 (BitVec.setWidth 12 (BabyBear.toBV32 row.imm)) = BabyBear.toBV32 row.imm ∧
+    BabyBear.toBV32 row.imm = BitVec.signExtend 32 (BitVec.ofNat 16 row.imm_lower_half) ∧
+    row.imm_sign = (BabyBear.toBV32 row.imm).msb.toNat ∧
+    row.write_data = #v[
+      ↑sw_output.data0.2.toNat,
+      ↑sw_output.data1.2.toNat,
+      ↑sw_output.data2.2.toNat,
+      ↑sw_output.data3.2.toNat
+    ]
 
   def LoadStore_instruction_fields.spec (row : LoadStore_instruction_fields) : Prop :=
     row.is_valid = 1 → (
@@ -1355,6 +1399,345 @@ namespace Equivalence.LoadStore
         simp
         decide
       done
+
+  set_option maxHeartbeats 0 in
+  lemma sw_spec_of_get_instruction_fields [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_row : row ≤ air.last_row)
+    (h_constraints : allHold_allRows air)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  :
+    ((get_instruction_fields_row air row).opcode = 531 →
+        SwOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
+          (PureSpec.execute_STORE_sw_pure
+            (SwInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
+  := by
+    intro h_opcode
+    simp [get_instruction_fields_row] at h_opcode
+    simp [
+      SwOutput_matches_LoadStore_instruction_fields,
+      get_instruction_fields_row
+    ]
+
+    rewrite [allHold_allRows] at h_constraints
+    specialize h_constraints ⟨row, by omega⟩
+    specialize h_bus_assumptions row h_row
+    specialize h_bus_wellformedness row h_row
+    simp [SwInput_of_LoadStore_instruction_fields, PureSpec.execute_STORE_sw_pure]
+    split_ands
+    . omega
+    . have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      omega
+    . omega
+    . have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      omega
+    . have := Store.rs1_data_0_range air row h_is_valid h_bus_wellformedness
+      apply Fin.lt_def.mp at this
+      convert this
+    . have := Store.rs1_data_1_range air row h_is_valid h_bus_wellformedness
+      apply Fin.lt_def.mp at this
+      convert this
+    . have := Store.rs1_data_2_range air row h_is_valid h_bus_wellformedness
+      apply Fin.lt_def.mp at this
+      convert this
+    . have := Store.rs1_data_3_range air row h_is_valid h_bus_wellformedness
+      apply Fin.lt_def.mp at this
+      convert this
+    . have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      exact h_memory.2.1.2.2.1
+    . have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      exact h_memory.2.1.2.2.2.1
+    . have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      exact h_memory.2.1.2.2.2.2.1
+    . have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      exact h_memory.2.1.2.2.2.2.2
+    . have := Store.needs_write_of_opcode_531 air row h_bus_wellformedness
+      exact this h_is_valid h_opcode
+    . simp [
+        Valid_VmAirWrapper_loadstore.to_pc
+      ]
+      have h_execution := h_bus_assumptions.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid
+      ] at h_execution
+      rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
+      . simp
+      . omega
+    . exact Store.read_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . exact Store.read_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . exact Store.write_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . simp only [U32.toNat]
+      rewrite [
+        BitVec.toNat_ofFin,
+        BitVec.toNat_ofFin,
+        BitVec.toNat_ofFin,
+        BitVec.toNat_ofFin,
+        BitVec.toNat_ofFin,
+      ]
+      simp
+      have := Store.write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      rewrite [this]; clear this
+      have h_mem_ptr := Store.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      have h_imm_sign_extend := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      rewrite [h_imm_sign_extend] at h_mem_ptr
+      rewrite [BitVec.toNat_eq] at h_mem_ptr
+      simp [-BitVec.toNat_add] at h_mem_ptr
+      rewrite [BitVec.toNat_add] at h_mem_ptr
+      simp at h_mem_ptr
+      rewrite [Nat.mod_eq_of_lt (by omega)] at h_mem_ptr
+      rewrite [h_mem_ptr]; clear h_mem_ptr
+      congr
+      rewrite [BitVec.toNat_ofFin]
+      simp
+      have (x y: ℕ) :
+        (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
+        (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
+        (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
+      := by bv_decide
+      rewrite [←this]; clear this
+      rewrite [BitVec.toNat_add]
+      simp
+      have (x: ℕ) :
+        x % 65536 =
+        256 * (x / 256) % 65536 + x % 256
+      := by
+        rewrite (occs := .pos [1]) [
+          ←Nat.div_add_mod x 256
+        ]
+        rw [
+          Nat.add_mod,
+          Nat.mod_eq_of_lt (by omega),
+          @Nat.mod_eq_of_lt (x % 256) _ (by omega)
+        ]
+      rewrite [@Nat.mod_eq_of_lt (_ % 65536)]
+      simp [Nat.shiftLeft_eq]
+      rewrite [@Nat.mod_eq_of_lt _ 4294967296 (by omega)]
+      rewrite [this]
+      . omega
+      . omega
+    . have := Store.write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      rewrite [this]; clear this
+      have := Store.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      rewrite [←BitVec.toNat_inj] at this
+      simp at this
+      rewrite [Nat.mod_eq_of_lt (by omega)] at this
+      rewrite [this]; clear this
+      rewrite [add_comm]
+      sorry
+      done
+    . have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      simp [U32.toBV]
+      have (bv1 bv2 bv3 bv4: BitVec 8) :
+        BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
+        BitVec.setWidth 12 (bv3 ++ bv4)
+      := by bv_decide
+      rewrite [this]; clear this
+      -- combine the two halves of imm into BitVec.ofNat 16 imm
+      have h_imm_range := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      have h_split_imm := split_bitvec_16_to_8s h_imm_range
+      simp [BitVec.ofNat, Nat.cast] at h_split_imm
+      unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm
+      dsimp at h_split_imm
+      simp (disch := omega) [Nat.mod_eq_of_lt] at h_split_imm
+      simp (disch := omega) [Nat.mod_eq_of_lt]
+      have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
+      rewrite [this]
+      simp [←h_split_imm]
+      have :
+        BitVec.signExtend 32 (BitVec.setWidth 12 (BitVec.ofNat 16 (air.adapter.imm row 0))) =
+        BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0))
+      := by
+        have h_transpile := h_bus_wellformedness.2.2.2
+        simp [
+          VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+          h_is_valid,
+          Interaction.ReadInstructionBusEntry.operand_properties
+        ] at h_transpile
+        obtain ⟨
+          instruction,
+          multiplciity,
+          data,
+          ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟩ := h_transpile
+        rewrite [←h_data_imm]
+        have := Transpiler.transpiler_opcode_531 h_instruction
+        simp [h_data_opcode, h_opcode] at this
+        have h_alignment := Transpiler.pc_aligned_of_some h_instruction
+        obtain ⟨imm, rs2, rs1, h_instruction_store⟩ := this
+        rewrite [h_instruction_store] at h_instruction
+        unfold Transpiler.transpile_op at h_instruction
+        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_instruction
+        dsimp at h_instruction
+        simp [-Vector.mk_eq] at h_instruction
+        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        bv_decide
+      convert this using 1
+      . simp [BitVec.ofNat, Nat.cast]
+        unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
+        dsimp
+        simp (disch := omega) [Nat.mod_eq_of_lt]
+      . have h_imm_extended_range := Load.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
+        have h_split_imm_extended := split_bitvec_16_to_8s h_imm_extended_range
+        simp [BitVec.ofNat, Nat.cast] at h_split_imm_extended
+        unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm_extended
+        dsimp at h_split_imm_extended
+        simp (disch := omega) [Nat.mod_eq_of_lt] at h_split_imm_extended
+        simp (disch := omega) [Nat.mod_eq_of_lt]
+        rewrite [←h_split_imm_extended]
+        have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+        rewrite [this]
+        simp [BitVec.ofNat, Nat.cast]
+        unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
+        dsimp
+        simp (disch := omega) [Nat.mod_eq_of_lt]
+    . simp [U32.toBV]
+      have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      rewrite [this]
+      have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
+      rewrite [this]; clear this
+      congr
+      . have := Nat.div_add_mod (air.adapter.imm_extended_limb row 0).val 256
+        have :
+          BitVec.ofNat 16 (air.adapter.imm_extended_limb row 0).val =
+          BitVec.ofNat 16 (
+            256 * ((air.adapter.imm_extended_limb row 0).val / 256) +
+            (air.adapter.imm_extended_limb row 0).val % 256
+          )
+        := by
+          rw (occs := .pos [1]) [←this]
+        rewrite [this]; clear this; clear this; clear this
+        rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
+        have : (air.adapter.imm_extended_limb row 0).val / 256 < 256 := by
+          have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+          omega
+        simp [Nat.mod_eq_of_lt this]
+        have (bv1 bv2: BitVec 8) :
+          256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
+          bv1 ++ bv2
+        := by bv_decide
+        rewrite [←this]
+        congr
+        . simp [
+            ← BitVec.toNat_inj,
+            - BitVec.toNat_ofFin
+          ]
+          rw [BitVec.toNat_ofFin]
+        . simp [
+            ← BitVec.toNat_inj,
+            - BitVec.toNat_ofFin
+          ]
+          rw [BitVec.toNat_ofFin]
+      . have := Nat.div_add_mod (air.adapter.imm row 0).val 256
+        have :
+          BitVec.ofNat 16 (air.adapter.imm row 0).val =
+          BitVec.ofNat 16 (
+            256 * ((air.adapter.imm row 0).val / 256) +
+            (air.adapter.imm row 0).val % 256
+          )
+        := by
+          rw (occs := .pos [1]) [←this]
+        rewrite [this]; clear this; clear this; clear this
+        rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
+        have : (air.adapter.imm row 0).val / 256 < 256 := by
+          have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+          omega
+        simp [Nat.mod_eq_of_lt this]
+        have (bv1 bv2: BitVec 8) :
+          256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
+          bv1 ++ bv2
+        := by bv_decide
+        rewrite [←this]
+        congr <;> {
+          unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
+          simp [BitVec.ofNat]
+          refine BitVec.eq_of_toNat_eq ?_
+          simp
+          omega
+        }
+    . have := Store.imm_sign_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
+      rewrite [this]; clear this
+      simp [U32.toBV]
+      have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+      simp [this]
+      have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      have :
+        (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
+        (air.adapter.imm_extended_limb row 0).val / 256
+      := by
+        omega
+      simp [this]
+      have h_sign_extend := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+      have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
+      apply this at h_sign_extend
+      have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+      rewrite [this] at h_sign_extend
+      rewrite [h_sign_extend]
+      have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+      rewrite [this]
+      have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
+      rewrite [this]
+      simp [BitVec.msb, BitVec.getMsbD, Nat.testBit]
+      rewrite [Nat.mod_eq_of_lt (by omega)]
+      unfold getElem BitVec.instGetElemNatBoolLt
+      simp only [BitVec.getLsb, Nat.testBit]
+      simp
+      rewrite [
+        Nat.mod_eq_of_lt (by omega),
+        Nat.mod_eq_of_lt (by omega),
+        Nat.shiftRight_eq_div_pow,
+        Nat.shiftRight_eq_div_pow,
+      ]
+      simp
+      rewrite [Nat.div_div_eq_div_mul]
+      simp
+    . have := Store.write_data_0_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      rewrite [this]; clear this
+      simp [U32.toNat]
+      have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      have h_range := h_memory.2.1.2.2.1
+      simp [Nat.add_mod]
+      have (a: ℕ) : a * 65536 % 256 = 0 := by omega
+      simp [this]
+      have (a: ℕ) : a * 16777216 % 256 = 0 := by omega
+      simp [Nat.add_mod]
+      simp [this]
+      rewrite [Nat.mod_eq_of_lt h_range]
+      exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_0 row 0))
+    . done
+    . done
+    . done
+    done
+
+  -- below here is still unedited copy-paste
 
   lemma non_imm_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
