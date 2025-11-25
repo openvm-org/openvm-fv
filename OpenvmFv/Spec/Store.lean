@@ -1054,6 +1054,21 @@ namespace Store
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
     grind
 
+  lemma mem_ptr_range_of_opcode_531 [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_opcode : air.core.expected_opcode row 0 = 531)
+    (h_row : row ≤ air.last_row)
+    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+  : air.adapter.mem_ptr row 0 < 2^29
+  := by
+    unfold Valid_Rv32LoadStoreAdapterAir.mem_ptr
+    have := mem_ptr_limbs_0_range_of_opcode_531 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+    have := mem_ptr_limbs_1_range_of_opcode_531 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+    grind
+
   lemma rs1_data_0_range [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)

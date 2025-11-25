@@ -250,7 +250,7 @@ namespace Local
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    (h_does_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 < 2^32)
+    (h_does_fit : (rs1_val + BitVec.signExtend 32 imm).toNat + 4 < 2^32)
   :
     LeanRV32D.Functions.execute_STORE imm rs2 rs1 4 s =
     EStateM.Result.ok (ExecutionResult.Retire_Success ()) {
@@ -260,10 +260,10 @@ namespace Local
       cycleCount := s.cycleCount,
       sailOutput := s.sailOutput
       mem :=
-        ((((s.mem.insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat) (BitVec.extractLsb 7 0 rs2_val)
-        ).insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat + 1) (BitVec.extractLsb 15 8 rs2_val))
-        ).insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat + 2) (BitVec.extractLsb 23 16 rs2_val)
-        ).insert (BitVec.toNat rs1_val + (BitVec.signExtend 32 imm).toNat + 3) (BitVec.extractLsb 31 24 rs2_val)
+        ((((s.mem.insert (rs1_val + BitVec.signExtend 32 imm).toNat (BitVec.extractLsb 7 0 rs2_val)
+        ).insert ((rs1_val + BitVec.signExtend 32 imm).toNat + 1) (BitVec.extractLsb 15 8 rs2_val))
+        ).insert ((rs1_val + BitVec.signExtend 32 imm).toNat + 2) (BitVec.extractLsb 23 16 rs2_val)
+        ).insert ((rs1_val + BitVec.signExtend 32 imm).toNat + 3) (BitVec.extractLsb 31 24 rs2_val)
     }
   := by
     simp [
@@ -336,6 +336,10 @@ namespace Local
     ]
 
     rewrite [ite_cond_eq_false _ _ (by simp; omega)]
+    have bitvec_zero_extend_to_nat (a: BitVec 32): (BitVec.zeroExtend 34 a).toNat = a.toNat := by
+      clear *-a
+      simp
+      omega
     simp only [
       LeanRV32D.Functions.within_phys_mem,
       LeanRV32D.Functions.zero_extend,
@@ -348,24 +352,38 @@ namespace Local
       decide_true,
       ↓dreduceIte,
       pure_equiv,
+      bind_equiv,
+      decide_eq_true_eq,
+      Bool.and_eq_true,
       BitVec.ofInt_ofNat,
       BitVec.add_zero,
-      BitVec.truncate_eq_setWidth,
-      BitVec.toNat_setWidth,
-      BitVec.toNat_add,
+      bitvec_zero_extend_to_nat
+    ]
+
+    simp at h_does_fit
+    simp only [
+      BitVec.ofNat_eq_ofNat,
+      decide_true,
+      ↓dreduceIte,
       Nat.reducePow,
+      BitVec.toNat_add,
       Int.natCast_emod,
       Nat.cast_add,
       Nat.cast_ofNat,
-      Bool.and_eq_true,
-      decide_eq_true_eq,
-      bind_equiv,
-      BitVec.ofNat_eq_ofNat,
+      CharP.cast_eq_zero,
       Nat.add_one_sub_one,
-      BitVec.toNat_ofNat,
-      Nat.zero_mod,
+      zero_add,
+      BitVec.truncate_eq_setWidth
     ]
-    rewrite [ite_cond_eq_true _ _ (by simp; omega)]
+    rewrite [BitVec.toNat_ofNat]
+    have : 2^34 = 17179869184 := rfl
+    rewrite [this]; clear this
+    simp only [Nat.reduceMod]
+    rewrite [ite_cond_eq_true]; swap
+    . simp
+      omega
+    simp
+
     simp [
       LeanRV32D.Functions.phys_mem_write,
       LeanRV32D.Functions.write_ram,
@@ -375,15 +393,13 @@ namespace Local
       LeanRV32D.Functions.sys_misaligned_order_decreasing
     ]
 
-    rewrite [
-      Nat.mod_eq_of_lt (by omega),
-      Nat.mod_eq_of_lt (by omega)
-    ]
+    rewrite [Nat.mod_eq_of_lt (by omega)]
 
     simp [
       PreSail.writeBytes,
       PreSail.writeByte
     ]
+
 
     unfold modify modifyGet instMonadStateOfMonadStateOf MonadStateOf.modifyGet EStateM.instMonadStateOf EStateM.modifyGet ExceptT.pure ExceptT.mk EStateM.pure
     dsimp

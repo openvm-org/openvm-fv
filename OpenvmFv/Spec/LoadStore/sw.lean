@@ -121,7 +121,7 @@ namespace PureSpec
     i.plat_rom_base = 0 ∧
     i.htif_tohost_base = .none ∧
     BitVec.extractLsb 17 17 i.mstatus = 0#1 ∧
-    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 4 < 2^32
+    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 4 < 2^32
 
   set_option maxHeartbeats 0 in
   lemma r1_of_write_state

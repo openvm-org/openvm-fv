@@ -1690,7 +1690,7 @@ namespace Equivalence.LoadStore
       := by
         omega
       simp [this]
-      have h_sign_extend := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+      have h_sign_extend := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
       apply this at h_sign_extend
       have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
@@ -1732,9 +1732,97 @@ namespace Equivalence.LoadStore
       simp [this]
       rewrite [Nat.mod_eq_of_lt h_range]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_0 row 0))
-    . done
-    . done
-    . done
+    . have := Store.write_data_1_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      rewrite [this]; clear this
+      simp [U32.toNat]
+      have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      have h_range := h_memory.2.1.2.2.2.1
+      simp [
+        Nat.shiftRight_eq_div_pow,
+        Nat.add_div,
+        Nat.add_mod
+      ]
+      rewrite [
+        ite_cond_eq_false _ _ (by simp; omega),
+        ite_cond_eq_false _ _ (by simp; omega),
+        ite_cond_eq_false _ _ (by simp; omega)
+      ]
+      simp [
+        Nat.add_mod
+      ]
+      have (a : ℕ) : a % 256 * 65536 / 256 % 256 = 0 := by omega
+      simp [this]; clear this
+      have (a : ℕ) : a % 256 * 16777216 / 256 % 256 = 0 := by omega
+      simp [Nat.add_mod, this]
+      rewrite [Nat.mod_eq_of_lt (by omega)]
+      exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_1 row 0))
+    . have := Store.write_data_2_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      rewrite [this]; clear this
+      simp [U32.toNat]
+      have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      have h_range := h_memory.2.1.2.2.2.2.1
+      simp [
+        Nat.shiftRight_eq_div_pow,
+        Nat.add_div,
+        Nat.add_mod
+      ]
+      rewrite [
+        ite_cond_eq_false _ _ (by simp; omega),
+        ite_cond_eq_false _ _ (by simp; omega),
+        ite_cond_eq_false _ _ (by simp; omega)
+      ]
+      simp [
+        Nat.add_mod
+      ]
+      have (a : ℕ) : a % 256 / 65536 = 0 := by omega
+      simp [this]; clear this
+      have (a : ℕ) : a % 256 * 256 / 65536 = 0 := by omega
+      simp [this]; clear this
+      have (a : ℕ) : a % 256 * 16777216 / 65536 % 256 = 0 := by omega
+      simp [Nat.add_mod, this]
+      rewrite [Nat.mod_eq_of_lt (by omega)]
+      exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_2 row 0))
+    . have := Store.write_data_3_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      rewrite [this]; clear this
+      simp [U32.toNat]
+      have h_memory := h_bus_wellformedness.2.1
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        show (2013265920 : FBB) = (-1 : FBB) by decide
+      ] at h_memory
+      have h_range := h_memory.2.1.2.2.2.2.2
+      simp [
+        Nat.shiftRight_eq_div_pow,
+        Nat.add_div,
+        Nat.add_mod
+      ]
+      rewrite [
+        ite_cond_eq_false _ _ (by simp; omega),
+        ite_cond_eq_false _ _ (by simp; omega),
+        ite_cond_eq_false _ _ (by simp; omega)
+      ]
+      simp [
+        Nat.add_mod
+      ]
+      have (a : ℕ) : a % 256 / 16777216 = 0 := by omega
+      simp [this]; clear this
+      have (a : ℕ) : a % 256 * 256 / 16777216 = 0 := by omega
+      simp [this]; clear this
+      have (a : ℕ) : a % 256 * 65536 / 16777216 = 0 := by omega
+      simp [this]
+      rewrite [Nat.mod_eq_of_lt (by omega)]
+      exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_3 row 0))
     done
 
   -- below here is still unedited copy-paste
