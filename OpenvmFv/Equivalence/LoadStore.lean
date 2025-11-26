@@ -1403,16 +1403,25 @@ namespace Equivalence.LoadStore
   := by
     intro h_opcode
     simp [get_instruction_fields_row] at h_opcode
+
     simp [
       SwOutput_matches_LoadStore_instruction_fields,
-      get_instruction_fields_row
+      get_instruction_fields_row,
+      -BitVec.toNat_add
     ]
-
+    repeat rw [BitVec.toNat_add]
+    simp
     rewrite [allHold_allRows] at h_constraints
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_assumptions row h_row
     specialize h_bus_wellformedness row h_row
-    simp [SwInput_of_LoadStore_instruction_fields, PureSpec.execute_STORE_sw_pure]
+    simp [
+      SwInput_of_LoadStore_instruction_fields,
+      PureSpec.execute_STORE_sw_pure,
+      -BitVec.toNat_add
+    ]
+    repeat rw [BitVec.toNat_add]
+    simp
     split_ands
     . omega
     . have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
@@ -1576,7 +1585,6 @@ namespace Equivalence.LoadStore
       rewrite [this]
       clear this
       rfl
-      done
     . have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       simp [U32.toBV]
       have (bv1 bv2 bv3 bv4: BitVec 8) :
@@ -1819,143 +1827,5 @@ namespace Equivalence.LoadStore
       simp [this]
       rewrite [Nat.mod_eq_of_lt (by omega)]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_3 row 0))
-    done
-
-  -- below here is still unedited copy-paste
-
-  lemma non_imm_spec_of_get_instruction_fields [Field ExtF]
-    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
-    (row : ℕ)
-    (h_row : row ≤ air.last_row)
-    (h_constraints : allHold_allRows air)
-    (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
-  :
-    ((get_instruction_fields_row air row).non_imm = 1 →
-    ((get_instruction_fields_row air row).opcode = 512 →
-        AddOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_RTYPE_add_pure
-            (AddInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode = 513 →
-          SubOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_RTYPE_sub_pure
-              (SubInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode = 514 →
-          XorOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_RTYPE_xor_pure
-              (XorInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode = 515 →
-          OrOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_RTYPE_or_pure
-              (OrInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode = 516 →
-          AndOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_RTYPE_and_pure
-              (AndInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))))
-  := by
-    intro h_non_imm
-    simp [get_instruction_fields_row] at h_non_imm
-
-    exact ⟨
-      add_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm, ⟨
-        sub_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm, ⟨
-          xor_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm, ⟨
-            or_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm,
-            and_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm
-          ⟩
-        ⟩
-      ⟩
-    ⟩
-
-  lemma imm_spec_of_get_instruction_fields [Field ExtF]
-    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
-    (row : ℕ)
-    (h_row : row ≤ air.last_row)
-    (h_constraints : allHold_allRows air)
-    (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
-  :
-    ((get_instruction_fields_row air row).non_imm = 0 →
-    ((get_instruction_fields_row air row).opcode = 512 →
-        AddiOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_ITYPE_addi_pure
-            (AddiInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode ≠ 513) ∧
-      ((get_instruction_fields_row air row).opcode = 514 →
-          XoriOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_ITYPE_xori_pure
-              (XoriInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode = 515 →
-          OriOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_ITYPE_ori_pure
-              (OriInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))) ∧
-      ((get_instruction_fields_row air row).opcode = 516 →
-          AndiOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-            (PureSpec.execute_ITYPE_andi_pure
-              (AndiInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row)))))
-  := by
-    intro h_imm
-    simp [get_instruction_fields_row] at h_imm
-
-    exact ⟨
-      addi_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_imm, ⟨
-        subi_spec_of_get_instruction_fields air row h_row h_is_valid h_bus_wellformedness h_imm, ⟨
-          xori_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_imm, ⟨
-            ori_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_imm,
-            andi_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_imm
-          ⟩
-        ⟩
-      ⟩
-    ⟩
-
-  lemma spec_of_get_instruction_fields [Field ExtF]
-    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
-    (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
-  :
-    List.Forall LoadStore_instruction_fields.spec (get_instruction_fields air)
-  := by
-    apply List.forall_iff_forall_mem.mpr
-    intro instruction_fields h_instruction_fields
-    unfold LoadStore_instruction_fields.spec
-
-    intro h_is_valid
-
-    simp [get_instruction_fields] at h_instruction_fields
-    obtain ⟨row, ⟨h_row_range, h_fields⟩⟩ := h_instruction_fields
-    rewrite [←h_fields] at ⊢ h_is_valid; clear h_fields
-
-    simp [get_instruction_fields_row] at h_is_valid
-
-    exact ⟨
-      get_instruction_fields_row_non_imm_binary air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
-      ⟨
-        get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
-        ⟨
-          non_imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
-          imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-        ⟩
-      ⟩
-    ⟩
-
-  theorem lt_spec [Field ExtF]
-    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
-    (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
-  :
-    ∃ instruction_fields_list : List LoadStore_instruction_fields,
-      air.buses = bus_from_instruction_fields instruction_fields_list ∧
-      instruction_fields_list.Forall LoadStore_instruction_fields.spec
-  := by
-    use get_instruction_fields air
-    simp only [
-      bus_from_instruction_fields_eq_air_buses air h_constraints,
-      spec_of_get_instruction_fields air h_constraints h_bus_assumptions h_bus_wellformedness
-    ]
-    trivial
 
 end Equivalence.LoadStore
