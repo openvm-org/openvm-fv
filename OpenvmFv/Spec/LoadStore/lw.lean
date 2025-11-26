@@ -104,10 +104,10 @@ namespace PureSpec
     Sail.readReg Register.plat_ram_size state = EStateM.Result.ok i.plat_ram_size state ∧
     Sail.readReg Register.plat_rom_size state = EStateM.Result.ok i.plat_rom_size state ∧
     Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok i.htif_tohost_base state ∧
-    state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
-    state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 1]? = .some i.data1 ∧
-    state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 2]? = .some i.data2 ∧
-    state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 3]? = .some i.data3 ∧
+    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
+    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat + 1]? = .some i.data1 ∧
+    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat + 2]? = .some i.data2 ∧
+    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat + 3]? = .some i.data3 ∧
     state.regs.get? Register.PC = .some i.PC ∧
     i.cur_privilege = Privilege.Machine ∧
     i.plat_clint_base = 0 ∧
@@ -117,7 +117,7 @@ namespace PureSpec
     i.plat_rom_base = 0 ∧
     i.htif_tohost_base = .none ∧
     BitVec.extractLsb 17 17 i.mstatus = 0#1 ∧
-    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 4 < 2^32
+    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 4 < 2^32
 
   set_option maxHeartbeats 0 in
   lemma r1_of_write_state

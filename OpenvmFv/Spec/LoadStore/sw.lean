@@ -41,19 +41,19 @@ namespace PureSpec
   def execute_STORE_sw_pure (input : SwInput) : SwOutput := {
     nextPC := input.PC + 4#32
     data0 := (
-      input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat,
+      (input.r1_val + BitVec.signExtend 32 input.imm).toNat,
       BitVec.extractLsb 7 0 input.r2_val
     )
     data1 := (
-      input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat + 1,
+      (input.r1_val + BitVec.signExtend 32 input.imm).toNat + 1,
       BitVec.extractLsb 15 8 input.r2_val
     )
     data2 := (
-      input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat + 2,
+      (input.r1_val + BitVec.signExtend 32 input.imm).toNat + 2,
       BitVec.extractLsb 23 16 input.r2_val
     )
     data3 := (
-      input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat + 3,
+      (input.r1_val + BitVec.signExtend 32 input.imm).toNat + 3,
       BitVec.extractLsb 31 24 input.r2_val
     )
     : SwOutput

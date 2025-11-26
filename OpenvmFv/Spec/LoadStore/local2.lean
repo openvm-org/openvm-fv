@@ -19,11 +19,11 @@ namespace Local
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    (h_does_fit : reg_val.toNat + offset.toNat + 4 < 2^32)
-    (hmem₀ : s.mem[reg_val.toNat + offset.toNat]? = some data₀)
-    (hmem₁ : s.mem[reg_val.toNat + offset.toNat + 1]? = some data₁)
-    (hmem₂ : s.mem[reg_val.toNat + offset.toNat + 2]? = some data₂)
-    (hmem₃ : s.mem[reg_val.toNat + offset.toNat + 3]? = some data₃) :
+    (h_does_fit : (reg_val + offset).toNat + 4 < 2^32)
+    (hmem₀ : s.mem[(reg_val + offset).toNat]? = some data₀)
+    (hmem₁ : s.mem[(reg_val + offset).toNat + 1]? = some data₁)
+    (hmem₂ : s.mem[(reg_val + offset).toNat + 2]? = some data₂)
+    (hmem₃ : s.mem[(reg_val + offset).toNat + 3]? = some data₃) :
     let width := 4
     let data := data₃ ++ data₂ ++ data₁ ++ data₀
     (LeanRV32D.Functions.vmem_read
@@ -38,13 +38,17 @@ namespace Local
   have hsatp_bare : (SATPMode.Bare == SATPMode.Bare) = true := rfl
   have hmachine : (Privilege.Machine == Privilege.Machine) = true := rfl
   have hmem₀' : s.mem[(reg_val.toNat + offset.toNat) % 4294967296]? = some data₀ := by
-    rwa [Nat.mod_eq_of_lt]; clear *- h_does_fit; omega
+    clear *- hmem₀ h_does_fit
+    convert hmem₀
   have hmem₁' : s.mem[(reg_val.toNat + offset.toNat) % 4294967296 + 1]? = some data₁ := by
-    rwa [Nat.mod_eq_of_lt]; clear *- h_does_fit; omega
+    clear *- hmem₁ h_does_fit
+    convert hmem₁
   have hmem₂' : s.mem[(reg_val.toNat + offset.toNat) % 4294967296 + 2]? = some data₂ := by
-    rwa [Nat.mod_eq_of_lt]; clear *- h_does_fit; omega
+    clear *- hmem₂ h_does_fit
+    convert hmem₂
   have hmem₃' : s.mem[(reg_val.toNat + offset.toNat) % 4294967296 + 3]? = some data₃ := by
-    rwa [Nat.mod_eq_of_lt]; clear *- h_does_fit; omega
+    clear *- hmem₃ h_does_fit
+    convert hmem₃
 
   simp [
     Nat.reduceMul, vmem_read',
@@ -142,7 +146,11 @@ namespace Local
     decide_true,
     ↓dreduceIte,
   ]
-  rewrite [ite_cond_eq_true _ _ (by simp; omega)]
+  rewrite [ite_cond_eq_true]; swap
+  . simp
+    clear *-h_does_fit
+    simp at h_does_fit
+    omega
 
   simp [
     LeanRV32D.Functions.phys_mem_read,
@@ -190,11 +198,11 @@ namespace Local
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    (h_does_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 < 2^32)
-    (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
-    (hmem₁ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
-    (hmem₂ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 2]? = some data₂)
-    (hmem₃ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 3]? = some data₃)
+    (h_does_fit : (reg_val + BitVec.signExtend 32 imm).toNat + 4 < 2^32)
+    (hmem₀ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat]? = some data₀)
+    (hmem₁ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
+    (hmem₂ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat + 2]? = some data₂)
+    (hmem₃ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat + 3]? = some data₃)
   :
     execute_LOAD imm rs1 rd true 4 s =
     match LeanRV32D.Functions.wX_bits rd (data₃ ++ data₂ ++ data₁ ++ data₀) s with

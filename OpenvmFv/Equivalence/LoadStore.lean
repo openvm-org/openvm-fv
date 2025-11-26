@@ -646,12 +646,6 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_1 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
-    (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.imm row 0).val % 256 < 256
   := by
@@ -660,11 +654,8 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_2 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.imm row 0).val / 256 < 256
@@ -675,12 +666,6 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_3 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
-    (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.imm_extended_limb row 0).val % 256 < 256
   := by
@@ -691,10 +676,7 @@ namespace Equivalence.LoadStore
     (row : ℕ)
     (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.imm_extended_limb row 0).val / 256 < 256
   := by
@@ -704,11 +686,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_5 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.rs1_data_0 row 0).val < 256
@@ -720,11 +698,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_6 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.rs1_data_1 row 0).val < 256
@@ -736,11 +710,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_7 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.rs1_data_2 row 0).val < 256
@@ -752,11 +722,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_8 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.rs1_data_3 row 0).val < 256
@@ -768,11 +734,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_9 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.core.read_data_0 row 0).val < 256
@@ -788,11 +750,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_10 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.core.read_data_1 row 0).val < 256
@@ -808,11 +766,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_11 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.core.read_data_2 row 0).val < 256
@@ -828,11 +782,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_12 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.core.read_data_3 row 0).val < 256
@@ -848,11 +798,7 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_13 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     air.adapter.needs_write row 0 = 1 →
@@ -882,7 +828,6 @@ namespace Equivalence.LoadStore
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_opcode : air.core.expected_opcode row 0 = 528)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     air.adapter.needs_write row 0 = 1 →
@@ -913,12 +858,8 @@ namespace Equivalence.LoadStore
   lemma lw_spec_of_get_instruction_fields_part_15 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
-    (h_row : row ≤ air.last_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_opcode : air.core.expected_opcode row 0 = 528)
-    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
-    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     BitVec.ofNat 32 (air.adapter.from_state.pc row 0).val + 4#32 =
     BitVec.ofNat 32 (air.to_pc row 0).val
@@ -942,7 +883,6 @@ namespace Equivalence.LoadStore
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_opcode : air.core.expected_opcode row 0 = 528)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h1 : (air.adapter.imm row 0).val % 256 < 2 ^ 8)
     (h2 : (air.adapter.imm row 0).val / 256 % 256 < 2 ^ 8)
@@ -1308,24 +1248,24 @@ namespace Equivalence.LoadStore
     simp [LwInput_of_LoadStore_instruction_fields, PureSpec.execute_LOAD_lw_pure]
 
     split_ands
-    . exact lw_spec_of_get_instruction_fields_part_1 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_2 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_3 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_4 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_5 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_6 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_7 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_8 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_9 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_10 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_11 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_12 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_13 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_14 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_15 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_1 air row
+    . exact lw_spec_of_get_instruction_fields_part_2 air row h_is_valid h_opcode h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_3 air row
+    . exact lw_spec_of_get_instruction_fields_part_4 air row h_row h_is_valid h_constraints
+    . exact lw_spec_of_get_instruction_fields_part_5 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_6 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_7 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_8 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_9 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_10 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_11 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_12 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_13 air row h_is_valid h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_14 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields_part_15 air row h_is_valid h_bus_assumptions
     . exact Load.read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     . exact Load.write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
-    . apply lw_spec_of_get_instruction_fields_part_16 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
+    . apply lw_spec_of_get_instruction_fields_part_16 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
     . exact Load.write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     . apply lw_spec_of_get_instruction_fields_part_17 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
     . apply lw_spec_of_get_instruction_fields_part_18 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
@@ -1375,14 +1315,11 @@ namespace Equivalence.LoadStore
             simp [this]
             have := Load.write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            done
           . grind
-            done
           . clear *-h_rd
             fin_cases rd
             . simp_all
             all_goals decide
-          done
         . clear *-h_rd
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           simp
@@ -1398,7 +1335,56 @@ namespace Equivalence.LoadStore
         rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
         simp
         decide
-      done
+
+  lemma imm_extended_limb_upper_mod_of_opcode_531 [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_row : row ≤ air.last_row)
+    (h_opcode : air.core.expected_opcode row 0 = 531)
+    (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  :
+    (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
+    (air.adapter.imm_extended_limb row 0).val / 256
+  := by
+    have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    omega
+
+  lemma imm_12_bits_of_opcode_531 [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_opcode : air.core.expected_opcode row 0 = 531)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  :
+    BitVec.signExtend 32 (BitVec.setWidth 12 (BitVec.ofNat 16 (air.adapter.imm row 0))) =
+    BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0))
+  := by
+    have h_transpile := h_bus_wellformedness.2.2.2
+    simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      h_is_valid,
+      Interaction.ReadInstructionBusEntry.operand_properties
+    ] at h_transpile
+    obtain ⟨
+      instruction,
+      multiplciity,
+      data,
+      ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+    ⟩ := h_transpile
+    rewrite [←h_data_imm]
+    have := Transpiler.transpiler_opcode_531 h_instruction
+    simp [h_data_opcode, h_opcode] at this
+    have h_alignment := Transpiler.pc_aligned_of_some h_instruction
+    obtain ⟨imm, rs2, rs1, h_instruction_store⟩ := this
+    rewrite [h_instruction_store] at h_instruction
+    unfold Transpiler.transpile_op at h_instruction
+    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_instruction
+    dsimp at h_instruction
+    simp [-Vector.mk_eq] at h_instruction
+    simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+    bv_decide
 
   set_option maxHeartbeats 0 in
   lemma sw_spec_of_get_instruction_fields [Field ExtF]
@@ -1547,7 +1533,49 @@ namespace Equivalence.LoadStore
       rewrite [Nat.mod_eq_of_lt (by omega)] at this
       rewrite [this]; clear this
       rewrite [add_comm]
-      sorry
+      simp [
+        U32.toBV,
+        U32.toNat
+      ]
+      have (a b c d: BitVec 8) :
+        BitVec.setWidth 12 (a ++ b ++ c ++ d) =
+        BitVec.setWidth 12 (c ++ d)
+      := by
+        bv_decide
+      rewrite [this]; clear this
+      have
+        (h1 : (air.adapter.imm row 0).val / 256 % 256 < 256)
+        (h2 : (air.adapter.imm row 0).val % 256 < 256)
+      :
+        (
+          BitVec.ofNat 16 (air.adapter.imm row 0)
+        ) =
+         ({ toFin := ⟨(air.adapter.imm row 0).val / 256 % 256, h1⟩} : BitVec 8) ++
+         ({ toFin := ⟨(air.adapter.imm row 0).val % 256, h2⟩} : BitVec 8)
+      := by
+        rewrite (occs := .pos [1]) [←Nat.div_add_mod (air.adapter.imm row 0).val 256]
+        rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
+        have (a b: BitVec 8) :
+          256#16 * BitVec.setWidth 16 a +
+          BitVec.setWidth 16 b =
+          a ++ b
+        := by
+          bv_decide
+        rewrite [←this]; clear this
+        congr
+        . rewrite [←BitVec.toNat_inj]
+          simp
+          have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+          omega
+        . rewrite [←BitVec.toNat_inj]
+          simp
+      rewrite [←this]; clear this
+      simp
+      have := imm_12_bits_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      simp at this
+      rewrite [this]
+      clear this
+      rfl
       done
     . have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       simp [U32.toBV]
@@ -1567,34 +1595,7 @@ namespace Equivalence.LoadStore
       have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
       rewrite [this]
       simp [←h_split_imm]
-      have :
-        BitVec.signExtend 32 (BitVec.setWidth 12 (BitVec.ofNat 16 (air.adapter.imm row 0))) =
-        BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0))
-      := by
-        have h_transpile := h_bus_wellformedness.2.2.2
-        simp [
-          VmAirWrapper_loadstore_constraint_and_interaction_simplification,
-          h_is_valid,
-          Interaction.ReadInstructionBusEntry.operand_properties
-        ] at h_transpile
-        obtain ⟨
-          instruction,
-          multiplciity,
-          data,
-          ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
-        ⟩ := h_transpile
-        rewrite [←h_data_imm]
-        have := Transpiler.transpiler_opcode_531 h_instruction
-        simp [h_data_opcode, h_opcode] at this
-        have h_alignment := Transpiler.pc_aligned_of_some h_instruction
-        obtain ⟨imm, rs2, rs1, h_instruction_store⟩ := this
-        rewrite [h_instruction_store] at h_instruction
-        unfold Transpiler.transpile_op at h_instruction
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_instruction
-        dsimp at h_instruction
-        simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-        bv_decide
+      have := imm_12_bits_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       convert this using 1
       . simp [BitVec.ofNat, Nat.cast]
         unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
@@ -1683,12 +1684,7 @@ namespace Equivalence.LoadStore
       simp [U32.toBV]
       have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
       simp [this]
-      have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
-      have :
-        (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
-        (air.adapter.imm_extended_limb row 0).val / 256
-      := by
-        omega
+      have := imm_extended_limb_upper_mod_of_opcode_531 air row h_row h_opcode h_constraints h_is_valid h_bus_wellformedness
       simp [this]
       have h_sign_extend := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
@@ -1962,4 +1958,4 @@ namespace Equivalence.LoadStore
     ]
     trivial
 
-end Equivalence.BaseLoadStore
+end Equivalence.LoadStore

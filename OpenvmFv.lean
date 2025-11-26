@@ -56,6 +56,7 @@ import OpenvmFv.Equivalence.Auipc
 import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
+import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Shift
 
@@ -105,6 +106,7 @@ import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.LoadStore.local2
 import OpenvmFv.Spec.LoadStore.lw
+import OpenvmFv.Spec.LoadStore.sw
 import OpenvmFv.Spec.RTYPE.add
 import OpenvmFv.Spec.RTYPE.and
 import OpenvmFv.Spec.RTYPE.local
