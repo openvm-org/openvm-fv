@@ -1408,16 +1408,25 @@ namespace Equivalence.LoadStore
   := by
     intro h_opcode
     simp [get_instruction_fields_row] at h_opcode
+
     simp [
       SwOutput_matches_LoadStore_instruction_fields,
-      get_instruction_fields_row
+      get_instruction_fields_row,
+      -BitVec.toNat_add
     ]
-
+    repeat rw [BitVec.toNat_add]
+    simp
     rewrite [allHold_allRows] at h_constraints
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_assumptions row h_row
     specialize h_bus_wellformedness row h_row
-    simp [SwInput_of_LoadStore_instruction_fields, PureSpec.execute_STORE_sw_pure]
+    simp [
+      SwInput_of_LoadStore_instruction_fields,
+      PureSpec.execute_STORE_sw_pure,
+      -BitVec.toNat_add
+    ]
+    repeat rw [BitVec.toNat_add]
+    simp
     split_ands
     . omega
     . have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
@@ -1581,7 +1590,6 @@ namespace Equivalence.LoadStore
       rewrite [this]
       clear this
       rfl
-      done
     . have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       simp [U32.toBV]
       have (bv1 bv2 bv3 bv4: BitVec 8) :
@@ -1824,7 +1832,6 @@ namespace Equivalence.LoadStore
       simp [this]
       rewrite [Nat.mod_eq_of_lt (by omega)]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_3 row 0))
-    done
 
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
