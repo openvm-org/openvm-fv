@@ -153,6 +153,7 @@ namespace Local
       ((BitVec (8 * n * bytes)) × Bool × Nat) )
     (pure (Sail.Ok data))
 
+  -- 'axiom' until the spec is rebuilt to avoid the repeat
   lemma vmem_read'_equiv:
     vmem_read =
     vmem_read'
@@ -774,6 +775,7 @@ namespace Local
       (pure loop_vars) ) : Sail.SailME (Sail.Result Bool ExecutionResult) (Bool × Nat × Bool) )
     (pure (Sail.Ok write_success))
 
+  -- 'axiom' until the spec is rebuilt to avoid repeat
   lemma vmem_write_addr'_equiv :
     vmem_write_addr' =
     LeanRV32D.Functions.vmem_write_addr
