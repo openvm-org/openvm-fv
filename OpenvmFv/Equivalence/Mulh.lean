@@ -202,7 +202,7 @@ namespace Equivalence.Mulh
       if index = ExecutionBus then              rows.flatMap MULH_instruction_fields.execution
       else if index = MemoryBus then            rows.flatMap MULH_instruction_fields.memory
       else if index = RangeCheckerBus then      rows.flatMap MULH_instruction_fields.range_checks
-      else if index = ReadInstructionBus then   rows.flatMap MULH_instruction_fields.read_instruction
+      else if index = ProgramBus then   rows.flatMap MULH_instruction_fields.read_instruction
       else if index = BitwiseBus then           rows.flatMap MULH_instruction_fields.bitwise
       else if index = RangeTupleCheckerBus then rows.flatMap MULH_instruction_fields.range_check_tuples
       else []
@@ -308,11 +308,11 @@ namespace Equivalence.Mulh
   lemma read_instruction_eq_air_buses [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)
   :
-    List.flatMap (VmAirWrapper_mulh.constraints.readInstructionBus_row air) (List.range (air.last_row + 1)) =
+    List.flatMap (VmAirWrapper_mulh.constraints.programBus_row air) (List.range (air.last_row + 1)) =
     List.flatMap MULH_instruction_fields.read_instruction (get_instruction_fields air)
   := by
     unfold MULH_instruction_fields.read_instruction
-    unfold VmAirWrapper_mulh.constraints.readInstructionBus_row
+    unfold VmAirWrapper_mulh.constraints.programBus_row
     simp [
       get_instruction_fields,
       get_instruction_fields_row,
@@ -406,17 +406,17 @@ namespace Equivalence.Mulh
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
     simp [
       VmAirWrapper_mulh.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
-      VmAirWrapper_mulh.constraints._readInstructionBus_row,
-      VmAirWrapper_mulh.constraints.readInstructionBus_row,
+      Interaction.ProgramBusEntry.operand_properties,
+      VmAirWrapper_mulh.constraints._programBus_row,
+      VmAirWrapper_mulh.constraints.programBus_row,
       -List.map_nil, -Vector.toList_mk, -List.attach_cons
     ] at h_bus_wellformedness
-    unfold Interaction.ReadInstructionBusEntry.deserialise at h_bus_wellformedness
+    unfold Interaction.ProgramBusEntry.deserialise at h_bus_wellformedness
     dsimp [List.attach] at h_bus_wellformedness
     rewrite [h_is_valid] at h_bus_wellformedness
     simp only [
       Fin.isValue, Fin.coe_ofNat_eq_mod, Nat.one_mod, Nat.cast_one, Fin.cast_val_eq_self,
-      Nat.cast_zero, Interaction.ReadInstructionBusEntry.mk.injEq,
+      Nat.cast_zero, Interaction.ProgramBusEntry.mk.injEq,
       forall_const
     ] at h_bus_wellformedness
     exact h_bus_wellformedness

@@ -159,7 +159,7 @@ namespace Equivalence.BranchLessThan
       if index = ExecutionBus then            rows.flatMap BranchLessThan_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap BranchLessThan_instruction_fields.memory
       else if index = RangeCheckerBus then    rows.flatMap BranchLessThan_instruction_fields.range_checks
-      else if index = ReadInstructionBus then rows.flatMap BranchLessThan_instruction_fields.read_instruction
+      else if index = ProgramBus then rows.flatMap BranchLessThan_instruction_fields.read_instruction
       else if index = BitwiseBus then         rows.flatMap BranchLessThan_instruction_fields.bitwise
       else []
 
@@ -227,7 +227,7 @@ namespace Equivalence.BranchLessThan
       unfold VmAirWrapper_branch_lt.constraints.executionBus_row
       unfold VmAirWrapper_branch_lt.constraints.memoryBus_row
       unfold VmAirWrapper_branch_lt.constraints.rangeCheckerBus_row
-      unfold VmAirWrapper_branch_lt.constraints.readInstructionBus_row
+      unfold VmAirWrapper_branch_lt.constraints.programBus_row
       unfold VmAirWrapper_branch_lt.constraints.bitwiseBus_row
       funext index
       by_cases h_index: index = ExecutionBus
@@ -240,7 +240,7 @@ namespace Equivalence.BranchLessThan
         all_goals simp [h_neg_one]
       by_cases h_index: index = RangeCheckerBus
       . simp [h_index, List.flatMap_map]
-      by_cases h_index: index = ReadInstructionBus
+      by_cases h_index: index = ProgramBus
       . simp [h_index, List.flatMap_map, ← BranchLessThanCoreAir_4_8.expected_opcode_def]
       by_cases h_index: index = BitwiseBus
       . simp [h_index, List.flatMap_map, BranchLessThan_instruction_fields.bitwise]

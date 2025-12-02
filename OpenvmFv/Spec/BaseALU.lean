@@ -102,7 +102,7 @@ lemma wf_propertiesToAssert
   simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -206,7 +206,7 @@ lemma essentials
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3, op4 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -286,7 +286,7 @@ theorem spec_base_ALU
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3, op4 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -457,7 +457,7 @@ theorem spec_base_ALU_imm
   simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_read

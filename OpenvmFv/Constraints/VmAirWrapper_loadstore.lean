@@ -573,17 +573,17 @@ namespace VmAirWrapper_loadstore.constraints
 
 
       @[VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-      def readInstructionBus_row (air : Valid_VmAirWrapper_loadstore F ExtF) (row : ℕ) : List (F × List F) :=
+      def programBus_row (air : Valid_VmAirWrapper_loadstore F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
           [air.adapter.from_state.pc row 0, air.core.expected_opcode row 0, air.adapter.rd_rs2_ptr row 0,
             air.adapter.rs1_ptr row 0, air.adapter.imm row 0, 1, air.adapter.mem_as row 0,
             air.adapter.needs_write row 0, air.adapter.imm_sign row 0])]
 
-      lemma constrain_readInstruction_interactions
+      lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_loadstore F ExtF)
         (h : VmAirWrapper_loadstore.extraction.constrain_interactions air)
       :
-        air.buses ReadInstructionBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
         unfold VmAirWrapper_loadstore.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -596,7 +596,7 @@ namespace VmAirWrapper_loadstore.constraints
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
       else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
-      else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
       else []
 
       @[VmAirWrapper_loadstore_air_simplification]
@@ -789,7 +789,7 @@ namespace VmAirWrapper_loadstore.constraints
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
     -- @[VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-    -- def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
+    -- def programBus_properties (entry : Interaction.ProgramBusEntry FBB) : Prop :=
     --   let rs2 := entry.xc
     --   let rs2_as := entry.xe
     --   (rs2_as = 0 →
@@ -801,14 +801,14 @@ namespace VmAirWrapper_loadstore.constraints
     --     (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt)
 
     -- set_option maxHeartbeats 0
-    -- lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
+    -- lemma programBus_properties_of_opcode_bounds (entry : Interaction.ProgramBusEntry FBB)
     --   (h_bounds : entry.opcode = 528)
-    --   (h_bus : Interaction.ReadInstructionBusEntry.operand_properties entry)
+    --   (h_bus : Interaction.ProgramBusEntry.operand_properties entry)
     -- :
-    --   readInstructionBus_properties entry
+    --   programBus_properties entry
     -- := by
-    --   simp [readInstructionBus_properties.eq_def]
-    --   simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
+    --   simp [programBus_properties.eq_def]
+    --   simp [Interaction.ProgramBusEntry.operand_properties] at h_bus
     --   obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
     --   have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     --   simp [←h_data] at h_bounds ⊢ h_transpile h_alignment
@@ -936,24 +936,24 @@ namespace VmAirWrapper_loadstore.constraints
     --       simp
     --     }
 
-    lemma readInstructionBus_row_length [Field ExtF]
+    lemma programBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_loadstore FBB ExtF} {row : ℕ}
-      (h_in : entry ∈ readInstructionBus_row air row)
+      (h_in : entry ∈ programBus_row air row)
     :
-      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
+      entry.2.length = Interaction.ProgramBusEntryInstance.data_length
     := by
-      unfold readInstructionBus_row at *; simp_all
+      unfold programBus_row at *; simp_all
 
     @[VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-    def _readInstructionBus_row [Field ExtF]
+    def _programBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ) :=
-      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
+      let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
-          (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
-          (readInstructionBus_row air row).attach
-      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
+          (fun x : { row' // row' ∈ programBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (programBus_row_length x.2)))
+          (programBus_row air row).attach
+      List.map Interaction.ProgramBusEntryInstance.deserialise vectorised_row
 
     @[simp]
     def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
@@ -977,7 +977,7 @@ namespace VmAirWrapper_loadstore.constraints
       executionBus_row air row ++
       memoryBus_row air row ++
       rangeCheckerBus_row air row ++
-      readInstructionBus_row air row
+      programBus_row air row
 
     @[simp]
     def assumptionsPerRow [Field ExtF]
@@ -986,7 +986,7 @@ namespace VmAirWrapper_loadstore.constraints
       assumptions (_executionBus_row air row) ∧
       assumptions (_memoryBus_row air row) ∧
       assumptions (_rangeCheckerBus_row air row) ∧
-      assumptions (_readInstructionBus_row air row)
+      assumptions (_programBus_row air row)
 
     @[simp]
     def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ)
@@ -994,7 +994,7 @@ namespace VmAirWrapper_loadstore.constraints
       propertiesToAssume (_executionBus_row air row) ∧
       propertiesToAssume (_memoryBus_row air row) ∧
       propertiesToAssume (_rangeCheckerBus_row air row) ∧
-      propertiesToAssume (_readInstructionBus_row air row)
+      propertiesToAssume (_programBus_row air row)
 
     @[simp]
     def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ)
@@ -1002,7 +1002,7 @@ namespace VmAirWrapper_loadstore.constraints
       propertiesToAssert (_executionBus_row air row) ∧
       propertiesToAssert (_memoryBus_row air row) ∧
       propertiesToAssert (_rangeCheckerBus_row air row) ∧
-      propertiesToAssert (_readInstructionBus_row air row)
+      propertiesToAssert (_programBus_row air row)
 
   end bus_entries
 

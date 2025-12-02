@@ -23,7 +23,7 @@ section BusIndices
   abbrev ExecutionBus : ℕ := 0
   abbrev MemoryBus : ℕ := 1
   abbrev RangeCheckerBus : ℕ := 4
-  abbrev ReadInstructionBus : ℕ := 8
+  abbrev ProgramBus : ℕ := 8
   abbrev BitwiseBus : ℕ := 9
   abbrev RangeTupleCheckerBus : ℕ := 11
 
@@ -48,7 +48,7 @@ section BusIndices
   @[openvm_encapsulation]
   lemma read_instruction_bus_simplifcation:
     (if index = 8 then a else b) =
-    if index = ReadInstructionBus then a else b
+    if index = ProgramBus then a else b
   := rfl
 
   @[openvm_encapsulation]

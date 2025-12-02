@@ -58,7 +58,7 @@ lemma non_valid_row_Mul_all_interaction_multiplicities_zero
   entry ∈ executionBus_row air row ++
           memoryBus_row air row ++
           rangeCheckerBus_row air row ++
-          readInstructionBus_row air row ++
+          programBus_row air row ++
           rangeTupleCheckerBus_row air row → entry.1 = 0
 := by
   obtain ⟨ hint, constraints ⟩ := constraints

@@ -81,7 +81,7 @@ lemma wf_propertiesToAssert
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   simp [row_valid, VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ (by simp) pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ (by simp) pa_read
   simp [VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem
@@ -118,7 +118,7 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
   simp [row_valid, VmAirWrapper_auipc_constraint_and_interaction_simplification]
     at pa_exec pa_mem pa_range pa_read pa_bit assumptions constraints
 
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ (by simp) pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ (by simp) pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit assumptions constraints

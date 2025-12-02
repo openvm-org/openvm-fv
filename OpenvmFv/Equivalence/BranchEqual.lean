@@ -109,7 +109,7 @@ namespace Equivalence.BranchEqual
       if index = ExecutionBus then            rows.flatMap BranchEqual_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap BranchEqual_instruction_fields.memory
       else if index = RangeCheckerBus then    rows.flatMap BranchEqual_instruction_fields.range_checks
-      else if index = ReadInstructionBus then rows.flatMap BranchEqual_instruction_fields.read_instruction
+      else if index = ProgramBus then rows.flatMap BranchEqual_instruction_fields.read_instruction
       else []
 
   def allHold_allRows [Field ExtF] (air : Valid_VmAirWrapper_branch_eq FBB ExtF) : Prop :=
@@ -168,7 +168,7 @@ namespace Equivalence.BranchEqual
       unfold VmAirWrapper_branch_eq.constraints.executionBus_row
       unfold VmAirWrapper_branch_eq.constraints.memoryBus_row
       unfold VmAirWrapper_branch_eq.constraints.rangeCheckerBus_row
-      unfold VmAirWrapper_branch_eq.constraints.readInstructionBus_row
+      unfold VmAirWrapper_branch_eq.constraints.programBus_row
       funext index
       by_cases h_index: index = ExecutionBus
       . simp [h_index, List.flatMap_map]
@@ -180,7 +180,7 @@ namespace Equivalence.BranchEqual
         all_goals simp [h_neg_one]
       by_cases h_index: index = RangeCheckerBus
       . simp [h_index, List.flatMap_map]
-      by_cases h_index: index = ReadInstructionBus
+      by_cases h_index: index = ProgramBus
       . simp [h_index, List.flatMap_map, ← BranchEqualCoreAir_4.expected_opcode_def]
       . simp [*]
     . apply List.forall_iff_forall_mem.mpr

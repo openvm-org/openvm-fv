@@ -290,7 +290,7 @@ namespace Equivalence.Shift
       if index = ExecutionBus then            rows.flatMap Shift_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap Shift_instruction_fields.memory
       else if index = RangeCheckerBus then    rows.flatMap Shift_instruction_fields.range_checks
-      else if index = ReadInstructionBus then rows.flatMap Shift_instruction_fields.read_instruction
+      else if index = ProgramBus then rows.flatMap Shift_instruction_fields.read_instruction
       else if index = BitwiseBus then         rows.flatMap Shift_instruction_fields.bitwise
       else []
 
@@ -397,11 +397,11 @@ namespace Equivalence.Shift
   lemma read_instruction_eq_air_buses [Field ExtF]
     (air : Valid_VmAirWrapper_shift FBB ExtF)
   :
-    List.flatMap (VmAirWrapper_shift.constraints.readInstructionBus_row air) (List.range (air.last_row + 1)) =
+    List.flatMap (VmAirWrapper_shift.constraints.programBus_row air) (List.range (air.last_row + 1)) =
     List.flatMap Shift_instruction_fields.read_instruction (get_instruction_fields air)
   := by
     unfold Shift_instruction_fields.read_instruction
-    unfold VmAirWrapper_shift.constraints.readInstructionBus_row
+    unfold VmAirWrapper_shift.constraints.programBus_row
     simp [
       get_instruction_fields,
       get_instruction_fields_row,
@@ -506,7 +506,7 @@ namespace Equivalence.Shift
     simp [
       VmAirWrapper_shift_constraint_and_interaction_simplification,
       VmAirWrapper_shift.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
+      Interaction.ProgramBusEntry.operand_properties,
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
@@ -701,7 +701,7 @@ namespace Equivalence.Shift
     simp [
       VmAirWrapper_shift_constraint_and_interaction_simplification,
       VmAirWrapper_shift.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
+      Interaction.ProgramBusEntry.operand_properties,
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
@@ -895,7 +895,7 @@ namespace Equivalence.Shift
     simp [
       VmAirWrapper_shift_constraint_and_interaction_simplification,
       VmAirWrapper_shift.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
+      Interaction.ProgramBusEntry.operand_properties,
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
@@ -1093,7 +1093,7 @@ namespace Equivalence.Shift
     simp [
       VmAirWrapper_shift_constraint_and_interaction_simplification,
       VmAirWrapper_shift.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
+      Interaction.ProgramBusEntry.operand_properties,
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
@@ -1291,7 +1291,7 @@ namespace Equivalence.Shift
     simp [
       VmAirWrapper_shift_constraint_and_interaction_simplification,
       VmAirWrapper_shift.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
+      Interaction.ProgramBusEntry.operand_properties,
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
@@ -1487,7 +1487,7 @@ namespace Equivalence.Shift
     simp [
       VmAirWrapper_shift_constraint_and_interaction_simplification,
       VmAirWrapper_shift.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
+      Interaction.ProgramBusEntry.operand_properties,
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]

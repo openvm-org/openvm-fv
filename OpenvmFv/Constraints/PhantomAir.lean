@@ -138,14 +138,14 @@ namespace PhantomAir.constraints
 
 
       @[PhantomAir_constraint_and_interaction_simplification]
-      def readInstructionBus_row (air : Valid_PhantomAir F ExtF) (row : ℕ) : List (F × List F) :=
+      def programBus_row (air : Valid_PhantomAir F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.is_valid row 0, [air.pc row 0, 1, air.operand_0 row 0, air.operand_1 row 0, air.operand_2 row 0, 0, 0, 0, 0])]
 
-      lemma constrain_readInstruction_interactions
+      lemma constrain_program_interactions
         (air : Valid_PhantomAir F ExtF)
         (h : PhantomAir.extraction.constrain_interactions air)
       :
-        air.buses ReadInstructionBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
         unfold PhantomAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -156,7 +156,7 @@ namespace PhantomAir.constraints
       def constrain_interactions (air : Valid_PhantomAir F ExtF) : Prop :=
       air.buses = fun index ↦
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
-      else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
       else []
 
       @[PhantomAir_air_simplification]

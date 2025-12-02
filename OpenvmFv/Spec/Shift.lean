@@ -102,7 +102,7 @@ lemma non_valid_row_Shift_all_interaction_multiplicities_zero
   entry ∈ executionBus_row air row ++
           memoryBus_row air row ++
           rangeCheckerBus_row air row ++
-          readInstructionBus_row air row ++
+          programBus_row air row ++
           bitwiseBus_row air row → entry.1 = 0
 := by
   obtain ⟨ hint, constraints ⟩ := constraints
@@ -157,7 +157,7 @@ lemma wf_propertiesToAssert
   simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -224,7 +224,7 @@ lemma essentials
   simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -1668,7 +1668,7 @@ theorem spec_base_Shift_imm
         VmAirWrapper_shift.constraints.propertiesToAssume] at pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_read

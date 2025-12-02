@@ -97,7 +97,7 @@ lemma wf_propertiesToAssert
   simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
@@ -137,7 +137,7 @@ lemma essentials
   simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
@@ -193,7 +193,7 @@ theorem spec_BEQ_BNE_pc_FBB
   obtain ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
@@ -292,7 +292,7 @@ theorem spec_BEQ_BNE_pc
   obtain ⟨ sop0, sop1 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem

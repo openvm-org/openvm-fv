@@ -317,7 +317,7 @@ namespace Equivalence.LoadStore
         rows.flatMap LoadStore_instruction_fields.memory
       else if index = RangeCheckerBus then
         rows.flatMap LoadStore_instruction_fields.range_checks
-      else if index = ReadInstructionBus then
+      else if index = ProgramBus then
         rows.flatMap LoadStore_instruction_fields.read_instruction
       else []
 
@@ -443,11 +443,11 @@ namespace Equivalence.LoadStore
   lemma read_instruction_eq_air_buses [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
   :
-    List.flatMap (VmAirWrapper_loadstore.constraints.readInstructionBus_row air) (List.range (air.last_row + 1)) =
+    List.flatMap (VmAirWrapper_loadstore.constraints.programBus_row air) (List.range (air.last_row + 1)) =
     List.flatMap LoadStore_instruction_fields.read_instruction (get_instruction_fields air)
   := by
     unfold LoadStore_instruction_fields.read_instruction
-    unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
+    unfold VmAirWrapper_loadstore.constraints.programBus_row
     simp [
       get_instruction_fields,
       get_instruction_fields_row,
@@ -540,18 +540,18 @@ namespace Equivalence.LoadStore
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2
     simp [
       VmAirWrapper_loadstore.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
-      VmAirWrapper_loadstore.constraints._readInstructionBus_row,
-      VmAirWrapper_loadstore.constraints.readInstructionBus_row,
+      Interaction.ProgramBusEntry.operand_properties,
+      VmAirWrapper_loadstore.constraints._programBus_row,
+      VmAirWrapper_loadstore.constraints.programBus_row,
       -List.map_nil, -Vector.toList_mk, -List.attach_cons
     ] at h_bus_wellformedness
-    unfold Interaction.ReadInstructionBusEntry.deserialise at h_bus_wellformedness
+    unfold Interaction.ProgramBusEntry.deserialise at h_bus_wellformedness
     dsimp [List.attach] at h_bus_wellformedness
     rewrite [h_is_valid] at h_bus_wellformedness
     simp only [
       Fin.isValue, Fin.coe_ofNat_eq_mod, Nat.one_mod, Nat.cast_one,
       Fin.cast_val_eq_self,
-      Interaction.ReadInstructionBusEntry.mk.injEq,
+      Interaction.ProgramBusEntry.mk.injEq,
       forall_const
     ] at h_bus_wellformedness
     exact h_bus_wellformedness
@@ -958,7 +958,7 @@ namespace Equivalence.LoadStore
       simp [
         VmAirWrapper_loadstore_constraint_and_interaction_simplification,
         h_is_valid,
-        Interaction.ReadInstructionBusEntry.operand_properties
+        Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
       obtain ⟨
         instruction,
@@ -1211,7 +1211,7 @@ namespace Equivalence.LoadStore
       simp [
         VmAirWrapper_loadstore_constraint_and_interaction_simplification,
         h_is_valid,
-        Interaction.ReadInstructionBusEntry.operand_properties
+        Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
       obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
@@ -1302,7 +1302,7 @@ namespace Equivalence.LoadStore
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      Interaction.ReadInstructionBusEntry.operand_properties
+      Interaction.ProgramBusEntry.operand_properties
     ] at h_transpile
     obtain ⟨
       instruction,
