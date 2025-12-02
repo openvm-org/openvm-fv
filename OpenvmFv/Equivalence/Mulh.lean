@@ -434,11 +434,13 @@ namespace Equivalence.Mulh
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_593 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
+    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -469,11 +471,13 @@ namespace Equivalence.Mulh
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_594 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
+    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -504,6 +508,7 @@ namespace Equivalence.Mulh
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_595 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases

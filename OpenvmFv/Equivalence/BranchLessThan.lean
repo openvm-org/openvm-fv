@@ -256,7 +256,8 @@ namespace Equivalence.BranchLessThan
       intro h_is_valid
 
       have ⟨
-        h_pc, h_next_pc, h_next_pc_mod_4,
+        h_pc, h_pc_mod_4,
+        h_next_pc, h_next_pc_mod_4,
         ⟨h_a0, h_a1, h_a2, h_a3, h_b0, h_b1, h_b2, h_b3⟩,
         h_opcodes,
         imm_range
@@ -270,8 +271,8 @@ namespace Equivalence.BranchLessThan
             (h_bus_assumptions row (by omega))
             (h_bus_wellformedness row (by omega))
 
-      have ⟨ npc0_z, npc1_z ⟩ :=
-        BranchLessThan.ValidRows.next_pc_two_last_bits_zero
+      have ⟨ spec_blt, spec_bltu, spec_bge, spec_bgeu ⟩
+      := BranchLessThan.ValidRows.spec_BLT_BLTU_BGE_BGEU_pc
           ExtF
           air
           row
@@ -281,60 +282,338 @@ namespace Equivalence.BranchLessThan
           (h_bus_assumptions row (by omega))
           (h_bus_wellformedness row (by omega))
 
-      split_ands
-      . grind
-      . grind
+      split_ands <;> [
+        grind;
+        grind;
+        skip; skip; skip; skip
+      ]
 
-      all_goals
-        have ⟨ spec_blt, spec_bltu, spec_bge, spec_bgeu ⟩
-        := BranchLessThan.ValidRows.spec_BLT_BLTU_BGE_BGEU_pc
-            ExtF
-            air
-            row
-            (by omega)
-            (h_constraints ⟨row, by omega⟩)
-            h_is_valid
-            (h_bus_assumptions row (by omega))
-            (h_bus_wellformedness row (by omega))
-
-      . clear spec_bltu spec_bge spec_bgeu
+      . clear spec_bltu spec_bge spec_bgeu h_constraints h_bus_assumptions h_bus_wellformedness
         intro h_blt; simp [h_blt] at spec_blt
-        simp [BltOutput_matches_BranchLessThan_instruction_fields,
-              BltInput_of_BranchLessThan_instruction_fields]
-        clear h_constraints h_bus_assumptions h_bus_wellformedness
-        simp [PureSpec.execute_BLT_pure]
-        simp_all
 
-        rw [ite_neg_cond]; simp; rfl
+        split_ifs at spec_blt with h_lt
+        . simp [
+            BltOutput_matches_BranchLessThan_instruction_fields,
+            BltInput_of_BranchLessThan_instruction_fields
+          ]
+          simp [PureSpec.execute_BLT_pure]
+          rewrite [ite_cond_eq_false]
+          . split_ands
+            . exact h_a0
+            . exact h_a1
+            . exact h_a2
+            . exact h_a3
+            . exact h_b0
+            . exact h_b1
+            . exact h_b2
+            . exact h_b3
+            . exact spec_blt.symm
+            . right
+              rewrite [←spec_blt]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . left
+              right
+              rewrite [←spec_blt]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+          . simp_all
+            split_ands
+            . convert h_lt
+            . intro h; clear h
+              rewrite [←spec_blt]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . intro h; clear h
+              rewrite [←spec_blt]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+        . simp [BltOutput_matches_BranchLessThan_instruction_fields,
+                BltInput_of_BranchLessThan_instruction_fields]
+          simp [PureSpec.execute_BLT_pure]
+          rewrite [ite_cond_eq_true]
+          split_ands
+          . exact h_a0
+          . exact h_a1
+          . exact h_a2
+          . exact h_a3
+          . exact h_b0
+          . exact h_b1
+          . exact h_b2
+          . exact h_b3
+          . exact spec_blt.symm
+          . left
+            apply le_of_not_gt
+            convert h_lt
+          . left
+            left
+            apply le_of_not_gt
+            convert h_lt
+          . apply eq_true
+            left
+            apply le_of_not_gt
+            convert h_lt
 
       . clear spec_blt spec_bge spec_bgeu
         intro h_bltu; simp [h_bltu] at spec_bltu
-        simp [BltuOutput_matches_BranchLessThan_instruction_fields,
-              BltuInput_of_BranchLessThan_instruction_fields]
-        clear h_constraints h_bus_assumptions h_bus_wellformedness
-        simp [PureSpec.execute_BLTU_pure]
-        simp_all
 
-        rw [ite_neg_cond]; simp; rfl
+        split_ifs at spec_bltu with h_ltu
+        . simp [
+            BltuOutput_matches_BranchLessThan_instruction_fields,
+            BltuInput_of_BranchLessThan_instruction_fields
+          ]
+          simp [PureSpec.execute_BLTU_pure]
+          rewrite [ite_cond_eq_false]
+          . split_ands
+            . exact h_a0
+            . exact h_a1
+            . exact h_a2
+            . exact h_a3
+            . exact h_b0
+            . exact h_b1
+            . exact h_b2
+            . exact h_b3
+            . exact spec_bltu.symm
+            . right
+              rewrite [←spec_bltu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . left
+              right
+              rewrite [←spec_bltu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+          . simp_all
+            split_ands
+            . convert h_ltu
+            . intro h; clear h
+              rewrite [←spec_bltu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . intro h; clear h
+              rewrite [←spec_bltu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+        . simp [BltuOutput_matches_BranchLessThan_instruction_fields,
+                BltuInput_of_BranchLessThan_instruction_fields]
+          simp [PureSpec.execute_BLTU_pure]
+          rewrite [ite_cond_eq_true]
+          split_ands
+          . exact h_a0
+          . exact h_a1
+          . exact h_a2
+          . exact h_a3
+          . exact h_b0
+          . exact h_b1
+          . exact h_b2
+          . exact h_b3
+          . exact spec_bltu.symm
+          . left
+            apply le_of_not_gt
+            convert h_ltu
+          . left
+            left
+            apply le_of_not_gt
+            convert h_ltu
+          . apply eq_true
+            left
+            apply le_of_not_gt
+            convert h_ltu
 
       . clear spec_blt spec_bltu spec_bgeu
         intro h_bge; simp [h_bge] at spec_bge
-        simp [BgeOutput_matches_BranchLessThan_instruction_fields,
-              BgeInput_of_BranchLessThan_instruction_fields]
-        clear h_constraints h_bus_assumptions h_bus_wellformedness
-        simp [PureSpec.execute_BGE_pure]
-        simp_all
 
-        rw [ite_neg_cond]; simp; rfl
+        split_ifs at spec_bge with h_ge
+        . simp [
+            BgeOutput_matches_BranchLessThan_instruction_fields,
+            BgeInput_of_BranchLessThan_instruction_fields
+          ]
+          simp [PureSpec.execute_BGE_pure]
+          rewrite [ite_cond_eq_false]
+          . split_ands
+            . exact h_a0
+            . exact h_a1
+            . exact h_a2
+            . exact h_a3
+            . exact h_b0
+            . exact h_b1
+            . exact h_b2
+            . exact h_b3
+            . exact spec_bge.symm
+            . right
+              rewrite [←spec_bge]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . left
+              right
+              rewrite [←spec_bge]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+          . simp_all
+            split_ands
+            . convert h_ge
+            . intro h; clear h
+              rewrite [←spec_bge]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . intro h; clear h
+              rewrite [←spec_bge]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+        . simp [BgeOutput_matches_BranchLessThan_instruction_fields,
+                BgeInput_of_BranchLessThan_instruction_fields]
+          simp [PureSpec.execute_BGE_pure]
+          rewrite [ite_cond_eq_true]
+          split_ands
+          . exact h_a0
+          . exact h_a1
+          . exact h_a2
+          . exact h_a3
+          . exact h_b0
+          . exact h_b1
+          . exact h_b2
+          . exact h_b3
+          . exact spec_bge.symm
+          . left
+            apply lt_of_not_ge
+            convert h_ge
+          . left
+            left
+            apply lt_of_not_ge
+            convert h_ge
+          . apply eq_true
+            left
+            apply lt_of_not_ge
+            convert h_ge
 
       . clear spec_blt spec_bltu spec_bge
         intro h_bgeu; simp [h_bgeu] at spec_bgeu
-        simp [BgeuOutput_matches_BranchLessThan_instruction_fields,
-              BgeuInput_of_BranchLessThan_instruction_fields]
-        clear h_constraints h_bus_assumptions h_bus_wellformedness
-        simp [PureSpec.execute_BGEU_pure]
-        simp_all
 
-        rw [ite_neg_cond]; simp; rfl
+        split_ifs at spec_bgeu with h_geu
+        . simp [
+            BgeuOutput_matches_BranchLessThan_instruction_fields,
+            BgeuInput_of_BranchLessThan_instruction_fields
+          ]
+          simp [PureSpec.execute_BGEU_pure]
+          rewrite [ite_cond_eq_false]
+          . split_ands
+            . exact h_a0
+            . exact h_a1
+            . exact h_a2
+            . exact h_a3
+            . exact h_b0
+            . exact h_b1
+            . exact h_b2
+            . exact h_b3
+            . exact spec_bgeu.symm
+            . right
+              rewrite [←spec_bgeu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . left
+              right
+              rewrite [←spec_bgeu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+          . simp_all
+            split_ands
+            . convert h_geu
+            . intro h; clear h
+              rewrite [←spec_bgeu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              have : (air.to_pc row 0).val % 2 = 0 := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                omega
+              simp [this]
+            . intro h; clear h
+              rewrite [←spec_bgeu]
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rewrite [Nat.mod_eq_of_lt (by omega)]
+              have : (air.to_pc row 0).val.testBit 1 = false := by
+                simp [Fin.mod_def] at h_next_pc_mod_4
+                clear *-h_next_pc_mod_4
+                grind
+              simp [this]
+        . simp [BgeuOutput_matches_BranchLessThan_instruction_fields,
+                BgeuInput_of_BranchLessThan_instruction_fields]
+          simp [PureSpec.execute_BGEU_pure]
+          rewrite [ite_cond_eq_true]
+          split_ands
+          . exact h_a0
+          . exact h_a1
+          . exact h_a2
+          . exact h_a3
+          . exact h_b0
+          . exact h_b1
+          . exact h_b2
+          . exact h_b3
+          . exact spec_bgeu.symm
+          . left
+            apply lt_of_not_ge
+            convert h_geu
+          . left
+            left
+            apply lt_of_not_ge
+            convert h_geu
+          . apply eq_true
+            left
+            apply lt_of_not_ge
+            convert h_geu
 
 end Equivalence.BranchLessThan

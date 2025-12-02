@@ -15,7 +15,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "cc5237cb1ded2e778e098adbcbb5745f132922ad",
+   "rev": "569f5077d72c5c353f86d084d70b9630c67846d7",
    "name": "LeanZKCircuit",
    "manifestFile": "lake-manifest.json",
    "inputRev": "main",

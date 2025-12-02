@@ -607,6 +607,7 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_512 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_addi =>
@@ -614,6 +615,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_addi
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -627,6 +629,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_add
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -764,10 +767,12 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_sub := Transpiler.transpiler_opcode_513 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sub
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
+    rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -905,6 +910,7 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_514 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_xori =>
@@ -912,6 +918,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_xori
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -925,6 +932,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_xor
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1063,6 +1071,7 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_515 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_ori =>
@@ -1070,6 +1079,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_ori
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1083,6 +1093,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_or
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1221,6 +1232,7 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_516 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_andi =>
@@ -1228,6 +1240,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_andi
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1241,6 +1254,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_and
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1383,12 +1397,14 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_512 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_addi =>
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_addi
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1415,6 +1431,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_add
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1572,12 +1589,14 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_514 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_xori =>
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_xori
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1604,6 +1623,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_xor
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1739,12 +1759,14 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_515 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_ori =>
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_ori
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1771,6 +1793,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_or
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1906,12 +1929,14 @@ namespace Equivalence.BaseALU
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
+    have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_516 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_andi =>
         obtain ⟨h_rs2_as, ⟨imm, rs1, rd, h_instruction, h_rd⟩⟩ := h_andi
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1938,6 +1963,7 @@ namespace Equivalence.BaseALU
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_and
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1

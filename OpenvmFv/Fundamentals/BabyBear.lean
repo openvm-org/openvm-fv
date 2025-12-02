@@ -24,12 +24,15 @@ section inverses
 
 lemma inv_255 : (465814468 : FBB) = 255⁻¹ := by native_decide
 lemma inv_256 : (2005401601 : FBB) = 256⁻¹ := by native_decide
+lemma inv_65536 : (2013235201 : FBB) = 65536⁻¹ := by native_decide
 lemma inv_2_24 : (2013265801 : FBB) = 16777216⁻¹ := by native_decide
 
 lemma inv_255_eq_one_lr : (465814468 : FBB) * 255 = 1 := by rfl
 lemma inv_255_eq_one_rl : 255 * (465814468 : FBB) = 1 := by rfl
 lemma inv_256_eq_one_lr : (2005401601 : FBB) * 256 = 1 := by rfl
 lemma inv_256_eq_one_rl : 256 * (2005401601 : FBB) = 1 := by rfl
+lemma inv_65536_eq_one_lr : (2013235201 : FBB) * 65536 = 1 := by rfl
+lemma inv_65536_eq_one_rl : 65536 * (2013235201 : FBB) = 1 := by rfl
 lemma inv_2_24_eq_one_lr : (2013265801 : FBB) * 16777216 = 1 := by rfl
 lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
 
@@ -37,6 +40,8 @@ lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
 @[simp] lemma inv_255_eq_255_rl : x * (465814468 : FBB) = 1 ↔ x = 255 := by rw [mul_comm, inv_255_eq_255_lr]
 @[simp] lemma inv_256_eq_256_lr : (2005401601 : FBB) * x = 1 ↔ x = 256 := by rw [inv_256, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_256_eq_256_rl : x * (2005401601 : FBB) = 1 ↔ x = 256 := by rw [mul_comm, inv_256_eq_256_lr]
+@[simp] lemma inv_65536_eq_65536_lr : (2013235201 : FBB) * x = 1 ↔ x = 65536 := by rw [inv_65536, inv_mul_eq_one₀ (by simp), eq_comm]
+@[simp] lemma inv_65536_eq_65536_rl : x * (2013235201 : FBB) = 1 ↔ x = 65536 := by rw [mul_comm, inv_65536_eq_65536_lr]
 @[simp] lemma inv_2_24_eq_2_24_lr : (2013265801 : FBB) * x = 1 ↔ x = 16777216 := by rw [inv_2_24, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_2_24_eq_2_24_rl : x * (2013265801 : FBB) = 1 ↔ x = 16777216 := by rw [mul_comm, inv_2_24_eq_2_24_lr]
 

@@ -6,7 +6,9 @@ import OpenvmFv.Airs.Alu.MulHCoreAir
 import OpenvmFv.Airs.Alu.MultiplicationCoreAir
 import OpenvmFv.Airs.Alu.Rv32BaseAluAdapterAir
 import OpenvmFv.Airs.Alu.Rv32MultAdapterAir
+import OpenvmFv.Airs.Alu.ShiftCoreAir
 import OpenvmFv.Airs.Alu.VmAirWrapper_alu
+import OpenvmFv.Airs.Alu.VmAirWrapper_divrem
 import OpenvmFv.Airs.Alu.VmAirWrapper_lt
 import OpenvmFv.Airs.Alu.VmAirWrapper_mul
 import OpenvmFv.Airs.Alu.VmAirWrapper_mulh
@@ -20,6 +22,10 @@ import OpenvmFv.Airs.Branch.Rv32RdWriteAdapterAir
 import OpenvmFv.Airs.Branch.VmAirWrapper_auipc
 import OpenvmFv.Airs.Branch.VmAirWrapper_branch_eq
 import OpenvmFv.Airs.Branch.VmAirWrapper_branch_lt
+
+import OpenvmFv.Airs.LoadStore.LoadStoreCoreAir
+import OpenvmFv.Airs.LoadStore.Rv32LoadStoreAdapterAir
+import OpenvmFv.Airs.LoadStore.VmAirWrapper_loadstore
 
 import OpenvmFv.Airs.AccessAdapterAir
 import OpenvmFv.Airs.ExecutionState
@@ -41,6 +47,7 @@ import OpenvmFv.Constraints.VmAirWrapper_auipc
 import OpenvmFv.Constraints.VmAirWrapper_branch_eq
 import OpenvmFv.Constraints.VmAirWrapper_branch_lt
 import OpenvmFv.Constraints.VmAirWrapper_divrem
+import OpenvmFv.Constraints.VmAirWrapper_loadstore
 import OpenvmFv.Constraints.VmAirWrapper_lt
 import OpenvmFv.Constraints.VmAirWrapper_mul
 import OpenvmFv.Constraints.VmAirWrapper_mulh
@@ -52,6 +59,7 @@ import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
+import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Mul
 import OpenvmFv.Equivalence.Mulh
@@ -70,6 +78,7 @@ import OpenvmFv.Extraction.VmAirWrapper_auipc
 import OpenvmFv.Extraction.VmAirWrapper_branch_eq
 import OpenvmFv.Extraction.VmAirWrapper_branch_lt
 import OpenvmFv.Extraction.VmAirWrapper_divrem
+import OpenvmFv.Extraction.VmAirWrapper_loadstore
 import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Extraction.VmAirWrapper_mul
 import OpenvmFv.Extraction.VmAirWrapper_mulh
@@ -81,6 +90,7 @@ import OpenvmFv.Fundamentals.Core
 import OpenvmFv.Fundamentals.Execution
 import OpenvmFv.Fundamentals.Interaction
 import OpenvmFv.Fundamentals.RV32D
+import OpenvmFv.Fundamentals.Transpiler
 import OpenvmFv.Fundamentals.U32
 
 import OpenvmFv.Spec.ControlFlow.auipc
@@ -101,10 +111,13 @@ import OpenvmFv.Spec.ITYPE.addi
 import OpenvmFv.Spec.ITYPE.andi
 import OpenvmFv.Spec.ITYPE.local
 import OpenvmFv.Spec.ITYPE.ori
-import OpenvmFv.Spec.ITYPE.xori
 import OpenvmFv.Spec.ITYPE.slti
 import OpenvmFv.Spec.ITYPE.sltiu
+import OpenvmFv.Spec.ITYPE.xori
 import OpenvmFv.Spec.JAL.execute_jal
+import OpenvmFv.Spec.LoadStore.local2
+import OpenvmFv.Spec.LoadStore.lw
+import OpenvmFv.Spec.LoadStore.sw
 import OpenvmFv.Spec.MULH.local
 import OpenvmFv.Spec.MULH.mul
 import OpenvmFv.Spec.MULH.mulh
@@ -131,11 +144,12 @@ import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.BranchLessThan
 import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
+import OpenvmFv.Spec.Load
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
-import OpenvmFv.Spec.rX_bits
 import OpenvmFv.Spec.run_hart_active
+import OpenvmFv.Spec.rX_bits
 import OpenvmFv.Spec.Shift
 
 import OpenvmFv.Util
