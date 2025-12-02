@@ -372,7 +372,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).opcode ∈ Finset.Icc 593 595
@@ -537,7 +537,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 593 →
@@ -559,16 +559,16 @@ namespace Equivalence.Mulh
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mulh_pure, MulhInput_of_MULH_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulhInput_of_MULH_instruction_fields, PureSpec.execute_MULH_mulh_pure]
@@ -611,7 +611,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 594 →
@@ -633,16 +633,16 @@ namespace Equivalence.Mulh
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mulhsu_pure, MulhsuInput_of_MULH_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulhsuInput_of_MULH_instruction_fields, PureSpec.execute_MULH_mulhsu_pure]
@@ -685,7 +685,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 595 →
@@ -707,16 +707,16 @@ namespace Equivalence.Mulh
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mulhu_pure, MulhuInput_of_MULH_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulhuInput_of_MULH_instruction_fields, PureSpec.execute_MULH_mulhu_pure]
@@ -756,7 +756,7 @@ namespace Equivalence.Mulh
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     List.Forall MULH_instruction_fields.spec (get_instruction_fields air)
@@ -773,9 +773,9 @@ namespace Equivalence.Mulh
 
     simp [get_instruction_fields_row] at h_is_valid
     split_ands
-    . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact mulh_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact mulhsu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact mulhu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
+    . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact mulh_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact mulhsu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact mulhu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
 end Equivalence.Mulh

@@ -77,9 +77,9 @@ namespace Mul.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -116,7 +116,7 @@ set_option maxRecDepth 1_000_000 in
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume
 in
 /-- Some properties more important than others that should
@@ -141,7 +141,7 @@ lemma essentials
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
-  clear *- assumptions; grind
+  clear *- axioms; grind
 
 /-- From Mul opcode to RISC-V opcode -/
 def rop_of_Mul_opcode (opcode : FBB) : mop :=

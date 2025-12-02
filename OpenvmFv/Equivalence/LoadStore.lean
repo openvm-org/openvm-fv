@@ -796,7 +796,7 @@ namespace Equivalence.LoadStore
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
   :
     BitVec.ofNat 32 (air.adapter.from_state.pc row 0).val + 4#32 =
     BitVec.ofNat 32 (air.to_pc row 0).val
@@ -804,7 +804,7 @@ namespace Equivalence.LoadStore
     simp [
       Valid_VmAirWrapper_loadstore.to_pc
     ]
-    have h_execution := h_bus_assumptions.1
+    have h_execution := h_bus_axioms.1
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid
@@ -906,7 +906,7 @@ namespace Equivalence.LoadStore
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_opcode : air.core.expected_opcode row 0 = 528)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h1 : (air.adapter.imm row 0).val % 256 < 2 ^ 8)
     (h2 : (air.adapter.imm row 0).val / 256 % 256 < 2 ^ 8)
@@ -1010,7 +1010,7 @@ namespace Equivalence.LoadStore
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_opcode : air.core.expected_opcode row 0 = 528)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h1 : (air.adapter.imm row 0).val % 256 < 2 ^ 8)
     (h2 : (air.adapter.imm row 0).val / 256 % 256 < 2 ^ 8)
@@ -1098,7 +1098,7 @@ namespace Equivalence.LoadStore
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_opcode : air.core.expected_opcode row 0 = 528)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_bus_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h1 : (air.adapter.imm row 0).val % 256 < 2 ^ 8)
     (h2 : (air.adapter.imm row 0).val / 256 % 256 < 2 ^ 8)
@@ -1160,7 +1160,7 @@ namespace Equivalence.LoadStore
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 528 →
@@ -1180,7 +1180,7 @@ namespace Equivalence.LoadStore
 
     rewrite [allHold_allRows] at h_constraints
     specialize h_constraints ⟨row, by omega⟩
-    specialize h_bus_assumptions row h_row
+    specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
     simp [LwInput_of_LoadStore_instruction_fields, PureSpec.execute_LOAD_lw_pure]
 
@@ -1199,14 +1199,14 @@ namespace Equivalence.LoadStore
     . exact lw_spec_of_get_instruction_fields_part_12 air row h_is_valid h_bus_wellformedness
     . exact lw_spec_of_get_instruction_fields_part_13 air row h_is_valid h_bus_wellformedness
     . exact lw_spec_of_get_instruction_fields_part_14 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
-    . exact lw_spec_of_get_instruction_fields_part_15 air row h_is_valid h_bus_assumptions
+    . exact lw_spec_of_get_instruction_fields_part_15 air row h_is_valid h_bus_axioms
     . exact Load.read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     . exact Load.write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     . apply lw_spec_of_get_instruction_fields_part_16 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
     . exact Load.write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
-    . apply lw_spec_of_get_instruction_fields_part_17 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . apply lw_spec_of_get_instruction_fields_part_18 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
-    . apply lw_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_assumptions h_bus_wellformedness
+    . apply lw_spec_of_get_instruction_fields_part_17 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
+    . apply lw_spec_of_get_instruction_fields_part_18 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
+    . apply lw_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
         VmAirWrapper_loadstore_constraint_and_interaction_simplification,
@@ -1330,7 +1330,7 @@ namespace Equivalence.LoadStore
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 531 →
@@ -1350,7 +1350,7 @@ namespace Equivalence.LoadStore
     simp
     rewrite [allHold_allRows] at h_constraints
     specialize h_constraints ⟨row, by omega⟩
-    specialize h_bus_assumptions row h_row
+    specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
     simp [
       SwInput_of_LoadStore_instruction_fields,
@@ -1411,7 +1411,7 @@ namespace Equivalence.LoadStore
     . simp [
         Valid_VmAirWrapper_loadstore.to_pc
       ]
-      have h_execution := h_bus_assumptions.1
+      have h_execution := h_bus_axioms.1
       simp [
         VmAirWrapper_loadstore_constraint_and_interaction_simplification,
         h_is_valid
@@ -1768,7 +1768,7 @@ namespace Equivalence.LoadStore
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     List.Forall LoadStore_instruction_fields.spec (get_instruction_fields air)
@@ -1787,14 +1787,14 @@ namespace Equivalence.LoadStore
 
     split_ands
     . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid
-    . exact lw_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact sw_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
+    . exact lw_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact sw_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
 
   theorem loadstore_spec [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List LoadStore_instruction_fields,
@@ -1804,7 +1804,7 @@ namespace Equivalence.LoadStore
     use get_instruction_fields air
     simp only [
       bus_from_instruction_fields_eq_air_buses air h_constraints,
-      spec_of_get_instruction_fields air h_constraints h_bus_assumptions h_bus_wellformedness
+      spec_of_get_instruction_fields air h_constraints h_bus_axioms h_bus_wellformedness
     ]
     trivial
 

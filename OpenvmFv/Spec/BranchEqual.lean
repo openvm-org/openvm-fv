@@ -76,9 +76,9 @@ namespace BranchEqual.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -112,7 +112,7 @@ lemma wf_propertiesToAssert
 
 include
   row_valid
-  assumptions
+  axioms
   constraints
   propertiesToAssume
 in
@@ -146,7 +146,7 @@ lemma essentials
   obtain ⟨ lb_imm, ub_imm ⟩ := pa_read
   clear pa_exec pa_range
 
-  simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at assumptions assertions
+  simp [row_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at axioms assertions
   clear constraints; simp_all
   split_ands <;> omega
 
@@ -231,7 +231,7 @@ theorem spec_BEQ_BNE_pc_FBB
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The constraints entail the correct change
     of the `pc` for BEQ/BNE, in BitVec terms
@@ -281,7 +281,7 @@ theorem spec_BEQ_BNE_pc
         (by omega)
         constraints
         row_valid
-        assumptions
+        axioms
         propertiesToAssume
   clear rest
 

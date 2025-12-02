@@ -410,7 +410,7 @@ namespace Equivalence.DivRem
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).opcode ∈ Finset.Icc 596 599
@@ -614,7 +614,7 @@ namespace Equivalence.DivRem
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 596 →
@@ -637,16 +637,16 @@ namespace Equivalence.DivRem
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_DIVREM_div_pure, DivInput_of_DIVREM_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [DivInput_of_DIVREM_instruction_fields, PureSpec.execute_DIVREM_div_pure]
@@ -695,7 +695,7 @@ namespace Equivalence.DivRem
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 597 →
@@ -718,16 +718,16 @@ namespace Equivalence.DivRem
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_DIVREM_divu_pure, DivuInput_of_DIVREM_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [DivuInput_of_DIVREM_instruction_fields, PureSpec.execute_DIVREM_divu_pure]
@@ -776,7 +776,7 @@ namespace Equivalence.DivRem
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 598 →
@@ -799,16 +799,16 @@ namespace Equivalence.DivRem
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_DIVREM_rem_pure, RemInput_of_DIVREM_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [RemInput_of_DIVREM_instruction_fields, PureSpec.execute_DIVREM_rem_pure]
@@ -857,7 +857,7 @@ namespace Equivalence.DivRem
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 599 →
@@ -880,16 +880,16 @@ namespace Equivalence.DivRem
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_DIVREM_remu_pure, RemuInput_of_DIVREM_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [RemuInput_of_DIVREM_instruction_fields, PureSpec.execute_DIVREM_remu_pure]
@@ -935,7 +935,7 @@ namespace Equivalence.DivRem
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_divrem FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
   :
     List.Forall DIVREM_instruction_fields.spec (get_instruction_fields air)
@@ -952,10 +952,10 @@ namespace Equivalence.DivRem
 
     simp [get_instruction_fields_row] at h_is_valid
     split_ands
-    . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact div_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact divu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact rem_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact remu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
+    . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact div_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact divu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact rem_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact remu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
 end Equivalence.DivRem

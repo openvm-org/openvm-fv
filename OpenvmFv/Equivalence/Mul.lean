@@ -358,7 +358,7 @@ namespace Equivalence.Mul
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 592 →
@@ -380,16 +380,16 @@ namespace Equivalence.Mul
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mul_pure, MulInput_of_MUL_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulInput_of_MUL_instruction_fields, PureSpec.execute_MULH_mul_pure]
@@ -426,7 +426,7 @@ namespace Equivalence.Mul
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_mul FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.wf_propertiesToAssumePerRow air row)
   :
     List.Forall MUL_instruction_fields.spec (get_instruction_fields air)
@@ -442,6 +442,6 @@ namespace Equivalence.Mul
     rewrite [←h_fields] at ⊢ h_is_valid; clear h_fields
 
     simp [get_instruction_fields_row] at h_is_valid
-    exact mul_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
+    exact mul_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
 end Equivalence.Mul

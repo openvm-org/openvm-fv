@@ -2000,8 +2000,8 @@ namespace VmAirWrapper_shift.constraints
       rowData.map Interaction.BusEntry.serialiseToList
 
     @[simp]
-    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
-      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+    def axioms [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.axioms FBB))
 
     @[simp]
     def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
@@ -2021,14 +2021,14 @@ namespace VmAirWrapper_shift.constraints
       bitwiseBus_row air row
 
     @[simp]
-    def assumptionsPerRow [Field ExtF]
+    def axiomsPerRow [Field ExtF]
       (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)
     : Prop :=
-      assumptions (_executionBus_row air row) ∧
-      assumptions (_memoryBus_row air row) ∧
-      assumptions (_rangeCheckerBus_row air row) ∧
-      assumptions (_programBus_row air row) ∧
-      assumptions (_bitwiseBus_row air row)
+      axioms (_executionBus_row air row) ∧
+      axioms (_memoryBus_row air row) ∧
+      axioms (_rangeCheckerBus_row air row) ∧
+      axioms (_programBus_row air row) ∧
+      axioms (_bitwiseBus_row air row)
 
     @[simp]
     def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_shift FBB ExtF) (row : ℕ)

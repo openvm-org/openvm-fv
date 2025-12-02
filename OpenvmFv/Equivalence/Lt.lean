@@ -376,7 +376,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).non_imm = 0 ∨
@@ -390,7 +390,7 @@ namespace Equivalence.Lt
       (by omega)
       (h_constraints ⟨row, by omega⟩)
       h_is_valid
-      (h_bus_assumptions row (by omega))
+      (h_bus_axioms row (by omega))
       (h_bus_wellformedness row (by omega))
 
     exact this.2.2.2.1
@@ -401,7 +401,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).opcode ∈ Finset.Icc 520 521
@@ -414,7 +414,7 @@ namespace Equivalence.Lt
       (by omega)
       (h_constraints ⟨row, by omega⟩)
       h_is_valid
-      (h_bus_assumptions row (by omega))
+      (h_bus_axioms row (by omega))
       (h_bus_wellformedness row (by omega))
 
     replace this := this.2.2.1
@@ -515,7 +515,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
   :
@@ -544,7 +544,7 @@ namespace Equivalence.Lt
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *-h_b0
@@ -564,13 +564,13 @@ namespace Equivalence.Lt
     . clear *-h_c3
       simp [List.Forall] at h_c3
       simp [get_instruction_fields_row, h_c3]
-    . clear *-h_bus_assumptions h_row h_is_valid h_pc
+    . clear *-h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_RTYPE_slt_pure, SltInput_of_Lt_instruction_fields, get_instruction_fields_row]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
-    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_non_imm
+    . clear *-h_bus_axioms h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_non_imm
       simp [SltInput_of_Lt_instruction_fields, PureSpec.execute_RTYPE_slt_pure]
       have h_rd := slt_rd_properties
         air
@@ -599,7 +599,7 @@ namespace Equivalence.Lt
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_assumptions row (by omega))
+          (h_bus_axioms row (by omega))
           (h_bus_wellformedness row (by omega))
           h_non_imm
 
@@ -689,7 +689,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
   :
@@ -718,7 +718,7 @@ namespace Equivalence.Lt
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *-h_b0
@@ -738,13 +738,13 @@ namespace Equivalence.Lt
     . clear *-h_c3
       simp [List.Forall] at h_c3
       simp [get_instruction_fields_row, h_c3]
-    . clear *-h_bus_assumptions h_row h_is_valid h_pc
+    . clear *-h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_RTYPE_sltu_pure, SltuInput_of_Lt_instruction_fields, get_instruction_fields_row]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
-    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_non_imm
+    . clear *-h_bus_axioms h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_non_imm
       simp [SltuInput_of_Lt_instruction_fields, PureSpec.execute_RTYPE_sltu_pure]
       have h_rd := sltu_rd_properties
         air
@@ -773,7 +773,7 @@ namespace Equivalence.Lt
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_assumptions row (by omega))
+          (h_bus_axioms row (by omega))
           (h_bus_wellformedness row (by omega))
           h_non_imm
 
@@ -871,7 +871,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
     (h_imm : air.adapter.rs2_as row 0 = 0)
   :
@@ -900,7 +900,7 @@ namespace Equivalence.Lt
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *-h_b0
@@ -919,13 +919,13 @@ namespace Equivalence.Lt
       refine (Int.bmod_eq_iff ?_).mpr ?_
       . trivial
       . grind
-    . clear *-h_bus_assumptions h_row h_is_valid h_pc
+    . clear *-h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_ITYPE_slti_pure, SltiInput_of_Lt_instruction_fields, get_instruction_fields_row]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
-    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_imm
+    . clear *-h_bus_axioms h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_imm
       simp [SltiInput_of_Lt_instruction_fields, PureSpec.execute_ITYPE_slti_pure]
       have h_rd := slti_register_properties
         air
@@ -954,7 +954,7 @@ namespace Equivalence.Lt
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_assumptions row (by omega))
+          (h_bus_axioms row (by omega))
           (h_bus_wellformedness row (by omega))
           h_imm
 
@@ -1055,7 +1055,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
     (h_imm : air.adapter.rs2_as row 0 = 0)
   :
@@ -1084,7 +1084,7 @@ namespace Equivalence.Lt
         (by omega)
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
     split_ands
     . clear *-h_b0
@@ -1103,13 +1103,13 @@ namespace Equivalence.Lt
       refine (Int.bmod_eq_iff ?_).mpr ?_
       . trivial
       . grind
-    . clear *-h_bus_assumptions h_row h_is_valid h_pc
+    . clear *-h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_ITYPE_sltiu_pure, SltiuInput_of_Lt_instruction_fields, get_instruction_fields_row]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
-    . clear *-h_bus_assumptions h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_imm
+    . clear *-h_bus_axioms h_bus_wellformedness h_row h_is_valid h_opcode h_cmp_result h_constraints h_imm
       simp [SltiuInput_of_Lt_instruction_fields, PureSpec.execute_ITYPE_sltiu_pure]
       have h_rd := sltiu_register_properties
         air
@@ -1138,7 +1138,7 @@ namespace Equivalence.Lt
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_assumptions row (by omega))
+          (h_bus_axioms row (by omega))
           (h_bus_wellformedness row (by omega))
           h_imm
 
@@ -1174,7 +1174,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).non_imm = 1 →
@@ -1191,8 +1191,8 @@ namespace Equivalence.Lt
     simp [get_instruction_fields_row] at h_non_imm
 
     exact ⟨
-      slt_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm,
-      sltu_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_non_imm
+      slt_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_non_imm,
+      sltu_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_non_imm
     ⟩
 
   lemma imm_spec_of_get_instruction_fields [Field ExtF]
@@ -1201,7 +1201,7 @@ namespace Equivalence.Lt
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).non_imm = 0 →
@@ -1218,14 +1218,14 @@ namespace Equivalence.Lt
     simp [get_instruction_fields_row] at h_imm
 
     exact ⟨
-      slti_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_imm,
-      sltiu_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness h_imm
+      slti_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_imm,
+      sltiu_spec_of_get_instruction_fields air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_imm
     ⟩
 
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     List.Forall Lt_instruction_fields.spec (get_instruction_fields air)
@@ -1243,12 +1243,12 @@ namespace Equivalence.Lt
     simp [get_instruction_fields_row] at h_is_valid
 
     exact ⟨
-      get_instruction_fields_row_non_imm_binary air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
+      get_instruction_fields_row_non_imm_binary air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness,
       ⟨
-        get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
+        get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness,
         ⟨
-          non_imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness,
-          imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
+          non_imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness,
+          imm_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
         ⟩
       ⟩
     ⟩
@@ -1256,7 +1256,7 @@ namespace Equivalence.Lt
   theorem lt_spec [Field ExtF]
     (air : Valid_VmAirWrapper_lt FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List Lt_instruction_fields,
@@ -1266,7 +1266,7 @@ namespace Equivalence.Lt
     use get_instruction_fields air
     simp only [
       bus_from_instruction_fields_eq_air_buses air h_constraints,
-      spec_of_get_instruction_fields air h_constraints h_bus_assumptions h_bus_wellformedness
+      spec_of_get_instruction_fields air h_constraints h_bus_axioms h_bus_wellformedness
     ]
     trivial
 

@@ -110,9 +110,9 @@ namespace BranchLessThan.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -147,7 +147,7 @@ lemma wf_propertiesToAssert
 
 include
   row_valid
-  assumptions
+  axioms
   constraints
   propertiesToAssume
 in
@@ -187,7 +187,7 @@ lemma essentials
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions constraints
+  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at axioms assertions constraints
   obtain ⟨ constrain_interactions,
            b_blt, b_bltu, b_bge, b_bgeu,
            b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
@@ -436,7 +436,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The constraints entail the correct change
     of the `pc` for BLT/BLTU/BGE/BGEU, in BitVec terms
@@ -514,7 +514,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
         (by omega)
         constraints
         row_valid
-        assumptions
+        axioms
         propertiesToAssume
   clear rest
 

@@ -205,7 +205,7 @@ namespace Equivalence.Auipc
   theorem auipc_spec [Field ExtF]
     (air : Valid_VmAirWrapper_auipc FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_auipc.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_auipc.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_auipc.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List Auipc_instruction_fields,
@@ -258,7 +258,7 @@ namespace Equivalence.Auipc
 
       intro h_is_valid
       specialize h_constraints ⟨ row, by omega ⟩
-      specialize h_bus_assumptions row (by omega)
+      specialize h_bus_axioms row (by omega)
       specialize h_bus_wellformedness row (by omega)
 
       have spec :=
@@ -269,7 +269,7 @@ namespace Equivalence.Auipc
           (by omega)
           h_constraints
           h_is_valid
-          h_bus_assumptions
+          h_bus_axioms
           h_bus_wellformedness
 
       obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := auipc_rd_properties air row h_is_valid h_bus_wellformedness
@@ -283,7 +283,7 @@ namespace Equivalence.Auipc
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd'.1
           simp
-      . have := h_bus_assumptions.1.1.1
+      . have := h_bus_axioms.1.1.1
         simp [← BitVec.toNat_inj]
         omega
 

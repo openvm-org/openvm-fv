@@ -1513,7 +1513,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     (h_opcode: air.core.expected_opcode row 0 = 528)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid: air.core.is_valid row 0 = 1)
   : ∃ pc imm rs1 rd rs1_data read_data prev_data rs1_prev_timestamp read_prev_timestamp write_prev_timestamp timestamp,
