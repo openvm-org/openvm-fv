@@ -513,6 +513,7 @@ namespace Equivalence.Shift
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_slli =>
@@ -520,7 +521,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_slli
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -534,7 +535,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sll
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -708,6 +709,7 @@ namespace Equivalence.Shift
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_srli =>
@@ -715,7 +717,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srli
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -729,7 +731,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_srl
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -902,6 +904,7 @@ namespace Equivalence.Shift
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_srai =>
@@ -909,7 +912,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srai
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -923,7 +926,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sra
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1100,13 +1103,14 @@ namespace Equivalence.Shift
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_slli =>
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_slli
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1133,7 +1137,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sll
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1298,12 +1302,14 @@ namespace Equivalence.Shift
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_srli =>
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srli
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1330,6 +1336,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_srl
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1494,12 +1501,14 @@ namespace Equivalence.Shift
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.2.1
     cases h_cases with
       | inl h_srai =>
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srai
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1
@@ -1526,6 +1535,7 @@ namespace Equivalence.Shift
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sra
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . have := Transpiler.extract_opcode h_transpile.1

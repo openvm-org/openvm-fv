@@ -970,6 +970,7 @@ namespace Equivalence.LoadStore
       have := Transpiler.transpiler_opcode_528 h_instruction
       simp [h_data_opcode, h_opcode] at this
       have h_alignment := Transpiler.pc_aligned_of_some h_instruction
+      have h_bound := Transpiler.pc_bound_of_some h_instruction
       obtain
         ⟨_, imm, rs1, rd, h_instruction_load, _⟩ |
         ⟨_, imm, rs1, h_instruction_load⟩
@@ -977,7 +978,7 @@ namespace Equivalence.LoadStore
       all_goals {
         rewrite [h_instruction_load] at h_instruction
         unfold Transpiler.transpile_op at h_instruction
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_instruction
+        rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
@@ -1215,6 +1216,7 @@ namespace Equivalence.LoadStore
       ] at h_transpile
       obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
+      have h_bound := Transpiler.pc_bound_of_some h_instruction.1
       have h_rd := Transpiler.transpiler_opcode_528 h_instruction.1
       simp [h_instruction, h_opcode] at h_rd
       obtain ⟨
@@ -1233,7 +1235,7 @@ namespace Equivalence.LoadStore
       . rewrite [h_instruction_load] at h_instruction
         unfold Transpiler.transpile_op at h_instruction
         dsimp at h_instruction
-        rewrite [ite_cond_eq_true _ _ (eq_true h_aligned)] at h_instruction
+        rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
@@ -1265,7 +1267,7 @@ namespace Equivalence.LoadStore
       . rewrite [h_instruction_load] at h_instruction
         unfold Transpiler.transpile_op at h_instruction
         dsimp at h_instruction
-        rewrite [ite_cond_eq_true _ _ (eq_true h_aligned)] at h_instruction
+        rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
@@ -1277,15 +1279,13 @@ namespace Equivalence.LoadStore
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
     (h_row : row ≤ air.last_row)
-    (h_opcode : air.core.expected_opcode row 0 = 531)
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   :
     (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
     (air.adapter.imm_extended_limb row 0).val / 256
   := by
-    have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have := Store.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
     omega
 
   lemma imm_12_bits_of_opcode_531 [Field ExtF]
@@ -1314,10 +1314,11 @@ namespace Equivalence.LoadStore
     have := Transpiler.transpiler_opcode_531 h_instruction
     simp [h_data_opcode, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_instruction
+    have h_bound := Transpiler.pc_bound_of_some h_instruction
     obtain ⟨imm, rs2, rs1, h_instruction_store⟩ := this
     rewrite [h_instruction_store] at h_instruction
     unfold Transpiler.transpile_op at h_instruction
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_instruction
+    rewrite [if_pos (by constructor <;> assumption)] at h_instruction
     dsimp at h_instruction
     simp [-Vector.mk_eq] at h_instruction
     simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
@@ -1364,7 +1365,7 @@ namespace Equivalence.LoadStore
     . have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       omega
     . omega
-    . have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    . have := Store.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
       omega
     . have := Store.rs1_data_0_range air row h_is_valid h_bus_wellformedness
       apply Fin.lt_def.mp at this
@@ -1578,7 +1579,7 @@ namespace Equivalence.LoadStore
         rewrite [this]; clear this; clear this; clear this
         rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
         have : (air.adapter.imm_extended_limb row 0).val / 256 < 256 := by
-          have := Store.imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+          have := Store.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
           omega
         simp [Nat.mod_eq_of_lt this]
         have (bv1 bv2: BitVec 8) :
@@ -1629,7 +1630,7 @@ namespace Equivalence.LoadStore
       simp [U32.toBV]
       have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
       simp [this]
-      have := imm_extended_limb_upper_mod_of_opcode_531 air row h_row h_opcode h_constraints h_is_valid h_bus_wellformedness
+      have := imm_extended_limb_upper_mod_of_opcode_531 air row h_row h_constraints h_is_valid
       simp [this]
       have h_sign_extend := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind

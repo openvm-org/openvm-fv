@@ -96,7 +96,7 @@ namespace Interaction
                 pc < 2^30 ∧ pc % 4 = 0
 
           -- An execution bus entry has no assume/prove properties
-          wf_properties := fun ⟨_, pc, _⟩ => True
+          wf_properties := fun _ => True
 
           wf_assume_cond := fun entry => entry.1 = -1,
           wf_assert_cond := fun entry => entry.1 = 1,

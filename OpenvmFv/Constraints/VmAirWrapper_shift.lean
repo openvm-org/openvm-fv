@@ -1930,7 +1930,8 @@ namespace VmAirWrapper_shift.constraints
       simp [Interaction.ProgramBusEntry.operand_properties] at h_bus
       obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
       have h_alignment := Transpiler.pc_aligned_of_some h_transpile
-      rewrite [←h_data] at h_alignment
+      have h_bound := Transpiler.pc_bound_of_some h_transpile
+      rewrite [←h_data] at h_alignment h_bound
       dsimp at h_alignment
       simp [←h_data] at h_bounds ⊢ h_transpile
       obtain h_opcode | h_opcode | h_opcode := h_bounds <;> [
@@ -1943,7 +1944,7 @@ namespace VmAirWrapper_shift.constraints
         simp [h_data_6] at this
         obtain ⟨shamt, rs1, rd, h_instruction, h_rd⟩ := this
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment), h_instruction] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption), h_instruction] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . exfalso

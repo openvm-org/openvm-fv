@@ -409,7 +409,8 @@ namespace VmAirWrapper_auipc.constraints
       simp [Interaction.ProgramBusEntry.operand_properties] at h_bus
       obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
       have h_alignment := Transpiler.pc_aligned_of_some h_transpile
-      simp [←h_data] at h_bounds ⊢ h_transpile h_alignment
+      have h_bound := Transpiler.pc_bound_of_some h_transpile
+      simp [←h_data] at h_bounds ⊢ h_transpile h_alignment h_bound
       clear h_data
       have := Transpiler.transpiler_opcode_576 h_transpile h_bounds
       split_ands
@@ -417,7 +418,7 @@ namespace VmAirWrapper_auipc.constraints
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
         dsimp at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         split_ifs at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [←h_transpile] at h_bounds
@@ -434,7 +435,7 @@ namespace VmAirWrapper_auipc.constraints
         rewrite [h_instruction] at h_transpile
         unfold Transpiler.transpile_op at h_transpile
         dsimp at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption)] at h_transpile
         split_ifs at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [←h_transpile] at h_bounds

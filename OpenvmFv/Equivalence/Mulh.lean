@@ -435,12 +435,13 @@ namespace Equivalence.Mulh
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_593 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -472,12 +473,13 @@ namespace Equivalence.Mulh
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_594 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -509,11 +511,13 @@ namespace Equivalence.Mulh
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_595 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -530,6 +534,7 @@ namespace Equivalence.Mulh
         . simp [BitVec.toNat_eq_nat]
           convert h_contr
       . use rd
+
 
   lemma mulh_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)

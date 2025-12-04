@@ -119,7 +119,7 @@ namespace Local
     let finished : Bool := false
     let vaddr := (LeanRV32D.Functions.bits_of_virtaddr vaddr)
     let (data, _finished, _i) ← (( do
-      let loop_vars ← untilFuelM (fuel :=n) (λ (data, finished, i) => (pure finished)) (data, finished, i)
+      let loop_vars ← untilFuelM (fuel :=n) (λ (_, finished, _) => (pure finished)) (data, finished, i)
         fun (data, finished, i) => do
           let offset := i
           let vaddr := (Sail.BitVec.addInt vaddr (offset *i bytes))

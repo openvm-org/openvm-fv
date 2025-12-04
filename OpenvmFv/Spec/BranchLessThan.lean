@@ -335,49 +335,6 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_pos (by simpa)]; rw [if_neg (by aesop)] ] <;>
     simp [h_lt]
-  -- . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-  --   . clear *- b_cmp_result; grind
-  --   . congr
-  --     clear pa_range lb_imm ub_imm
-  --     obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
-  --     simp [← BranchLessThanCoreAir_4_8.diff_0_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_1_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_2_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_3_def,
-  --             h_cmp_lt] at *
-  --     have : ¬(2 * (1 - air.core.cmp_result row 0) - 1 = 0) := by grind
-  --     simp [this] at *; clear this
-  --     simp [← BranchLessThanCoreAir_4_8.a_diff_def,
-  --           ← BranchLessThanCoreAir_4_8.b_diff_def] at *
-
-  --     have eq_msb_b : air.core.a_msb_f row 0 = if 128 ≤ (air.core.a_3 row 0).val then (air.core.a_3 row 0) - 256 else (air.core.a_3 row 0)
-  --       := by clear *- ub_a3 h_msb_a h_a_diff; split_ifs <;> grind
-  --     have eq_msb_c : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then air.core.b_3 row 0 - 256 else air.core.b_3 row 0
-  --       := by clear *- ub_b3 h_msb_b h_b_diff; split_ifs <;> grind
-
-  --     simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
-  --     repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-  --     repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
-
-  --     have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
-  --       (air.core.diff_marker_0 row 0 = 1 → air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_1 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_2 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_3 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0)
-  --     := by
-  --       clear *- h_b_ps3 h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0
-  --       grind (splits := 14)
-
-  --     rcases h_b_ps3 with h_dm3 | h_dm3
-  --     . rcases h_b_dm2 with h_dm2 | h_dm2
-  --       . rcases h_b_dm1 with h_dm1 | h_dm1
-  --         . rcases h_b_dm0 with h_dm0 | h_dm0
-  --           . simp_all; split_ifs <;> simp_all <;> grind
-  --           . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --         . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --       . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --     . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-
   -- BLTU
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_pos (by simpa)]; rw [if_neg (by aesop)] ] <;>
@@ -386,48 +343,6 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_neg (by simpa)]; rw [if_pos (by aesop)] ] <;>
     simp [h_lt] <;> grind
-  -- . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-  --   . clear *- b_cmp_result; grind
-  --   . congr
-  --     clear pa_range lb_imm ub_imm
-  --     obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
-  --     simp [← BranchLessThanCoreAir_4_8.diff_0_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_1_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_2_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_3_def,
-  --             h_cmp_lt] at *
-  --     have : ¬(2 * (1 - air.core.cmp_result row 0) - 1 = 0) := by grind
-  --     simp [this] at *; clear this
-  --     simp [← BranchLessThanCoreAir_4_8.a_diff_def,
-  --           ← BranchLessThanCoreAir_4_8.b_diff_def] at *
-
-  --     have eq_msb_b : air.core.a_msb_f row 0 = if 128 ≤ (air.core.a_3 row 0).val then (air.core.a_3 row 0) - 256 else (air.core.a_3 row 0)
-  --       := by clear *- ub_a3 h_msb_a h_a_diff; split_ifs <;> grind
-  --     have eq_msb_c : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then air.core.b_3 row 0 - 256 else air.core.b_3 row 0
-  --       := by clear *- ub_b3 h_msb_b h_b_diff; split_ifs <;> grind
-
-  --     simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
-  --     repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-  --     repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
-
-  --     have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
-  --       (air.core.diff_marker_0 row 0 = 1 → air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_1 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_2 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_3 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0)
-  --     := by
-  --       clear *- h_b_ps3 h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0
-  --       grind (splits := 14)
-
-  --     rcases h_b_ps3 with h_dm3 | h_dm3
-  --     . rcases h_b_dm2 with h_dm2 | h_dm2
-  --       . rcases h_b_dm1 with h_dm1 | h_dm1
-  --         . rcases h_b_dm0 with h_dm0 | h_dm0
-  --           . simp_all; split_ifs <;> simp_all <;> grind
-  --           . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --         . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --       . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --     . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
   -- BGEU
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_neg (by simpa)]; rw [if_pos (by aesop)] ] <;>

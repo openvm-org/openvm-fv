@@ -51,6 +51,7 @@ namespace Load
     have := Transpiler.transpiler_opcode_528 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
       ⟨h_needs_write, imm, rs1, h_instruction⟩
@@ -62,7 +63,7 @@ namespace Load
       ]
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
@@ -80,7 +81,7 @@ namespace Load
       ]
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
@@ -109,6 +110,7 @@ namespace Load
     have := Transpiler.transpiler_opcode_528 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
       ⟨h_needs_write, imm, rs1, h_instruction⟩
@@ -120,7 +122,7 @@ namespace Load
       ]
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
@@ -138,7 +140,7 @@ namespace Load
       ]
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
@@ -166,6 +168,7 @@ namespace Load
     have := Transpiler.transpiler_opcode_528 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     rewrite [←h_data.2.2.2.2.2.2.2.2.2]
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
@@ -174,7 +177,7 @@ namespace Load
     all_goals {
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       rewrite [←h_data.2.2.2.2.2.1]
@@ -208,6 +211,7 @@ namespace Load
     have := Transpiler.transpiler_opcode_528 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     rewrite [←h_data.2.2.2.2.2.2.2.1]
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
@@ -216,7 +220,7 @@ namespace Load
     all_goals {
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [←h_transpile.2]
@@ -1250,6 +1254,7 @@ namespace Load
     have := Transpiler.transpiler_opcode_528 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
       ⟨h_needs_write, imm, rs1, h_instruction⟩
@@ -1258,7 +1263,7 @@ namespace Load
       rewrite [←h_data.2.2.2.2.2.1]
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
-      rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+      rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
