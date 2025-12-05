@@ -108,7 +108,7 @@ lemma non_valid_row_Mul_all_interaction_multiplicities_zero
   entry ∈ executionBus_row air row ++
           memoryBus_row air row ++
           rangeCheckerBus_row air row ++
-          readInstructionBus_row air row ++
+          programBus_row air row ++
           rangeTupleCheckerBus_row air row ++
           bitwiseBus_row air row → entry.1 = 0
 := by
@@ -158,9 +158,9 @@ namespace DivRem.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -233,7 +233,7 @@ set_option maxRecDepth 1_000_000 in
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume
 in
 /-- Some properties more important than others that should
@@ -274,7 +274,7 @@ lemma essentials
         ← DivRemCoreAir_4_8.a_3_def]
 
   split_ands
-  . clear *- assumptions; grind
+  . clear *- axioms; grind
   . intro h_op; rcases h_op with h_op | h_op <;> simp_all
   . intro h_op; rcases h_op with h_op | h_op <;> simp_all
 

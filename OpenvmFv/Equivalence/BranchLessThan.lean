@@ -159,7 +159,7 @@ namespace Equivalence.BranchLessThan
       if index = ExecutionBus then            rows.flatMap BranchLessThan_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap BranchLessThan_instruction_fields.memory
       else if index = RangeCheckerBus then    rows.flatMap BranchLessThan_instruction_fields.range_checks
-      else if index = ReadInstructionBus then rows.flatMap BranchLessThan_instruction_fields.read_instruction
+      else if index = ProgramBus then rows.flatMap BranchLessThan_instruction_fields.read_instruction
       else if index = BitwiseBus then         rows.flatMap BranchLessThan_instruction_fields.bitwise
       else []
 
@@ -204,7 +204,7 @@ namespace Equivalence.BranchLessThan
   theorem branch_lt_spec [Field ExtF]
     (air : Valid_VmAirWrapper_branch_lt FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_branch_lt.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_branch_lt.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_branch_lt.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List BranchLessThan_instruction_fields,
@@ -227,7 +227,7 @@ namespace Equivalence.BranchLessThan
       unfold VmAirWrapper_branch_lt.constraints.executionBus_row
       unfold VmAirWrapper_branch_lt.constraints.memoryBus_row
       unfold VmAirWrapper_branch_lt.constraints.rangeCheckerBus_row
-      unfold VmAirWrapper_branch_lt.constraints.readInstructionBus_row
+      unfold VmAirWrapper_branch_lt.constraints.programBus_row
       unfold VmAirWrapper_branch_lt.constraints.bitwiseBus_row
       funext index
       by_cases h_index: index = ExecutionBus
@@ -240,7 +240,7 @@ namespace Equivalence.BranchLessThan
         all_goals simp [h_neg_one]
       by_cases h_index: index = RangeCheckerBus
       . simp [h_index, List.flatMap_map]
-      by_cases h_index: index = ReadInstructionBus
+      by_cases h_index: index = ProgramBus
       . simp [h_index, List.flatMap_map, ← BranchLessThanCoreAir_4_8.expected_opcode_def]
       by_cases h_index: index = BitwiseBus
       . simp [h_index, List.flatMap_map, BranchLessThan_instruction_fields.bitwise]
@@ -268,7 +268,7 @@ namespace Equivalence.BranchLessThan
             (by omega)
             (h_constraints ⟨row, by omega⟩)
             h_is_valid
-            (h_bus_assumptions row (by omega))
+            (h_bus_axioms row (by omega))
             (h_bus_wellformedness row (by omega))
 
       have ⟨ spec_blt, spec_bltu, spec_bge, spec_bgeu ⟩
@@ -279,7 +279,7 @@ namespace Equivalence.BranchLessThan
           (by omega)
           (h_constraints ⟨row, by omega⟩)
           h_is_valid
-          (h_bus_assumptions row (by omega))
+          (h_bus_axioms row (by omega))
           (h_bus_wellformedness row (by omega))
 
       split_ands <;> [
@@ -288,7 +288,7 @@ namespace Equivalence.BranchLessThan
         skip; skip; skip; skip
       ]
 
-      . clear spec_bltu spec_bge spec_bgeu h_constraints h_bus_assumptions h_bus_wellformedness
+      . clear spec_bltu spec_bge spec_bgeu h_constraints h_bus_axioms h_bus_wellformedness
         intro h_blt; simp [h_blt] at spec_blt
 
         split_ifs at spec_blt with h_lt

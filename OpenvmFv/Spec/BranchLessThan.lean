@@ -85,7 +85,7 @@ lemma non_valid_row_BranchLessThan_all_interaction_multiplicities_zero
   (entry ∈ executionBus_row air row ++
            memoryBus_row air row ++
            rangeCheckerBus_row air row ++
-           readInstructionBus_row air row → entry.1 = 0) ∧
+           programBus_row air row → entry.1 = 0) ∧
   (entry ∈ bitwiseBus_row air row →
     entry.1 = 0 ∨
     (air.core.prefix_sum row 0 0 = 1 ∧
@@ -110,9 +110,9 @@ namespace BranchLessThan.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -131,7 +131,7 @@ lemma wf_propertiesToAssert
   simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
@@ -147,7 +147,7 @@ lemma wf_propertiesToAssert
 
 include
   row_valid
-  assumptions
+  axioms
   constraints
   propertiesToAssume
 in
@@ -174,7 +174,7 @@ lemma essentials
   simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read pa_bit
 
   rw [Fin.ext_iff] at pa_mem
@@ -187,7 +187,7 @@ lemma essentials
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at assumptions assertions constraints
+  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at axioms assertions constraints
   obtain ⟨ constrain_interactions,
            b_blt, b_bltu, b_bge, b_bgeu,
            b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
@@ -268,7 +268,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
@@ -335,49 +335,6 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_pos (by simpa)]; rw [if_neg (by aesop)] ] <;>
     simp [h_lt]
-  -- . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-  --   . clear *- b_cmp_result; grind
-  --   . congr
-  --     clear pa_range lb_imm ub_imm
-  --     obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
-  --     simp [← BranchLessThanCoreAir_4_8.diff_0_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_1_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_2_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_3_def,
-  --             h_cmp_lt] at *
-  --     have : ¬(2 * (1 - air.core.cmp_result row 0) - 1 = 0) := by grind
-  --     simp [this] at *; clear this
-  --     simp [← BranchLessThanCoreAir_4_8.a_diff_def,
-  --           ← BranchLessThanCoreAir_4_8.b_diff_def] at *
-
-  --     have eq_msb_b : air.core.a_msb_f row 0 = if 128 ≤ (air.core.a_3 row 0).val then (air.core.a_3 row 0) - 256 else (air.core.a_3 row 0)
-  --       := by clear *- ub_a3 h_msb_a h_a_diff; split_ifs <;> grind
-  --     have eq_msb_c : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then air.core.b_3 row 0 - 256 else air.core.b_3 row 0
-  --       := by clear *- ub_b3 h_msb_b h_b_diff; split_ifs <;> grind
-
-  --     simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
-  --     repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-  --     repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
-
-  --     have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
-  --       (air.core.diff_marker_0 row 0 = 1 → air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_1 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_2 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_3 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0)
-  --     := by
-  --       clear *- h_b_ps3 h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0
-  --       grind (splits := 14)
-
-  --     rcases h_b_ps3 with h_dm3 | h_dm3
-  --     . rcases h_b_dm2 with h_dm2 | h_dm2
-  --       . rcases h_b_dm1 with h_dm1 | h_dm1
-  --         . rcases h_b_dm0 with h_dm0 | h_dm0
-  --           . simp_all; split_ifs <;> simp_all <;> grind
-  --           . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --         . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --       . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --     . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-
   -- BLTU
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_pos (by simpa)]; rw [if_neg (by aesop)] ] <;>
@@ -386,48 +343,6 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_neg (by simpa)]; rw [if_pos (by aesop)] ] <;>
     simp [h_lt] <;> grind
-  -- . trans (if air.core.cmp_result row 0 = 1 then air.adapter.from_state.pc row 0 + air.core.imm row 0 else air.adapter.from_state.pc row 0 + 4)
-  --   . clear *- b_cmp_result; grind
-  --   . congr
-  --     clear pa_range lb_imm ub_imm
-  --     obtain ⟨ ⟨ h_msb_a, h_msb_b ⟩, h_diff ⟩ := pa_bit
-  --     simp [← BranchLessThanCoreAir_4_8.diff_0_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_1_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_2_def,
-  --           ← BranchLessThanCoreAir_4_8.diff_3_def,
-  --             h_cmp_lt] at *
-  --     have : ¬(2 * (1 - air.core.cmp_result row 0) - 1 = 0) := by grind
-  --     simp [this] at *; clear this
-  --     simp [← BranchLessThanCoreAir_4_8.a_diff_def,
-  --           ← BranchLessThanCoreAir_4_8.b_diff_def] at *
-
-  --     have eq_msb_b : air.core.a_msb_f row 0 = if 128 ≤ (air.core.a_3 row 0).val then (air.core.a_3 row 0) - 256 else (air.core.a_3 row 0)
-  --       := by clear *- ub_a3 h_msb_a h_a_diff; split_ifs <;> grind
-  --     have eq_msb_c : air.core.b_msb_f row 0 = if 128 ≤ (air.core.b_3 row 0).val then air.core.b_3 row 0 - 256 else air.core.b_3 row 0
-  --       := by clear *- ub_b3 h_msb_b h_b_diff; split_ifs <;> grind
-
-  --     simp [U32.toInt, U32.toNat, ← U32.msb_3_negative, BitVec.msb_eq_decide]
-  --     repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
-  --     repeat rw [Int.emod_eq_of_lt (b := 256) (by omega) (by omega)]
-
-  --     have ⟨ hdm0, hdm1, hdm2, hdm3 ⟩ :
-  --       (air.core.diff_marker_0 row 0 = 1 → air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_1 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_2 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_3 row 0 = 0) ∧
-  --       (air.core.diff_marker_3 row 0 = 1 → air.core.diff_marker_0 row 0 = 0 ∧ air.core.diff_marker_1 row 0 = 0 ∧ air.core.diff_marker_2 row 0 = 0)
-  --     := by
-  --       clear *- h_b_ps3 h_b_dm2 h_b_dm1 h_b_dm0 h_b_ps0
-  --       grind (splits := 14)
-
-  --     rcases h_b_ps3 with h_dm3 | h_dm3
-  --     . rcases h_b_dm2 with h_dm2 | h_dm2
-  --       . rcases h_b_dm1 with h_dm1 | h_dm1
-  --         . rcases h_b_dm0 with h_dm0 | h_dm0
-  --           . simp_all; split_ifs <;> simp_all <;> grind
-  --           . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --         . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --       . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
-  --     . simp_all; rcases b_cmp_result <;> split_ifs <;> simp_all <;> grind
   -- BGEU
   . split_ifs at h_lt with h_is_lt <;>
     [ rw [if_neg (by simpa)]; rw [if_pos (by aesop)] ] <;>
@@ -436,7 +351,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The constraints entail the correct change
     of the `pc` for BLT/BLTU/BGE/BGEU, in BitVec terms
@@ -514,7 +429,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
         (by omega)
         constraints
         row_valid
-        assumptions
+        axioms
         propertiesToAssume
   clear rest
 
@@ -525,7 +440,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
   obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem

@@ -80,9 +80,9 @@ namespace ALU.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -90,7 +90,7 @@ section General
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume
 in
 /-- The properties that need to be proven actually hold -/
@@ -102,7 +102,7 @@ lemma wf_propertiesToAssert
   simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -167,7 +167,7 @@ lemma wf_propertiesToAssert
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume
 in
 /-- Some properties more important than others that should
@@ -193,7 +193,7 @@ lemma essentials
     air.rs2_sign row 0 = air.rs2_limbs row 0 3 ∧
     (air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255))
 := by
-  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid assumptions propertiesToAssume
+  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid axioms propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   simp [row_valid, and_assoc,
         VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_mem
@@ -206,7 +206,7 @@ lemma essentials
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3, op4 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -246,7 +246,7 @@ def rop_of_ALU_opcode (opcode : FBB) : rop :=
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The constraints entail correct implementation of the
     five base ALU opcodes for:
@@ -272,7 +272,7 @@ theorem spec_base_ALU
     (rop_of_ALU_opcode (air.core.ctx row 0).instruction.opcode)
 := by
   -- Get relevant previous info
-  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid assumptions propertiesToAssume
+  have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid axioms propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   simp [row_valid, and_assoc,
         VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_mem
@@ -286,7 +286,7 @@ theorem spec_base_ALU
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3, op4 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
@@ -393,7 +393,7 @@ section NonImmediate
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The non-immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
@@ -431,7 +431,7 @@ def iop_of_ALU_opcode (opcode : FBB) : iop :=
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The immediate variants of the five base ALU opcodes
     are implemented as per the RISC-V spec -/
@@ -457,7 +457,7 @@ theorem spec_base_ALU_imm
   simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ opcodes pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
   simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_read
@@ -487,7 +487,7 @@ theorem spec_base_ALU_imm
       grind
   . simp [*, ← BitVec.toInt_inj]
     trans (BitVec.ofNat 24 (air.adapter.rs2 row 0).val).toInt
-    . have essentials := essentials _ air row row_in_range constraints row_valid assumptions propertiesToAssume
+    . have essentials := essentials _ air row row_in_range constraints row_valid axioms propertiesToAssume
       simp [h_imm, and_assoc] at essentials
       obtain ⟨ ub_pc, ub_a0, ub_a1, ub_a2, ub_a3, ub_b0, ub_b1, ub_b2, ub_b3, ub_c0, ub_c1, ub_c2, ub_c3,
                opcodes, opcode_not_sub, h_rs2, imm_sign_extend, rs2_as_imm, imm_sign, imm_sign_extend' ⟩ := essentials

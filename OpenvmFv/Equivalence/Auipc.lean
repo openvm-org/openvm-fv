@@ -89,7 +89,7 @@ namespace Equivalence.Auipc
       if index = ExecutionBus then            rows.flatMap Auipc_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap Auipc_instruction_fields.memory
       else if index = RangeCheckerBus then    rows.flatMap Auipc_instruction_fields.range_checks
-      else if index = ReadInstructionBus then rows.flatMap Auipc_instruction_fields.read_instruction
+      else if index = ProgramBus then rows.flatMap Auipc_instruction_fields.read_instruction
       else if index = BitwiseBus then         rows.flatMap Auipc_instruction_fields.bitwise
       else []
 
@@ -152,17 +152,17 @@ namespace Equivalence.Auipc
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
     simp [
       VmAirWrapper_auipc.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
-      VmAirWrapper_auipc.constraints._readInstructionBus_row,
-      VmAirWrapper_auipc.constraints.readInstructionBus_row,
+      Interaction.ProgramBusEntry.operand_properties,
+      VmAirWrapper_auipc.constraints._programBus_row,
+      VmAirWrapper_auipc.constraints.programBus_row,
       -List.map_nil, -Vector.toList_mk, -List.attach_cons
     ] at h_bus_wellformedness
-    unfold Interaction.ReadInstructionBusEntry.deserialise at h_bus_wellformedness
+    unfold Interaction.ProgramBusEntry.deserialise at h_bus_wellformedness
     dsimp [List.attach] at h_bus_wellformedness
     rewrite [h_is_valid] at h_bus_wellformedness
     simp only [
       Fin.isValue, Fin.coe_ofNat_eq_mod, Nat.one_mod, Nat.cast_one, Fin.cast_val_eq_self,
-      Nat.cast_zero, Interaction.ReadInstructionBusEntry.mk.injEq,
+      Nat.cast_zero, Interaction.ProgramBusEntry.mk.injEq,
       forall_const
     ] at h_bus_wellformedness
     exact h_bus_wellformedness
@@ -181,9 +181,10 @@ namespace Equivalence.Auipc
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     obtain ⟨ imm, rd, h_instruction, h_rd ⟩ := Transpiler.transpiler_opcode_576 h_transpile.1 h_transpile.2.2.2.1
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_pc_aligned)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -205,7 +206,7 @@ namespace Equivalence.Auipc
   theorem auipc_spec [Field ExtF]
     (air : Valid_VmAirWrapper_auipc FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_auipc.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_auipc.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_auipc.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List Auipc_instruction_fields,
@@ -228,7 +229,7 @@ namespace Equivalence.Auipc
       unfold VmAirWrapper_auipc.constraints.executionBus_row
       unfold VmAirWrapper_auipc.constraints.memoryBus_row
       unfold VmAirWrapper_auipc.constraints.rangeCheckerBus_row
-      unfold VmAirWrapper_auipc.constraints.readInstructionBus_row
+      unfold VmAirWrapper_auipc.constraints.programBus_row
       unfold VmAirWrapper_auipc.constraints.bitwiseBus_row
       funext index
       by_cases h_index: index = ExecutionBus
@@ -241,7 +242,7 @@ namespace Equivalence.Auipc
         all_goals simp [h_neg_one]
       by_cases h_index: index = RangeCheckerBus
       . simp [h_index, get_instruction_fields_row, List.flatMap_map]
-      by_cases h_index: index = ReadInstructionBus
+      by_cases h_index: index = ProgramBus
       . simp [h_index, get_instruction_fields_row, List.flatMap_map]
       by_cases h_index: index = BitwiseBus
       . simp [h_index, get_instruction_fields_row, List.flatMap_map, Auipc_instruction_fields.bitwise]
@@ -258,7 +259,7 @@ namespace Equivalence.Auipc
 
       intro h_is_valid
       specialize h_constraints ⟨ row, by omega ⟩
-      specialize h_bus_assumptions row (by omega)
+      specialize h_bus_axioms row (by omega)
       specialize h_bus_wellformedness row (by omega)
 
       have spec :=
@@ -269,7 +270,7 @@ namespace Equivalence.Auipc
           (by omega)
           h_constraints
           h_is_valid
-          h_bus_assumptions
+          h_bus_axioms
           h_bus_wellformedness
 
       obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := auipc_rd_properties air row h_is_valid h_bus_wellformedness
@@ -283,7 +284,7 @@ namespace Equivalence.Auipc
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd'.1
           simp
-      . have := h_bus_assumptions.1.1.1
+      . have := h_bus_axioms.1.1.1
         simp [← BitVec.toNat_inj]
         omega
 

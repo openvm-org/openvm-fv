@@ -38,8 +38,8 @@ namespace Interaction
       data_length : ℕ
       data : α → Vector F data_length
 
-      -- Unconditional assumptions on bus entries
-      assumptions : α → Prop
+      -- Axioms on bus entries
+      axioms : α → Prop
 
       -- Well-formedness properties of bus entries
       wf_properties : α → Prop
@@ -47,7 +47,8 @@ namespace Interaction
       wf_assume_cond : α → Prop
       -- Condition under which well-formedness properties need to be asserted
       wf_assert_cond : α → Prop
-      -- Assuming and proving of well-formedness properties
+
+      -- Assumption and assertion of well-formedness properties
       assume (a : α) := wf_assume_cond a → wf_properties a
       assert (a : α) := wf_assert_cond a → wf_properties a
 
@@ -89,13 +90,13 @@ namespace Interaction
 
           -- `pc`s are always less than `2^30`,
           -- timestamps are always less than `2^29`.
-          assumptions :=
+          axioms :=
             fun ⟨multiplicity, pc, timestamp⟩ =>
               ¬ multiplicity = 0 →
                 pc < 2^30 ∧ pc % 4 = 0
 
           -- An execution bus entry has no assume/prove properties
-          wf_properties := fun ⟨_, pc, _⟩ => True
+          wf_properties := fun _ => True
 
           wf_assume_cond := fun entry => entry.1 = -1,
           wf_assert_cond := fun entry => entry.1 = 1,
@@ -151,7 +152,7 @@ namespace Interaction
                     #v[as, ptr, x0, x1, x2, x3, timestamp],
 
           -- Timestamps are always less than `2^29`
-          assumptions := fun ⟨multiplicity, _, _, _, _, _, _, timestamp⟩ =>
+          axioms := fun ⟨multiplicity, _, _, _, _, _, _, timestamp⟩ =>
                            ¬ multiplicity = 0 → timestamp < 2 ^ 29
 
           -- Values already in memory are constrained in range
@@ -204,8 +205,8 @@ namespace Interaction
           data_length := 2,
           data := fun ⟨_, val, deg⟩ => #v[val, deg],
 
-          -- No assumptions
-          assumptions := fun _ => True
+          -- No axioms
+          axioms := fun _ => True
 
           -- The range checking bus checks that the
           -- value is less than 2 to the degree
@@ -230,10 +231,10 @@ namespace Interaction
 
     end RangeCheckerBus
 
-    section ReadInstructionBus
+    section ProgramBus
 
       /-- Read-instruction bus entry -/
-      structure ReadInstructionBusEntry where
+      structure ProgramBusEntry where
         multiplicity : F
         pc : F
         opcode : F
@@ -246,9 +247,9 @@ namespace Interaction
         xg : F
 
       @[simp, grind]
-      def ReadInstructionBusEntry.deserialise
+      def ProgramBusEntry.deserialise
         (entry : FBB × Vector FBB 9)
-      : ReadInstructionBusEntry F :=
+      : ProgramBusEntry F :=
         {
           multiplicity := entry.1,
           pc := entry.2[0],
@@ -262,15 +263,15 @@ namespace Interaction
           xg := entry.2[8]
         }
 
-      def ReadInstructionBusEntry.operand_properties (entry : ReadInstructionBusEntry FBB) : Prop :=
+      def ProgramBusEntry.operand_properties (entry : ProgramBusEntry FBB) : Prop :=
         ∃ instruction data,
           (Transpiler.transpile_op instruction entry.multiplicity entry.pc = .some data) ∧
-          (ReadInstructionBusEntry.deserialise FBB data = entry)
+          (ProgramBusEntry.deserialise FBB data = entry)
 
       /-- Read-instruction bus entry instance -/
       @[simp, grind]
-      instance ReadInstructionBusEntryInstance
-      : BusEntry FBB (ReadInstructionBusEntry FBB) :=
+      instance ProgramBusEntryInstance
+      : BusEntry FBB (ProgramBusEntry FBB) :=
       {
           multiplicity := fun entry => entry.1,
 
@@ -278,15 +279,15 @@ namespace Interaction
           data := fun ⟨_, pc, opcode, xa, xb, xc, xd, xe, xf, xg⟩ =>
                     #v[pc, opcode, xa, xb, xc, xd, xe, xf, xg],
 
-          -- No assumptions
-          assumptions := fun _ => True
+          -- No axioms
+          axioms := fun _ => True
 
           -- Well formedness entirely derived from the fact that the entries come from the transpiler
-          wf_properties := ReadInstructionBusEntry.operand_properties
+          wf_properties := ProgramBusEntry.operand_properties
           wf_assume_cond := fun entry => entry.1 = 1,
           wf_assert_cond := fun entry => entry.1 = -1,
 
-          deserialise := ReadInstructionBusEntry.deserialise FBB
+          deserialise := ProgramBusEntry.deserialise FBB
 
           inv_deser_ser := by simp
           inv_ser_deser := by
@@ -295,7 +296,7 @@ namespace Interaction
             simp_all; grind (splits := 18) (gen := 12) (ematch := 11)
       }
 
-    end ReadInstructionBus
+    end ProgramBus
 
     section BitwiseBus
 
@@ -329,8 +330,8 @@ namespace Interaction
           data_length := 4,
           data := fun ⟨_, a, b, c, op⟩ => #v[a, b, c, op],
 
-          -- No assumptions
-          assumptions := fun _ => True
+          -- No axioms
+          axioms := fun _ => True
 
           -- The bitwise bus range checks operands and
           -- possibly performs a `xor`
@@ -385,8 +386,8 @@ namespace Interaction
           data_length := 2,
           data := fun ⟨_, x1, x2⟩ => #v[x1, x2],
 
-          -- No assumptions
-          assumptions := fun _ => True
+          -- No axioms
+          axioms := fun _ => True
 
           -- The tuple range checker checks the appropriate ranges
           wf_properties := fun ⟨_, x1, x2⟩ => x1.val < 256 ∧ x2.val < 2048

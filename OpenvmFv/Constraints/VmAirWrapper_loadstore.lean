@@ -573,17 +573,17 @@ namespace VmAirWrapper_loadstore.constraints
 
 
       @[VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-      def readInstructionBus_row (air : Valid_VmAirWrapper_loadstore F ExtF) (row : ℕ) : List (F × List F) :=
+      def programBus_row (air : Valid_VmAirWrapper_loadstore F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
           [air.adapter.from_state.pc row 0, air.core.expected_opcode row 0, air.adapter.rd_rs2_ptr row 0,
             air.adapter.rs1_ptr row 0, air.adapter.imm row 0, 1, air.adapter.mem_as row 0,
             air.adapter.needs_write row 0, air.adapter.imm_sign row 0])]
 
-      lemma constrain_readInstruction_interactions
+      lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_loadstore F ExtF)
         (h : VmAirWrapper_loadstore.extraction.constrain_interactions air)
       :
-        air.buses ReadInstructionBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
         unfold VmAirWrapper_loadstore.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -596,7 +596,7 @@ namespace VmAirWrapper_loadstore.constraints
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
       else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
-      else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
       else []
 
       @[VmAirWrapper_loadstore_air_simplification]
@@ -788,180 +788,32 @@ namespace VmAirWrapper_loadstore.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-    -- @[VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-    -- def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
-    --   let rs2 := entry.xc
-    --   let rs2_as := entry.xe
-    --   (rs2_as = 0 →
-    --     -- opcode cannot be SUB
-    --     ¬ entry.opcode = 513 ∧
-    --     -- immediate fits 24 bits
-    --     rs2.val < 2 ^ 24 ∧
-    --     -- immediate is a sign-extended 12-bit value
-    --     (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt)
-
-    -- set_option maxHeartbeats 0
-    -- lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
-    --   (h_bounds : entry.opcode = 528)
-    --   (h_bus : Interaction.ReadInstructionBusEntry.operand_properties entry)
-    -- :
-    --   readInstructionBus_properties entry
-    -- := by
-    --   simp [readInstructionBus_properties.eq_def]
-    --   simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
-    --   obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
-    --   have h_alignment := Transpiler.pc_aligned_of_some h_transpile
-    --   simp [←h_data] at h_bounds ⊢ h_transpile h_alignment
-    --   clear h_data
-    --   have h_supported_types := Transpiler.transpiler_supported_opcode_types h_transpile
-    --   have : data = #v[data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]] := by
-    --     clear *-data
-    --     apply Vector.ext
-    --     intro i h_i
-    --     by_cases i=0; simp [*]
-    --     by_cases i=1; simp [*]
-    --     by_cases i=2; simp [*]
-    --     by_cases i=3; simp [*]
-    --     by_cases i=4; simp [*]
-    --     by_cases i=5; simp [*]
-    --     by_cases i=6; simp [*]
-    --     by_cases i=7; simp [*]
-    --     by_cases i=8; simp [*]
-    --     exfalso; omega
-    --   rcases h_supported_types with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
-    --   . obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type -- RTYPE
-    --     cases op <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       simp at h_transpile
-    --       rewrite [this] at h_transpile
-    --       dsimp at h_transpile
-    --       split_ifs at h_transpile
-    --       . exfalso; grind
-    --       . grind
-    --     }
-    --   . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
-    --     cases op <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       simp at h_transpile
-    --       rewrite [this] at h_transpile
-    --       dsimp at h_transpile
-    --       split_ifs at h_transpile
-    --       . exfalso; grind
-    --       . intro h_rs2_as
-    --         have : data[4] = Transpiler.utof (Transpiler.sign_extend_24 imm) := by grind
-    --         split_ands
-    --         . grind
-    --         . simp [this, Transpiler.utof, Transpiler.sign_extend_24]
-    --           omega
-    --         . simp [this, Transpiler.utof, Transpiler.sign_extend_24]
-    --           rewrite [
-    --             Nat.mod_eq_of_lt (by omega), BitVec.ofNat_toNat, BitVec.ofNat_toNat,
-    --             BitVec.setWidth_eq, (show BitVec.setWidth 12 (BitVec.signExtend 24 imm) = imm by bv_decide)
-    --           ]
-    --           clear * - imm
-    --           simp [BitVec.toInt_signExtend]
-    --           exact Int.bmod_eq_of_le (by grind) (by grind)
-    --     }
-    --   . obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type -- SHIFTIOP
-    --     cases op <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       simp at h_transpile
-    --       rewrite [this] at h_transpile
-    --       dsimp at h_transpile
-    --       split_ifs at h_transpile
-    --       . exfalso; grind
-    --       . exfalso; grind
-    --     }
-    --   . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- BTYPE
-    --     cases op <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       simp at h_transpile
-    --       rewrite [this] at h_transpile
-    --       dsimp at h_transpile
-    --       exfalso
-    --       grind
-    --     }
-    --   . obtain ⟨⟨imm, rs1, op⟩, h_op_data⟩ := h_type -- UTYPE
-    --     cases op <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       exfalso
-    --       dsimp at h_transpile
-    --       grind
-    --     }
-    --   . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
-    --     cases high <;> cases signed_rs1 <;> cases signed_rs2 <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       exfalso
-    --       dsimp at h_transpile
-    --       grind
-    --     }
-    --   . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
-    --     cases signed <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       exfalso
-    --       dsimp at h_transpile
-    --       split_ifs at h_transpile <;> simp at h_transpile <;> grind
-    --     }
-    --   . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
-    --     cases signed <;> {
-    --       rewrite [h_op_data] at h_transpile
-    --       unfold Transpiler.transpile_op at h_transpile
-    --       rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --       exfalso
-    --       dsimp at h_transpile
-    --       split_ifs at h_transpile <;> simp at h_transpile <;> grind
-    --     }
-    --   . obtain ⟨⟨imm, rs1, rd, is_unsigned, w⟩, h_op_data⟩ := h_type -- LOAD
-    --     rewrite [h_op_data] at h_transpile
-    --     unfold Transpiler.transpile_op at h_transpile
-    --     rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
-    --     dsimp at h_transpile
-    --     split_ifs at h_transpile <;> {
-    --       simp [-Vector.mk_eq] at h_transpile
-    --       rewrite [←h_transpile]
-    --       simp
-    --     }
-
-    lemma readInstructionBus_row_length [Field ExtF]
+    lemma programBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_loadstore FBB ExtF} {row : ℕ}
-      (h_in : entry ∈ readInstructionBus_row air row)
+      (h_in : entry ∈ programBus_row air row)
     :
-      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
+      entry.2.length = Interaction.ProgramBusEntryInstance.data_length
     := by
-      unfold readInstructionBus_row at *; simp_all
+      unfold programBus_row at *; simp_all
 
     @[VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-    def _readInstructionBus_row [Field ExtF]
+    def _programBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ) :=
-      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
+      let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
-          (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
-          (readInstructionBus_row air row).attach
-      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
+          (fun x : { row' // row' ∈ programBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (programBus_row_length x.2)))
+          (programBus_row air row).attach
+      List.map Interaction.ProgramBusEntryInstance.deserialise vectorised_row
 
     @[simp]
     def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
       rowData.map Interaction.BusEntry.serialiseToList
 
     @[simp]
-    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
-      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+    def axioms [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.axioms FBB))
 
     @[simp]
     def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
@@ -977,16 +829,16 @@ namespace VmAirWrapper_loadstore.constraints
       executionBus_row air row ++
       memoryBus_row air row ++
       rangeCheckerBus_row air row ++
-      readInstructionBus_row air row
+      programBus_row air row
 
     @[simp]
-    def assumptionsPerRow [Field ExtF]
+    def axiomsPerRow [Field ExtF]
       (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ)
     : Prop :=
-      assumptions (_executionBus_row air row) ∧
-      assumptions (_memoryBus_row air row) ∧
-      assumptions (_rangeCheckerBus_row air row) ∧
-      assumptions (_readInstructionBus_row air row)
+      axioms (_executionBus_row air row) ∧
+      axioms (_memoryBus_row air row) ∧
+      axioms (_rangeCheckerBus_row air row) ∧
+      axioms (_programBus_row air row)
 
     @[simp]
     def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ)
@@ -994,7 +846,7 @@ namespace VmAirWrapper_loadstore.constraints
       propertiesToAssume (_executionBus_row air row) ∧
       propertiesToAssume (_memoryBus_row air row) ∧
       propertiesToAssume (_rangeCheckerBus_row air row) ∧
-      propertiesToAssume (_readInstructionBus_row air row)
+      propertiesToAssume (_programBus_row air row)
 
     @[simp]
     def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_loadstore FBB ExtF) (row : ℕ)
@@ -1002,7 +854,7 @@ namespace VmAirWrapper_loadstore.constraints
       propertiesToAssert (_executionBus_row air row) ∧
       propertiesToAssert (_memoryBus_row air row) ∧
       propertiesToAssert (_rangeCheckerBus_row air row) ∧
-      propertiesToAssert (_readInstructionBus_row air row)
+      propertiesToAssert (_programBus_row air row)
 
   end bus_entries
 

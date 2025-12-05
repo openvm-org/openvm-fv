@@ -109,7 +109,7 @@ namespace Equivalence.BranchEqual
       if index = ExecutionBus then            rows.flatMap BranchEqual_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap BranchEqual_instruction_fields.memory
       else if index = RangeCheckerBus then    rows.flatMap BranchEqual_instruction_fields.range_checks
-      else if index = ReadInstructionBus then rows.flatMap BranchEqual_instruction_fields.read_instruction
+      else if index = ProgramBus then rows.flatMap BranchEqual_instruction_fields.read_instruction
       else []
 
   def allHold_allRows [Field ExtF] (air : Valid_VmAirWrapper_branch_eq FBB ExtF) : Prop :=
@@ -145,7 +145,7 @@ namespace Equivalence.BranchEqual
   theorem branch_eq_spec [Field ExtF]
     (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_branch_eq.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_branch_eq.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_branch_eq.constraints.wf_propertiesToAssumePerRow air row)
   :
     ∃ instruction_fields_list : List BranchEqual_instruction_fields,
@@ -168,7 +168,7 @@ namespace Equivalence.BranchEqual
       unfold VmAirWrapper_branch_eq.constraints.executionBus_row
       unfold VmAirWrapper_branch_eq.constraints.memoryBus_row
       unfold VmAirWrapper_branch_eq.constraints.rangeCheckerBus_row
-      unfold VmAirWrapper_branch_eq.constraints.readInstructionBus_row
+      unfold VmAirWrapper_branch_eq.constraints.programBus_row
       funext index
       by_cases h_index: index = ExecutionBus
       . simp [h_index, List.flatMap_map]
@@ -180,7 +180,7 @@ namespace Equivalence.BranchEqual
         all_goals simp [h_neg_one]
       by_cases h_index: index = RangeCheckerBus
       . simp [h_index, List.flatMap_map]
-      by_cases h_index: index = ReadInstructionBus
+      by_cases h_index: index = ProgramBus
       . simp [h_index, List.flatMap_map, ← BranchEqualCoreAir_4.expected_opcode_def]
       . simp [*]
     . apply List.forall_iff_forall_mem.mpr
@@ -205,7 +205,7 @@ namespace Equivalence.BranchEqual
             (by omega)
             (h_constraints ⟨row, by omega⟩)
             h_is_valid
-            (h_bus_assumptions row (by omega))
+            (h_bus_axioms row (by omega))
             (h_bus_wellformedness row (by omega))
 
       split_ands
@@ -221,7 +221,7 @@ namespace Equivalence.BranchEqual
             (by omega)
             (h_constraints ⟨row, by omega⟩)
             h_is_valid
-            (h_bus_assumptions row (by omega))
+            (h_bus_axioms row (by omega))
             (h_bus_wellformedness row (by omega))
 
       . clear spec_bne
@@ -233,7 +233,7 @@ namespace Equivalence.BranchEqual
                 BeqInput_of_BranchEqual_instruction_fields]
           simp [PureSpec.execute_BEQ_pure]
           rewrite [ite_cond_eq_false]
-          . clear h_constraints h_bus_assumptions h_bus_wellformedness
+          . clear h_constraints h_bus_axioms h_bus_wellformedness
             split_ands
             . exact h_a0
             . exact h_a1
@@ -261,7 +261,7 @@ namespace Equivalence.BranchEqual
                 clear *-h_next_pc_mod_4
                 grind
               simp [this]
-          . clear h_constraints h_bus_assumptions h_bus_wellformedness
+          . clear h_constraints h_bus_axioms h_bus_wellformedness
             simp_all
             split_ands
             . convert h_eq
@@ -335,7 +335,7 @@ namespace Equivalence.BranchEqual
                 BneInput_of_BranchEqual_instruction_fields]
           simp [PureSpec.execute_BNE_pure]
           rewrite [ite_cond_eq_false]
-          . clear h_constraints h_bus_assumptions h_bus_wellformedness
+          . clear h_constraints h_bus_axioms h_bus_wellformedness
             split_ands
             . exact h_a0
             . exact h_a1
@@ -363,7 +363,7 @@ namespace Equivalence.BranchEqual
                 clear *-h_next_pc_mod_4
                 grind
               simp [this]
-          . clear h_constraints h_bus_assumptions h_bus_wellformedness
+          . clear h_constraints h_bus_axioms h_bus_wellformedness
             simp_all
             split_ands
             . convert h_ne

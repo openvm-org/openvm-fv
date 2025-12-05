@@ -40,20 +40,21 @@ namespace Store
   :
     air.adapter.needs_write row 0 = 1
   := by
-    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get readInstructionBus properties specifically
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      Interaction.ReadInstructionBusEntry.operand_properties
+      Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
     obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_531 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain ⟨imm, rs2, rs1, h_instruction⟩ := this
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     simp [-Vector.mk_eq] at h_transpile
     simp [←h_transpile.2] at h_data
@@ -68,16 +69,17 @@ namespace Store
   : air.adapter.imm_sign row 0 =
     (BitVec.ofNat 16 (air.adapter.imm row 0)).msb.toNat
   := by
-    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get readInstructionBus properties specifically
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      Interaction.ReadInstructionBusEntry.operand_properties
+      Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
     obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_531 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     rewrite [
       ←h_data.2.2.2.2.2.2.2.2.2,
       ←h_data.2.2.2.2.2.1
@@ -85,7 +87,7 @@ namespace Store
     obtain ⟨imm, rs2, rs1, h_instruction⟩ := this
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     simp [-Vector.mk_eq] at h_transpile
     simp [
@@ -108,21 +110,22 @@ namespace Store
     (h_opcode: air.core.expected_opcode row 0 = 531)
   : air.adapter.mem_as row 0 = 2
   := by
-    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get readInstructionBus properties specifically
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      Interaction.ReadInstructionBusEntry.operand_properties
+      Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
     obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_531 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     rewrite [←h_data.2.2.2.2.2.2.2.1]
     obtain ⟨imm, rs2, rs1, h_instruction⟩ := this
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     simp [-Vector.mk_eq] at h_transpile
     simp [←h_transpile.2]
@@ -769,13 +772,12 @@ namespace Store
   -- constraint 13 is already simplified
   -- constraint 14 gives nothing when is_valid is 1
   -- constraint 15 gives nothing when is_load is 1
-  -- constraint 16 is subsumed by the readInstruction bus assumptions
+  -- constraint 16 is subsumed by the program bus assumptions
 
   -- constraint 17
   lemma rs1_timestamp_diff_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
@@ -796,7 +798,6 @@ namespace Store
   lemma carry_boolean_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
@@ -816,7 +817,6 @@ namespace Store
   lemma imm_sign_boolean_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
@@ -836,7 +836,6 @@ namespace Store
   lemma carry'_boolean_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
@@ -852,7 +851,7 @@ namespace Store
     clear *- this
     grind
 
-  -- constraint 21 is superseded by the readInstruction bus
+  -- constraint 21 is superseded by the program bus
 
   -- constraint 22 does nothing when is_valid is 1
 
@@ -860,7 +859,6 @@ namespace Store
   lemma read_data_timestamp_diff_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
@@ -1161,20 +1159,21 @@ namespace Store
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   : air.adapter.imm row 0 < 65536
   := by
-    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get readInstructionBus properties specifically
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      Interaction.ReadInstructionBusEntry.operand_properties
+      Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
     obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_531 h_transpile
     simp [h_data.2.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain ⟨imm, rs2, rs1, h_instruction⟩ := this
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     simp [-Vector.mk_eq] at h_transpile
     rewrite [
@@ -1191,14 +1190,12 @@ namespace Store
 lemma imm_extend_range_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode : air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
-    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
   : air.adapter.imm_extended_limb row 0 < 65536
   := by
-    have := imm_sign_boolean_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have := imm_sign_boolean_of_opcode_531 air row h_row h_constraints h_is_valid
     rw [← Rv32LoadStoreAdapterAir.imm_extended_limb_def]
     omega
 
@@ -1251,12 +1248,12 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     have h_rs1_data_2 := rs1_data_2_range air row h_is_valid h_bus_wellformedness
     have h_rs1_data_3 := rs1_data_3_range air row h_is_valid h_bus_wellformedness
     have h_imm_range := imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
-    have h_imm_ext_range := imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_ext_range := imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
     have h_mem_ptr_0_range := mem_ptr_limbs_0_range_of_opcode_531 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
     have h_mem_ptr_1_range := mem_ptr_limbs_1_range_of_opcode_531 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
     simp at h_mem_ptr_0_range h_mem_ptr_1_range
-    have b_carry := carry_boolean_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
-    have b_carry' := carry'_boolean_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    have b_carry := carry_boolean_of_opcode_531 air row h_row h_constraints h_is_valid
+    have b_carry' := carry'_boolean_of_opcode_531 air row h_row h_constraints h_is_valid
     rw [← Rv32LoadStoreAdapterAir.mem_ptr_def, imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness]
     simp [U32.toBV]
     rw [← BitVec.toNat_inj]
@@ -1317,9 +1314,6 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
   lemma executionBus_row_of_opcode_531 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
-    (h_opcode: air.core.expected_opcode row 0 = 531)
-    (h_row: row ≤ air.last_row)
-    (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_is_valid: air.core.is_valid row 0 = 1)
   : VmAirWrapper_loadstore.constraints.executionBus_row air row = [
       (-1, [air.adapter.from_state.pc row 0, air.adapter.from_state.timestamp row 0]),
@@ -1329,7 +1323,7 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     unfold VmAirWrapper_loadstore.constraints.executionBus_row
     simp [h_is_valid, Valid_VmAirWrapper_loadstore.to_pc]
 
-  def readInstruction_of_instruction
+  def program_of_instruction
     (pc : FBB)
     (imm : BitVec 12) (rs1 rs2 : regidx)
   : List (FBB × List FBB) := [
@@ -1434,12 +1428,12 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     (h_opcode: air.core.expected_opcode row 0 = 531)
     (h_row: row ≤ air.last_row)
     (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
-    (h_assumptions : VmAirWrapper_loadstore.constraints.assumptionsPerRow air row)
+    (h_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid: air.core.is_valid row 0 = 1)
   : ∃ pc imm rs1 rd rs1_data read_data prev_data rs1_prev_timestamp read_prev_timestamp write_prev_timestamp timestamp,
-    VmAirWrapper_loadstore.constraints.readInstructionBus_row air row =
-    readInstruction_of_instruction pc imm rs1 rd ∧
+    VmAirWrapper_loadstore.constraints.programBus_row air row =
+    program_of_instruction pc imm rs1 rd ∧
     VmAirWrapper_loadstore.constraints.memoryBus_row air row =
     memory_of_instruction
       imm
@@ -1458,7 +1452,7 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     simp [
       VmAirWrapper_loadstore_constraint_and_interaction_simplification,
       h_is_valid,
-      Interaction.ReadInstructionBusEntry.operand_properties
+      Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness'
     obtain ⟨ inst, a, b, h_transpile, h_a, h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8 ⟩ := h_bus_wellformedness'
     have := Transpiler.transpiler_opcode_531 h_transpile (by simp; grind)
@@ -1468,7 +1462,7 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     simp [h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8] at h_eq_b
 
     have h_imm_range := imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
-    have h_imm_ext_range := imm_extend_range_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_ext_range := imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
     have h_imm_sign := imm_sign_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
     have h_mem_as := mem_as_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
     -- have h_load_val := expected_load_val_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
@@ -1507,8 +1501,8 @@ lemma imm_extend_range_of_opcode_531 [Field ExtF]
     symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
     obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
     -- Rest
-    unfold VmAirWrapper_loadstore.constraints.readInstructionBus_row
-            readInstruction_of_instruction
+    unfold VmAirWrapper_loadstore.constraints.programBus_row
+            program_of_instruction
             VmAirWrapper_loadstore.constraints.memoryBus_row
             memory_of_instruction
     exists air.adapter.from_state.pc row 0, imm, rs1, rs2,

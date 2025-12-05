@@ -428,7 +428,7 @@ namespace VmAirWrapper_lt.constraints
         rfl
 
       @[VmAirWrapper_lt_constraint_and_interaction_simplification]
-      def readInstructionBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
+      def programBus_row (air : Valid_VmAirWrapper_lt F ExtF) (row : ℕ) : List (F × List F) :=
         [
           (air.core.is_valid row 0, [
                                       air.adapter.from_state.pc row 0,
@@ -443,11 +443,11 @@ namespace VmAirWrapper_lt.constraints
                                     ])
         ]
 
-      lemma constrain_readInstruction_interactions
+      lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_lt F ExtF)
         (h : VmAirWrapper_lt.extraction.constrain_interactions air)
       :
-        air.buses ReadInstructionBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
         unfold VmAirWrapper_lt.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -478,7 +478,7 @@ namespace VmAirWrapper_lt.constraints
         if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
         else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
         else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
-        else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+        else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
         else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
         else []
 
@@ -737,7 +737,7 @@ section bus_entries
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
     @[VmAirWrapper_lt_constraint_and_interaction_simplification]
-    def readInstructionBus_properties (entry : Interaction.ReadInstructionBusEntry FBB) : Prop :=
+    def programBus_properties (entry : Interaction.ProgramBusEntry FBB) : Prop :=
       let rs2 := entry.xc
       let rs2_as := entry.xe
       (rs2_as = 0 →
@@ -746,20 +746,21 @@ section bus_entries
         -- immediate is a sign-extended 12-bit value
         (BitVec.ofNat 24 rs2.val).toInt = (BitVec.ofNat 12 rs2.val).toInt)
 
-    lemma readInstructionBus_properties_of_opcode_bounds (entry : Interaction.ReadInstructionBusEntry FBB)
+    lemma programBus_properties_of_opcode_bounds (entry : Interaction.ProgramBusEntry FBB)
       (h_bounds :
         entry.opcode = 520 ∨
         entry.opcode = 521
       )
-      (h_bus : Interaction.ReadInstructionBusEntry.operand_properties entry)
+      (h_bus : Interaction.ProgramBusEntry.operand_properties entry)
     :
-      readInstructionBus_properties entry
+      programBus_properties entry
     := by
-      simp [readInstructionBus_properties.eq_def]
-      simp [Interaction.ReadInstructionBusEntry.operand_properties] at h_bus
+      simp [programBus_properties.eq_def]
+      simp [Interaction.ProgramBusEntry.operand_properties] at h_bus
       obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus
       have h_alignment := Transpiler.pc_aligned_of_some h_transpile
-      rewrite [←h_data] at h_alignment
+      have h_bound := Transpiler.pc_bound_of_some h_transpile
+      rewrite [←h_data] at h_alignment h_bound
       dsimp at h_alignment
       simp [←h_data] at h_bounds ⊢ h_transpile
       obtain h_opcode | h_opcode := h_bounds <;> [
@@ -771,7 +772,7 @@ section bus_entries
         simp [h_data_6] at this
         obtain ⟨imm, rs1, rd, h_instruction, h_rd⟩ := this
         unfold Transpiler.transpile_op at h_transpile
-        rewrite [ite_cond_eq_true _ _ (eq_true h_alignment), h_instruction] at h_transpile
+        rewrite [if_pos (by constructor <;> assumption), h_instruction] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile
         . exfalso
@@ -790,24 +791,24 @@ section bus_entries
             omega
       }
 
-    lemma readInstructionBus_row_length [Field ExtF]
+    lemma programBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
-      (h_in : entry ∈ readInstructionBus_row air row)
+      (h_in : entry ∈ programBus_row air row)
     :
-      entry.2.length = Interaction.ReadInstructionBusEntryInstance.data_length
+      entry.2.length = Interaction.ProgramBusEntryInstance.data_length
     := by
-      unfold readInstructionBus_row at *; simp_all
+      unfold programBus_row at *; simp_all
 
     @[VmAirWrapper_lt_constraint_and_interaction_simplification]
-    def _readInstructionBus_row [Field ExtF]
+    def _programBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ) :=
-      let vectorised_row : List (FBB × Vector FBB Interaction.ReadInstructionBusEntryInstance.data_length) := by
+      let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
         exact
         List.map
-          (fun x : { row' // row' ∈ readInstructionBus_row air row} =>
-          (x.1.1, Vector.mk x.1.2.toArray (readInstructionBus_row_length x.2)))
-          (readInstructionBus_row air row).attach
-      List.map Interaction.ReadInstructionBusEntryInstance.deserialise vectorised_row
+          (fun x : { row' // row' ∈ programBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (programBus_row_length x.2)))
+          (programBus_row air row).attach
+      List.map Interaction.ProgramBusEntryInstance.deserialise vectorised_row
 
     lemma bitwiseBus_row_length [Field ExtF]
       {air : Valid_VmAirWrapper_lt FBB ExtF} {row : ℕ}
@@ -834,8 +835,8 @@ section bus_entries
       rowData.map Interaction.BusEntry.serialiseToList
 
     @[simp]
-    def assumptions [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
-      List.Forall id (rowData.map (Interaction.BusEntry.assumptions FBB))
+    def axioms [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.axioms FBB))
 
     @[simp]
     def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
@@ -851,18 +852,18 @@ section bus_entries
       executionBus_row air row ++
       memoryBus_row air row ++
       rangeCheckerBus_row air row ++
-      readInstructionBus_row air row ++
+      programBus_row air row ++
       bitwiseBus_row air row
 
     @[simp]
-    def assumptionsPerRow [Field ExtF]
+    def axiomsPerRow [Field ExtF]
       (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ)
     : Prop :=
-      assumptions (_executionBus_row air row) ∧
-      assumptions (_memoryBus_row air row) ∧
-      assumptions (_rangeCheckerBus_row air row) ∧
-      assumptions (_readInstructionBus_row air row) ∧
-      assumptions (_bitwiseBus_row air row)
+      axioms (_executionBus_row air row) ∧
+      axioms (_memoryBus_row air row) ∧
+      axioms (_rangeCheckerBus_row air row) ∧
+      axioms (_programBus_row air row) ∧
+      axioms (_bitwiseBus_row air row)
 
     @[simp]
     def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_lt FBB ExtF) (row : ℕ)
@@ -870,7 +871,7 @@ section bus_entries
       propertiesToAssume (_executionBus_row air row) ∧
       propertiesToAssume (_memoryBus_row air row) ∧
       propertiesToAssume (_rangeCheckerBus_row air row) ∧
-      propertiesToAssume (_readInstructionBus_row air row) ∧
+      propertiesToAssume (_programBus_row air row) ∧
       propertiesToAssume (_bitwiseBus_row air row)
 
     @[simp]
@@ -879,7 +880,7 @@ section bus_entries
       propertiesToAssert (_executionBus_row air row) ∧
       propertiesToAssert (_memoryBus_row air row) ∧
       propertiesToAssert (_rangeCheckerBus_row air row) ∧
-      propertiesToAssert (_readInstructionBus_row air row) ∧
+      propertiesToAssert (_programBus_row air row) ∧
       propertiesToAssert (_bitwiseBus_row air row)
 
   end bus_entries

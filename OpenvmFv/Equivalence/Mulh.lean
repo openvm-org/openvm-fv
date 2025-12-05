@@ -202,7 +202,7 @@ namespace Equivalence.Mulh
       if index = ExecutionBus then              rows.flatMap MULH_instruction_fields.execution
       else if index = MemoryBus then            rows.flatMap MULH_instruction_fields.memory
       else if index = RangeCheckerBus then      rows.flatMap MULH_instruction_fields.range_checks
-      else if index = ReadInstructionBus then   rows.flatMap MULH_instruction_fields.read_instruction
+      else if index = ProgramBus then   rows.flatMap MULH_instruction_fields.read_instruction
       else if index = BitwiseBus then           rows.flatMap MULH_instruction_fields.bitwise
       else if index = RangeTupleCheckerBus then rows.flatMap MULH_instruction_fields.range_check_tuples
       else []
@@ -308,11 +308,11 @@ namespace Equivalence.Mulh
   lemma read_instruction_eq_air_buses [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)
   :
-    List.flatMap (VmAirWrapper_mulh.constraints.readInstructionBus_row air) (List.range (air.last_row + 1)) =
+    List.flatMap (VmAirWrapper_mulh.constraints.programBus_row air) (List.range (air.last_row + 1)) =
     List.flatMap MULH_instruction_fields.read_instruction (get_instruction_fields air)
   := by
     unfold MULH_instruction_fields.read_instruction
-    unfold VmAirWrapper_mulh.constraints.readInstructionBus_row
+    unfold VmAirWrapper_mulh.constraints.programBus_row
     simp [
       get_instruction_fields,
       get_instruction_fields_row,
@@ -372,7 +372,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     (get_instruction_fields_row air row).opcode ∈ Finset.Icc 593 595
@@ -406,17 +406,17 @@ namespace Equivalence.Mulh
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
     simp [
       VmAirWrapper_mulh.constraints.propertiesToAssume,
-      Interaction.ReadInstructionBusEntry.operand_properties,
-      VmAirWrapper_mulh.constraints._readInstructionBus_row,
-      VmAirWrapper_mulh.constraints.readInstructionBus_row,
+      Interaction.ProgramBusEntry.operand_properties,
+      VmAirWrapper_mulh.constraints._programBus_row,
+      VmAirWrapper_mulh.constraints.programBus_row,
       -List.map_nil, -Vector.toList_mk, -List.attach_cons
     ] at h_bus_wellformedness
-    unfold Interaction.ReadInstructionBusEntry.deserialise at h_bus_wellformedness
+    unfold Interaction.ProgramBusEntry.deserialise at h_bus_wellformedness
     dsimp [List.attach] at h_bus_wellformedness
     rewrite [h_is_valid] at h_bus_wellformedness
     simp only [
       Fin.isValue, Fin.coe_ofNat_eq_mod, Nat.one_mod, Nat.cast_one, Fin.cast_val_eq_self,
-      Nat.cast_zero, Interaction.ReadInstructionBusEntry.mk.injEq,
+      Nat.cast_zero, Interaction.ProgramBusEntry.mk.injEq,
       forall_const
     ] at h_bus_wellformedness
     exact h_bus_wellformedness
@@ -435,12 +435,13 @@ namespace Equivalence.Mulh
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_593 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -472,12 +473,13 @@ namespace Equivalence.Mulh
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_594 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
-    rewrite [ite_cond_eq_true _ _ (eq_true h_alignment)] at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -509,11 +511,13 @@ namespace Equivalence.Mulh
     simp [wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
+    have h_bound := Transpiler.pc_bound_of_some h_transpile.1
     rewrite [h_opcode] at h_transpile
     have h_cases := Transpiler.transpiler_opcode_595 h_transpile.1 h_transpile.2.2.2.1
     obtain ⟨rs2, rs1, rd, h_instruction, h_rd⟩ := h_cases
     rewrite [h_instruction] at h_transpile
     unfold Transpiler.transpile_op at h_transpile
+    rewrite [if_pos (by constructor <;> assumption)] at h_transpile
     dsimp at h_transpile
     split_ifs at h_transpile
     . have := Transpiler.extract_opcode h_transpile.1
@@ -531,13 +535,14 @@ namespace Equivalence.Mulh
           convert h_contr
       . use rd
 
+
   lemma mulh_spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)
     (row : ℕ)
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 593 →
@@ -559,16 +564,16 @@ namespace Equivalence.Mulh
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mulh_pure, MulhInput_of_MULH_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulhInput_of_MULH_instruction_fields, PureSpec.execute_MULH_mulh_pure]
@@ -611,7 +616,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 594 →
@@ -633,16 +638,16 @@ namespace Equivalence.Mulh
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mulhsu_pure, MulhsuInput_of_MULH_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulhsuInput_of_MULH_instruction_fields, PureSpec.execute_MULH_mulhsu_pure]
@@ -685,7 +690,7 @@ namespace Equivalence.Mulh
     (h_row : row ≤ air.last_row)
     (h_constraints : allHold_allRows air)
     (h_is_valid : air.core.is_valid row 0 = 1)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     ((get_instruction_fields_row air row).opcode = 595 →
@@ -707,16 +712,16 @@ namespace Equivalence.Mulh
         ExtF air row h_row
         (h_constraints ⟨row, by omega⟩)
         h_is_valid
-        (h_bus_assumptions row (by omega))
+        (h_bus_axioms row (by omega))
         (h_bus_wellformedness row (by omega))
 
     simp [get_instruction_fields_row, *]
 
     split_ands
-    . clear *- h_bus_assumptions h_row h_is_valid h_pc
+    . clear *- h_bus_axioms h_row h_is_valid h_pc
       simp [PureSpec.execute_MULH_mulhu_pure, MulhuInput_of_MULH_instruction_fields]
       simp [← BitVec.toNat_inj]
-      specialize h_bus_assumptions row h_row
+      specialize h_bus_axioms row h_row
       rw [Nat.mod_eq_of_lt (by omega), Nat.mod_eq_of_lt (by omega)]
       omega
     . simp [MulhuInput_of_MULH_instruction_fields, PureSpec.execute_MULH_mulhu_pure]
@@ -756,7 +761,7 @@ namespace Equivalence.Mulh
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)
     (h_constraints : allHold_allRows air)
-    (h_bus_assumptions : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.assumptionsPerRow air row)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
     (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.wf_propertiesToAssumePerRow air row)
   :
     List.Forall MULH_instruction_fields.spec (get_instruction_fields air)
@@ -773,9 +778,9 @@ namespace Equivalence.Mulh
 
     simp [get_instruction_fields_row] at h_is_valid
     split_ands
-    . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact mulh_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact mulhsu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
-    . exact mulhu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_assumptions h_bus_wellformedness
+    . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact mulh_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact mulhsu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+    . exact mulhu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
 end Equivalence.Mulh

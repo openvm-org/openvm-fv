@@ -62,9 +62,9 @@ namespace Auipc.ValidRows
 
 variable (row_valid : air.core.is_valid row 0 = 1)
 
--- Row assumptions, properties to assume, and properties to prove
+-- Row axioms, properties to assume, and properties to prove
 variable
-  (assumptions : assumptionsPerRow air row)
+  (axioms : axiomsPerRow air row)
   (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 section General
@@ -81,7 +81,7 @@ lemma wf_propertiesToAssert
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   simp [row_valid, VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ (by simp) pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ (by simp) pa_read
   simp [VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem
@@ -94,7 +94,7 @@ lemma wf_propertiesToAssert
 include
   row_valid
   constraints
-  assumptions
+  axioms
   propertiesToAssume in
 /-- The constraints entail correct implementation
     of the `auipc` opcode
@@ -116,12 +116,12 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
   simp [row_valid, VmAirWrapper_auipc_constraint_and_interaction_simplification]
-    at pa_exec pa_mem pa_range pa_read pa_bit assumptions constraints
+    at pa_exec pa_mem pa_range pa_read pa_bit axioms constraints
 
-  replace pa_read := readInstructionBus_properties_of_opcode_bounds _ (by simp) pa_read
+  replace pa_read := programBus_properties_of_opcode_bounds _ (by simp) pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem
-  simp [and_assoc] at pa_mem pa_range pa_read pa_bit assumptions constraints
+  simp [and_assoc] at pa_mem pa_range pa_read pa_bit axioms constraints
   obtain ⟨ ub_rd, ub_prev_0, ub_prev_1, ub_prev_2, ub_prev_3 ⟩ := pa_mem
 
   obtain ⟨ ub_rd0, ub_rd1, ub_rd2, ub_rd3, ub_imm0, ub_imm1, ub_imm2, ub_pc0, ub_pc1, ub_pc_msl ⟩ := pa_bit
@@ -195,7 +195,7 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
         rw [mul_comm (b := 2013265801)] at ub_msl ⊢
         rw [hh] at ub_msl ⊢; clear hh
         rw [← Rv32AuipcCoreAir.intermed_val_def, ← add_assoc] at hl
-        have ub_pc := assumptions.1; simp [Fin.lt_def] at ub_pc
+        have ub_pc := axioms.1; simp [Fin.lt_def] at ub_pc
         clear *- ub_rd0 ub_pc ub_pc0 ub_pc1 hl
         simp [Fin.ext_iff, Fin.val_add, Fin.val_mul] at hl
         rw [Nat.mod_eq_of_lt (by omega)] at hl
@@ -226,7 +226,7 @@ BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
     repeat rw [BitVec.toNat_add]
     simp [eq_imm]
 
-    clear pa_range assumptions
+    clear pa_range axioms
           ub_prev_0 ub_prev_1 ub_prev_2 ub_prev_3
           eq_imm ub_imm imm_mod
 
