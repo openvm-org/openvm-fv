@@ -9,7 +9,6 @@ register_simp_attr VmAirWrapper_branch_eq_constraint_and_interaction_simplificat
 
 namespace VmAirWrapper_branch_eq.extraction
   --extracted constraints here
-
   @[simp]
   def constraint_0 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     ((Circuit.main c (id := 0) (column := 20) (row := row) (rotation := 0)) * ((Circuit.main c (id := 0) (column := 20) (row := row) (rotation := 0)) - 1)) = 0
