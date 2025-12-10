@@ -18,10 +18,13 @@ import OpenvmFv.Airs.Branch.BranchEqualCoreAir
 import OpenvmFv.Airs.Branch.BranchLessThanCoreAir
 import OpenvmFv.Airs.Branch.Rv32AuipcCoreAir
 import OpenvmFv.Airs.Branch.Rv32BranchAdapterAir
+import OpenvmFv.Airs.Branch.Rv32CondRdWriteAdapterAir
 import OpenvmFv.Airs.Branch.Rv32RdWriteAdapterAir
+import OpenvmFv.Airs.Branch.Rv32JalLuiCoreAir
 import OpenvmFv.Airs.Branch.VmAirWrapper_auipc
 import OpenvmFv.Airs.Branch.VmAirWrapper_branch_eq
 import OpenvmFv.Airs.Branch.VmAirWrapper_branch_lt
+import OpenvmFv.Airs.Branch.VmAirWrapper_jallui
 
 import OpenvmFv.Airs.LoadStore.LoadStoreCoreAir
 import OpenvmFv.Airs.LoadStore.Rv32LoadStoreAdapterAir
@@ -47,6 +50,7 @@ import OpenvmFv.Constraints.VmAirWrapper_auipc
 import OpenvmFv.Constraints.VmAirWrapper_branch_eq
 import OpenvmFv.Constraints.VmAirWrapper_branch_lt
 import OpenvmFv.Constraints.VmAirWrapper_divrem
+import OpenvmFv.Constraints.VmAirWrapper_jallui
 import OpenvmFv.Constraints.VmAirWrapper_loadstore
 import OpenvmFv.Constraints.VmAirWrapper_lt
 import OpenvmFv.Constraints.VmAirWrapper_mul
@@ -78,6 +82,7 @@ import OpenvmFv.Extraction.VmAirWrapper_auipc
 import OpenvmFv.Extraction.VmAirWrapper_branch_eq
 import OpenvmFv.Extraction.VmAirWrapper_branch_lt
 import OpenvmFv.Extraction.VmAirWrapper_divrem
+import OpenvmFv.Extraction.VmAirWrapper_jallui
 import OpenvmFv.Extraction.VmAirWrapper_loadstore
 import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Extraction.VmAirWrapper_mul
