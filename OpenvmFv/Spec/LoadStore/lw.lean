@@ -113,11 +113,10 @@ namespace PureSpec
     i.plat_clint_base = 0 ∧
     i.plat_clint_size = 0 ∧
     i.plat_ram_base = 0 ∧
-    i.plat_ram_size = (BitVec.ofNat 34 (2^32 - 1)) ∧
     i.plat_rom_base = 0 ∧
     i.htif_tohost_base = .none ∧
     BitVec.extractLsb 17 17 i.mstatus = 0#1 ∧
-    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 4 < 2^32
+    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 4 < i.plat_ram_size
 
   set_option maxHeartbeats 0 in
   lemma r1_of_write_state
@@ -450,7 +449,6 @@ namespace PureSpec
       h_plat_clint_base_val,
       h_plat_clint_size_val,
       h_plat_ram_base_val,
-      h_plat_ram_size_val,
       h_plat_rom_base_val,
       h_htif_tohost_base_val,
       h_mstatus_val,
@@ -461,7 +459,6 @@ namespace PureSpec
     rewrite [h_plat_clint_base_val] at h_clint_base
     rewrite [h_plat_clint_size_val] at h_clint_size
     rewrite [h_plat_ram_base_val] at h_plat_ram_base
-    rewrite [h_plat_ram_size_val] at h_plat_ram_size
     rewrite [h_plat_rom_base_val] at h_plat_rom_base
     rewrite [h_htif_tohost_base_val] at h_htif_tohost_base
 

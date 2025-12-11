@@ -445,4 +445,21 @@ namespace Equivalence.Mul
     simp [get_instruction_fields_row] at h_is_valid
     exact mul_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
+  theorem mul_spec [Field ExtF]
+    (air : Valid_VmAirWrapper_mul FBB ExtF)
+    (h_constraints : allHold_allRows air)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.axiomsPerRow air row)
+    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_mul.constraints.wf_propertiesToAssumePerRow air row)
+  :
+    ∃ instruction_fields_list : List MUL_instruction_fields,
+      air.buses = bus_from_instruction_fields instruction_fields_list ∧
+      instruction_fields_list.Forall MUL_instruction_fields.spec
+  := by
+    use get_instruction_fields air
+    simp only [
+      bus_from_instruction_fields_eq_air_buses air h_constraints,
+      spec_of_get_instruction_fields air h_constraints h_bus_axioms h_bus_wellformedness
+    ]
+    trivial
+
 end Equivalence.Mul

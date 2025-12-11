@@ -962,4 +962,21 @@ namespace Equivalence.DivRem
     . exact rem_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
     . exact remu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
+  theorem divrem_spec [Field ExtF]
+    (air : Valid_VmAirWrapper_divrem FBB ExtF)
+    (h_constraints : allHold_allRows air)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.axiomsPerRow air row)
+    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
+  :
+    ∃ instruction_fields_list : List DIVREM_instruction_fields,
+      air.buses = bus_from_instruction_fields instruction_fields_list ∧
+      instruction_fields_list.Forall DIVREM_instruction_fields.spec
+  := by
+    use get_instruction_fields air
+    simp only [
+      bus_from_instruction_fields_eq_air_buses air h_constraints,
+      spec_of_get_instruction_fields air h_constraints h_bus_axioms h_bus_wellformedness
+    ]
+    trivial
+
 end Equivalence.DivRem

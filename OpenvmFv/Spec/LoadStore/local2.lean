@@ -15,11 +15,11 @@ namespace Local
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
     (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
-    (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok (BitVec.ofNat 34 (2^32 - 1)) s)
+    (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    (h_does_fit : (reg_val + offset).toNat + 4 < 2^32)
+    (h_does_fit : (reg_val + offset).toNat + 4 < ram_size)
     (hmem₀ : s.mem[(reg_val + offset).toNat]? = some data₀)
     (hmem₁ : s.mem[(reg_val + offset).toNat + 1]? = some data₁)
     (hmem₂ : s.mem[(reg_val + offset).toNat + 2]? = some data₂)
@@ -136,11 +136,9 @@ namespace Local
     h_plat_ram_size,
     h_plat_rom_size,
     Nat.reducePow,
-    Nat.add_one_sub_one,
     BitVec.toNat_ofNat,
     CharP.cast_eq_zero,
     Nat.reduceMod,
-    Nat.cast_ofNat,
     zero_add,
     BitVec.ofNat_eq_ofNat,
     decide_true,
@@ -150,6 +148,8 @@ namespace Local
   . simp
     clear *-h_does_fit
     simp at h_does_fit
+    rw [Int.emod_eq_of_lt (b := 17179869184) (by omega) (by omega)]
+    simp [← BitVec.ult_iff_lt, BitVec.ult_iff_toNat_lt] at h_does_fit
     omega
 
   simp [
@@ -194,11 +194,11 @@ namespace Local
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
     (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
-    (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok (BitVec.ofNat 34 (2^32 - 1)) s)
+    (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    (h_does_fit : (reg_val + BitVec.signExtend 32 imm).toNat + 4 < 2^32)
+    (h_does_fit : (reg_val + BitVec.signExtend 32 imm).toNat + 4 < ram_size)
     (hmem₀ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat]? = some data₀)
     (hmem₁ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
     (hmem₂ : s.mem[(reg_val + BitVec.signExtend 32 imm).toNat + 2]? = some data₂)

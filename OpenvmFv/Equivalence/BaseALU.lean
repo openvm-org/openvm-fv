@@ -2207,7 +2207,7 @@ namespace Equivalence.BaseALU
       ⟩
     ⟩
 
-  theorem lt_spec [Field ExtF]
+  theorem base_ALU_spec [Field ExtF]
     (air : Valid_VmAirWrapper_alu FBB ExtF)
     (h_constraints : allHold_allRows air)
     (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_alu.constraints.axiomsPerRow air row)
