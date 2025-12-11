@@ -783,7 +783,7 @@ namespace Equivalence.Mulh
     . exact mulhsu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
     . exact mulhu_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
-  theorem mul_spec [Field ExtF]
+  theorem mulh_spec [Field ExtF]
     (air : Valid_VmAirWrapper_mulh FBB ExtF)
     (h_constraints : allHold_allRows air)
     (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_mulh.constraints.axiomsPerRow air row)
