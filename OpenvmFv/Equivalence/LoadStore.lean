@@ -87,7 +87,7 @@ namespace Equivalence.LoadStore
 
   structure RVConfig where
     mstatus : BitVec 64
-    cur_privielge : Privilege
+    cur_privilege : Privilege
     plat_clint_base : BitVec 34
     plat_clint_size : BitVec 34
     plat_ram_base : BitVec 34
@@ -98,7 +98,7 @@ namespace Equivalence.LoadStore
 
   def config : RVConfig := {
     mstatus := 0
-    cur_privielge := Privilege.Machine
+    cur_privilege := Privilege.Machine
     plat_clint_base := 0
     plat_clint_size := 0
     plat_ram_base := 0
@@ -115,7 +115,7 @@ namespace Equivalence.LoadStore
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
     mstatus := config.mstatus
-    cur_privilege := config.cur_privielge
+    cur_privilege := config.cur_privilege
     plat_clint_base := config.plat_clint_base
     plat_clint_size := config.plat_clint_size
     plat_ram_base := config.plat_ram_base
@@ -138,7 +138,7 @@ namespace Equivalence.LoadStore
     r2_val := BabyBear.toBV32 row.prev_read_data
     PC := row.pc.toNat
     mstatus := config.mstatus
-    cur_privilege := config.cur_privielge
+    cur_privilege := config.cur_privilege
     plat_clint_base := config.plat_clint_base
     plat_clint_size := config.plat_clint_size
     plat_ram_base := config.plat_ram_base
