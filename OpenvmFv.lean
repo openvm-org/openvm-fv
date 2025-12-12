@@ -150,7 +150,8 @@ import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.BranchLessThan
 import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
-import OpenvmFv.Spec.Load
+import OpenvmFv.Spec.LoadW
+import OpenvmFv.Spec.StoreW
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh

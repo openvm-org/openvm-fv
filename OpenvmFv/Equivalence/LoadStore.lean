@@ -1,7 +1,7 @@
 import OpenvmFv.Spec.LoadStore.lw
 import OpenvmFv.Spec.LoadStore.sw
-import OpenvmFv.Spec.Load
-import OpenvmFv.Spec.Store
+import OpenvmFv.Spec.LoadW
+import OpenvmFv.Spec.StoreW
 
 namespace Equivalence.LoadStore
 
@@ -597,7 +597,7 @@ namespace Equivalence.LoadStore
   :
     (air.adapter.imm row 0).val / 256 < 256
   := by
-    have := Load.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadW.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     omega
 
   lemma lw_spec_of_get_instruction_fields_part_3 [Field ExtF]
@@ -617,7 +617,7 @@ namespace Equivalence.LoadStore
   :
     (air.adapter.imm_extended_limb row 0).val / 256 < 256
   := by
-    have := Load.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
+    have := LoadW.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
     omega
 
   lemma lw_spec_of_get_instruction_fields_part_5 [Field ExtF]
@@ -628,7 +628,7 @@ namespace Equivalence.LoadStore
   :
     (air.adapter.rs1_data_0 row 0).val < 256
   := by
-    have := Load.rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    have := LoadW.rs1_data_0_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -640,7 +640,7 @@ namespace Equivalence.LoadStore
   :
     (air.adapter.rs1_data_1 row 0).val < 256
   := by
-    have := Load.rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    have := LoadW.rs1_data_1_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -652,7 +652,7 @@ namespace Equivalence.LoadStore
   :
     (air.adapter.rs1_data_2 row 0).val < 256
   := by
-    have := Load.rs1_data_2_range air row h_is_valid h_bus_wellformedness
+    have := LoadW.rs1_data_2_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -664,7 +664,7 @@ namespace Equivalence.LoadStore
   :
     (air.adapter.rs1_data_3 row 0).val < 256
   := by
-    have := Load.rs1_data_3_range air row h_is_valid h_bus_wellformedness
+    have := LoadW.rs1_data_3_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -781,10 +781,10 @@ namespace Equivalence.LoadStore
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
     ] at h_memory
-    have h_0 := Load.write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
-    have h_1 := Load.write_data_1_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
-    have h_2 := Load.write_data_2_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
-    have h_3 := Load.write_data_3_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_0 := LoadW.write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_1 := LoadW.write_data_1_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_2 := LoadW.write_data_2_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have h_3 := LoadW.write_data_3_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     rewrite [h_0, h_1, h_2, h_3]
     split_ands
     . exact h_memory.2.1.2.2.1
@@ -858,10 +858,10 @@ namespace Equivalence.LoadStore
       BitVec.toNat_ofFin
     ]
     simp
-    have := Load.read_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    have := LoadW.read_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     rewrite [this]; clear this
-    have h_mem_ptr := Load.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
-    have h_imm_sign_extend := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_mem_ptr := LoadW.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_sign_extend := LoadW.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     rewrite [h_imm_sign_extend] at h_mem_ptr
     rewrite [BitVec.toNat_eq] at h_mem_ptr
     simp [-BitVec.toNat_add] at h_mem_ptr
@@ -932,7 +932,7 @@ namespace Equivalence.LoadStore
         { toFin := ⟨↑(air.adapter.imm_extended_limb row 0) / 256 % 256, h4⟩ }
       ]
   := by
-    have := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadW.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     simp [U32.toBV]
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
@@ -940,7 +940,7 @@ namespace Equivalence.LoadStore
     := by bv_decide
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
-    have h_imm_range := Load.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_imm_range := LoadW.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     have h_split_imm := split_bitvec_16_to_8s h_imm_range
     simp [BitVec.ofNat, Nat.cast] at h_split_imm
     unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm
@@ -989,7 +989,7 @@ namespace Equivalence.LoadStore
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
       dsimp
       simp (disch := omega) [Nat.mod_eq_of_lt]
-    . have h_imm_extended_range := Load.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
+    . have h_imm_extended_range := LoadW.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
       have h_split_imm_extended := split_bitvec_16_to_8s h_imm_extended_range
       simp [BitVec.ofNat, Nat.cast] at h_split_imm_extended
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm_extended
@@ -997,7 +997,7 @@ namespace Equivalence.LoadStore
       simp (disch := omega) [Nat.mod_eq_of_lt] at h_split_imm_extended
       simp (disch := omega) [Nat.mod_eq_of_lt]
       rewrite [←h_split_imm_extended]
-      have := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+      have := LoadW.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
       rewrite [this]
       simp [BitVec.ofNat, Nat.cast]
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
@@ -1028,7 +1028,7 @@ namespace Equivalence.LoadStore
     BitVec.signExtend 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))
   := by
     simp [U32.toBV]
-    have := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadW.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     rewrite [this]
     have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
     rewrite [this]; clear this
@@ -1045,7 +1045,7 @@ namespace Equivalence.LoadStore
       rewrite [this]; clear this; clear this; clear this
       rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
       have : (air.adapter.imm_extended_limb row 0).val / 256 < 256 := by
-        have := Load.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
+        have := LoadW.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
         omega
       simp [Nat.mod_eq_of_lt this]
       have (bv1 bv2: BitVec 8) :
@@ -1076,7 +1076,7 @@ namespace Equivalence.LoadStore
       rewrite [this]; clear this; clear this; clear this
       rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
       have : (air.adapter.imm row 0).val / 256 < 256 := by
-        have := Load.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+        have := LoadW.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
         omega
       simp [Nat.mod_eq_of_lt this]
       have (bv1 bv2: BitVec 8) :
@@ -1117,19 +1117,19 @@ namespace Equivalence.LoadStore
         ]
     ).msb.toNat
   := by
-    have := Load.imm_sign_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode
+    have := LoadW.imm_sign_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
     have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
     simp [this]
-    have := Load.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
+    have := LoadW.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
     have :
       (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
       (air.adapter.imm_extended_limb row 0).val / 256
     := by
       omega
     simp [this]
-    have h_sign_extend := Load.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_sign_extend := LoadW.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
     have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
@@ -1201,10 +1201,10 @@ namespace Equivalence.LoadStore
     . exact lw_spec_of_get_instruction_fields_part_13 air row h_is_valid h_bus_wellformedness
     . exact lw_spec_of_get_instruction_fields_part_14 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
     . exact lw_spec_of_get_instruction_fields_part_15 air row h_is_valid h_bus_axioms
-    . exact Load.read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
-    . exact Load.write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadW.read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadW.write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     . apply lw_spec_of_get_instruction_fields_part_16 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
-    . exact Load.write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadW.write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     . apply lw_spec_of_get_instruction_fields_part_17 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . apply lw_spec_of_get_instruction_fields_part_18 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . apply lw_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
@@ -1246,13 +1246,13 @@ namespace Equivalence.LoadStore
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
           . simp [U32.toBV]
-            have := Load.write_data_3_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadW.write_data_3_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := Load.write_data_2_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadW.write_data_2_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := Load.write_data_1_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadW.write_data_1_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := Load.write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadW.write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
           . grind
           . clear *-h_rd
@@ -1285,7 +1285,7 @@ namespace Equivalence.LoadStore
     (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
     (air.adapter.imm_extended_limb row 0).val / 256
   := by
-    have := Store.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
+    have := StoreW.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
     omega
 
   lemma imm_12_bits_of_opcode_531 [Field ExtF]
@@ -1362,21 +1362,21 @@ namespace Equivalence.LoadStore
     simp
     split_ands
     . omega
-    . have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+    . have := StoreW.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       omega
     . omega
-    . have := Store.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
+    . have := StoreW.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
       omega
-    . have := Store.rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    . have := StoreW.rs1_data_0_range air row h_is_valid h_bus_wellformedness
       apply Fin.lt_def.mp at this
       convert this
-    . have := Store.rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    . have := StoreW.rs1_data_1_range air row h_is_valid h_bus_wellformedness
       apply Fin.lt_def.mp at this
       convert this
-    . have := Store.rs1_data_2_range air row h_is_valid h_bus_wellformedness
+    . have := StoreW.rs1_data_2_range air row h_is_valid h_bus_wellformedness
       apply Fin.lt_def.mp at this
       convert this
-    . have := Store.rs1_data_3_range air row h_is_valid h_bus_wellformedness
+    . have := StoreW.rs1_data_3_range air row h_is_valid h_bus_wellformedness
       apply Fin.lt_def.mp at this
       convert this
     . have h_memory := h_bus_wellformedness.2.1
@@ -1407,7 +1407,7 @@ namespace Equivalence.LoadStore
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.2.2.2
-    . have := Store.needs_write_of_opcode_531 air row h_bus_wellformedness
+    . have := StoreW.needs_write_of_opcode_531 air row h_bus_wellformedness
       exact this h_is_valid h_opcode
     . simp [
         Valid_VmAirWrapper_loadstore.to_pc
@@ -1420,9 +1420,9 @@ namespace Equivalence.LoadStore
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
       . simp
       . omega
-    . exact Store.read_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
-    . exact Store.read_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
-    . exact Store.write_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . exact StoreW.read_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . exact StoreW.read_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . exact StoreW.write_as_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
     . simp only [U32.toNat]
       rewrite [
         BitVec.toNat_ofFin,
@@ -1432,10 +1432,10 @@ namespace Equivalence.LoadStore
         BitVec.toNat_ofFin,
       ]
       simp
-      have := Store.write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+      have := StoreW.write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
       rewrite [this]; clear this
-      have h_mem_ptr := Store.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
-      have h_imm_sign_extend := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      have h_mem_ptr := StoreW.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      have h_imm_sign_extend := StoreW.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       rewrite [h_imm_sign_extend] at h_mem_ptr
       rewrite [BitVec.toNat_eq] at h_mem_ptr
       simp [-BitVec.toNat_add] at h_mem_ptr
@@ -1472,9 +1472,9 @@ namespace Equivalence.LoadStore
       rewrite [this]
       . omega
       . omega
-    . have := Store.write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . have := StoreW.write_ptr_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
       rewrite [this]; clear this
-      have := Store.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      have := StoreW.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
       rewrite [←BitVec.toNat_inj] at this
       simp at this
       rewrite [Nat.mod_eq_of_lt (by omega)] at this
@@ -1512,7 +1512,7 @@ namespace Equivalence.LoadStore
         congr
         . rewrite [←BitVec.toNat_inj]
           simp
-          have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+          have := StoreW.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
           omega
         . rewrite [←BitVec.toNat_inj]
           simp
@@ -1523,7 +1523,7 @@ namespace Equivalence.LoadStore
       rewrite [this]
       clear this
       rfl
-    . have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+    . have := StoreW.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       simp [U32.toBV]
       have (bv1 bv2 bv3 bv4: BitVec 8) :
         BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
@@ -1531,7 +1531,7 @@ namespace Equivalence.LoadStore
       := by bv_decide
       rewrite [this]; clear this
       -- combine the two halves of imm into BitVec.ofNat 16 imm
-      have h_imm_range := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      have h_imm_range := StoreW.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       have h_split_imm := split_bitvec_16_to_8s h_imm_range
       simp [BitVec.ofNat, Nat.cast] at h_split_imm
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm
@@ -1547,7 +1547,7 @@ namespace Equivalence.LoadStore
         unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
         dsimp
         simp (disch := omega) [Nat.mod_eq_of_lt]
-      . have h_imm_extended_range := Load.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
+      . have h_imm_extended_range := LoadW.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
         have h_split_imm_extended := split_bitvec_16_to_8s h_imm_extended_range
         simp [BitVec.ofNat, Nat.cast] at h_split_imm_extended
         unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm_extended
@@ -1555,14 +1555,14 @@ namespace Equivalence.LoadStore
         simp (disch := omega) [Nat.mod_eq_of_lt] at h_split_imm_extended
         simp (disch := omega) [Nat.mod_eq_of_lt]
         rewrite [←h_split_imm_extended]
-        have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+        have := StoreW.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
         rewrite [this]
         simp [BitVec.ofNat, Nat.cast]
         unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
         dsimp
         simp (disch := omega) [Nat.mod_eq_of_lt]
     . simp [U32.toBV]
-      have := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      have := StoreW.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       rewrite [this]
       have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
       rewrite [this]; clear this
@@ -1579,7 +1579,7 @@ namespace Equivalence.LoadStore
         rewrite [this]; clear this; clear this; clear this
         rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
         have : (air.adapter.imm_extended_limb row 0).val / 256 < 256 := by
-          have := Store.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
+          have := StoreW.imm_extend_range_of_opcode_531 air row h_row h_constraints h_is_valid
           omega
         simp [Nat.mod_eq_of_lt this]
         have (bv1 bv2: BitVec 8) :
@@ -1610,7 +1610,7 @@ namespace Equivalence.LoadStore
         rewrite [this]; clear this; clear this; clear this
         rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
         have : (air.adapter.imm row 0).val / 256 < 256 := by
-          have := Store.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+          have := StoreW.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
           omega
         simp [Nat.mod_eq_of_lt this]
         have (bv1 bv2: BitVec 8) :
@@ -1625,14 +1625,14 @@ namespace Equivalence.LoadStore
           simp
           omega
         }
-    . have := Store.imm_sign_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
+    . have := StoreW.imm_sign_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
       rewrite [this]; clear this
       simp [U32.toBV]
       have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
       simp [this]
       have := imm_extended_limb_upper_mod_of_opcode_531 air row h_row h_constraints h_is_valid
       simp [this]
-      have h_sign_extend := Store.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
+      have h_sign_extend := StoreW.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
       apply this at h_sign_extend
       have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
@@ -1656,7 +1656,7 @@ namespace Equivalence.LoadStore
       simp
       rewrite [Nat.div_div_eq_div_mul]
       simp
-    . have := Store.write_data_0_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . have := StoreW.write_data_0_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
       rewrite [this]; clear this
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
@@ -1674,7 +1674,7 @@ namespace Equivalence.LoadStore
       simp [this]
       rewrite [Nat.mod_eq_of_lt h_range]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_0 row 0))
-    . have := Store.write_data_1_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . have := StoreW.write_data_1_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
       rewrite [this]; clear this
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
@@ -1703,7 +1703,7 @@ namespace Equivalence.LoadStore
       simp [Nat.add_mod, this]
       rewrite [Nat.mod_eq_of_lt (by omega)]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_1 row 0))
-    . have := Store.write_data_2_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . have := StoreW.write_data_2_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
       rewrite [this]; clear this
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
@@ -1734,7 +1734,7 @@ namespace Equivalence.LoadStore
       simp [Nat.add_mod, this]
       rewrite [Nat.mod_eq_of_lt (by omega)]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_2 row 0))
-    . have := Store.write_data_3_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
+    . have := StoreW.write_data_3_of_opcode_531 air row h_opcode h_row h_constraints h_is_valid
       rewrite [this]; clear this
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
