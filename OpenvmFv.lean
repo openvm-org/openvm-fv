@@ -117,7 +117,13 @@ import OpenvmFv.Spec.ITYPE.xori
 import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.LoadStore.local2
 import OpenvmFv.Spec.LoadStore.lw
+import OpenvmFv.Spec.LoadStore.lh
+import OpenvmFv.Spec.LoadStore.lhu
+import OpenvmFv.Spec.LoadStore.lb
+import OpenvmFv.Spec.LoadStore.lbu
 import OpenvmFv.Spec.LoadStore.sw
+import OpenvmFv.Spec.LoadStore.sh
+import OpenvmFv.Spec.LoadStore.sb
 import OpenvmFv.Spec.MULH.local
 import OpenvmFv.Spec.MULH.mul
 import OpenvmFv.Spec.MULH.mulh

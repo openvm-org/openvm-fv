@@ -1148,7 +1148,7 @@ namespace Local
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (h_mprv_disabled : BitVec.extractLsb 17 17 mstatus = 0#1)
-    (h_does_fit : (rs1_val + BitVec.signExtend 32 imm).toNat + 2 < ram_size)
+    (h_does_fit : (rs1_val + BitVec.signExtend 32 imm).toNat + 1 < ram_size)
   :
     LeanRV32D.Functions.execute_STORE imm rs2 rs1 1 s =
     EStateM.Result.ok (ExecutionResult.Retire_Success ()) {
