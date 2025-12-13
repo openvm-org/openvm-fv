@@ -876,7 +876,7 @@ include
   row_not_valid
   constraints
 in
-/-- On non-valid rows, all interactin multiplicities
+/-- On non-valid rows, all interaction multiplicities
     on the execution, memory, and program buses
     equal zero -/
 lemma non_valid_row_exec_mem_program_multiplicities_zero
