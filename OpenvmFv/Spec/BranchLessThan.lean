@@ -24,83 +24,24 @@ namespace BranchLessThan.NonValidRows
 
 open VmAirWrapper_branch_lt.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
 include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_BranchLessThan_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.core.a_0 row 0 = 0 ∧
-  air.core.a_1 row 0 = 0 ∧
-  air.core.a_2 row 0 = 0 ∧
-  air.core.a_3 row 0 = 0 ∧
-  air.core.b_0 row 0 = 0 ∧
-  air.core.b_1 row 0 = 0 ∧
-  air.core.b_2 row 0 = 0 ∧
-  air.core.b_3 row 0 = 0 ∧
-  air.core.cmp_result row 0 = 0 ∧
-  air.core.imm row 0 = 0 ∧
-  air.core.opcode_blt_flag row 0 = 0 ∧
-  air.core.opcode_bltu_flag row 0 = 0 ∧
-  air.core.opcode_bge_flag row 0 = 0 ∧
-  air.core.opcode_bgeu_flag row 0 = 0 ∧
-  air.core.a_msb_f row 0 = 0 ∧
-  air.core.b_msb_f row 0 = 0 ∧
-  air.core.cmp_lt row 0 = 0 ∧
-  air.core.diff_marker_0 row 0 = 0 ∧
-  air.core.diff_marker_1 row 0 = 0 ∧
-  air.core.diff_marker_2 row 0 = 0 ∧
-  air.core.diff_marker_3 row 0 = 0 ∧
-  air.core.diff_val row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  simp_all; intros
-  simp_all [VmAirWrapper_branch_lt_constraint_and_interaction_simplification,
-            Valid_BranchLessThanCoreAir_4_8.is_valid,
-            ← BranchLessThanCoreAir_4_8.prefix_sum_3_def,
-            ← BranchLessThanCoreAir_4_8.prefix_sum_2_def,
-            ← BranchLessThanCoreAir_4_8.prefix_sum_1_def,
-            ← BranchLessThanCoreAir_4_8.prefix_sum_0_def,
-            ← BranchLessThanCoreAir_4_8.diff_3_def,
-            ← BranchLessThanCoreAir_4_8.diff_2_def,
-            ← BranchLessThanCoreAir_4_8.diff_1_def,
-            ← BranchLessThanCoreAir_4_8.diff_0_def,
-            ← BranchLessThanCoreAir_4_8.a_diff_def,
-            ← BranchLessThanCoreAir_4_8.b_diff_def,
-            Valid_BranchLessThanCoreAir_4_8.ge]
-
-include
-  row_in_range
   row_not_valid
-  constraints
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_BranchLessThan_all_interaction_multiplicities_zero
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
-  (entry ∈ executionBus_row air row ++
-           memoryBus_row air row ++
-           rangeCheckerBus_row air row ++
-           programBus_row air row → entry.1 = 0) ∧
-  (entry ∈ bitwiseBus_row air row →
-    entry.1 = 0 ∨
-    (air.core.prefix_sum row 0 0 = 1 ∧
-     entry = (1, [air.core.diff_val row 0 - 1, 0, 0, 0])))
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
-  obtain ⟨ hint, constraints ⟩ := constraints
-  clear hint; unfold extracted_row_constraint_list at constraints
-  simp only [VmAirWrapper_branch_lt_air_simplification,
-             VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at constraints
-  simp at constraints
   simp_all [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
-  simp_all [← BranchLessThanCoreAir_4_8.prefix_sum_0_def,
-            ← BranchLessThanCoreAir_4_8.prefix_sum_1_def,
-            ← BranchLessThanCoreAir_4_8.prefix_sum_2_def]
-  grind (splits := 11)
 
 end BranchLessThan.NonValidRows
 

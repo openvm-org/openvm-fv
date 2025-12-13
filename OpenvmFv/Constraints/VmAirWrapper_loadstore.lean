@@ -859,3 +859,36 @@ namespace VmAirWrapper_loadstore.constraints
   end bus_entries
 
 end VmAirWrapper_loadstore.constraints
+
+namespace LoadStore.NonValidRows
+
+open VmAirWrapper_loadstore.constraints
+
+variable (ExtF : Type) [Field ExtF]
+variable (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+variable (row : ℕ)
+variable (row_in_range : row ≤ air.last_row)
+variable (constraints : VmAirWrapper_loadstore.constraints.allHold air row row_in_range)
+
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
+
+include
+  row_not_valid
+  constraints
+in
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
+:
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
+:= by
+  rw [allHold_simplified_of_allHold] at constraints
+  simp_all [VmAirWrapper_loadstore_constraint_and_interaction_simplification]
+
+end LoadStore.NonValidRows

@@ -19,48 +19,24 @@ namespace ALU.NonValidRows
 
 open VmAirWrapper_alu.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
-
-include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_ALU_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.adapter.rs2 row 0 = 0 ∧
-  air.adapter.rs2_as row 0 = 0 ∧
-  air.core.c_0 row 0 = 0 ∧
-  air.core.c_1 row 0 = 0 ∧
-  air.core.c_2 row 0 = 0 ∧
-  air.core.c_3 row 0 = 0 ∧
-  air.core.opcode_add_flag row 0 = 0 ∧
-  air.core.opcode_sub_flag row 0 = 0 ∧
-  air.core.opcode_xor_flag row 0 = 0 ∧
-  air.core.opcode_or_flag row 0 = 0 ∧
-  air.core.opcode_and_flag row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  simp_all; intro hint h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification]
-  simp [← BaseAluCoreAir.is_valid_def,
-        ← VmAirWrapper_alu.rs2_imm_def,
-        ← VmAirWrapper_alu.rs2_sign_limbs]
-  rw [h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10]
-  split_ands <;> (try decide) <;> simp
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
 include
   row_in_range
   row_not_valid
   constraints
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_ALU_all_interaction_multiplicities_zero
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
   forall entry,
-  entry ∈ busRow air row → entry.1 = 0
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
   have : air.adapter.rs2_as row 0 = 0 := by
     obtain ⟨ hint, constraints ⟩ := constraints
@@ -68,6 +44,7 @@ lemma non_valid_row_ALU_all_interaction_multiplicities_zero
     simp only [VmAirWrapper_alu_air_simplification,
                VmAirWrapper_alu_constraint_and_interaction_simplification] at constraints
     simp at constraints
+    simp [executionBus_row] at row_not_valid
     grind
   clear constraints
   simp_all [VmAirWrapper_alu_constraint_and_interaction_simplification]

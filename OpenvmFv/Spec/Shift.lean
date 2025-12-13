@@ -20,112 +20,33 @@ namespace Shift.NonValidRows
 
 open VmAirWrapper_shift.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
-
-set_option maxRecDepth 1_000_000 in
-include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_Shift_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.adapter.rs2 row 0 = 0 ∧
-  air.adapter.rs2_as row 0 = 0 ∧
-  air.core.b_0 row 0 = 0 ∧
-  air.core.b_1 row 0 = 0 ∧
-  air.core.b_2 row 0 = 0 ∧
-  air.core.b_3 row 0 = 0 ∧
-  air.core.c_0 row 0 = 0 ∧
-  air.core.c_1 row 0 = 0 ∧
-  air.core.c_2 row 0 = 0 ∧
-  air.core.c_3 row 0 = 0 ∧
-  air.core.opcode_sll_flag row 0 = 0 ∧
-  air.core.opcode_srl_flag row 0 = 0 ∧
-  air.core.opcode_sra_flag row 0 = 0 ∧
-  air.core.bit_multiplier_left row 0 = 0 ∧
-  air.core.bit_multiplier_right row 0 = 0 ∧
-  air.core.b_sign row 0 = 0 ∧
-  air.core.bit_shift_marker_0 row 0 = 0 ∧
-  air.core.bit_shift_marker_1 row 0 = 0 ∧
-  air.core.bit_shift_marker_2 row 0 = 0 ∧
-  air.core.bit_shift_marker_3 row 0 = 0 ∧
-  air.core.bit_shift_marker_4 row 0 = 0 ∧
-  air.core.bit_shift_marker_5 row 0 = 0 ∧
-  air.core.bit_shift_marker_6 row 0 = 0 ∧
-  air.core.bit_shift_marker_7 row 0 = 0 ∧
-  air.core.limb_shift_marker_0 row 0 = 0 ∧
-  air.core.limb_shift_marker_1 row 0 = 0 ∧
-  air.core.limb_shift_marker_2 row 0 = 0 ∧
-  air.core.limb_shift_marker_3 row 0 = 0 ∧
-  air.core.bit_shift_carry_0 row 0 = 0 ∧
-  air.core.bit_shift_carry_1 row 0 = 0 ∧
-  air.core.bit_shift_carry_2 row 0 = 0 ∧
-  air.core.bit_shift_carry_3 row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  intro h_zeros
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification,
-        ← Valid_ShiftCoreAir_4_8.is_valid_def,
-        ← Valid_ShiftCoreAir_4_8.right_shift_def,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_1,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_2,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_3,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_4,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_5,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_6,
-        ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_7,
-        ← Valid_ShiftCoreAir_4_8.expected_a_left_0_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_left_1_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_left_2_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_left_3_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_right_0_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_right_1_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_right_2_def,
-        ← Valid_ShiftCoreAir_4_8.expected_a_right_3_def,
-        ← Valid_ShiftCoreAir_4_8.b_sign_shifted_def,
-        ← VmAirWrapper_shift.rs2_imm_def,
-        ← VmAirWrapper_shift.rs2_sign_limbs]
-  grind
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
 include
   row_in_range
   row_not_valid
   constraints
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_Shift_all_interaction_multiplicities_zero
-  (entry : FBB × List FBB)
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
-  entry ∈ executionBus_row air row ++
-          memoryBus_row air row ++
-          rangeCheckerBus_row air row ++
-          programBus_row air row ++
-          bitwiseBus_row air row → entry.1 = 0
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
   obtain ⟨ hint, constraints ⟩ := constraints
   clear hint; unfold extracted_row_constraint_list at constraints
   simp only [VmAirWrapper_shift_air_simplification,
              VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
   simp at constraints
+  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at row_not_valid
   have : air.adapter.rs2_as row 0 = 0 := by grind
   simp_all [VmAirWrapper_shift_constraint_and_interaction_simplification]
-  simp_all [← Valid_ShiftCoreAir_4_8.is_valid_def,
-            ← Valid_ShiftCoreAir_4_8.right_shift_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_left_0_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_left_1_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_left_2_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_left_3_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_right_0_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_right_1_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_right_2_def,
-            ← Valid_ShiftCoreAir_4_8.expected_a_right_3_def,
-            ← Valid_ShiftCoreAir_4_8.b_sign_shifted_def,
-            ← VmAirWrapper_shift.rs2_imm_def,
-            ← VmAirWrapper_shift.rs2_sign_limbs]
-  grind (splits := 37)
 
 end Shift.NonValidRows
 

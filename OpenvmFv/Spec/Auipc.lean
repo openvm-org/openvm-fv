@@ -19,38 +19,24 @@ namespace Auipc.NonValidRows
 
 open VmAirWrapper_auipc.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
-include
-  row_in_range
-  row_not_valid
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_auipc_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.core.imm_limbs_0 = 0 ∧
-  air.core.imm_limbs_1 = 0 ∧
-  air.core.imm_limbs_2 = 0 ∧
-  air.core.pc_limbs_0 = 0 ∧
-  air.core.pc_limbs_1 = 0 ∧
-  air.core.rd_data_0 row 0 = 0 ∧
-  air.core.rd_data_1 row 0 = 0 ∧
-  air.core.rd_data_2 row 0 = 0 ∧
-  air.core.rd_data_3 row 0 = 0
-    → allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  simp_all [VmAirWrapper_auipc_constraint_and_interaction_simplification]
-
+omit
+  [Field ExtF]
 include
   row_not_valid
 in
-/-- On non-valid rows, all interaction multiplicities equal zero -/
-lemma non_valid_row_auipc_all_interaction_multiplicities_zero
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
   forall entry,
-  entry ∈ busRow air row → entry.1 = 0
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
   simp_all [VmAirWrapper_auipc_constraint_and_interaction_simplification]
 
