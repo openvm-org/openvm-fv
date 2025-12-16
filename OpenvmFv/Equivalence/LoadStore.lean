@@ -1,7 +1,9 @@
 import OpenvmFv.Spec.LoadStore.lw
 import OpenvmFv.Spec.LoadStore.sw
+import OpenvmFv.Spec.LoadStore.sh
 import OpenvmFv.Spec.LoadW
 import OpenvmFv.Spec.StoreW
+import OpenvmFv.Spec.StoreH
 
 namespace Equivalence.LoadStore
 
@@ -39,13 +41,14 @@ namespace Equivalence.LoadStore
     write_address_space : FBB
     write_ptr : FBB
 
-
     imm : Vector FBB 4
     rs1_val : Vector FBB 4
     prev_read_data : Vector FBB 4
     read_data : Vector FBB 4
     prev_write_data : Vector FBB 4
     write_data : Vector FBB 4
+
+    shift : FBB
 
     range_checked_vals : Vector FBB 8
 
@@ -76,6 +79,7 @@ namespace Equivalence.LoadStore
     a.read_data = b.read_data ∧
     a.prev_write_data = b.prev_write_data ∧
     a.write_data = b.write_data ∧
+    a.shift = b.shift ∧
     a.range_checked_vals = b.range_checked_vals
       → a = b
   := by
@@ -149,6 +153,25 @@ namespace Equivalence.LoadStore
     : PureSpec.SwInput
   }
 
+  def ShInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.ShInput := {
+    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    imm := BabyBear.toBV32 row.imm
+    r2 := BitVec.ofFin (wrap_to_regidx row.rd)
+    r1_val := BabyBear.toBV32 row.rs1_val
+    r2_val := BabyBear.toBV32 row.prev_read_data
+    PC := row.pc.toNat
+    mstatus := config.mstatus
+    cur_privilege := config.cur_privilege
+    plat_clint_base := config.plat_clint_base
+    plat_clint_size := config.plat_clint_size
+    plat_ram_base := config.plat_ram_base
+    plat_ram_size := config.plat_ram_size
+    plat_rom_base := config.plat_rom_base
+    plat_rom_size := config.plat_rom_size
+    htif_tohost_base := config.htif_tohost_base
+    : PureSpec.ShInput
+  }
+
   def LwOutput_matches_LoadStore_instruction_fields (row : LoadStore_instruction_fields) (lw_output : PureSpec.LwOutput) : Prop :=
     BabyBear.isU32 row.imm ∧
     BabyBear.isU32 row.rs1_val ∧
@@ -197,6 +220,34 @@ namespace Equivalence.LoadStore
       ↑sw_output.data3.2.toNat
     ]
 
+  def ShOutput_matches_LoadStore_instruction_fields (row : LoadStore_instruction_fields) (sh_output : PureSpec.ShOutput) : Prop :=
+    BabyBear.isU32 row.imm ∧
+    BabyBear.isU32 row.rs1_val ∧
+    BabyBear.isU32 row.prev_read_data ∧
+    BabyBear.isU32 row.read_data ∧
+    row.needs_write = 1 ∧
+    row.read_address_space = 1 ∧
+    row.read_ptr = row.rd ∧
+    row.write_address_space = row.memory_address_space ∧
+    row.prev_read_data = row.read_data ∧
+    (row.shift.val = 0 ∨ row.shift.val = 2) ∧
+    BitVec.signExtend 32 (BitVec.setWidth 12 (BabyBear.toBV32 row.imm)) = BabyBear.toBV32 row.imm ∧
+    BabyBear.toBV32 row.imm = BitVec.signExtend 32 (BitVec.ofNat 16 row.imm_lower_half) ∧
+    row.imm_sign = (BabyBear.toBV32 row.imm).msb.toNat ∧
+    row.write_data = #v[
+      if (row.shift = 0) then row.read_data[0] else row.prev_write_data[0],
+      if (row.shift = 0) then row.read_data[1] else row.prev_write_data[1],
+      if (row.shift = 0) then row.prev_write_data[2] else row.read_data[0],
+      if (row.shift = 0) then row.prev_write_data[3] else row.read_data[1],
+    ] ∧
+    -- Actual output characterisation
+    sh_output.nextPC = row.next_pc.toNat ∧
+    row.write_ptr.val = (BabyBear.toBV32 row.imm + BabyBear.toBV32 row.rs1_val).toNat - row.shift.val ∧
+    sh_output.data0.1 = (BabyBear.toBV32 row.imm + BabyBear.toBV32 row.rs1_val).toNat ∧
+    sh_output.data0.2 = row.read_data[0].toNat ∧
+    sh_output.data1.1 = (BabyBear.toBV32 row.imm + BabyBear.toBV32 row.rs1_val).toNat + 1 ∧
+    sh_output.data1.2 = row.read_data[1].toNat
+
   def LoadStore_instruction_fields.spec (row : LoadStore_instruction_fields) : Prop :=
     row.is_valid = 1 → (
       row.opcode ∈ Finset.Icc 528 533 ∧
@@ -209,6 +260,11 @@ namespace Equivalence.LoadStore
         SwOutput_matches_LoadStore_instruction_fields
           row
           (PureSpec.execute_STORE_sw_pure (SwInput_of_LoadStore_instruction_fields row))
+      ) ∧
+      (row.opcode = 532 →
+        ShOutput_matches_LoadStore_instruction_fields
+          row
+          (PureSpec.execute_STOREH_sh_pure (ShInput_of_LoadStore_instruction_fields row))
       )
     )
 
@@ -380,6 +436,7 @@ namespace Equivalence.LoadStore
       air.core.write_data_2 row 0,
       air.core.write_data_3 row 0
     ]
+    shift := air.shift_amount row 0,
     range_checked_vals := #v[
       air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0,
       air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0,
@@ -1766,6 +1823,113 @@ namespace Equivalence.LoadStore
       rewrite [Nat.mod_eq_of_lt (by omega)]
       exact Eq.symm (Fin.cast_val_eq_self (air.core.read_data_3 row 0))
 
+set_option maxHeartbeats 0 in
+  lemma sh_spec_of_get_instruction_fields [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_row : row ≤ air.last_row)
+    (h_constraints : allHold_allRows air)
+    (h_is_valid : air.core.is_valid row 0 = 1)
+    (h_bus_axioms : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
+    (h_bus_wellformedness : ∀ row ≤ air.last_row, VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+  :
+    ((get_instruction_fields_row air row).opcode = 532 →
+        ShOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
+          (PureSpec.execute_STOREH_sh_pure
+            (ShInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
+  := by
+    intro h_opcode
+    simp [get_instruction_fields_row] at h_opcode
+
+    simp [
+      ShOutput_matches_LoadStore_instruction_fields,
+      get_instruction_fields_row,
+      -BitVec.toNat_add
+    ]
+    repeat rw [BitVec.toNat_add]
+    simp
+    rewrite [allHold_allRows] at h_constraints
+    specialize h_constraints ⟨row, by omega⟩
+    specialize h_bus_axioms row h_row
+    specialize h_bus_wellformedness row h_row
+    simp [
+      ShInput_of_LoadStore_instruction_fields,
+      PureSpec.execute_STOREH_sh_pure,
+      -BitVec.toNat_add
+    ]
+    have h_needs_write := StoreH.needs_write_of_opcode_532 air row h_bus_wellformedness h_is_valid h_opcode
+    have h_bus_wellformedness' := h_bus_wellformedness
+    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+          h_is_valid,
+          h_needs_write,
+          show (((-1) : FBB) = 2013265920) by native_decide,
+          and_assoc] at h_bus_wellformedness'
+    obtain ⟨ hwf01, hwf02, hwf03, hwf04, hwf05, hwf06, hwf07, hwf08, hwf09, hwf10,
+             hwf11, hwf12, hwf13, hwf14, hwf15, hwf16, hwf17, hwf18, hwf19, hwf20,
+             hwf21, hwf22, hwf23, hwf24, hwf25, hwf26 ⟩ := h_bus_wellformedness'
+    simp [Interaction.ProgramBusEntry.operand_properties] at hwf26
+    obtain ⟨ instr, a, b, h_transpile, h_a, h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8 ⟩ := hwf26
+    have h_transpile' := Transpiler.transpiler_opcode_532 h_transpile (by simp; rw [h_b1]; exact h_opcode)
+    obtain ⟨ imm, rs2, rs1, eq_instr ⟩ := h_transpile'
+    subst instr
+    unfold Transpiler.transpile_op at h_transpile
+    split_ifs at h_transpile with h_if h_eq
+    . exfalso; clear *- h_eq; grind
+    . dsimp at h_transpile; clear h_eq
+      have : b = #v[b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]]
+        := by clear *-; ext i; interval_cases i <;> simp
+      rw [this] at h_transpile; clear this
+      rw [h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8] at h_transpile; clear h_a h_b0 h_b1 h_b2 h_b3 h_b4 h_b5 h_b6 h_b7 h_b8
+      simp [Transpiler.utof, Transpiler.sign_extend_16, Transpiler.sign_of] at h_transpile
+      obtain ⟨ h_a, h_op, h_rs2, h_rs1, h_imm_sign_extend, h_mem_as, h_imm_sgn ⟩ := h_transpile
+      clear h_a h_op h_rs1 h_rs2; symm at h_imm_sign_extend h_mem_as h_imm_sgn
+      have h_constraints' := h_constraints
+      rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
+      simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
+      simp [h_is_valid, h_needs_write] at h_constraints'
+      obtain ⟨
+        h_interactions,
+        h_flag_0_le_2,
+        h_flag_1_le_2,
+        h_flag_2_le_2,
+        h_flag_3_le_2,
+        h_sum_le_2,
+        h_sum_1_or_2_of_is_valid,
+        h_is_load_def,
+        h_wd_0,
+        h_wd_1,
+        h_wd_2,
+        h_wd_3,
+        h_ts_0,
+        h_carry_boolean,
+        h_imm_sign_boolean,
+        h_carry'_boolean,
+        h_mem_as,
+        h_ts_1,
+        h_ts_2
+      ⟩ := h_constraints'
+      have h_imm_range        := StoreH.imm_range_of_opcode_532 air row h_opcode h_is_valid h_bus_wellformedness
+      have h_imm_range_extend := StoreH.imm_extend_range_of_opcode_532 air row h_row h_constraints h_is_valid
+      have h_read_as          := StoreH.read_as_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
+      have h_read_ptr         := StoreH.read_ptr_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
+      have h_write_as         := StoreH.write_as_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
+      have h_shift_amount     := StoreH.shift_amount_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
+      have h_ptr_range        := StoreH.mem_ptr_range_of_opcode_532 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+      have h_eq_shift : air.core.store_shift_amount row 0 = air.shift_amount row 0 := by
+        rewrite [h_shift_amount]
+        exact StoreH.store_shift_amount_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
+      have h_imm_upper : (air.adapter.imm row 0).val / 256 % 256 = (air.adapter.imm row 0).val / 256
+        := by clear *- h_imm_range; rw [Nat.mod_eq_of_lt (by omega)]
+      have h_imm_ext_upper : (air.adapter.imm_extended_limb row 0).val / 256 % 256 = (air.adapter.imm_extended_limb row 0).val / 256
+        := by clear *- h_imm_range_extend; rw [Nat.mod_eq_of_lt (by omega)]
+      simp [U32.toBV, h_imm_upper, h_imm_ext_upper]
+      split_ands <;> try assumption
+
+
+
+
+#exit
+
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (h_constraints : allHold_allRows air)
@@ -1790,7 +1954,7 @@ namespace Equivalence.LoadStore
     . exact get_instruction_fields_row_opcode_range air row (by omega) h_constraints h_is_valid
     . exact lw_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
     . exact sw_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
-
+    . exact sh_spec_of_get_instruction_fields air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
 
   theorem loadstore_spec [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
