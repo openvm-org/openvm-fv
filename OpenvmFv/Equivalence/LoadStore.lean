@@ -1909,7 +1909,7 @@ set_option maxHeartbeats 0 in
         h_ts_2
       ⟩ := h_constraints'
       have h_imm_range        := StoreH.imm_range_of_opcode_532 air row h_opcode h_is_valid h_bus_wellformedness
-      have h_imm_range_extend := StoreH.imm_extend_range_of_opcode_532 air row h_row h_constraints h_is_valid
+      have h_imm_extend_range := StoreH.imm_extend_range_of_opcode_532 air row h_row h_constraints h_is_valid
       have h_read_as          := StoreH.read_as_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
       have h_read_ptr         := StoreH.read_ptr_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
       have h_write_as         := StoreH.write_as_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid
@@ -1921,14 +1921,48 @@ set_option maxHeartbeats 0 in
       have h_imm_upper : (air.adapter.imm row 0).val / 256 % 256 = (air.adapter.imm row 0).val / 256
         := by clear *- h_imm_range; rw [Nat.mod_eq_of_lt (by omega)]
       have h_imm_ext_upper : (air.adapter.imm_extended_limb row 0).val / 256 % 256 = (air.adapter.imm_extended_limb row 0).val / 256
-        := by clear *- h_imm_range_extend; rw [Nat.mod_eq_of_lt (by omega)]
-      simp [U32.toBV, h_imm_upper, h_imm_ext_upper]
+        := by clear *- h_imm_extend_range; rw [Nat.mod_eq_of_lt (by omega)]
+      simp [U32.toBV, h_imm_upper, h_imm_ext_upper, -BitVec.toNat_add]
       split_ands <;> try assumption
-
-
-
-
-#exit
+      . clear *-; omega
+      . clear *- h_imm_range; omega
+      . clear *-; omega
+      . clear *- h_imm_extend_range; omega
+      . clear *- h_shift_amount; grind
+      . sorry
+      . sorry
+      . sorry
+      . rw [StoreH.write_data_0_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid, h_shift_amount]
+        clear *-; split_ifs <;> grind
+      . rw [StoreH.write_data_1_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid, h_shift_amount]
+        clear *-; split_ifs <;> grind
+      . rw [StoreH.write_data_2_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid, h_shift_amount]
+        clear *-; split_ifs <;> grind
+      . rw [StoreH.write_data_3_of_opcode_532 air row h_opcode h_row h_constraints h_is_valid, h_shift_amount]
+        clear *-; split_ifs <;> grind
+      . sorry
+      . sorry
+      . rw [BitVec.toNat_add]
+        rw [add_comm]; congr
+        . rw [← U32.toBV_toNat, BitVec.toNat_inj]
+          simp [U32.toBV]
+          sorry
+        . rw [← U32.toBV_toNat, BitVec.toNat_inj]
+          simp [U32.toBV]
+      . simp [BitVec.extractLsb]
+        rw [BitVec.extractLsb'_append_eq_of_add_le (by simp)]
+        simp; rfl
+      . rw [BitVec.toNat_add]
+        rw [add_comm]; congr
+        . rw [← U32.toBV_toNat, BitVec.toNat_inj]
+          simp [U32.toBV]
+          sorry
+        . rw [← U32.toBV_toNat, BitVec.toNat_inj]
+          simp [U32.toBV]
+      . simp [BitVec.extractLsb]
+        rw [BitVec.extractLsb'_append_eq_of_le (by simp)]
+        rw [BitVec.extractLsb'_append_eq_of_add_le (by simp)]
+        simp; rfl
 
   lemma spec_of_get_instruction_fields [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
