@@ -724,6 +724,18 @@ namespace VmAirWrapper_loadstore.constraints
 
     variable[Field ExtF]
 
+    @[simp]
+    def flags_eq
+      (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (fl0 fl1 fl2 fl3 : FBB)
+    : Prop :=
+      air.core.flags_0 row 0 = fl0 ∧ air.core.flags_1 row 0 = fl1 ∧
+      air.core.flags_2 row 0 = fl2 ∧ air.core.flags_3 row 0 = fl3
+
+    instance : Decidable (flags_eq air row fl0 fl1 fl2 fl3)
+      := by simp; infer_instance
+
   end properties
 
   section bus_entries

@@ -35,7 +35,7 @@ namespace PureSpec
     obtain ⟨x: Fin 32⟩ := bv
     fin_cases x <;> simp_all
 
-  def execute_STOREH_sb_pure (input : SbInput) : SbOutput := {
+  def execute_STOREB_sb_pure (input : SbInput) : SbOutput := {
     nextPC := input.PC + 4#32
     data0 := (
       (input.r1_val + BitVec.signExtend 32 input.imm).toNat,
@@ -407,7 +407,7 @@ namespace PureSpec
   }
 
   set_option maxHeartbeats 0 in
-  lemma execute_STOREH_sb_pure_equiv
+  lemma execute_STOREB_sb_pure_equiv
     (sb_input : SbInput)
     (h_assumptions : sb_state_assumptions sb_input state)
   :
@@ -421,7 +421,7 @@ namespace PureSpec
           1
         ))
     ) state =
-    let sb_output := execute_STOREH_sb_pure sb_input
+    let sb_output := execute_STOREB_sb_pure sb_input
     (do
       Sail.writeReg Register.nextPC sb_output.nextPC
       set (modify_memory_1 (← get) sb_output)
@@ -503,6 +503,6 @@ namespace PureSpec
 
     unfold write_reg_state
     unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get
-    simp [EStateM.instMonadStateOf, EStateM.get, EStateM.set, modify_memory_1, execute_STOREH_sb_pure, Sail.BitVec.addInt]
+    simp [EStateM.instMonadStateOf, EStateM.get, EStateM.set, modify_memory_1, execute_STOREB_sb_pure, Sail.BitVec.addInt]
 
 end PureSpec

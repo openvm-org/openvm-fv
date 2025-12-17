@@ -152,6 +152,8 @@ import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.LoadW
 import OpenvmFv.Spec.StoreW
+import OpenvmFv.Spec.StoreH
+import OpenvmFv.Spec.StoreB
 import OpenvmFv.Spec.Lt
 import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
