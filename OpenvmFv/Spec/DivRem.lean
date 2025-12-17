@@ -20,135 +20,26 @@ namespace DivRem.NonValidRows
 
 open VmAirWrapper_divrem.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
-set_option maxRecDepth 1_000_000 in
+omit
+  [Field ExtF]
 include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_Mul_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.core.b_0 row 0 = 0 ∧
-  air.core.b_1 row 0 = 0 ∧
-  air.core.b_2 row 0 = 0 ∧
-  air.core.b_3 row 0 = 0 ∧
-  air.core.c_0 row 0 = 0 ∧
-  air.core.c_1 row 0 = 0 ∧
-  air.core.c_2 row 0 = 0 ∧
-  air.core.c_3 row 0 = 0 ∧
-  air.core.q_0 row 0 = 0 ∧
-  air.core.q_1 row 0 = 0 ∧
-  air.core.q_2 row 0 = 0 ∧
-  air.core.q_3 row 0 = 0 ∧
-  air.core.r_0 row 0 = 0 ∧
-  air.core.r_1 row 0 = 0 ∧
-  air.core.r_2 row 0 = 0 ∧
-  air.core.r_3 row 0 = 0 ∧
-  air.core.zero_divisor row 0 = 0 ∧
-  air.core.r_zero row 0 = 0 ∧
-  air.core.b_sign row 0 = 0 ∧
-  air.core.c_sign row 0 = 0 ∧
-  air.core.q_sign row 0 = 0 ∧
-  air.core.c_ext row 0 = 0 ∧
-  air.core.sign_xor row 0 = 0 ∧
-  air.core.c_sum_inv row 0 = 0 ∧
-  air.core.r_sum_inv row 0 = 0 ∧
-  air.core.r_prime_0 row 0 = 0 ∧
-  air.core.r_prime_1 row 0 = 0 ∧
-  air.core.r_prime_2 row 0 = 0 ∧
-  air.core.r_prime_3 row 0 = 0 ∧
-  air.core.r_inv_0 row 0 = 0 ∧
-  air.core.r_inv_1 row 0 = 0 ∧
-  air.core.r_inv_2 row 0 = 0 ∧
-  air.core.r_inv_3 row 0 = 0 ∧
-  air.core.lt_marker_0 row 0 = 0 ∧
-  air.core.lt_marker_1 row 0 = 0 ∧
-  air.core.lt_marker_2 row 0 = 0 ∧
-  air.core.lt_marker_3 row 0 = 0 ∧
-  air.core.lt_diff row 0 = 0 ∧
-  air.core.opcode_div_flag row 0 = 0 ∧
-  air.core.opcode_divu_flag row 0 = 0 ∧
-  air.core.opcode_rem_flag row 0 = 0 ∧
-  air.core.opcode_remu_flag row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  intro ⟨ h0, h1, h2, h3, h4, h5, h6, h7, h8, h9,
-          h10, h11, h12, h13, h14, h15, h16, h17, h18, h19,
-          h20, h21, h22, h23, h24, h25, h26, h27, h28, h29,
-          h30, h31, h32, h33, h34, h35, h36, h37, h38, h39,
-          h40, h41, h42 ⟩
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification,
-        ← DivRemCoreAir_4_8.is_valid_def,
-        ← DivRemCoreAir_4_8.special_case_def,
-        ← DivRemCoreAir_4_8.c_sum_def,
-        ← DivRemCoreAir_4_8.valid_and_not_zero_divisor_def,
-        ← DivRemCoreAir_4_8.r_sum_def,
-        ← DivRemCoreAir_4_8.valid_and_not_special_case_def,
-        ← DivRemCoreAir_4_8.signed_def,
-        ← DivRemCoreAir_4_8.nonzero_q_def,
-        ← DivRemCoreAir_4_8.carry_lt_0_def,
-        ← DivRemCoreAir_4_8.carry_lt_1_def,
-        ← DivRemCoreAir_4_8.carry_lt_2_def,
-        ← DivRemCoreAir_4_8.carry_lt_3_def]
-  grind
-
-include
-  row_in_range
   row_not_valid
-  constraints
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_Mul_all_interaction_multiplicities_zero
-  (entry : FBB × List FBB)
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
-  entry ∈ executionBus_row air row ++
-          memoryBus_row air row ++
-          rangeCheckerBus_row air row ++
-          programBus_row air row ++
-          rangeTupleCheckerBus_row air row ++
-          bitwiseBus_row air row → entry.1 = 0
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
-  obtain ⟨ hint, constraints ⟩ := constraints
-  clear hint; unfold extracted_row_constraint_list at constraints
-  simp only [VmAirWrapper_divrem_air_simplification,
-             VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
-  simp at constraints
-  simp_all
-      [VmAirWrapper_divrem_constraint_and_interaction_simplification,
-        ← DivRemCoreAir_4_8.is_valid_def,
-        ← DivRemCoreAir_4_8.special_case_def,
-        ← DivRemCoreAir_4_8.c_sum_def,
-        ← DivRemCoreAir_4_8.valid_and_not_zero_divisor_def,
-        ← DivRemCoreAir_4_8.r_sum_def,
-        ← DivRemCoreAir_4_8.valid_and_not_special_case_def,
-        ← DivRemCoreAir_4_8.signed_def,
-        ← DivRemCoreAir_4_8.nonzero_q_def,
-        ← DivRemCoreAir_4_8.carry_lt_0_def,
-        ← DivRemCoreAir_4_8.carry_lt_1_def,
-        ← DivRemCoreAir_4_8.carry_lt_2_def,
-        ← DivRemCoreAir_4_8.carry_lt_3_def]
-  simp [or_imp]
-  split_ands <;> intro hyp <;> simp [hyp]
-  . obtain ⟨ h0, h1, h2, h3, rest ⟩ := constraints
-    clear rest
-    grind
-  . suffices : air.core.zero_divisor row 0 + air.core.r_zero row 0 = 0
-    . grind
-    . obtain ⟨ z0, z1, z2, z3 ⟩ :
-        air.core.opcode_div_flag row 0 = 0 ∧
-        air.core.opcode_divu_flag row 0 = 0 ∧
-        air.core.opcode_rem_flag row 0 = 0 ∧
-        air.core.opcode_remu_flag row 0 = 0
-      := by
-        obtain ⟨ h0, h1, h2, h3, rest ⟩ := constraints
-        clear rest
-        grind
-      simp [z0, z1, z2, z3] at constraints
-      grind
+  simp_all [VmAirWrapper_divrem_constraint_and_interaction_simplification]
 
 end DivRem.NonValidRows
 

@@ -20,68 +20,26 @@ namespace Mulh.NonValidRows
 
 open VmAirWrapper_mulh.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
-set_option maxRecDepth 1_000_000 in
+omit
+  [Field ExtF]
 include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_Mul_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.core.b_0 row 0 = 0 ∧
-  air.core.b_1 row 0 = 0 ∧
-  air.core.b_2 row 0 = 0 ∧
-  air.core.b_3 row 0 = 0 ∧
-  air.core.c_0 row 0 = 0 ∧
-  air.core.c_1 row 0 = 0 ∧
-  air.core.c_2 row 0 = 0 ∧
-  air.core.c_3 row 0 = 0 ∧
-  air.core.a_mul_0 row 0 = 0 ∧
-  air.core.a_mul_1 row 0 = 0 ∧
-  air.core.a_mul_2 row 0 = 0 ∧
-  air.core.a_mul_3 row 0 = 0 ∧
-  air.core.b_ext row 0 = 0 ∧
-  air.core.c_ext row 0 = 0 ∧
-  air.core.opcode_mulh_flag row 0 = 0 ∧
-  air.core.opcode_mulhsu_flag row 0 = 0 ∧
-  air.core.opcode_mulhu_flag row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  intro h_zeros
-  simp [VmAirWrapper_mulh_constraint_and_interaction_simplification,
-        Valid_MulHCoreAir_4_8.is_valid,
-        ← MulHCoreAir_4_8.b_sign_def,
-        ← MulHCoreAir_4_8.c_sign_def]
-  grind
-
-include
-  row_in_range
   row_not_valid
-  constraints
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_Mul_all_interaction_multiplicities_zero
-  (entry : FBB × List FBB)
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
-  entry ∈ executionBus_row air row ++
-          memoryBus_row air row ++
-          rangeCheckerBus_row air row ++
-          programBus_row air row ++
-          rangeTupleCheckerBus_row air row ++
-          bitwiseBus_row air row → entry.1 = 0
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
-  obtain ⟨ hint, constraints ⟩ := constraints
-  clear hint; unfold extracted_row_constraint_list at constraints
-  simp only [VmAirWrapper_mulh_air_simplification,
-             VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
-  simp at constraints
-  simp_all [Valid_MulHCoreAir_4_8.is_valid,
-            VmAirWrapper_mulh_constraint_and_interaction_simplification]
-  grind (splits := 28)
+  simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification]
 
 end Mulh.NonValidRows
 

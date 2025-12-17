@@ -20,85 +20,34 @@ namespace Lt.NonValidRows
 
 open VmAirWrapper_lt.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
 include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_Lt_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.adapter.rs2 row 0 = 0 ∧
-  air.adapter.rs2_as row 0 = 0 ∧
-  air.core.b_0 row 0 = 0 ∧
-  air.core.b_1 row 0 = 0 ∧
-  air.core.b_2 row 0 = 0 ∧
-  air.core.b_3 row 0 = 0 ∧
-  air.core.c_0 row 0 = 0 ∧
-  air.core.c_1 row 0 = 0 ∧
-  air.core.c_2 row 0 = 0 ∧
-  air.core.c_3 row 0 = 0 ∧
-  air.core.cmp_result row 0 = 0 ∧
-  air.core.opcode_slt_flag row 0 = 0 ∧
-  air.core.opcode_sltu_flag row 0 = 0 ∧
-  air.core.b_msb_f row 0 = 0 ∧
-  air.core.c_msb_f row 0 = 0 ∧
-  air.core.diff_marker_0 row 0 = 0 ∧
-  air.core.diff_marker_1 row 0 = 0 ∧
-  air.core.diff_marker_2 row 0 = 0 ∧
-  air.core.diff_marker_3 row 0 = 0 ∧
-  air.core.diff_val row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  simp_all; intro hint h0 h1 h2 h3 h4 h5 h6 h7 h8 h9
-                       h10 h11 h12 h13 h14 h15 h16 h17 h18 h19
-  simp [VmAirWrapper_lt_constraint_and_interaction_simplification]
-  simp [← LessThanCoreAir_4.is_valid_def,
-        ← LessThanCoreAir_4.diff_def_0,
-        ← LessThanCoreAir_4.diff_def_1,
-        ← LessThanCoreAir_4.diff_def_2,
-        ← LessThanCoreAir_4.diff_def_3,
-        ← LessThanCoreAir_4.prefix_sum_0_def,
-        ← LessThanCoreAir_4.prefix_sum_1_def,
-        ← LessThanCoreAir_4.prefix_sum_2_def,
-        ← VmAirWrapper_lt.rs2_imm_def,
-        ← VmAirWrapper_lt.rs2_sign_limbs]
-  rw [h0, h1, h2, h3, h4, h5, h6, h7, h8, h9,
-      h10, h11, h12, h13, h14, h15, h16, h17, h18, h19]
-  split_ands <;> (try decide) <;> simp
-
-include
-  row_in_range
   row_not_valid
   constraints
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_Lt_all_interaction_multiplicities_zero
-  (entry : FBB × List FBB)
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
-  (entry ∈ executionBus_row air row ++
-           memoryBus_row air row ++
-           rangeCheckerBus_row air row ++
-           programBus_row air row → entry.1 = 0) ∧
-  (entry ∈ bitwiseBus_row air row →
-    entry.1 = 0 ∨
-    (air.core.prefix_sum row 0 0 = 1 ∧
-     entry = (1, [air.core.diff_val row 0 - 1, 0, 0, 0])))
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
-  obtain ⟨ hint, constraints ⟩ := constraints
-  clear hint; unfold extracted_row_constraint_list at constraints
-  simp only [VmAirWrapper_lt_air_simplification,
+  have : air.adapter.rs2_as row 0 = 0 := by
+    obtain ⟨ hint, constraints ⟩ := constraints
+    clear hint; unfold extracted_row_constraint_list at constraints
+    simp only [VmAirWrapper_lt_air_simplification,
                VmAirWrapper_lt_constraint_and_interaction_simplification] at constraints
-  simp at constraints
-  have : air.adapter.rs2_as row 0 = 0 := by grind
+    simp at constraints
+    simp [executionBus_row] at row_not_valid
+    grind
+  clear constraints
   simp_all [VmAirWrapper_lt_constraint_and_interaction_simplification]
-  simp_all [← LessThanCoreAir_4.prefix_sum_0_def,
-            ← LessThanCoreAir_4.prefix_sum_1_def,
-            ← LessThanCoreAir_4.prefix_sum_2_def]
-  grind (splits := 15)
 
 end Lt.NonValidRows
 

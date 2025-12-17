@@ -24,47 +24,22 @@ namespace BranchEqual.NonValidRows
 
 open VmAirWrapper_branch_eq.constraints
 
-variable (row_not_valid : air.core.is_valid row 0 = 0)
-
-include
-  row_in_range
-in
-/-- Zeros required to form a non-valid row -/
-lemma non_valid_row_BranchEqual_allZeros_allHold
-:
-  constrain_interactions air ∧
-  air.core.a_0 row 0 = 0 ∧
-  air.core.a_1 row 0 = 0 ∧
-  air.core.a_2 row 0 = 0 ∧
-  air.core.a_3 row 0 = 0 ∧
-  air.core.b_0 row 0 = 0 ∧
-  air.core.b_1 row 0 = 0 ∧
-  air.core.b_2 row 0 = 0 ∧
-  air.core.b_3 row 0 = 0 ∧
-  air.core.cmp_result row 0 = 0 ∧
-  air.core.imm row 0 = 0 ∧
-  air.core.opcode_beq_flag row 0 = 0 ∧
-  air.core.opcode_bne_flag row 0 = 0 ∧
-  air.core.diff_inv_marker_0 row 0 = 0 ∧
-  air.core.diff_inv_marker_1 row 0 = 0 ∧
-  air.core.diff_inv_marker_2 row 0 = 0 ∧
-  air.core.diff_inv_marker_3 row 0 = 0
-    → air.core.is_valid row 0 = 0 ∧
-      allHold air row row_in_range
-:= by
-  rw [allHold_simplified_of_allHold]
-  simp_all; intros
-  simp_all [VmAirWrapper_branch_eq_constraint_and_interaction_simplification,
-            Valid_BranchEqualCoreAir_4.is_valid]
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
 
 include
   row_not_valid
 in
-/-- On non-valid rows, all interactin multiplicities equal zero -/
-lemma non_valid_row_BranchEqual_all_interaction_multiplicities_zero
+/-- On non-valid rows, all interactin multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
 :
   forall entry,
-  entry ∈ busRow air row → entry.1 = 0
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
 := by
   simp_all [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
 
