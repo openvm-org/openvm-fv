@@ -9,7 +9,7 @@ register_simp_attr VmAirWrapper_divrem_constraint_and_interaction_simplification
 
 namespace VmAirWrapper_divrem.extraction
   --extracted constraints here
-    @[simp]
+  @[simp]
   def constraint_0 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     ((Circuit.main c (id := 0) (column := 55) (row := row) (rotation := 0)) * ((Circuit.main c (id := 0) (column := 55) (row := row) (rotation := 0)) - 1)) = 0
 
