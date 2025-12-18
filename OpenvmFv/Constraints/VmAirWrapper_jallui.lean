@@ -426,7 +426,7 @@ namespace VmAirWrapper_jallui.constraints
         (air : Valid_VmAirWrapper_jallui F ExtF)
         (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
       :
-        air.buses ReadInstructionBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
       := by
         unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -457,7 +457,7 @@ namespace VmAirWrapper_jallui.constraints
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
       else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
-      else if index = ReadInstructionBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
       else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
       else []
 
