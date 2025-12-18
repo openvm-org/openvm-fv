@@ -24,7 +24,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_0 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_0_of_extraction
@@ -42,7 +42,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_1 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.imm_sign row 0 = 0 ∨ air.core.imm_sign row 0 = 1
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_1_of_extraction
@@ -60,7 +60,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_2 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.to_pc_least_sig_bit row 0 = 0 ∨ air.core.to_pc_least_sig_bit row 0 = 1
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_2_of_extraction
@@ -78,7 +78,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_3 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨ air.core.carry row 0 = 0 ∨ air.core.carry row 0 = 1
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_3_of_extraction
@@ -96,7 +96,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_4 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨ air.core.carry' row 0 = 0 ∨ air.core.carry' row 0 = 1
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_4_of_extraction
@@ -114,7 +114,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_5 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_5_of_extraction
@@ -132,7 +132,7 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_6 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 1 ∨ air.adapter.needs_write row 0 = 0
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_6_of_extraction
@@ -142,15 +142,20 @@ namespace VmAirWrapper_jalr.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_jalr_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_jalr_constraint_and_interaction_simplification]
+        simp [eq_constant_1] at h
         exact h
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_jalr_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_jalr_constraint_and_interaction_simplification] at h
+        simp [eq_constant_1]
         exact h
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_7 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+    air.adapter.from_state.timestamp row 0 - air.adapter.rs1_aux_cols.base.prev_timestamp row 0 - 1 =
+      air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_7_of_extraction
@@ -168,7 +173,10 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def constraint_8 (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.adapter.needs_write row 0 = 0 ∨
+    air.adapter.from_state.timestamp row 0 + 1 - air.adapter.rd_aux_cols.base.prev_timestamp row 0 - 1 =
+      air.adapter.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_jalr_air_simplification]
       lemma constraint_8_of_extraction
@@ -393,7 +401,8 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def executionBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(-air.core.is_valid row 0, [air.adapter.from_state.pc row 0, air.adapter.from_state.timestamp row 0]),
+        (air.core.is_valid row 0, [air.core.to_pc row 0, air.adapter.from_state.timestamp row 0 + 2])]
 
       lemma constrain_execution_interactions
         (air : Valid_VmAirWrapper_jalr F ExtF)
@@ -409,7 +418,21 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def memoryBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(2013265920 * air.core.is_valid row 0,
+          [1, air.adapter.rs1_ptr row 0, air.core.rs1_data_0 row 0, air.core.rs1_data_1 row 0,
+            air.core.rs1_data_2 row 0, air.core.rs1_data_3 row 0, air.adapter.rs1_aux_cols.base.prev_timestamp row 0]),
+        (air.core.is_valid row 0,
+          [1, air.adapter.rs1_ptr row 0, air.core.rs1_data_0 row 0, air.core.rs1_data_1 row 0,
+            air.core.rs1_data_2 row 0, air.core.rs1_data_3 row 0, air.adapter.from_state.timestamp row 0]),
+        (2013265920 * air.adapter.needs_write row 0,
+          [1, air.adapter.rd_ptr row 0, air.adapter.rd_aux_cols.prev_data_0 row 0,
+            air.adapter.rd_aux_cols.prev_data_1 row 0, air.adapter.rd_aux_cols.prev_data_2 row 0,
+            air.adapter.rd_aux_cols.prev_data_3 row 0, air.adapter.rd_aux_cols.base.prev_timestamp row 0]),
+        (air.adapter.needs_write row 0,
+          [1, air.adapter.rd_ptr row 0, air.core.rd_data row 0 (air.adapter.from_state.pc row 0) 0,
+            air.core.rd_data row 0 (air.adapter.from_state.pc row 0) 1,
+            air.core.rd_data row 0 (air.adapter.from_state.pc row 0) 2,
+            air.core.rd_data row 0 (air.adapter.from_state.pc row 0) 3, air.adapter.from_state.timestamp row 0 + 1])]
 
       lemma constrain_memory_interactions
         (air : Valid_VmAirWrapper_jalr F ExtF)
@@ -425,7 +448,14 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0, [air.core.rd_data_1 row 0, 8]),
+        (air.core.is_valid row 0, [air.core.rd_data_2 row 0, 6]),
+        (air.core.is_valid row 0, [air.core.to_pc_limbs_1 row 0, 14]),
+        (air.core.is_valid row 0, [air.core.to_pc_limbs_0 row 0, 15]),
+        (air.core.is_valid row 0, [air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.adapter.needs_write row 0, [air.adapter.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.adapter.needs_write row 0, [air.adapter.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0, 12])]
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_jalr F ExtF)
@@ -441,7 +471,9 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def readInstructionBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0,
+          [air.adapter.from_state.pc row 0, 565, air.adapter.rd_ptr row 0, air.adapter.rs1_ptr row 0,
+            air.core.imm row 0, 1, 0, air.adapter.needs_write row 0, air.core.imm_sign row 0])]
 
       lemma constrain_readInstruction_interactions
         (air : Valid_VmAirWrapper_jalr F ExtF)
@@ -457,7 +489,9 @@ namespace VmAirWrapper_jalr.constraints
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
       def bitwiseBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0,
+          [air.core.rd_data row 0 (air.adapter.from_state.pc row 0) 0,
+            air.core.rd_data row 0 (air.adapter.from_state.pc row 0) 1, 0, 0])]
 
       lemma constrain_bitwise_interactions
         (air : Valid_VmAirWrapper_jalr F ExtF)

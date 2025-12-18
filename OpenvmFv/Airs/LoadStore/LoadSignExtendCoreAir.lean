@@ -22,36 +22,196 @@ set_option linter.unusedVariables false
   Column["prev_data_2"]
   Column["prev_data_3"]
 
--- def Valid_LoadStoreCoreAir_4.sum
---   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
--- : F :=
---   c.flags_0 row rotation +
---   c.flags_1 row rotation +
---   c.flags_2 row rotation +
---   c.flags_3 row rotation
+def Valid_LoadSignExtendCoreAir_4.is_valid
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: F :=
+  c.opcode_loadb_flag0 row rotation +
+  c.opcode_loadb_flag1 row rotation +
+  c.opcode_loadh_flag row rotation
 
--- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.sum
---   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
--- :
---   c.flags_0 row rotation +
---   c.flags_1 row rotation +
---   c.flags_2 row rotation +
---   c.flags_3 row rotation =
---   c.sum row rotation
--- := rfl
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.is_valid_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.opcode_loadb_flag0 row rotation +
+  c.opcode_loadb_flag1 row rotation +
+  c.opcode_loadh_flag row rotation =
+  c.is_valid row rotation
+:= rfl
 
--- def Valid_LoadStoreCoreAir_4.inv_2
+def Valid_LoadSignExtendCoreAir_4.expected_opcode
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: F :=
+  (
+    c.opcode_loadb_flag0 row rotation +
+    c.opcode_loadb_flag1 row rotation
+  ) * 6 +
+  c.opcode_loadh_flag row rotation * 7 +
+  528
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.expected_opcode_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  (
+    c.opcode_loadb_flag0 row rotation +
+    c.opcode_loadb_flag1 row rotation
+  ) * 6 +
+  c.opcode_loadh_flag row rotation * 7 +
+  528 =
+  c.expected_opcode row rotation
+:= rfl
+
+def Valid_LoadSignExtendCoreAir_4.limb_mask
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: F :=
+  c.data_most_sig_bit row rotation * 255
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.limb_mask_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.data_most_sig_bit row rotation * 255 =
+  c.limb_mask row rotation
+:= rfl
+
+def Valid_LoadSignExtendCoreAir_4.write_data
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: Fin 4 → F :=
+  λ idx => match idx with
+    | 0 => (
+        c.opcode_loadh_flag row rotation +
+        c.opcode_loadb_flag0 row rotation
+      ) * c.shifted_read_data_0 row rotation +
+      c.opcode_loadb_flag1 row rotation * c.shifted_read_data_1 row rotation
+    | 1 =>
+      c.shifted_read_data_1 row rotation * c.opcode_loadh_flag row rotation +
+      (c.opcode_loadb_flag0 row rotation + c.opcode_loadb_flag1 row rotation) * c.limb_mask row rotation
+    | 2 => c.limb_mask row rotation
+    | 3 => c.limb_mask row rotation
+
+def Valid_LoadSignExtendCoreAir_4.most_sig_limb
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: F :=
+  c.shifted_read_data_0 row rotation * c.opcode_loadb_flag0 row rotation +
+  c.shifted_read_data_1 row rotation * c.opcode_loadb_flag1 row rotation +
+  c.shifted_read_data_1 row rotation * c.opcode_loadh_flag row rotation
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.most_sig_limb_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.shifted_read_data_0 row rotation * c.opcode_loadb_flag0 row rotation +
+  c.shifted_read_data_1 row rotation * c.opcode_loadb_flag1 row rotation +
+  c.shifted_read_data_1 row rotation * c.opcode_loadh_flag row rotation =
+  c.most_sig_limb row rotation
+:= rfl
+
+def Valid_LoadSignExtendCoreAir_4.read_data
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: Fin 4 → F :=
+  λ idx => match idx with
+    | 0 =>
+      c.shift_most_sig_bit row rotation * c.shifted_read_data_2 row rotation +
+      (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_0 row rotation
+    | 1 =>
+      c.shift_most_sig_bit row rotation * c.shifted_read_data_3 row rotation +
+      (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_1 row rotation
+    | 2 =>
+      c.shift_most_sig_bit row rotation * c.shifted_read_data_0 row rotation +
+      (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_2 row rotation
+    | 3 =>
+      c.shift_most_sig_bit row rotation * c.shifted_read_data_1 row rotation +
+      (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_3 row rotation
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.read_data_0_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.shift_most_sig_bit row rotation * c.shifted_read_data_2 row rotation +
+  (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_0 row rotation =
+  c.read_data row rotation 0
+:= rfl
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.read_data_1_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.shift_most_sig_bit row rotation * c.shifted_read_data_3 row rotation +
+  (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_1 row rotation =
+  c.read_data row rotation 1
+:= rfl
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.read_data_2_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.shift_most_sig_bit row rotation * c.shifted_read_data_0 row rotation +
+  (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_2 row rotation =
+  c.read_data row rotation 2
+:= rfl
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.read_data_3_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.shift_most_sig_bit row rotation * c.shifted_read_data_1 row rotation +
+  (1 - c.shift_most_sig_bit row rotation) * c.shifted_read_data_3 row rotation =
+  c.read_data row rotation 3
+:= rfl
+
+def Valid_LoadSignExtendCoreAir_4.load_shift_amount
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+: F :=
+  c.shift_most_sig_bit row rotation * 2 +
+  c.opcode_loadb_flag1 row rotation
+
+@[openvm_encapsulation]
+lemma LoadSignExtendCoreAir_4.load_shift_amount_def
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
+:
+  c.shift_most_sig_bit row rotation * 2 +
+  c.opcode_loadb_flag1 row rotation =
+  c.load_shift_amount row rotation
+:= rfl
+
+def Valid_LoadSignExtendCoreAir_4.is_load
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation : ℕ)
+: F :=
+  c.is_valid row rotation
+
+def Valid_LoadSignExtendCoreAir_4.store_shift_amount
+  [Field F]
+  (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation : ℕ)
+: F :=
+  0
+
+-- def Valid_LoadSignExtendCoreAir_4.inv_2
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 -- : F :=
 --   1006632961
 
--- def Valid_LoadStoreCoreAir_4.opcode_flags
+-- def Valid_LoadSignExtendCoreAir_4.opcode_flags
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : Fin 14 → F :=
 --   λ idx => match idx with
@@ -71,9 +231,9 @@ set_option linter.unusedVariables false
 --     | 13 => c.flags_2 row rotation * c.flags_3 row rotation
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_0
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_0
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_0 row rotation *
 --   (c.flags_0 row rotation - 1) *
@@ -82,9 +242,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_1
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_1
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_1 row rotation *
 --   (c.flags_1 row rotation - 1) *
@@ -93,9 +253,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_2
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_2
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_2 row rotation *
 --   (c.flags_2 row rotation - 1) *
@@ -104,9 +264,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_3
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_3
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_3 row rotation *
 --   (c.flags_3 row rotation - 1) *
@@ -115,9 +275,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_4
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_4
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_0 row rotation *
 --   (c.sum row rotation - 2) *
@@ -126,9 +286,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_5
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_5
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_1 row rotation *
 --   (c.sum row rotation - 2) *
@@ -137,9 +297,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_6
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_6
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_2 row rotation *
 --   (c.sum row rotation - 2) *
@@ -148,9 +308,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_7
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_7
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_3 row rotation *
 --   (c.sum row rotation - 2) *
@@ -159,9 +319,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_8
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_8
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_0 row rotation *
 --   c.flags_1 row rotation =
@@ -169,9 +329,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_9
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_9
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_0 row rotation *
 --   c.flags_2 row rotation =
@@ -179,9 +339,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_10
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_10
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_0 row rotation *
 --   c.flags_3 row rotation =
@@ -189,9 +349,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_11
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_11
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_1 row rotation *
 --   c.flags_2 row rotation =
@@ -199,9 +359,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_12
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_12
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_1 row rotation *
 --   c.flags_3 row rotation =
@@ -209,18 +369,18 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_flags_13
+-- lemma LoadSignExtendCoreAir_4.opcode_flags_13
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.flags_2 row rotation *
 --   c.flags_3 row rotation =
 --   c.opcode_flags row rotation 13
 -- := rfl
 
--- def Valid_LoadStoreCoreAir_4.opcode_when
+-- def Valid_LoadSignExtendCoreAir_4.opcode_when
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 --   (opcodes : List (Fin 14))
 -- : F :=
@@ -229,29 +389,29 @@ set_option linter.unusedVariables false
 --     | o::os => c.opcode_flags row rotation o + c.opcode_when row rotation os
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_when_def
+-- lemma LoadSignExtendCoreAir_4.opcode_when_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_flags row rotation x =
 --   c.opcode_when row rotation [x]
 -- := by
---   simp [Valid_LoadStoreCoreAir_4.opcode_when]
+--   simp [Valid_LoadSignExtendCoreAir_4.opcode_when]
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.opcode_when_def'
+-- lemma LoadSignExtendCoreAir_4.opcode_when_def'
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation l +
 --   c.opcode_when row rotation [x] =
 --   c.opcode_when row rotation (l ++ [x])
 -- := by
 --   induction l with
---     | nil => simp [Valid_LoadStoreCoreAir_4.opcode_when]
+--     | nil => simp [Valid_LoadSignExtendCoreAir_4.opcode_when]
 --     | cons head tail h_tail =>
---       unfold Valid_LoadStoreCoreAir_4.opcode_when
---       simp [←h_tail, Valid_LoadStoreCoreAir_4.opcode_when]
+--       unfold Valid_LoadSignExtendCoreAir_4.opcode_when
+--       simp [←h_tail, Valid_LoadSignExtendCoreAir_4.opcode_when]
 --       grind
 
 -- abbrev LS.LoadW0: Fin 14 := 0
@@ -269,9 +429,9 @@ set_option linter.unusedVariables false
 -- abbrev LS.StoreB2: Fin 14 := 12
 -- abbrev LS.StoreB3: Fin 14 := 13
 
--- def Valid_LoadStoreCoreAir_4.expected_load_val
+-- def Valid_LoadSignExtendCoreAir_4.expected_load_val
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : Fin 4 →  F :=
 --   λ idx => match idx with
@@ -303,9 +463,9 @@ set_option linter.unusedVariables false
 --       c.read_data_3 row rotation
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_load_val_0_def
+-- lemma LoadSignExtendCoreAir_4.expected_load_val_0_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [
 --         LS.LoadW0, LS.LoadHu0, LS.LoadBu0
@@ -323,9 +483,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_load_val_1_def
+-- lemma LoadSignExtendCoreAir_4.expected_load_val_1_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [
 --         LS.LoadW0, LS.LoadHu0
@@ -337,9 +497,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_load_val_2_def
+-- lemma LoadSignExtendCoreAir_4.expected_load_val_2_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [LS.LoadW0] *
 --       c.read_data_2 row rotation =
@@ -347,18 +507,18 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_load_val_3_def
+-- lemma LoadSignExtendCoreAir_4.expected_load_val_3_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [LS.LoadW0] *
 --       c.read_data_3 row rotation =
 --   c.expected_load_val row rotation 3
 -- := rfl
 
--- def Valid_LoadStoreCoreAir_4.expected_store_val
+-- def Valid_LoadSignExtendCoreAir_4.expected_store_val
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : Fin 4 →  F :=
 --   λ idx => match idx with
@@ -404,9 +564,9 @@ set_option linter.unusedVariables false
 --       ] * c.prev_data_3 row rotation
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_store_val_0_def
+-- lemma LoadSignExtendCoreAir_4.expected_store_val_0_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [
 --         LS.StoreW0, LS.StoreH0, LS.StoreB0
@@ -418,9 +578,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_store_val_1_def
+-- lemma LoadSignExtendCoreAir_4.expected_store_val_1_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [
 --         LS.StoreB1
@@ -435,9 +595,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_store_val_2_def
+-- lemma LoadSignExtendCoreAir_4.expected_store_val_2_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [
 --         LS.StoreH2, LS.StoreB2
@@ -452,9 +612,9 @@ set_option linter.unusedVariables false
 -- := rfl
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_store_val_3_def
+-- lemma LoadSignExtendCoreAir_4.expected_store_val_3_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F) (row rotation: ℕ)
+--   (c : Valid_LoadSignExtendCoreAir_4 F) (row rotation: ℕ)
 -- :
 --   c.opcode_when row rotation [
 --         LS.StoreB3
@@ -471,9 +631,9 @@ set_option linter.unusedVariables false
 --   c.expected_store_val row rotation 3
 -- := rfl
 
--- def Valid_LoadStoreCoreAir_4.expected_val
+-- def Valid_LoadSignExtendCoreAir_4.expected_val
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : Fin 4 →  F :=
 --   λ idx =>
@@ -481,9 +641,9 @@ set_option linter.unusedVariables false
 --     c.expected_store_val row rotation idx
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_val_def
+-- lemma LoadSignExtendCoreAir_4.expected_val_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ) (idx : Fin 4)
 -- :
 --   c.expected_load_val row rotation idx +
@@ -491,9 +651,9 @@ set_option linter.unusedVariables false
 --   c.expected_val row rotation idx
 -- := rfl
 
--- def Valid_LoadStoreCoreAir_4.expected_opcode
+-- def Valid_LoadSignExtendCoreAir_4.expected_opcode
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : F :=
 --   528 +
@@ -503,9 +663,9 @@ set_option linter.unusedVariables false
 --       c.opcode_when row rotation [10, 11, 12, 13] * 5)
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.expected_opcode_def
+-- lemma LoadSignExtendCoreAir_4.expected_opcode_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- :
 --   528 +
@@ -516,9 +676,9 @@ set_option linter.unusedVariables false
 --   c.expected_opcode row rotation
 -- := rfl
 
--- def Valid_LoadStoreCoreAir_4.load_shift_amount
+-- def Valid_LoadSignExtendCoreAir_4.load_shift_amount
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : F :=
 --   c.opcode_when row rotation [4] +
@@ -526,9 +686,9 @@ set_option linter.unusedVariables false
 --   c.opcode_when row rotation [6] * 3
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.load_shift_amount_def
+-- lemma LoadSignExtendCoreAir_4.load_shift_amount_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- :
 --   c.opcode_when row rotation [4] +
@@ -537,9 +697,9 @@ set_option linter.unusedVariables false
 --   c.load_shift_amount row rotation
 -- := rfl
 
--- def Valid_LoadStoreCoreAir_4.store_shift_amount
+-- def Valid_LoadSignExtendCoreAir_4.store_shift_amount
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- : F :=
 --   c.opcode_when row rotation [11] +
@@ -547,9 +707,9 @@ set_option linter.unusedVariables false
 --   c.opcode_when row rotation [13] * 3
 
 -- @[openvm_encapsulation]
--- lemma LoadStoreCoreAir_4.store_shift_amount_def
+-- lemma LoadSignExtendCoreAir_4.store_shift_amount_def
 --   [Field F]
---   (c : Valid_LoadStoreCoreAir_4 F)
+--   (c : Valid_LoadSignExtendCoreAir_4 F)
 --   (row rotation : ℕ)
 -- :
 --   c.opcode_when row rotation [11] +

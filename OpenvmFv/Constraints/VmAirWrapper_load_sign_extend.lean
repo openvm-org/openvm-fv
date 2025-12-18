@@ -23,7 +23,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
       -- constraints and constraints_of_extraction
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_0 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.opcode_loadb_flag0 row 0 = 0 ∨ air.core.opcode_loadb_flag0 row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_0_of_extraction
@@ -41,7 +41,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_1 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.opcode_loadb_flag1 row 0 = 0 ∨ air.core.opcode_loadb_flag1 row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_1_of_extraction
@@ -59,7 +59,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_2 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.opcode_loadh_flag row 0 = 0 ∨ air.core.opcode_loadh_flag row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_2_of_extraction
@@ -77,7 +77,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_3 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_3_of_extraction
@@ -95,7 +95,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_4 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.data_most_sig_bit row 0 = 0 ∨ air.core.data_most_sig_bit row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_4_of_extraction
@@ -113,7 +113,8 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_5 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.shift_most_sig_bit row 0 = 0 ∨
+        air.core.shift_most_sig_bit row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_5_of_extraction
@@ -131,7 +132,8 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_6 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.adapter.needs_write row 0 = 0 ∨
+        air.adapter.needs_write row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_6_of_extraction
@@ -149,7 +151,8 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_7 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.adapter.needs_write row 0 = 0 ∨
+        air.core.is_valid row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_7_of_extraction
@@ -167,7 +170,8 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_8 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = air.adapter.needs_write row 0 ∨
+        air.core.is_valid row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_8_of_extraction
@@ -185,7 +189,8 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_9 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = air.adapter.needs_write row 0 ∨
+        air.adapter.rd_rs2_ptr row 0 = 0
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_9_of_extraction
@@ -203,7 +208,10 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_10 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+    air.adapter.from_state.timestamp row 0 - air.adapter.rs1_aux_cols.base.prev_timestamp row 0 - 1 =
+      air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_10_of_extraction
@@ -221,7 +229,9 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_11 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+        air.adapter.carry row 0 = 0 ∨
+        air.adapter.carry row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_11_of_extraction
@@ -239,7 +249,9 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_12 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+        air.adapter.imm_sign row 0 = 0 ∨
+        air.adapter.imm_sign row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_12_of_extraction
@@ -257,7 +269,9 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_13 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+        air.adapter.carry' row 0 = 0 ∨
+        air.adapter.carry' row 0 = 1
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_13_of_extraction
@@ -275,7 +289,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_14 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        (air.adapter.mem_as row 0 = 0 ∨ air.adapter.mem_as row 0 = 1) ∨ air.adapter.mem_as row 0 = 2
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_14_of_extraction
@@ -293,7 +307,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_15 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 1 ∨ air.adapter.mem_as row 0 = 0
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_15_of_extraction
@@ -303,15 +317,20 @@ namespace VmAirWrapper_load_sign_extend.constraints
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification] at h
         simp only [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+        simp [eq_constant_1] at h
         exact h
       . intro h
         simp [openvm_encapsulation, VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
         simp only [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification] at h
+        simp [eq_constant_1]
         exact h
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_16 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.core.is_valid row 0 = 0 ∨
+    air.adapter.from_state.timestamp row 0 + 1 - air.adapter.read_data_aux.base.prev_timestamp row 0 - 1 =
+      air.adapter.read_data_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.read_data_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_16_of_extraction
@@ -329,7 +348,10 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def constraint_17 (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : Prop :=
-        sorry
+        air.adapter.needs_write row 0 = 0 ∨
+    air.adapter.from_state.timestamp row 0 + 2 - air.adapter.write_base_aux.prev_timestamp row 0 - 1 =
+      air.adapter.write_base_aux.timestamp_lt_aux.lower_decomp_0 row 0 +
+        air.adapter.write_base_aux.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
       lemma constraint_17_of_extraction
@@ -625,7 +647,8 @@ namespace VmAirWrapper_load_sign_extend.constraints
       --busRows, constrain_interactions, and constrain_interactions_of_extraction
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def executionBus_row (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(-air.core.is_valid row 0, [air.adapter.from_state.pc row 0, air.adapter.from_state.timestamp row 0]),
+        (air.core.is_valid row 0, [air.to_pc row 0, air.adapter.from_state.timestamp row 0 + 3])]
 
       lemma constrain_execution_interactions
         (air : Valid_VmAirWrapper_load_sign_extend F ExtF)
@@ -641,7 +664,26 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def memoryBus_row (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(2013265920 * air.core.is_valid row 0,
+          [1, air.adapter.rs1_ptr row 0, air.adapter.rs1_data_0 row 0, air.adapter.rs1_data_1 row 0,
+            air.adapter.rs1_data_2 row 0, air.adapter.rs1_data_3 row 0,
+            air.adapter.rs1_aux_cols.base.prev_timestamp row 0]),
+        (air.core.is_valid row 0,
+          [1, air.adapter.rs1_ptr row 0, air.adapter.rs1_data_0 row 0, air.adapter.rs1_data_1 row 0,
+            air.adapter.rs1_data_2 row 0, air.adapter.rs1_data_3 row 0, air.adapter.from_state.timestamp row 0]),
+        (2013265920 * air.core.is_valid row 0,
+          [air.read_as row 0, air.read_ptr row 0, air.core.read_data row 0 0, air.core.read_data row 0 1,
+            air.core.read_data row 0 2, air.core.read_data row 0 3,
+            air.adapter.read_data_aux.base.prev_timestamp row 0]),
+        (air.core.is_valid row 0,
+          [air.read_as row 0, air.read_ptr row 0, air.core.read_data row 0 0, air.core.read_data row 0 1,
+            air.core.read_data row 0 2, air.core.read_data row 0 3, air.adapter.from_state.timestamp row 0 + 1]),
+        (2013265920 * air.adapter.needs_write row 0,
+          [air.write_as row 0, air.write_ptr row 0, air.core.prev_data_0 row 0, air.core.prev_data_1 row 0,
+            air.core.prev_data_2 row 0, air.core.prev_data_3 row 0, air.adapter.write_base_aux.prev_timestamp row 0]),
+        (air.adapter.needs_write row 0,
+          [air.write_as row 0, air.write_ptr row 0, air.core.write_data row 0 0, air.core.write_data row 0 1,
+            air.core.write_data row 0 2, air.core.write_data row 0 3, air.adapter.from_state.timestamp row 0 + 2])]
 
       lemma constrain_memory_interactions
         (air : Valid_VmAirWrapper_load_sign_extend F ExtF)
@@ -655,9 +697,19 @@ namespace VmAirWrapper_load_sign_extend.constraints
         rfl
 
 
+      -- the constant in the 4th entry is 4⁻¹
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0, [air.core.most_sig_limb row 0 - air.core.data_most_sig_bit row 0 * 128, 7]),
+        (air.core.is_valid row 0, [air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.rs1_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.core.is_valid row 0,
+          [(air.adapter.mem_ptr_limbs_0 row 0 - air.core.load_shift_amount row 0) * 1509949441, 14]),
+        (air.core.is_valid row 0, [air.adapter.mem_ptr_limbs_1 row 0, 13]),
+        (air.core.is_valid row 0, [air.adapter.read_data_aux.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.core.is_valid row 0, [air.adapter.read_data_aux.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
+        (air.adapter.needs_write row 0, [air.adapter.write_base_aux.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
+        (air.adapter.needs_write row 0, [air.adapter.write_base_aux.timestamp_lt_aux.lower_decomp_1 row 0, 12])]
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_load_sign_extend F ExtF)
@@ -673,7 +725,10 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
       def readInstructionBus_row (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : List (F × List F) :=
-        sorry
+        [(air.core.is_valid row 0,
+            [air.adapter.from_state.pc row 0, air.core.expected_opcode row 0, air.adapter.rd_rs2_ptr row 0,
+              air.adapter.rs1_ptr row 0, air.adapter.imm row 0, 1, air.adapter.mem_as row 0,
+              air.adapter.needs_write row 0, air.adapter.imm_sign row 0])]
 
       lemma constrain_readInstruction_interactions
         (air : Valid_VmAirWrapper_load_sign_extend F ExtF)
