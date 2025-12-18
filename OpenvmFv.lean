@@ -151,6 +151,8 @@ import OpenvmFv.Spec.BranchLessThan
 import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.LoadW
+import OpenvmFv.Spec.LoadH
+import OpenvmFv.Spec.LoadB
 import OpenvmFv.Spec.StoreW
 import OpenvmFv.Spec.StoreH
 import OpenvmFv.Spec.StoreB
