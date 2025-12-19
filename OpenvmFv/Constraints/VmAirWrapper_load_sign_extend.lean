@@ -724,17 +724,17 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
 
       @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
-      def readInstructionBus_row (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : List (F × List F) :=
+      def programBus_row (air : Valid_VmAirWrapper_load_sign_extend F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
             [air.adapter.from_state.pc row 0, air.core.expected_opcode row 0, air.adapter.rd_rs2_ptr row 0,
               air.adapter.rs1_ptr row 0, air.adapter.imm row 0, 1, air.adapter.mem_as row 0,
               air.adapter.needs_write row 0, air.adapter.imm_sign row 0])]
 
-      lemma constrain_readInstruction_interactions
+      lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_load_sign_extend F ExtF)
         (h : VmAirWrapper_load_sign_extend.extraction.constrain_interactions air)
       :
-        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
         unfold VmAirWrapper_load_sign_extend.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -747,7 +747,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
       else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
-      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
       else []
 
       @[VmAirWrapper_load_sign_extend_air_simplification]
@@ -893,4 +893,233 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
   end properties
 
+  section bus_entries
+
+    lemma executionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_load_sign_extend FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ executionBus_row air row)
+    :
+      entry.2.length = Interaction.ExecutionBusEntryInstance.data_length
+    := by
+      unfold executionBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+    def _executionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ executionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (executionBus_row_length x.2)))
+          (executionBus_row air row).attach
+      List.map Interaction.ExecutionBusEntryInstance.deserialise vectorised_row
+
+    lemma memoryBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_load_sign_extend FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ memoryBus_row air row)
+    :
+      entry.2.length = Interaction.MemoryBusEntryInstance.data_length
+    := by
+      unfold memoryBus_row at *; simp_all
+      grind (ematch := 8)
+
+    @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+    def _memoryBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ memoryBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (memoryBus_row_length x.2)))
+          (memoryBus_row air row).attach
+      List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
+
+    lemma rangeCheckerBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_load_sign_extend FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ rangeCheckerBus_row air row)
+    :
+      entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
+    := by
+      unfold rangeCheckerBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+    def _rangeCheckerBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
+      List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
+
+    lemma programBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_load_sign_extend FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ programBus_row air row)
+    :
+      entry.2.length = Interaction.ProgramBusEntryInstance.data_length
+    := by
+      unfold programBus_row at *; simp_all
+
+    @[VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+    def _programBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ programBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (programBus_row_length x.2)))
+          (programBus_row air row).attach
+      List.map Interaction.ProgramBusEntryInstance.deserialise vectorised_row
+
+    @[simp]
+    def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
+      rowData.map Interaction.BusEntry.serialiseToList
+
+    @[simp]
+    def axioms [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.axioms FBB))
+
+    @[simp]
+    def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
+
+    @[simp]
+    def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
+
+    @[simp]
+    def busRow [Field ExtF] (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ)
+    : List (FBB × List FBB) :=
+      executionBus_row air row ++
+      memoryBus_row air row ++
+      rangeCheckerBus_row air row ++
+      programBus_row air row
+
+    @[simp]
+    def axiomsPerRow [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ)
+    : Prop :=
+      axioms (_executionBus_row air row) ∧
+      axioms (_memoryBus_row air row) ∧
+      axioms (_rangeCheckerBus_row air row) ∧
+      axioms (_programBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssume (_executionBus_row air row) ∧
+      propertiesToAssume (_memoryBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
+      propertiesToAssume (_programBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssert (_executionBus_row air row) ∧
+      propertiesToAssert (_memoryBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
+      propertiesToAssert (_programBus_row air row)
+
+  end bus_entries
+
 end VmAirWrapper_load_sign_extend.constraints
+
+namespace LoadStore.NonValidRows
+
+open VmAirWrapper_load_sign_extend.constraints
+
+variable (ExtF : Type) [Field ExtF]
+variable (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)
+variable (row : ℕ)
+variable (row_in_range : row ≤ air.last_row)
+variable (constraints : VmAirWrapper_load_sign_extend.constraints.allHold air row row_in_range)
+
+variable (row_not_valid : (executionBus_row air row)[0]!.1 = 0)
+
+include
+  row_not_valid
+  constraints
+in
+/-- On non-valid rows, all interaction multiplicities
+    on the execution, memory, and program buses
+    equal zero -/
+lemma non_valid_row_exec_mem_program_multiplicities_zero
+:
+  forall entry,
+  entry ∈
+    executionBus_row air row
+     ++ memoryBus_row air row
+     ++ programBus_row air row
+    → entry.1 = 0
+:= by
+  rw [allHold_simplified_of_allHold] at constraints
+  simp_all [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+
+end LoadStore.NonValidRows
+
+namespace LoadStore.ValidRows
+
+open VmAirWrapper_load_sign_extend.constraints
+
+variable (ExtF : Type) [Field ExtF]
+variable (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)
+variable (row : ℕ)
+variable (row_in_range : row ≤ air.last_row)
+variable (constraints : VmAirWrapper_load_sign_extend.constraints.allHold air row row_in_range)
+variable (axioms : axiomsPerRow air row)
+variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
+
+variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
+
+set_option maxHeartbeats 0 in
+set_option maxRecDepth 2_000_000 in
+include
+  row_valid
+  constraints
+  axioms
+  propertiesToAssume
+in
+/-- The properties that need to be proven actually hold -/
+lemma wf_propertiesToAssert
+:
+  wf_propertiesToAssertPerRow air row
+:= by
+  simp [executionBus_row] at row_valid
+  rw [allHold_simplified_of_allHold] at constraints
+
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
+  simp [row_valid,
+        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+    at pa_exec pa_mem pa_range pa_read constraints ⊢
+  simp_all [show ((2013265920 : FBB) = -1) by grind]
+  obtain h_nw | h_nw : (air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1) := by grind
+  . simp [h_nw]
+  . simp_all
+    simp [Valid_LoadSignExtendCoreAir_4.write_data,
+          ← LoadSignExtendCoreAir_4.limb_mask_def]
+    obtain ⟨ h00, h01, h02, h03, h04, h05, h06, h07, h08, h09,
+             h10, h11, h12 ⟩ := constraints
+    obtain h_lbf0 | h_lbf0 := h01
+    all_goals obtain h_lbf1 | h_lbf1 := h02
+    all_goals obtain h_lhf  | h_lhf  := h03
+    all_goals simp [h_lbf0, h_lbf1, h_lhf]
+    all_goals obtain h_msb : (air.core.data_most_sig_bit row 0 * 255).val < 256 := by grind
+    all_goals simp_all [← LoadSignExtendCoreAir_4.is_valid_def]
+    all_goals {
+      obtain ⟨ hrd0, hrd1, hrd2, hrd3 ⟩ :
+        (air.core.read_data row 0 0).val < 256 ∧
+        (air.core.read_data row 0 1).val < 256 ∧
+        (air.core.read_data row 0 2).val < 256 ∧
+        (air.core.read_data row 0 3).val < 256
+      := by grind
+      simp [← LoadSignExtendCoreAir_4.read_data_0_def] at hrd0
+      simp [← LoadSignExtendCoreAir_4.read_data_1_def] at hrd1
+      simp [← LoadSignExtendCoreAir_4.read_data_2_def] at hrd2
+      simp [← LoadSignExtendCoreAir_4.read_data_3_def] at hrd3
+      obtain h05 | h05 := h05 <;> simp_all
+    }
+
+end LoadStore.ValidRows
