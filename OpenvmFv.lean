@@ -113,8 +113,11 @@ import OpenvmFv.Spec.ControlFlow.bgeu
 import OpenvmFv.Spec.ControlFlow.blt
 import OpenvmFv.Spec.ControlFlow.bltu
 import OpenvmFv.Spec.ControlFlow.bne
+import OpenvmFv.Spec.ControlFlow.jal
+import OpenvmFv.Spec.ControlFlow.jalr
 import OpenvmFv.Spec.ControlFlow.jump_to
 import OpenvmFv.Spec.ControlFlow.local
+import OpenvmFv.Spec.ControlFlow.lui
 import OpenvmFv.Spec.DIVREM.div
 import OpenvmFv.Spec.DIVREM.divu
 import OpenvmFv.Spec.DIVREM.local
@@ -127,7 +130,6 @@ import OpenvmFv.Spec.ITYPE.ori
 import OpenvmFv.Spec.ITYPE.slti
 import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.ITYPE.xori
-import OpenvmFv.Spec.JAL.execute_jal
 import OpenvmFv.Spec.LoadStore.local2
 import OpenvmFv.Spec.LoadStore.lw
 import OpenvmFv.Spec.LoadStore.lh

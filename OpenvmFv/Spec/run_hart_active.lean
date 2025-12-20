@@ -117,6 +117,7 @@ def fin_to_x_reg (r : Fin 32) : Option Register :=
 
 lemma bit_eq_one_of_not_eq_zero (bit: BitVec 1) (h : ¬bit = 0) : bit = 1 := by grind
 lemma bit_eq_zero_of_not_eq_one (bit: BitVec 1) (h : ¬bit = 1) : bit = 0 := by grind
+lemma bit_eq_zero_eq_not_eq_one (bit : BitVec 1) : (bit == 0) = !(bit == 1) := by grind
 
 lemma readReg_state
   (h: state.regs.get? reg = .some reg_val)
