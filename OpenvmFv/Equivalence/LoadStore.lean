@@ -5,8 +5,8 @@ import OpenvmFv.Spec.LoadStore.sw
 import OpenvmFv.Spec.LoadStore.sh
 import OpenvmFv.Spec.LoadStore.sb
 import OpenvmFv.Spec.LoadW
-import OpenvmFv.Spec.LoadH
-import OpenvmFv.Spec.LoadB
+import OpenvmFv.Spec.LoadHU
+import OpenvmFv.Spec.LoadBU
 import OpenvmFv.Spec.StoreW
 import OpenvmFv.Spec.StoreH
 import OpenvmFv.Spec.StoreB
@@ -2859,7 +2859,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.imm row 0).val / 256 < 256
   := by
-    have := LoadH.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadHU.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     omega
 
   lemma lhu_spec_of_get_instruction_fields_part_3 [Field ExtF]
@@ -2879,7 +2879,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.imm_extended_limb row 0).val / 256 < 256
   := by
-    have := LoadH.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
+    have := LoadHU.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
     omega
 
   lemma lhu_spec_of_get_instruction_fields_part_5 [Field ExtF]
@@ -2890,7 +2890,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_0 row 0).val < 256
   := by
-    have := LoadH.rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    have := LoadHU.rs1_data_0_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -2902,7 +2902,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_1 row 0).val < 256
   := by
-    have := LoadH.rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    have := LoadHU.rs1_data_1_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -2914,7 +2914,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_2 row 0).val < 256
   := by
-    have := LoadH.rs1_data_2_range air row h_is_valid h_bus_wellformedness
+    have := LoadHU.rs1_data_2_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -2926,7 +2926,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_3 row 0).val < 256
   := by
-    have := LoadH.rs1_data_3_range air row h_is_valid h_bus_wellformedness
+    have := LoadHU.rs1_data_3_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -3043,10 +3043,10 @@ set_option maxHeartbeats 0 in
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
     ] at h_memory
-    have h_0 := LoadH.write_data_0_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
-    have h_1 := LoadH.write_data_1_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
-    have h_2 := LoadH.write_data_2_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
-    have h_3 := LoadH.write_data_3_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    have h_0 := LoadHU.write_data_0_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    have h_1 := LoadHU.write_data_1_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    have h_2 := LoadHU.write_data_2_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    have h_3 := LoadHU.write_data_3_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
     rewrite [h_0, h_1, h_2, h_3]
     split_ands <;> simp <;> split_ifs <;> grind
 
@@ -3117,10 +3117,10 @@ set_option maxHeartbeats 0 in
       BitVec.toNat_ofFin
     ]
     simp
-    have := LoadH.read_ptr_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    have := LoadHU.read_ptr_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
     rewrite [this]; clear this
-    have h_mem_ptr := LoadH.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
-    have h_imm_sign_extend := LoadH.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_mem_ptr := LoadHU.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_sign_extend := LoadHU.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     rewrite [h_imm_sign_extend] at h_mem_ptr
     rewrite [BitVec.toNat_eq] at h_mem_ptr
     simp [-BitVec.toNat_add] at h_mem_ptr
@@ -3128,8 +3128,8 @@ set_option maxHeartbeats 0 in
     simp at h_mem_ptr
     rewrite [Nat.mod_eq_of_lt (by omega)] at h_mem_ptr
     rw [Fin.sub_val_of_le
-        (by have h_ptr_range := LoadH.mem_ptr_range_of_opcode_530 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
-            simp [LoadH.shift_amount_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid] at h_ptr_range ⊢
+        (by have h_ptr_range := LoadHU.mem_ptr_range_of_opcode_530 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+            simp [LoadHU.shift_amount_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid] at h_ptr_range ⊢
             clear *- h_ptr_range
             split_ifs with h_if <;>
             simp_all;
@@ -3199,7 +3199,7 @@ set_option maxHeartbeats 0 in
         { toFin := ⟨↑(air.adapter.imm_extended_limb row 0) / 256 % 256, h4⟩ }
       ]
   := by
-    have := LoadH.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadHU.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     simp [U32.toBV]
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
@@ -3207,7 +3207,7 @@ set_option maxHeartbeats 0 in
     := by bv_decide
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
-    have h_imm_range := LoadH.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_imm_range := LoadHU.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     have h_split_imm := split_bitvec_16_to_8s h_imm_range
     simp [BitVec.ofNat, Nat.cast] at h_split_imm
     unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm
@@ -3256,7 +3256,7 @@ set_option maxHeartbeats 0 in
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
       dsimp
       simp (disch := omega) [Nat.mod_eq_of_lt]
-    . have h_imm_extended_range := LoadH.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
+    . have h_imm_extended_range := LoadHU.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
       have h_split_imm_extended := split_bitvec_16_to_8s h_imm_extended_range
       simp [BitVec.ofNat, Nat.cast] at h_split_imm_extended
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm_extended
@@ -3264,7 +3264,7 @@ set_option maxHeartbeats 0 in
       simp (disch := omega) [Nat.mod_eq_of_lt] at h_split_imm_extended
       simp (disch := omega) [Nat.mod_eq_of_lt]
       rewrite [←h_split_imm_extended]
-      have := LoadH.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+      have := LoadHU.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
       rewrite [this]
       simp [BitVec.ofNat, Nat.cast]
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
@@ -3295,7 +3295,7 @@ set_option maxHeartbeats 0 in
     BitVec.signExtend 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))
   := by
     simp [U32.toBV]
-    have := LoadH.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadHU.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     rewrite [this]
     have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
     rewrite [this]; clear this
@@ -3312,7 +3312,7 @@ set_option maxHeartbeats 0 in
       rewrite [this]; clear this; clear this; clear this
       rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
       have : (air.adapter.imm_extended_limb row 0).val / 256 < 256 := by
-        have := LoadH.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
+        have := LoadHU.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
         omega
       simp [Nat.mod_eq_of_lt this]
       have (bv1 bv2: BitVec 8) :
@@ -3343,7 +3343,7 @@ set_option maxHeartbeats 0 in
       rewrite [this]; clear this; clear this; clear this
       rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
       have : (air.adapter.imm row 0).val / 256 < 256 := by
-        have := LoadH.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+        have := LoadHU.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
         omega
       simp [Nat.mod_eq_of_lt this]
       have (bv1 bv2: BitVec 8) :
@@ -3384,19 +3384,19 @@ set_option maxHeartbeats 0 in
         ]
     ).msb.toNat
   := by
-    have := LoadH.imm_sign_of_opcode_530 air row h_bus_wellformedness h_is_valid h_opcode
+    have := LoadHU.imm_sign_of_opcode_530 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
     have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
     simp [this]
-    have := LoadH.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
+    have := LoadHU.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
     have :
       (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
       (air.adapter.imm_extended_limb row 0).val / 256
     := by
       omega
     simp [this]
-    have h_sign_extend := LoadH.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_sign_extend := LoadHU.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
     have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
@@ -3468,10 +3468,10 @@ set_option maxHeartbeats 0 in
     . exact lhu_spec_of_get_instruction_fields_part_13 air row h_is_valid h_bus_wellformedness
     . exact lhu_spec_of_get_instruction_fields_part_14 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
     . exact lhu_spec_of_get_instruction_fields_part_15 air row h_is_valid h_bus_axioms
-    . exact LoadH.read_as_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
-    . exact LoadH.write_as_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadHU.read_as_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadHU.write_as_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
     . apply lhu_spec_of_get_instruction_fields_part_16 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
-    . exact LoadH.write_ptr_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadHU.write_ptr_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
     . apply lhu_spec_of_get_instruction_fields_part_17 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . apply lhu_spec_of_get_instruction_fields_part_18 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . apply lhu_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
@@ -3513,14 +3513,14 @@ set_option maxHeartbeats 0 in
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
           . simp [U32.toBV]
-            have := LoadH.write_data_3_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadHU.write_data_3_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := LoadH.write_data_2_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadHU.write_data_2_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := LoadH.write_data_1_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadHU.write_data_1_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := LoadH.write_data_0_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
-            simp [this, LoadH.shift_amount_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid]
+            have := LoadHU.write_data_0_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
+            simp [this, LoadHU.shift_amount_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid]
             simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
             split_ifs
             . clear *-; symm
@@ -3626,7 +3626,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.imm row 0).val / 256 < 256
   := by
-    have := LoadB.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadBU.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     omega
 
   lemma lbu_spec_of_get_instruction_fields_part_3 [Field ExtF]
@@ -3646,7 +3646,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.imm_extended_limb row 0).val / 256 < 256
   := by
-    have := LoadB.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
+    have := LoadBU.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
     omega
 
   lemma lbu_spec_of_get_instruction_fields_part_5 [Field ExtF]
@@ -3657,7 +3657,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_0 row 0).val < 256
   := by
-    have := LoadB.rs1_data_0_range air row h_is_valid h_bus_wellformedness
+    have := LoadBU.rs1_data_0_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -3669,7 +3669,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_1 row 0).val < 256
   := by
-    have := LoadB.rs1_data_1_range air row h_is_valid h_bus_wellformedness
+    have := LoadBU.rs1_data_1_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -3681,7 +3681,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_2 row 0).val < 256
   := by
-    have := LoadB.rs1_data_2_range air row h_is_valid h_bus_wellformedness
+    have := LoadBU.rs1_data_2_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -3693,7 +3693,7 @@ set_option maxHeartbeats 0 in
   :
     (air.adapter.rs1_data_3 row 0).val < 256
   := by
-    have := LoadB.rs1_data_3_range air row h_is_valid h_bus_wellformedness
+    have := LoadBU.rs1_data_3_range air row h_is_valid h_bus_wellformedness
     apply Fin.lt_def.mp at this
     convert this
 
@@ -3810,10 +3810,10 @@ set_option maxHeartbeats 0 in
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
     ] at h_memory
-    have h_0 := LoadB.write_data_0_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
-    have h_1 := LoadB.write_data_1_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
-    have h_2 := LoadB.write_data_2_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
-    have h_3 := LoadB.write_data_3_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    have h_0 := LoadBU.write_data_0_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    have h_1 := LoadBU.write_data_1_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    have h_2 := LoadBU.write_data_2_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    have h_3 := LoadBU.write_data_3_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
     rewrite [h_0, h_1, h_2, h_3]
     split_ands <;> simp; split_ifs <;> grind
 
@@ -3884,10 +3884,10 @@ set_option maxHeartbeats 0 in
       BitVec.toNat_ofFin
     ]
     simp
-    have := LoadB.read_ptr_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    have := LoadBU.read_ptr_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
     rewrite [this]; clear this
-    have h_mem_ptr := LoadB.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
-    have h_imm_sign_extend := LoadB.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_mem_ptr := LoadBU.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    have h_imm_sign_extend := LoadBU.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     rewrite [h_imm_sign_extend] at h_mem_ptr
     rewrite [BitVec.toNat_eq] at h_mem_ptr
     simp [-BitVec.toNat_add] at h_mem_ptr
@@ -3895,8 +3895,8 @@ set_option maxHeartbeats 0 in
     simp at h_mem_ptr
     rewrite [Nat.mod_eq_of_lt (by omega)] at h_mem_ptr
     rw [Fin.sub_val_of_le
-        (by have h_ptr_range := LoadB.mem_ptr_range_of_opcode_529 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
-            simp [LoadB.shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid] at h_ptr_range ⊢
+        (by have h_ptr_range := LoadBU.mem_ptr_range_of_opcode_529 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+            simp [LoadBU.shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid] at h_ptr_range ⊢
             clear *- h_ptr_range
             split_ifs <;>
             simp_all <;>
@@ -3965,7 +3965,7 @@ set_option maxHeartbeats 0 in
         { toFin := ⟨↑(air.adapter.imm_extended_limb row 0) / 256 % 256, h4⟩ }
       ]
   := by
-    have := LoadB.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadBU.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     simp [U32.toBV]
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
@@ -3973,7 +3973,7 @@ set_option maxHeartbeats 0 in
     := by bv_decide
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
-    have h_imm_range := LoadB.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_imm_range := LoadBU.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     have h_split_imm := split_bitvec_16_to_8s h_imm_range
     simp [BitVec.ofNat, Nat.cast] at h_split_imm
     unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm
@@ -4022,7 +4022,7 @@ set_option maxHeartbeats 0 in
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
       dsimp
       simp (disch := omega) [Nat.mod_eq_of_lt]
-    . have h_imm_extended_range := LoadB.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
+    . have h_imm_extended_range := LoadBU.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
       have h_split_imm_extended := split_bitvec_16_to_8s h_imm_extended_range
       simp [BitVec.ofNat, Nat.cast] at h_split_imm_extended
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat at h_split_imm_extended
@@ -4030,7 +4030,7 @@ set_option maxHeartbeats 0 in
       simp (disch := omega) [Nat.mod_eq_of_lt] at h_split_imm_extended
       simp (disch := omega) [Nat.mod_eq_of_lt]
       rewrite [←h_split_imm_extended]
-      have := LoadB.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+      have := LoadBU.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
       rewrite [this]
       simp [BitVec.ofNat, Nat.cast]
       unfold NatCast.natCast Fin.NatCast.instNatCast Fin.ofNat
@@ -4061,7 +4061,7 @@ set_option maxHeartbeats 0 in
     BitVec.signExtend 32 (BitVec.ofNat 16 ↑(air.adapter.imm row 0))
   := by
     simp [U32.toBV]
-    have := LoadB.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+    have := LoadBU.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     rewrite [this]
     have (a b c d: BitVec 8) : a ++ b ++ c ++ d = (a ++ b) ++ (c ++ d) := by grind
     rewrite [this]; clear this
@@ -4078,7 +4078,7 @@ set_option maxHeartbeats 0 in
       rewrite [this]; clear this; clear this; clear this
       rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
       have : (air.adapter.imm_extended_limb row 0).val / 256 < 256 := by
-        have := LoadB.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
+        have := LoadBU.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
         omega
       simp [Nat.mod_eq_of_lt this]
       have (bv1 bv2: BitVec 8) :
@@ -4109,7 +4109,7 @@ set_option maxHeartbeats 0 in
       rewrite [this]; clear this; clear this; clear this
       rewrite [BitVec.ofNat_add, BitVec.ofNat_mul]
       have : (air.adapter.imm row 0).val / 256 < 256 := by
-        have := LoadB.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+        have := LoadBU.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
         omega
       simp [Nat.mod_eq_of_lt this]
       have (bv1 bv2: BitVec 8) :
@@ -4150,19 +4150,19 @@ set_option maxHeartbeats 0 in
         ]
     ).msb.toNat
   := by
-    have := LoadB.imm_sign_of_opcode_529 air row h_bus_wellformedness h_is_valid h_opcode
+    have := LoadBU.imm_sign_of_opcode_529 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
     have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
     simp [this]
-    have := LoadB.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
+    have := LoadBU.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
     have :
       (air.adapter.imm_extended_limb row 0).val / 256 % 256 =
       (air.adapter.imm_extended_limb row 0).val / 256
     := by
       omega
     simp [this]
-    have h_sign_extend := LoadB.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
+    have h_sign_extend := LoadBU.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
     have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
@@ -4234,10 +4234,10 @@ set_option maxHeartbeats 0 in
     . exact lbu_spec_of_get_instruction_fields_part_13 air row h_is_valid h_bus_wellformedness
     . exact lbu_spec_of_get_instruction_fields_part_14 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
     . exact lbu_spec_of_get_instruction_fields_part_15 air row h_is_valid h_bus_axioms
-    . exact LoadB.read_as_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
-    . exact LoadB.write_as_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadBU.read_as_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadBU.write_as_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
     . apply lbu_spec_of_get_instruction_fields_part_16 air row h_row h_is_valid h_opcode h_constraints h_bus_wellformedness
-    . exact LoadB.write_ptr_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+    . exact LoadBU.write_ptr_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
     . apply lbu_spec_of_get_instruction_fields_part_17 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . apply lbu_spec_of_get_instruction_fields_part_18 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . apply lbu_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
@@ -4279,14 +4279,14 @@ set_option maxHeartbeats 0 in
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
           . simp [U32.toBV]
-            have := LoadB.write_data_3_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadBU.write_data_3_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := LoadB.write_data_2_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadBU.write_data_2_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := LoadB.write_data_1_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+            have := LoadBU.write_data_1_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
             simp [this]
-            have := LoadB.write_data_0_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
-            simp [this, LoadB.shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid]
+            have := LoadBU.write_data_0_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+            simp [this, LoadBU.shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid]
             simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
             clear *-
             split_ifs

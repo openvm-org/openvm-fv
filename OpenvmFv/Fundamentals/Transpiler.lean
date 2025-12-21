@@ -183,9 +183,9 @@ namespace Transpiler
                else .none)
         else
           (if width = 2
-              then .some (multiplicity, #v[pc, 1024, ind rd, ind rs1, utof (sign_extend_16 imm), 1, 2, if rd == regidx.Regidx 0 then 0 else 1, sign_of imm])
+              then .some (multiplicity, #v[pc, 535, ind rd, ind rs1, utof (sign_extend_16 imm), 1, 2, if rd == regidx.Regidx 0 then 0 else 1, sign_of imm])
               else if width = 1
-                then .some (multiplicity, #v[pc, 1025, ind rd, ind rs1, utof (sign_extend_16 imm), 1, 2, if rd == regidx.Regidx 0 then 0 else 1, sign_of imm])
+                then .some (multiplicity, #v[pc, 534, ind rd, ind rs1, utof (sign_extend_16 imm), 1, 2, if rd == regidx.Regidx 0 then 0 else 1, sign_of imm])
                 else .none)
       | .STORE (imm, rs2, rs1, width) =>
         if width = 4
@@ -3142,6 +3142,373 @@ namespace Transpiler
         dsimp at h_transpile
         split_ifs at h_transpile <;> symm at h_transpile <;> simp_all
 
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_534
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 534)
+    :
+      (result.2[7] = 1 ∧ ∃ imm rs1 rd, inst = .LOAD (imm, rs1, rd, false, 1) ∧ rd.1 ≠ 0) ∨
+      (result.2[7] = 0 ∧ ∃ imm rs1, inst = .LOAD (imm, rs1, regidx.Regidx 0#5, false, 1))
+    := by
+      have h_alignment := pc_aligned_of_some h_transpile
+      have h_bound := pc_bound_of_some h_transpile
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          simp at h_transpile
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, is_unsigned, width⟩, h_op_data⟩ := h_type -- LOAD
+        rewrite [h_op_data] at h_transpile
+        unfold transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . right
+          simp at h_transpile
+          simp [←h_transpile]
+          use imm, rs1
+          convert h_op_data <;> [skip; grind; grind]
+          obtain ⟨⟨rd_fin: Fin 32⟩⟩ := rd
+          fin_cases rd_fin
+          . rfl
+          all_goals {
+            exfalso
+            simp_all
+            contradiction
+          }
+        . left
+          simp at h_transpile
+          simp [←h_transpile]
+          use imm, rs1, rd
+          split_ands
+          . convert h_op_data <;> grind
+          . obtain ⟨⟨rd_fin: Fin 32⟩⟩ := rd
+            fin_cases rd_fin
+            . exfalso
+              simp_all
+              contradiction
+            all_goals simp
+      . obtain ⟨⟨imm, rs2, rs1, width⟩, h_op_data⟩ := h_type -- STORE
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_535
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 535)
+    :
+      (result.2[7] = 1 ∧ ∃ imm rs1 rd, inst = .LOAD (imm, rs1, rd, false, 2) ∧ rd.1 ≠ 0) ∨
+      (result.2[7] = 0 ∧ ∃ imm rs1, inst = .LOAD (imm, rs1, regidx.Regidx 0#5, false, 2))
+    := by
+      have h_alignment := pc_aligned_of_some h_transpile
+      have h_bound := pc_bound_of_some h_transpile
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          simp at h_transpile
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, is_unsigned, width⟩, h_op_data⟩ := h_type -- LOAD
+        rewrite [h_op_data] at h_transpile
+        unfold transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . right
+          simp at h_transpile
+          simp [←h_transpile]
+          use imm, rs1
+          convert h_op_data <;> [skip; grind; grind]
+          obtain ⟨⟨rd_fin: Fin 32⟩⟩ := rd
+          fin_cases rd_fin
+          . rfl
+          all_goals {
+            exfalso
+            simp_all
+            contradiction
+          }
+        . left
+          simp at h_transpile
+          simp [←h_transpile]
+          use imm, rs1, rd
+          split_ands
+          . convert h_op_data <;> grind
+          . obtain ⟨⟨rd_fin: Fin 32⟩⟩ := rd
+            fin_cases rd_fin
+            . exfalso
+              simp_all
+              contradiction
+            all_goals simp
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+        . exfalso; clear *- h_transpile h_opcode; symm at h_transpile; simp_all
+      . obtain ⟨⟨imm, rs2, rs1, width⟩, h_op_data⟩ := h_type -- STORE
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_544

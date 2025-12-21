@@ -1027,7 +1027,7 @@ namespace VmAirWrapper_load_sign_extend.constraints
 
 end VmAirWrapper_load_sign_extend.constraints
 
-namespace LoadStore.NonValidRows
+namespace LoadSignExtend.NonValidRows
 
 open VmAirWrapper_load_sign_extend.constraints
 
@@ -1058,9 +1058,9 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
   rw [allHold_simplified_of_allHold] at constraints
   simp_all [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
 
-end LoadStore.NonValidRows
+end LoadSignExtend.NonValidRows
 
-namespace LoadStore.ValidRows
+namespace LoadSignExtend.ValidRows
 
 open VmAirWrapper_load_sign_extend.constraints
 
@@ -1122,4 +1122,4 @@ lemma wf_propertiesToAssert
       obtain h05 | h05 := h05 <;> simp_all
     }
 
-end LoadStore.ValidRows
+end LoadSignExtend.ValidRows
