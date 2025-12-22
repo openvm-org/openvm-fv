@@ -69,6 +69,7 @@ import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
+-- import OpenvmFv.Equivalence.LoadSignExtend
 import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Mul
@@ -130,11 +131,11 @@ import OpenvmFv.Spec.ITYPE.ori
 import OpenvmFv.Spec.ITYPE.slti
 import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.ITYPE.xori
+import OpenvmFv.Spec.LoadSignExtend.lh
+import OpenvmFv.Spec.LoadSignExtend.lb
 import OpenvmFv.Spec.LoadStore.local2
 import OpenvmFv.Spec.LoadStore.lw
-import OpenvmFv.Spec.LoadStore.lh
 import OpenvmFv.Spec.LoadStore.lhu
-import OpenvmFv.Spec.LoadStore.lb
 import OpenvmFv.Spec.LoadStore.lbu
 import OpenvmFv.Spec.LoadStore.sw
 import OpenvmFv.Spec.LoadStore.sh
