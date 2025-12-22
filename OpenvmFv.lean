@@ -69,7 +69,7 @@ import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
--- import OpenvmFv.Equivalence.LoadSignExtend
+import OpenvmFv.Equivalence.LoadSignExtend
 import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Mul
@@ -168,6 +168,7 @@ import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.LoadW
 import OpenvmFv.Spec.LoadH
+import OpenvmFv.Spec.LoadB
 import OpenvmFv.Spec.LoadHU
 import OpenvmFv.Spec.LoadBU
 import OpenvmFv.Spec.StoreW
