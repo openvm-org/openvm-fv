@@ -140,6 +140,10 @@ namespace Transpiler
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 576, ind rd, 0, utof ((zero_extend_24 imm) <<< 4), 1, 0, 0, 0]))
+      | .UTYPE (imm, rd, uop.LUI) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 561, ind rd, 0, utof imm, 1, 0, 1, 0]))
       | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
@@ -386,7 +390,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -557,7 +566,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -743,7 +757,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -929,7 +948,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -1115,7 +1139,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -1301,7 +1330,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -1487,7 +1521,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -1673,7 +1712,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -1859,7 +1903,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -2045,7 +2094,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -2203,7 +2257,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -2387,7 +2446,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -2573,7 +2637,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -2760,7 +2829,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -2912,7 +2986,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -3064,7 +3143,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -3216,7 +3300,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -3400,7 +3489,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -3585,7 +3679,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -3744,7 +3843,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -3903,7 +4007,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -4062,7 +4171,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -4221,7 +4335,12 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
-          simp at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -4380,7 +4499,172 @@ namespace Transpiler
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
           simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, is_unsigned, width⟩, h_op_data⟩ := h_type -- LOAD
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, width⟩, h_op_data⟩ := h_type -- STORE
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_561
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 561)
+    :
+      ∃ imm rd, inst = .UTYPE (imm, rd, uop.LUI) ∧ rd.1 ≠ 0
+    := by
+      have h_alignment := pc_aligned_of_some h_transpile
+      have h_bound := pc_bound_of_some h_transpile
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . symm at h_transpile; simp_all
+          . have h_rd := non_phantom_rd h_if
+            simp_all
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -4536,7 +4820,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
@@ -4689,7 +4979,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -4846,7 +5142,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -5010,7 +5312,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -5172,7 +5480,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -5336,7 +5650,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -5495,7 +5815,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -5652,7 +5978,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
@@ -5809,7 +6141,13 @@ namespace Transpiler
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
-          simp at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
         . exfalso
           rewrite [h_op_data] at h_transpile
           unfold transpile_op at h_transpile
