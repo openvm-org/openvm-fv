@@ -266,6 +266,53 @@ theorem spec_jal
         simp [Int.bmod_def]
         omega
 
+include
+  row_in_range
+  constraints
+  propertiesToAssume
+in
+lemma needs_write_eq_is_valid
+:
+  air.adapter.needs_write row 0 = air.core.is_valid row 0
+:= by
+  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
+  rw [allHold_simplified_of_allHold] at constraints
+  simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at constraints
+  obtain ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 ⟩ := constraints
+  obtain row_valid | row_valid := c3
+  . simp_all
+  . clear pa_mem pa_range
+    simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      at pa_exec pa_read pa_bit
+    simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
+    obtain ⟨ instruction, multiplicity, data, h_transpile,
+            hm, hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
+    obtain is_lui | is_lui := c1
+    . have h_jal : air.core.is_jal row 0 = 1
+        := by simp [← Rv32JalLuiCoreAir_4.is_valid_def] at row_valid; grind
+      simp_all [← Rv32JalLuiCoreAir_4.expected_opcode_def]
+      obtain ⟨ imm, rd, eq_instr, nz_rd ⟩ := Transpiler.transpiler_opcode_560 h_transpile (by grind)
+      subst instruction; dsimp [Transpiler.transpile_op] at h_transpile
+      rw [if_pos (by grind)] at h_transpile
+      split_ifs at h_transpile with z_rd
+      all_goals
+        simp [-Vector.mk_eq] at h_transpile
+        subst data; simp at *
+      simp_all
+    . have h_jal : air.core.is_jal row 0 = 0
+        := by simp [← Rv32JalLuiCoreAir_4.is_valid_def] at row_valid; grind
+      simp_all [← Rv32JalLuiCoreAir_4.expected_opcode_def]
+      obtain ⟨ imm, rd, eq_instr, nz_rd ⟩ := Transpiler.transpiler_opcode_561 h_transpile (by grind)
+      subst instruction; dsimp [Transpiler.transpile_op] at h_transpile
+      rw [if_pos (by grind)] at h_transpile
+      split_ifs at h_transpile with z_rd
+      all_goals
+        simp [-Vector.mk_eq] at h_transpile
+        subst data; simp at *
+      simp_all
+
 end General
 
 end JalLui.ValidRows
