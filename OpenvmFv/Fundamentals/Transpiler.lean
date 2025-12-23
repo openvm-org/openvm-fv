@@ -199,6 +199,14 @@ namespace Transpiler
           else if width = 1
             then .some (multiplicity, #v[pc, 533, ind rs2, ind rs1, utof (sign_extend_16 imm), 1, 2, 1, sign_of imm])
             else .none
+      | .JAL (imm, rd) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 560, ind rd, 0, itof imm, 1, 0, 1, 0]))
+      | .JALR (imm, rd, rs1) =>
+        .some (if rd == regidx.Regidx 0
+        then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
+        else (multiplicity, #v[pc, 565, ind rd, ind rs1, itof imm, 1, 0, 1, sign_of imm]))
       | _ => .none
     else .none
 
@@ -241,7 +249,9 @@ namespace Transpiler
       (∃ data, inst = .DIV data) ∨
       (∃ data, inst = .REM data) ∨
       (∃ data, inst = .LOAD data) ∨
-      (∃ data, inst = .STORE data)
+      (∃ data, inst = .STORE data) ∨
+      (∃ data, inst = .JAL data) ∨
+      (∃ data, inst = .JALR data)
     := by
       have h_alignment := pc_aligned_of_some h_some
       have h_bound := pc_bound_of_some h_some
@@ -255,7 +265,9 @@ namespace Transpiler
       case DIV data => right; right; right; right; right; right; left; use data
       case REM data => right; right; right; right; right; right; right; left; use data
       case LOAD data => right; right; right; right; right; right; right; right; left; use data
-      case STORE data => right; right; right; right; right; right; right; right; right; use data
+      case STORE data => right; right; right; right; right; right; right; right; right; left; use data
+      case JAL data => right; right; right; right; right; right; right; right; right; right; left; use data
+      case JALR data => right; right; right; right; right; right; right; right; right; right; right; use data
       all_goals {
         exfalso
         rewrite [h] at h_some
@@ -299,7 +311,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -478,6 +490,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_513
@@ -489,7 +527,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -654,6 +692,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_514
@@ -666,7 +730,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -845,6 +909,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_515
@@ -857,7 +947,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -1036,6 +1126,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_516
@@ -1048,7 +1164,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -1227,6 +1343,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_517
@@ -1239,7 +1381,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -1418,6 +1560,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_518
@@ -1430,7 +1598,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -1609,6 +1777,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_519
@@ -1621,7 +1815,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -1800,6 +1994,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_520
@@ -1812,7 +2032,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -1991,6 +2211,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_521
@@ -2003,7 +2249,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -2182,6 +2428,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_528
@@ -2194,7 +2466,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -2371,6 +2643,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_529
@@ -2383,7 +2681,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -2562,6 +2860,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_530
@@ -2574,7 +2898,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -2755,6 +3079,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_531
@@ -2766,7 +3116,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -2911,7 +3261,32 @@ namespace Transpiler
         rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile <;> symm at h_transpile <;> simp_all
-
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_532
@@ -2923,7 +3298,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -3068,7 +3443,32 @@ namespace Transpiler
         rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile <;> symm at h_transpile <;> simp_all
-
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_533
@@ -3080,7 +3480,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -3225,6 +3625,32 @@ namespace Transpiler
         rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
         dsimp at h_transpile
         split_ifs at h_transpile <;> symm at h_transpile <;> simp_all
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_534
@@ -3237,7 +3663,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -3409,6 +3835,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -3426,7 +3878,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -3603,6 +4055,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_544
@@ -3614,7 +4092,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -3767,6 +4245,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_545
@@ -3778,7 +4282,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -3931,6 +4435,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_549
@@ -3942,7 +4472,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -4095,6 +4625,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_550
@@ -4106,7 +4662,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -4259,6 +4815,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_551
@@ -4270,7 +4852,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -4423,6 +5005,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_552
@@ -4434,7 +5042,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -4587,6 +5195,210 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_560
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 560)
+    :
+      ∃ imm rd, inst = .JAL (imm, rd) ∧ rd.1 ≠ 0
+    := by
+      have h_alignment := pc_aligned_of_some h_transpile
+      have h_bound := pc_bound_of_some h_transpile
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, is_unsigned, width⟩, h_op_data⟩ := h_type -- LOAD
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, width⟩, h_op_data⟩ := h_type -- STORE
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        rewrite [h_op_data] at h_transpile
+        unfold transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile with h_if
+        . symm at h_transpile; simp_all
+        . have h_rd := non_phantom_rd h_if
+          simp_all
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_561
@@ -4598,7 +5410,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -4747,6 +5559,208 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+
+    set_option maxHeartbeats 0 in
+    lemma transpiler_opcode_565
+      (h_transpile : transpile_op inst mult pc = .some result)
+      (h_opcode: result.2[1] = 565)
+    :
+      ∃ imm rd rs1, inst = .JALR (imm, rd, rs1) ∧ rd.1 ≠ 0
+    := by
+      have h_alignment := pc_aligned_of_some h_transpile
+      have h_bound := pc_bound_of_some h_transpile
+      have h_opcodes := transpiler_supported_opcode_types h_transpile
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      case inl => -- RTYPE
+        obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+          . have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      case inr.inr.inl => --SHIFTIOP
+        obtain ⟨⟨shamt, rs1, rd, op⟩, h_op_data⟩ := h_type
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, op⟩, h_op_data⟩ := h_type -- ITYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
+        cases op
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨⟨imm, rd, op⟩, h_op_data⟩ := h_type -- UTYPE
+        cases op
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        . exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+      . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
+        cases high <;> cases signed_rs1 <;> cases signed_rs2
+        case true.false.true =>
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          simp at h_transpile
+        all_goals {
+          rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          exfalso
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- REM
+        cases signed
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs1, rd, is_unsigned, width⟩, h_op_data⟩ := h_type -- LOAD
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨⟨imm, rs2, rs1, width⟩, h_op_data⟩ := h_type -- STORE
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        exfalso
+        rewrite [h_op_data] at h_transpile
+        unfold transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile with h_if1 <;> {
+          have := extract_opcode h_transpile
+          clear * - h_opcode this
+          omega
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        rewrite [h_op_data] at h_transpile
+        unfold transpile_op at h_transpile
+        rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+        dsimp at h_transpile
+        split_ifs at h_transpile with h_if
+        . symm at h_transpile; simp_all
+        . have h_rd := non_phantom_rd h_if
+          simp_all
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_576
@@ -4758,7 +5772,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -4902,6 +5916,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -4920,7 +5960,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -5072,6 +6112,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_593
@@ -5083,7 +6149,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -5242,6 +6308,32 @@ namespace Transpiler
             omega
           }
         }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
 
     set_option maxHeartbeats 0 in
     lemma transpiler_opcode_594
@@ -5253,7 +6345,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -5405,6 +6497,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -5421,7 +6539,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -5573,6 +6691,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -5591,7 +6735,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -5738,6 +6882,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -5754,7 +6924,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -5903,6 +7073,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -5919,7 +7115,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -6066,6 +7262,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega
@@ -6082,7 +7304,7 @@ namespace Transpiler
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
       have h_opcodes := transpiler_supported_opcode_types h_transpile
-      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
+      rcases h_opcodes with h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type | h_type
       case inl => -- RTYPE
         obtain ⟨⟨rs2, rs1, rd, op⟩, h_op_data⟩ := h_type
         cases op
@@ -6229,6 +7451,32 @@ namespace Transpiler
           rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
           dsimp at h_transpile
           split_ifs at h_transpile with h_if <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd ⟩, h_op_data ⟩ := h_type -- JAL
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
+            have := extract_opcode h_transpile
+            clear * - h_opcode this
+            omega
+          }
+        }
+      . obtain ⟨ ⟨ imm, rd, rs1 ⟩, h_op_data ⟩ := h_type -- JALR
+        all_goals {
+          exfalso
+          rewrite [h_op_data] at h_transpile
+          unfold transpile_op at h_transpile
+          rewrite [if_pos (by constructor <;> [ exact h_alignment; exact h_bound ])] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if1 <;> {
             have := extract_opcode h_transpile
             clear * - h_opcode this
             omega

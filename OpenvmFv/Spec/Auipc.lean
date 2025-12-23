@@ -92,9 +92,8 @@ theorem spec_auipc
               (air.core.rd_data_2 row 0).val,
               (air.core.rd_data_3 row 0).val]
     =
-BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
-(BitVec.ofNat 20 ((air.core.imm row 0).val >>> 4) ++ 0#12)
-
+  BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) +
+  (BitVec.ofNat 20 ((air.core.imm row 0).val >>> 4) ++ 0#12)
 := by
   -- rd_data represents limbs of rd
   -- pc_limbs are limbs of pc except the most and least significant limbs

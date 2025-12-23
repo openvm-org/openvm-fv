@@ -166,12 +166,12 @@ import OpenvmFv.Spec.BranchEqual
 import OpenvmFv.Spec.BranchLessThan
 import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
+import OpenvmFv.Spec.JalLui
 import OpenvmFv.Spec.LoadW
 import OpenvmFv.Spec.LoadH
 import OpenvmFv.Spec.LoadB
 import OpenvmFv.Spec.LoadHU
 import OpenvmFv.Spec.LoadBU
-import OpenvmFv.Spec.Lui
 import OpenvmFv.Spec.StoreW
 import OpenvmFv.Spec.StoreH
 import OpenvmFv.Spec.StoreB
