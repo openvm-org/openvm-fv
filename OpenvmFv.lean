@@ -70,6 +70,7 @@ import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.JalLui
+import OpenvmFv.Equivalence.JalR
 import OpenvmFv.Equivalence.LoadSignExtend
 import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt

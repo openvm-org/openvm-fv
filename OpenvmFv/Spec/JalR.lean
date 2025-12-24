@@ -9,7 +9,7 @@ import LeanZKCircuit.Interactions
 
 set_option maxHeartbeats 1_000_000_000
 
-namespace JalLui.NonValidRows
+namespace JalR.NonValidRows
 
 open VmAirWrapper_jalr.constraints
 
@@ -40,9 +40,9 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
   rw [allHold_simplified_of_allHold] at constraints
   simp_all [VmAirWrapper_jalr_constraint_and_interaction_simplification]
 
-end JalLui.NonValidRows
+end JalR.NonValidRows
 
-namespace JalLui.ValidRows
+namespace JalR.ValidRows
 
 open VmAirWrapper_jalr.constraints
 
@@ -380,4 +380,4 @@ theorem spec_jalr
 
 end General
 
-end JalLui.ValidRows
+end JalR.ValidRows

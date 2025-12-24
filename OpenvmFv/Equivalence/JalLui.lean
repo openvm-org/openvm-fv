@@ -232,7 +232,7 @@ namespace Equivalence.JalLui
 
   /-
      ***
-     *** LUI
+     *** JAL
      ***
   -/
 
