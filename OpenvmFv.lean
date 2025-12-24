@@ -168,6 +168,7 @@ import OpenvmFv.Spec.BranchLessThan
 import OpenvmFv.Spec.DivRem
 import OpenvmFv.Spec.execute_rtype
 import OpenvmFv.Spec.JalLui
+import OpenvmFv.Spec.JalR
 import OpenvmFv.Spec.LoadW
 import OpenvmFv.Spec.LoadH
 import OpenvmFv.Spec.LoadB

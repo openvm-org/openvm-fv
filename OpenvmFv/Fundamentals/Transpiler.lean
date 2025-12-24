@@ -206,7 +206,7 @@ namespace Transpiler
       | .JALR (imm, rd, rs1) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
-        else (multiplicity, #v[pc, 565, ind rd, ind rs1, itof imm, 1, 0, 1, sign_of imm]))
+        else (multiplicity, #v[pc, 565, ind rd, ind rs1, utof (sign_extend_16 imm), 1, 0, 1, sign_of imm]))
       | _ => .none
     else .none
 
