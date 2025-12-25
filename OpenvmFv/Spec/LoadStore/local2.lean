@@ -14,7 +14,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -192,7 +192,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -360,7 +360,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -524,7 +524,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -580,7 +580,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -635,7 +635,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -690,7 +690,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -744,7 +744,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -802,7 +802,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -975,7 +975,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -1143,7 +1143,7 @@ namespace Local
     (h_clint_base: Sail.readReg Register.plat_clint_base s = EStateM.Result.ok 0 s)
     (h_clint_size: Sail.readReg Register.plat_clint_size s = EStateM.Result.ok 0 s)
     (h_plat_ram_base: Sail.readReg Register.plat_ram_base s = EStateM.Result.ok 0 s)
-    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok 0 s)
+    (h_plat_rom_base: Sail.readReg Register.plat_rom_base s = EStateM.Result.ok rom_base s)
     (h_plat_ram_size: Sail.readReg Register.plat_ram_size s = EStateM.Result.ok ram_size s)
     (h_plat_rom_size: Sail.readReg Register.plat_rom_size s = EStateM.Result.ok rom_size s)
     (h_htif_tohost_base: Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
@@ -1306,3 +1306,25 @@ namespace Local
   := rfl
 
 end Local
+
+namespace Local.Assumptions
+
+  def general_memory_assumptions
+    (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
+  : Prop :=
+    -- Operations are executed in Machine mode
+    Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state ∧
+    -- The MPRV bit is set to not override Machine mode
+    (∃ mstatus, Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state ∧ BitVec.extractLsb 17 17 mstatus = 0#1) ∧
+    -- The CLINT mechanism is not active
+    Sail.readReg Register.plat_clint_base state = EStateM.Result.ok 0 state ∧
+    Sail.readReg Register.plat_clint_size state = EStateM.Result.ok 0 state ∧
+    -- The ROM base and size can be read
+    (∃ plat_rom_base, Sail.readReg Register.plat_rom_base state = EStateM.Result.ok plat_rom_base state) ∧
+    (∃ plat_rom_size, Sail.readReg Register.plat_rom_size state = EStateM.Result.ok plat_rom_size state) ∧
+    -- The RAM starts at address zero
+    Sail.readReg Register.plat_ram_base state = EStateM.Result.ok 0 state ∧
+    -- There is no host-target interaction
+    Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state
+
+end Local.Assumptions

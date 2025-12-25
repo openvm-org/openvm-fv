@@ -96,29 +96,12 @@ namespace Equivalence.LoadStore
     ⟨val / 4 % 32, by grind⟩
 
   structure RVConfig where
-    mstatus : BitVec 64
-    cur_privilege : Privilege
-    plat_clint_base : BitVec 34
-    plat_clint_size : BitVec 34
-    plat_ram_base : BitVec 34
     plat_ram_size : BitVec 34
-    plat_rom_base : BitVec 34
-    plat_rom_size : BitVec 34
-    htif_tohost_base : Option (BitVec 34)
 
   opaque plat_ram_size : BitVec 34
-  opaque plat_rom_size : BitVec 34
 
   def config : RVConfig := {
-    mstatus := 0
-    cur_privilege := Privilege.Machine
-    plat_clint_base := 0
-    plat_clint_size := 0
-    plat_ram_base := 0
     plat_ram_size := plat_ram_size
-    plat_rom_base := 0
-    plat_rom_size := plat_rom_size
-    htif_tohost_base := .none
   }
 
   def LoadStore_instruction_fields.execution (row : LoadStore_instruction_fields) : List (FBB × List FBB) := [
@@ -503,15 +486,7 @@ namespace Equivalence.LoadStore
     r1_val := BabyBear.toBV32 row.rs1_val
     r2_val := BabyBear.toBV32 row.prev_read_data
     PC := row.pc.toNat
-    mstatus := config.mstatus
-    cur_privilege := config.cur_privilege
-    plat_clint_base := config.plat_clint_base
-    plat_clint_size := config.plat_clint_size
-    plat_ram_base := config.plat_ram_base
     plat_ram_size := config.plat_ram_size
-    plat_rom_base := config.plat_rom_base
-    plat_rom_size := config.plat_rom_size
-    htif_tohost_base := config.htif_tohost_base
     : PureSpec.SwInput
   }
 
@@ -1042,15 +1017,7 @@ namespace Equivalence.LoadStore
       r1_val := BabyBear.toBV32 row.rs1_val
       r2_val := BabyBear.toBV32 row.prev_read_data
       PC := row.pc.toNat
-      mstatus := config.mstatus
-      cur_privilege := config.cur_privilege
-      plat_clint_base := config.plat_clint_base
-      plat_clint_size := config.plat_clint_size
-      plat_ram_base := config.plat_ram_base
       plat_ram_size := config.plat_ram_size
-      plat_rom_base := config.plat_rom_base
-      plat_rom_size := config.plat_rom_size
-      htif_tohost_base := config.htif_tohost_base
       : PureSpec.ShInput
     }
 
@@ -1557,15 +1524,7 @@ set_option maxHeartbeats 0 in
       r1_val := BabyBear.toBV32 row.rs1_val
       r2_val := BabyBear.toBV32 row.prev_read_data
       PC := row.pc.toNat
-      mstatus := config.mstatus
-      cur_privilege := config.cur_privilege
-      plat_clint_base := config.plat_clint_base
-      plat_clint_size := config.plat_clint_size
-      plat_ram_base := config.plat_ram_base
       plat_ram_size := config.plat_ram_size
-      plat_rom_base := config.plat_rom_base
-      plat_rom_size := config.plat_rom_size
-      htif_tohost_base := config.htif_tohost_base
       : PureSpec.SbInput
     }
 
@@ -2055,15 +2014,7 @@ set_option maxHeartbeats 0 in
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    mstatus := config.mstatus
-    cur_privilege := config.cur_privilege
-    plat_clint_base := config.plat_clint_base
-    plat_clint_size := config.plat_clint_size
-    plat_ram_base := config.plat_ram_base
     plat_ram_size := config.plat_ram_size
-    plat_rom_base := config.plat_rom_base
-    plat_rom_size := config.plat_rom_size
-    htif_tohost_base := config.htif_tohost_base
     data0 := row.prev_read_data[0]
     data1 := row.prev_read_data[1]
     data2 := row.prev_read_data[2]
@@ -2803,15 +2754,7 @@ set_option maxHeartbeats 0 in
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    mstatus := config.mstatus
-    cur_privilege := config.cur_privilege
-    plat_clint_base := config.plat_clint_base
-    plat_clint_size := config.plat_clint_size
-    plat_ram_base := config.plat_ram_base
     plat_ram_size := config.plat_ram_size
-    plat_rom_base := config.plat_rom_base
-    plat_rom_size := config.plat_rom_size
-    htif_tohost_base := config.htif_tohost_base
     data0 := if (row.shift = 0) then row.prev_read_data[0] else row.prev_read_data[2]
     data1 := if (row.shift = 0) then row.prev_read_data[1] else row.prev_read_data[3]
     : PureSpec.LhuInput
@@ -3568,15 +3511,7 @@ set_option maxHeartbeats 0 in
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    mstatus := config.mstatus
-    cur_privilege := config.cur_privilege
-    plat_clint_base := config.plat_clint_base
-    plat_clint_size := config.plat_clint_size
-    plat_ram_base := config.plat_ram_base
     plat_ram_size := config.plat_ram_size
-    plat_rom_base := config.plat_rom_base
-    plat_rom_size := config.plat_rom_size
-    htif_tohost_base := config.htif_tohost_base
     data0 := if (row.shift = 0) then row.prev_read_data[0] else
              if (row.shift = 1) then row.prev_read_data[1] else
              if (row.shift = 2) then row.prev_read_data[2] else

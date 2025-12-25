@@ -12,15 +12,7 @@ namespace PureSpec
     r1_val : BitVec 32
     r2_val : BitVec 32
     PC : BitVec 32
-    mstatus : BitVec 64
-    cur_privilege : Privilege
-    plat_clint_base : BitVec 34
-    plat_clint_size : BitVec 34
-    plat_ram_base : BitVec 34
     plat_ram_size : BitVec 34
-    plat_rom_base : BitVec 34
-    plat_rom_size : BitVec 34
-    htif_tohost_base : Option (BitVec 34)
 
   structure SwOutput where
     -- registers
@@ -100,26 +92,16 @@ namespace PureSpec
     (i : SwInput)
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
   : Prop :=
-    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 4 = true ∧
+    -- Connecting the registers
+    state.regs.get? Register.PC = .some i.PC ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r2) state = EStateM.Result.ok i.r2_val state ∧
-    Sail.readReg Register.mstatus state = EStateM.Result.ok i.mstatus state ∧
-    Sail.readReg Register.cur_privilege state = EStateM.Result.ok i.cur_privilege state ∧
-    Sail.readReg Register.plat_clint_base state = EStateM.Result.ok i.plat_clint_base state ∧
-    Sail.readReg Register.plat_clint_size state = EStateM.Result.ok i.plat_clint_size state ∧
-    Sail.readReg Register.plat_ram_base state = EStateM.Result.ok i.plat_ram_base state ∧
-    Sail.readReg Register.plat_rom_base state = EStateM.Result.ok i.plat_rom_base state ∧
     Sail.readReg Register.plat_ram_size state = EStateM.Result.ok i.plat_ram_size state ∧
-    Sail.readReg Register.plat_rom_size state = EStateM.Result.ok i.plat_rom_size state ∧
-    Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok i.htif_tohost_base state ∧
-    state.regs.get? Register.PC = .some i.PC ∧
-    i.cur_privilege = Privilege.Machine ∧
-    i.plat_clint_base = 0 ∧
-    i.plat_clint_size = 0 ∧
-    i.plat_ram_base = 0 ∧
-    i.plat_rom_base = 0 ∧
-    i.htif_tohost_base = .none ∧
-    BitVec.extractLsb 17 17 i.mstatus = 0#1 ∧
+    -- General memory assumptions
+    Local.Assumptions.general_memory_assumptions state ∧
+    -- Address is correctly aligned
+    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 4 = true ∧
+    -- Operation does not overflow
     (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 4 < i.plat_ram_size
 
   set_option maxHeartbeats 0 in
@@ -447,35 +429,23 @@ namespace PureSpec
     ) state
   := by
     obtain ⟨
-      h_aligned,
+      h_pc,
       h_r1_val,
       h_r2_val,
-      h_mstatus,
-      h_cur_privilege,
-      h_clint_base,
-      h_clint_size,
-      h_plat_ram_base,
-      h_plat_rom_base,
       h_plat_ram_size,
-      h_plat_rom_size,
-      h_htif_tohost_base,
-      h_pc,
-      h_cur_privilege_val,
-      h_plat_clint_base_val,
-      h_plat_clint_size_val,
-      h_plat_ram_base_val,
-      h_plat_rom_base_val,
-      h_htif_tohost_base_val,
-      h_mstatus_val,
+      ⟨
+        h_cur_privilege,
+        ⟨ mstatus, ⟨ h_mstatus, h_plat_mstatus_val⟩ ⟩,
+        h_plat_clint_base_val,
+        h_plat_clint_size_val,
+        ⟨ plat_rom_base, h_plat_rom_base_val ⟩,
+        ⟨ plat_rom_size, h_plat_rom_size_val ⟩,
+        h_plat_ram_base_val,
+        h_plat_htif_tohost_base_val
+      ⟩,
+      h_aligned,
       h_does_fit
     ⟩ := h_assumptions
-
-    rewrite [h_cur_privilege_val] at h_cur_privilege
-    rewrite [h_plat_clint_base_val] at h_clint_base
-    rewrite [h_plat_clint_size_val] at h_clint_size
-    rewrite [h_plat_ram_base_val] at h_plat_ram_base
-    rewrite [h_plat_rom_base_val] at h_plat_rom_base
-    rewrite [h_htif_tohost_base_val] at h_htif_tohost_base
 
     simp [
       readReg_state h_pc,
@@ -486,13 +456,13 @@ namespace PureSpec
     replace h_r2_val := r1_of_write_state sw_input.PC h_r2_val
     replace h_mstatus := mstatus_of_write_state sw_input.PC h_mstatus
     replace h_cur_privilege := cur_privilege_of_write_state sw_input.PC h_cur_privilege
-    replace h_clint_base := clint_base_of_write_state sw_input.PC h_clint_base
-    replace h_clint_size := clint_size_of_write_state sw_input.PC h_clint_size
-    replace h_plat_ram_base := ram_base_of_write_state sw_input.PC h_plat_ram_base
+    replace h_clint_base := clint_base_of_write_state sw_input.PC h_plat_clint_base_val
+    replace h_clint_size := clint_size_of_write_state sw_input.PC h_plat_clint_size_val
+    replace h_plat_ram_base := ram_base_of_write_state sw_input.PC h_plat_ram_base_val
     replace h_plat_ram_size := ram_size_of_write_state sw_input.PC h_plat_ram_size
-    replace h_plat_rom_base := rom_base_of_write_state sw_input.PC h_plat_rom_base
-    replace h_plat_rom_size := rom_size_of_write_state sw_input.PC h_plat_rom_size
-    replace h_htif_tohost_base := htif_tohost_base_of_write_state sw_input.PC h_htif_tohost_base
+    replace h_plat_rom_base := rom_base_of_write_state sw_input.PC h_plat_rom_base_val
+    replace h_plat_rom_size := rom_size_of_write_state sw_input.PC h_plat_rom_size_val
+    replace h_htif_tohost_base := htif_tohost_base_of_write_state sw_input.PC h_plat_htif_tohost_base_val
 
     have h_execute_store := Local.execute_STORE_simplified
       (write_reg_state state Register.nextPC (Sail.BitVec.addInt sw_input.PC 4))
@@ -508,7 +478,7 @@ namespace PureSpec
       h_plat_ram_size
       h_plat_rom_size
       h_htif_tohost_base
-      h_mstatus_val
+      h_plat_mstatus_val
       h_does_fit
 
     rewrite [
