@@ -1319,9 +1319,9 @@ namespace Local.Assumptions
     -- The CLINT mechanism is not active
     Sail.readReg Register.plat_clint_base state = EStateM.Result.ok 0 state ∧
     Sail.readReg Register.plat_clint_size state = EStateM.Result.ok 0 state ∧
-    -- The ROM base and size can be read
-    (∃ plat_rom_base, Sail.readReg Register.plat_rom_base state = EStateM.Result.ok plat_rom_base state) ∧
-    (∃ plat_rom_size, Sail.readReg Register.plat_rom_size state = EStateM.Result.ok plat_rom_size state) ∧
+    -- The ROM mechanism is not active
+    Sail.readReg Register.plat_rom_base state = EStateM.Result.ok 0 state ∧
+    Sail.readReg Register.plat_rom_size state = EStateM.Result.ok 0 state ∧
     -- The RAM starts at address zero
     Sail.readReg Register.plat_ram_base state = EStateM.Result.ok 0 state ∧
     -- There is no host-target interaction

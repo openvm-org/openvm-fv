@@ -417,8 +417,8 @@ namespace PureSpec
         ⟨ mstatus, ⟨ h_mstatus, h_plat_mstatus_val⟩ ⟩,
         h_plat_clint_base_val,
         h_plat_clint_size_val,
-        ⟨ plat_rom_base, h_plat_rom_base_val ⟩,
-        ⟨ plat_rom_size, h_plat_rom_size_val ⟩,
+        h_plat_rom_base_val,
+        h_plat_rom_size_val,
         h_plat_ram_base_val,
         h_plat_htif_tohost_base_val
       ⟩,
