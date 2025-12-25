@@ -417,7 +417,7 @@ namespace PureSpec
         h_plat_rom_base_val,
         h_plat_rom_size_val,
         h_plat_ram_base_val,
-        h_plat_htif_tohost_base_val
+        h_htif_tohost_base_val
       ⟩,
       h_aligned,
       h_does_fit
@@ -443,7 +443,7 @@ namespace PureSpec
     replace h_plat_ram_size := ram_size_of_write_state lb_input.PC h_plat_ram_size
     replace h_plat_rom_base := rom_base_of_write_state lb_input.PC h_plat_rom_base_val
     replace h_plat_rom_size := rom_size_of_write_state lb_input.PC h_plat_rom_size_val
-    replace h_htif_tohost_base := htif_tohost_base_of_write_state lb_input.PC h_plat_htif_tohost_base_val
+    replace h_htif_tohost_base := htif_tohost_base_of_write_state lb_input.PC h_htif_tohost_base_val
 
     have h_execute_load := Local.execute_LOADB_simplified
       (write_reg_state state Register.nextPC (Sail.BitVec.addInt lb_input.PC 4))
