@@ -470,16 +470,16 @@ namespace VmAirWrapper_jalr.constraints
 
 
       @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
-      def readInstructionBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
+      def programBus_row (air : Valid_VmAirWrapper_jalr F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
           [air.adapter.from_state.pc row 0, 565, air.adapter.rd_ptr row 0, air.adapter.rs1_ptr row 0,
             air.core.imm row 0, 1, 0, air.adapter.needs_write row 0, air.core.imm_sign row 0])]
 
-      lemma constrain_readInstruction_interactions
+      lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_jalr F ExtF)
         (h : VmAirWrapper_jalr.extraction.constrain_interactions air)
       :
-        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => readInstructionBus_row air row)
+        air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
         unfold VmAirWrapper_jalr.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -510,7 +510,7 @@ namespace VmAirWrapper_jalr.constraints
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
       else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
-      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (readInstructionBus_row air)
+      else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
       else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
       else []
 
@@ -630,5 +630,160 @@ namespace VmAirWrapper_jalr.constraints
     variable[Field ExtF]
 
   end properties
+
+  section bus_entries
+
+    lemma executionBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_jalr FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ executionBus_row air row)
+    :
+      entry.2.length = Interaction.ExecutionBusEntryInstance.data_length
+    := by
+      unfold executionBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    def _executionBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ executionBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (executionBus_row_length x.2)))
+          (executionBus_row air row).attach
+      List.map Interaction.ExecutionBusEntryInstance.deserialise vectorised_row
+
+    lemma memoryBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_jalr FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ memoryBus_row air row)
+    :
+      entry.2.length = Interaction.MemoryBusEntryInstance.data_length
+    := by
+      unfold memoryBus_row at *; simp_all
+      grind (ematch := 8)
+
+    @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    def _memoryBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ memoryBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (memoryBus_row_length x.2)))
+          (memoryBus_row air row).attach
+      List.map Interaction.MemoryBusEntryInstance.deserialise vectorised_row
+
+    lemma rangeCheckerBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_jalr FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ rangeCheckerBus_row air row)
+    :
+      entry.2.length = Interaction.RangeCheckerBusEntryInstance.data_length
+    := by
+      unfold rangeCheckerBus_row at *; simp_all
+      grind
+
+    @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    def _rangeCheckerBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ rangeCheckerBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (rangeCheckerBus_row_length x.2)))
+          (rangeCheckerBus_row air row).attach
+      List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
+
+    lemma programBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_jalr FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ programBus_row air row)
+    :
+      entry.2.length = Interaction.ProgramBusEntryInstance.data_length
+    := by
+      unfold programBus_row at *; simp_all
+
+    @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    def _programBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ programBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (programBus_row_length x.2)))
+          (programBus_row air row).attach
+      List.map Interaction.ProgramBusEntryInstance.deserialise vectorised_row
+
+    lemma bitwiseBus_row_length [Field ExtF]
+      {air : Valid_VmAirWrapper_jalr FBB ExtF} {row : ℕ}
+      (h_in : entry ∈ bitwiseBus_row air row)
+    :
+      entry.2.length = Interaction.BitwiseBusEntryInstance.data_length
+    := by
+      unfold bitwiseBus_row at *; simp_all
+
+    @[VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    def _bitwiseBus_row [Field ExtF]
+      (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ) :=
+      let vectorised_row : List (FBB × Vector FBB Interaction.BitwiseBusEntryInstance.data_length) := by
+        exact
+        List.map
+          (fun x : { row' // row' ∈ bitwiseBus_row air row} =>
+          (x.1.1, Vector.mk x.1.2.toArray (bitwiseBus_row_length x.2)))
+          (bitwiseBus_row air row).attach
+      List.map Interaction.BitwiseBusEntryInstance.deserialise vectorised_row
+
+    @[simp]
+    def serialiseToList [Interaction.BusEntry FBB α] (rowData : List α) : List (FBB × List FBB) :=
+      rowData.map Interaction.BusEntry.serialiseToList
+
+    @[simp]
+    def axioms [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.axioms FBB))
+
+    @[simp]
+    def propertiesToAssume [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assume FBB))
+
+    @[simp]
+    def propertiesToAssert [Interaction.BusEntry FBB α] (rowData : List α) : Prop :=
+      List.Forall id (rowData.map (Interaction.BusEntry.assert FBB))
+
+    @[simp]
+    def busRow [Field ExtF] (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ)
+    : List (FBB × List FBB) :=
+      executionBus_row air row ++
+      memoryBus_row air row ++
+      rangeCheckerBus_row air row ++
+      programBus_row air row ++
+      bitwiseBus_row air row
+
+    @[simp]
+    def axiomsPerRow [Field ExtF]
+      (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ)
+    : Prop :=
+      axioms (_executionBus_row air row) ∧
+      axioms (_memoryBus_row air row) ∧
+      axioms (_rangeCheckerBus_row air row) ∧
+      axioms (_programBus_row air row) ∧
+      axioms (_bitwiseBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssumePerRow [Field ExtF] (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssume (_executionBus_row air row) ∧
+      propertiesToAssume (_memoryBus_row air row) ∧
+      propertiesToAssume (_rangeCheckerBus_row air row) ∧
+      propertiesToAssume (_programBus_row air row) ∧
+      propertiesToAssume (_bitwiseBus_row air row)
+
+    @[simp]
+    def wf_propertiesToAssertPerRow [Field ExtF] (air : Valid_VmAirWrapper_jalr FBB ExtF) (row : ℕ)
+    : Prop :=
+      propertiesToAssert (_executionBus_row air row) ∧
+      propertiesToAssert (_memoryBus_row air row) ∧
+      propertiesToAssert (_rangeCheckerBus_row air row) ∧
+      propertiesToAssert (_programBus_row air row) ∧
+      propertiesToAssert (_bitwiseBus_row air row)
+
+  end bus_entries
 
 end VmAirWrapper_jalr.constraints

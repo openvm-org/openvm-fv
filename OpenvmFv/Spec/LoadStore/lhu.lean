@@ -3,14 +3,13 @@ import OpenvmFv.Spec.rX_bits
 
 namespace PureSpec
 
-  structure SwInput where
+  structure LhuInput where
     -- operands
     r1 : BitVec 5
     imm : BitVec 12
-    r2 : BitVec 5
+    rd : BitVec 5
     -- registers
     r1_val : BitVec 32
-    r2_val : BitVec 32
     PC : BitVec 32
     mstatus : BitVec 64
     cur_privilege : Privilege
@@ -21,15 +20,14 @@ namespace PureSpec
     plat_rom_base : BitVec 34
     plat_rom_size : BitVec 34
     htif_tohost_base : Option (BitVec 34)
+    -- memory
+    data0 : BitVec 8
+    data1 : BitVec 8
 
-  structure SwOutput where
+  structure LhuOutput where
     -- registers
     nextPC : BitVec 32
-    -- memory
-    data0 : ℕ × BitVec 8
-    data1 : ℕ × BitVec 8
-    data2 : ℕ × BitVec 8
-    data3 : ℕ × BitVec 8
+    rd : Option (Finset.Icc 1 31 × BitVec 32)
 
   private lemma range (bv : BitVec 5) (h : bv ≠ 0)
   : bv.toNat ∈ Finset.Icc 1 31
@@ -38,25 +36,18 @@ namespace PureSpec
     obtain ⟨x: Fin 32⟩ := bv
     fin_cases x <;> simp_all
 
-  def execute_STORE_sw_pure (input : SwInput) : SwOutput := {
+  def execute_LOADHU_lhu_pure (input : LhuInput) : LhuOutput := {
     nextPC := input.PC + 4#32
-    data0 := (
-      (input.r1_val + BitVec.signExtend 32 input.imm).toNat,
-      BitVec.extractLsb 7 0 input.r2_val
-    )
-    data1 := (
-      (input.r1_val + BitVec.signExtend 32 input.imm).toNat + 1,
-      BitVec.extractLsb 15 8 input.r2_val
-    )
-    data2 := (
-      (input.r1_val + BitVec.signExtend 32 input.imm).toNat + 2,
-      BitVec.extractLsb 23 16 input.r2_val
-    )
-    data3 := (
-      (input.r1_val + BitVec.signExtend 32 input.imm).toNat + 3,
-      BitVec.extractLsb 31 24 input.r2_val
-    )
-    : SwOutput
+    rd := if h: input.rd = 0
+      then .none
+      else .some (
+        ⟨
+          input.rd.toNat,
+          range input.rd h
+        ⟩,
+        (BitVec.extend (input.data1 ++ input.data0) 32 false)
+      )
+    : LhuOutput
   }
 
   -- just used to allow the same tactics to handle the case for each non-zero register
@@ -96,13 +87,12 @@ namespace PureSpec
       | 31#5 => Register.x31
       | _ => Register.x1
 
-  def sw_state_assumptions
-    (i : SwInput)
+  def lhu_state_assumptions
+    (i : LhuInput)
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
   : Prop :=
-    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 4 = true ∧
+    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 2 = true ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
-    LeanRV32D.Functions.rX_bits (regidx.Regidx i.r2) state = EStateM.Result.ok i.r2_val state ∧
     Sail.readReg Register.mstatus state = EStateM.Result.ok i.mstatus state ∧
     Sail.readReg Register.cur_privilege state = EStateM.Result.ok i.cur_privilege state ∧
     Sail.readReg Register.plat_clint_base state = EStateM.Result.ok i.plat_clint_base state ∧
@@ -112,6 +102,8 @@ namespace PureSpec
     Sail.readReg Register.plat_ram_size state = EStateM.Result.ok i.plat_ram_size state ∧
     Sail.readReg Register.plat_rom_size state = EStateM.Result.ok i.plat_rom_size state ∧
     Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok i.htif_tohost_base state ∧
+    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
+    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat + 1]? = .some i.data1 ∧
     state.regs.get? Register.PC = .some i.PC ∧
     i.cur_privilege = Privilege.Machine ∧
     i.plat_clint_base = 0 ∧
@@ -120,7 +112,7 @@ namespace PureSpec
     i.plat_rom_base = 0 ∧
     i.htif_tohost_base = .none ∧
     BitVec.extractLsb 17 17 i.mstatus = 0#1 ∧
-    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 4 < i.plat_ram_size
+    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 2 < i.plat_ram_size
 
   set_option maxHeartbeats 0 in
   lemma r1_of_write_state
@@ -407,49 +399,34 @@ namespace PureSpec
     . simp [h] at ⊢ h_htif_tohost_base
       exact h_htif_tohost_base
 
-  def modify_memory_4
-    (s: PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
-    (sw_output: SwOutput)
-  := {
-    regs := s.regs,
-    choiceState := s.choiceState,
-    tags := s.tags,
-    cycleCount := s.cycleCount,
-    sailOutput := s.sailOutput
-    mem :=
-      ((((s.mem.insert sw_output.data0.1 sw_output.data0.2
-      ).insert sw_output.data1.1 sw_output.data1.2)
-      ).insert sw_output.data2.1 sw_output.data2.2
-      ).insert sw_output.data3.1 sw_output.data3.2
-    : PreSail.SequentialState RegisterType Sail.trivialChoiceSource
-  }
-
   set_option maxHeartbeats 0 in
-  lemma execute_STORE_sw_pure_equiv
-    (sw_input : SwInput)
-    (h_assumptions : sw_state_assumptions sw_input state)
+  lemma execute_LOADHU_lhu_pure_equiv
+    (lhu_input : LhuInput)
+    (h_assumptions : lhu_state_assumptions lhu_input state)
   :
     (
       do
         Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-        LeanRV32D.Functions.execute (instruction.STORE (
-          sw_input.imm,
-          regidx.Regidx sw_input.r2,
-          regidx.Regidx sw_input.r1,
-          4
+        LeanRV32D.Functions.execute (instruction.LOAD (
+          lhu_input.imm,
+          regidx.Regidx lhu_input.r1,
+          regidx.Regidx lhu_input.rd,
+          true,
+          2
         ))
     ) state =
-    let sw_output := execute_STORE_sw_pure sw_input
+    let lhu_output := execute_LOADHU_lhu_pure lhu_input
     (do
-      Sail.writeReg Register.nextPC sw_output.nextPC
-      set (modify_memory_4 (← get) sw_output)
+      Sail.writeReg Register.nextPC lhu_output.nextPC
+      match lhu_output.rd with
+        | .some (rd, rd_val) => write_xreg rd rd_val
+        | .none => pure ()
       pure (ExecutionResult.Retire_Success ())
     ) state
   := by
     obtain ⟨
       h_aligned,
       h_r1_val,
-      h_r2_val,
       h_mstatus,
       h_cur_privilege,
       h_clint_base,
@@ -459,6 +436,8 @@ namespace PureSpec
       h_plat_ram_size,
       h_plat_rom_size,
       h_htif_tohost_base,
+      h_mem_0,
+      h_mem_1,
       h_pc,
       h_cur_privilege_val,
       h_plat_clint_base_val,
@@ -482,23 +461,30 @@ namespace PureSpec
       writeReg_state_success,
     ]
 
-    replace h_r1_val := r1_of_write_state sw_input.PC h_r1_val
-    replace h_r2_val := r1_of_write_state sw_input.PC h_r2_val
-    replace h_mstatus := mstatus_of_write_state sw_input.PC h_mstatus
-    replace h_cur_privilege := cur_privilege_of_write_state sw_input.PC h_cur_privilege
-    replace h_clint_base := clint_base_of_write_state sw_input.PC h_clint_base
-    replace h_clint_size := clint_size_of_write_state sw_input.PC h_clint_size
-    replace h_plat_ram_base := ram_base_of_write_state sw_input.PC h_plat_ram_base
-    replace h_plat_ram_size := ram_size_of_write_state sw_input.PC h_plat_ram_size
-    replace h_plat_rom_base := rom_base_of_write_state sw_input.PC h_plat_rom_base
-    replace h_plat_rom_size := rom_size_of_write_state sw_input.PC h_plat_rom_size
-    replace h_htif_tohost_base := htif_tohost_base_of_write_state sw_input.PC h_htif_tohost_base
+    rewrite [
+      Local.execute_load_instruction,
+      ←Local.execute_LOAD_equiv
+    ]
+    simp
 
-    have h_execute_store := Local.execute_STORE_simplified
-      (write_reg_state state Register.nextPC (Sail.BitVec.addInt sw_input.PC 4))
+    replace h_r1_val := r1_of_write_state lhu_input.PC h_r1_val
+    replace h_mstatus := mstatus_of_write_state lhu_input.PC h_mstatus
+    replace h_cur_privilege := cur_privilege_of_write_state lhu_input.PC h_cur_privilege
+    replace h_clint_base := clint_base_of_write_state lhu_input.PC h_clint_base
+    replace h_clint_size := clint_size_of_write_state lhu_input.PC h_clint_size
+    replace h_plat_ram_base := ram_base_of_write_state lhu_input.PC h_plat_ram_base
+    replace h_plat_ram_size := ram_size_of_write_state lhu_input.PC h_plat_ram_size
+    replace h_plat_rom_base := rom_base_of_write_state lhu_input.PC h_plat_rom_base
+    replace h_plat_rom_size := rom_size_of_write_state lhu_input.PC h_plat_rom_size
+    replace h_htif_tohost_base := htif_tohost_base_of_write_state lhu_input.PC h_htif_tohost_base
+
+    have h_execute_load := Local.execute_LOADHU_simplified
+      (write_reg_state state Register.nextPC (Sail.BitVec.addInt lhu_input.PC 4))
+      (regidx.Regidx lhu_input.rd)
+      lhu_input.data0
+      lhu_input.data1
       h_aligned
       h_r1_val
-      h_r2_val
       h_mstatus
       h_cur_privilege
       h_clint_base
@@ -510,17 +496,31 @@ namespace PureSpec
       h_htif_tohost_base
       h_mstatus_val
       h_does_fit
+      h_mem_0 -- this works because write_reg_state doesn't affect state.mem
+      h_mem_1
 
     rewrite [
-      Local.execute_store_instruction
-    ]
-    simp only [Int.toNat]
-    rewrite [
-      h_execute_store
+      h_execute_load
     ]
 
-    unfold write_reg_state
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get
-    simp [EStateM.instMonadStateOf, EStateM.get, EStateM.set, modify_memory_4, execute_STORE_sw_pure, Sail.BitVec.addInt]
+    simp [
+      execute_LOADHU_lhu_pure
+    ]
+
+    split_ifs with h_rd
+    . simp [
+        LeanRV32D.Functions.wX_bits,
+        LeanRV32D.Functions.wX,
+        h_rd,
+        Sail.BitVec.addInt
+      ]
+    . simp [Sail.BitVec.addInt]
+      rewrite [
+        wX_write_xreg_equiv _ _
+          (regidx.Regidx lhu_input.rd)
+          ⟨lhu_input.rd.toNat, range lhu_input.rd h_rd⟩
+      ]
+      . split <;> aesop
+      . simp
 
 end PureSpec
