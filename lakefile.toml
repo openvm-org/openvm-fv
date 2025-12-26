@@ -23,7 +23,7 @@ rev = "main"
 [[require]]
 name = "LeanRV"
 git = "https://github.com/NethermindEth/sail-riscv-lean"
-rev = "rv32d"
+rev = "511e25600eb89f1d4a73e2a3b5e6fda7a0622757"
 
 [[lean_lib]]
 name = "OpenvmFv"
