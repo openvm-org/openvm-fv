@@ -88,8 +88,7 @@ namespace Interaction
           data_length := 2,
           data := fun ⟨_, pc, timestamp⟩ => #v[pc, timestamp],
 
-          -- `pc`s are always less than `2^30`,
-          -- timestamps are always less than `2^29`.
+          -- `pc`s are always less than `2^30` and aligned to 4
           axioms :=
             fun ⟨multiplicity, pc, timestamp⟩ =>
               ¬ multiplicity = 0 →
@@ -151,7 +150,7 @@ namespace Interaction
           data := fun ⟨_, as, ptr, x0, x1, x2, x3, timestamp⟩ =>
                     #v[as, ptr, x0, x1, x2, x3, timestamp],
 
-          -- Timestamps are always less than `2^29`
+          -- Timestamps are always less than 2 ^ 29
           axioms := fun ⟨multiplicity, _, _, _, _, _, _, timestamp⟩ =>
                            ¬ multiplicity = 0 → timestamp < 2 ^ 29
 
@@ -159,7 +158,7 @@ namespace Interaction
           wf_properties :=
             fun ⟨_, as, ptr, x0, x1, x2, x3, _⟩ =>
               as.val < 3 ∧
-              ptr.val < 2 ^ 29 ∧
+              ptr.val < OpenVM_memory_address_space_size ∧
               x0.val < 256 ∧ x1.val < 256 ∧
               x2.val < 256 ∧ x3.val < 256
 
@@ -946,10 +945,6 @@ namespace InteractionList
       case cons hd tl ihs =>
         obtain ⟨ dr', ds' ⟩ := hd
         simp_all [recv_data, rising_bus, rising_pair]
-        rcases h_in with _ | h_tl <;> [ simp_all; right ]
-        obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
-        specialize ihs l dr'' ds'' h_in'' eq_l
-        grind
 
     /-- All positive entries in a timestamp bus come from the sends -/
     lemma pos_ones_in_send_data
@@ -965,10 +960,6 @@ namespace InteractionList
       case cons hd tl ihs =>
         obtain ⟨ dr', ds' ⟩ := hd
         simp_all [send_data, rising_bus, rising_pair]
-        rcases h_in with _ | h_tl <;> [ simp_all; right ]
-        obtain ⟨ l, ⟨ ⟨ dr'', ds'', h_in'', eq_l ⟩, h_in ⟩ ⟩ := h_tl
-        specialize ihs l dr'' ds'' h_in'' eq_l
-        grind
 
     /-- Reconstructing receive data from a rising bus -/
     lemma recv_data_from_rising_bus
@@ -1366,7 +1357,7 @@ namespace InteractionList
       (xs : List (List FBB))
       (d_min d_max : List FBB)
       (μ : List FBB → ℕ)
-      (sorted_xs : List.Sorted (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs)
+      (sorted_xs : List.Pairwise (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs)
       (bus_data : List (List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
       (data_min : ∀ x ∈ xs, μ d_min < μ x)
@@ -1387,7 +1378,13 @@ namespace InteractionList
         set sends := xs ++ [ d_max ]
         -- Get `x_max`, the last element of `xs`, which has to exist given `xs` is non-empty
         obtain ⟨ xs', x_max, xs_split ⟩ : ∃ xs' x_max , xs = xs' ++ [x_max]
-          := by exists xs.reverse.tail.reverse, xs.reverse.head (by grind); grind
+        := by
+          exists xs.reverse.tail.reverse, xs.reverse.head (by rw [List.reverse_ne_nil_iff]; assumption)
+          clear *-
+          trans xs.reverse.reverse
+          . grind
+          . rw [List.reverse_eq_append_iff]
+            grind
         subst xs; clear xs_not_empty
         -- `x_max` is in the receives
         have x_max_in_recvs : x_max ∈ recv_data bus_data := by grind
@@ -1401,8 +1398,7 @@ namespace InteractionList
           subst sends; clear *- sorted_xs data_max y_in_sends x_max_lt_y
           simp_all
           rcases y_in_sends with y_in_xs' | y_is_xmax | y_is_dmax
-          . unfold List.Sorted at sorted_xs
-            simp_all [List.pairwise_append]
+          . simp_all [List.pairwise_append]
             grind
           . grind
           . assumption
@@ -1417,7 +1413,7 @@ namespace InteractionList
         rw [← List.cons_append, List.zip_append]
         trans (bus_data' ++ [(x_max, d_max)]) <;> [ assumption; skip ]
         simp [List.perm_append_right_iff]
-        unfold List.Sorted at *
+        unfold List.Pairwise at *
         -- Fire the IH
         apply ih xs' (by simp) (μ := μ) <;> (try grind) <;> clear ih
         . simp_all; grind
@@ -1435,7 +1431,7 @@ namespace InteractionList
       (xs : List (List FBB))
       (d_min d_max : List FBB)
       (μ : List FBB → ℕ)
-      (sorted_xs : List.Sorted (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs)
+      (sorted_xs : List.Pairwise (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs)
       (bus_data : List (List FBB × List FBB))
       (lt_proofs : ∀ entry ∈ bus_data, μ entry.1 < μ entry.2)
       (data_min : ∀ x ∈ xs, μ d_min < μ x)
@@ -1443,53 +1439,51 @@ namespace InteractionList
       (h_recvs : (recv_data bus_data).Perm (d_min :: xs))
       (h_sends : (send_data bus_data).Perm (xs ++ [d_max]))
     :
-      List.Sorted (fun x₁ x₂ ↦ μ x₁ < μ x₂) (d_min :: xs ++ [d_max])
+      List.Pairwise (fun x₁ x₂ ↦ μ x₁ < μ x₂) (d_min :: xs ++ [d_max])
     := by
       have bus_data_perm_ordered :=
         rising_bus_with_matching_sorted_data_is_monotonic
           xs d_min d_max μ sorted_xs bus_data lt_proofs
           data_min data_max h_recvs h_sends
-      unfold List.Sorted at *
+      unfold List.Pairwise at *
       rw [List.pairwise_append, List.pairwise_cons]
-      rcases xs with _ | ⟨ hd, tl ⟩
-      . simp_all
-      . split_ands
-        . grind
-        . have : IsTrans (List FBB) fun x₁ x₂ ↦ μ x₁ < μ x₂
-            := by grind [IsTrans.mk]
-          rw [← List.chain_iff_pairwise, List.chain_iff_get]
-          . split_ands
-            . intro h
-              apply lt_proofs (hd, tl.get ⟨ 0, by omega⟩)
-              rw [List.Perm.mem_iff bus_data_perm_ordered]
-              rcases tl <;> simp_all
-              grind
-            . intro i hlen
-              apply lt_proofs (tl.get ⟨ i, by omega⟩, tl.get ⟨ i + 1, by omega⟩)
-              rw [List.Perm.mem_iff bus_data_perm_ordered]
+      split_ands
+      . grind
+      . have : IsTrans (List FBB) fun x₁ x₂ ↦ μ x₁ < μ x₂
+          := by grind [IsTrans.mk]
+        rw [← List.isChain_iff_pairwise, List.isChain_iff_getElem]
+        intro idx h_mem
+        specialize lt_proofs ⟨ xs[idx], xs[idx+1] ⟩
+        apply lt_proofs
+        rw [List.Perm.mem_iff bus_data_perm_ordered]
+        clear *- idx h_mem
+        clear this μ
+        induction idx generalizing d_min d_max xs
+        case refine_1.refine_2.zero =>
+          cases xs
+          . case nil => grind
+          . case cons hd tl =>
               simp; right
-              suffices : tl[i] = (hd :: tl)[i+1]'(by simp; omega) ∧ tl[i+1] = (tl ++ [d_max])[i+1]'(by simp; omega)
-              . obtain ⟨ eq_i, eq_i_plus_one ⟩ := this
-                rw [eq_i, eq_i_plus_one]
-                suffices : ((hd :: tl)[i + 1]'(by simp; omega), (tl ++ [d_max])[i + 1]'(by simp; omega))
-                             =
-                           ((hd :: tl).zip (tl ++ [d_max]))[i+1]'(by simp; omega)
-                . grind
-                . grind
-              . simp_all; grind
-        . grind
-        . simp_all
-          by_cases tl_not_empty : tl = []
+              rcases tl <;> simp; grind
+        case refine_1.refine_2.succ idx ih =>
+          cases xs
+          . case nil => grind
+          . case cons hd xs =>
+              simp; right
+              rcases xs <;> [ simp; skip ] <;> grind
+      . grind
+      . rcases xs with _ | ⟨ hd, tl ⟩ <;> simp_all
+        by_cases tl_not_empty : tl = []
+        . simp_all; grind
+        . obtain ⟨ tl', tl_max, tl_split ⟩ : ∃ tl' tl_max , tl = tl' ++ [tl_max]
+          := by exists tl.reverse.tail.reverse, tl.reverse.head (by grind)
+                simp_all [List.dropLast_append_getLast]
+          subst tl; clear tl_not_empty
+          suffices : μ tl_max < μ d_max
           . simp_all; grind
-          . obtain ⟨ tl', tl_max, tl_split ⟩ : ∃ tl' tl_max , tl = tl' ++ [tl_max]
-            := by exists tl.reverse.tail.reverse, tl.reverse.head (by grind)
-                  simp_all [List.dropLast_append_getLast]
-            subst tl; clear tl_not_empty
-            suffices : μ tl_max < μ d_max
-            . simp_all; grind
-            . apply lt_proofs tl_max d_max
-              rw [← List.cons_append, List.zip_append (by simp)] at bus_data_perm_ordered
-              simp_all; grind
+          . apply lt_proofs tl_max d_max
+            rw [← List.cons_append, List.zip_append (by simp)] at bus_data_perm_ordered
+            simp_all; grind
 
     /-- If a non-empty rising bus is balanced with single balancers,
         then the measure of the associated data is strictly increasing,
@@ -1504,7 +1498,7 @@ namespace InteractionList
       (h_balance : InteractionList.is_balanced ([((1 : FBB), ldata)] ++ (rising_bus μ bus_data lt_proofs) ++ [((-1 : FBB), rdata)]))
     :
       ∃ xs, bus_data.Perm (List.zip (ldata :: xs) (xs ++ [rdata])) ∧
-            List.Sorted (fun x₁ x₂ ↦ μ x₁ < μ x₂) (ldata :: xs ++ [rdata])
+            List.Pairwise (fun x₁ x₂ ↦ μ x₁ < μ x₂) (ldata :: xs ++ [rdata])
     := by
       have bus_not_balanced := rising_bus_nonempty_not_balanced bus_data lt_proofs h_not_empty (by simp_all; omega)
       have ⟨ h_data_neq, h_decomposition ⟩ := single_balancer_decomposition (rising_bus_unitary μ bus_data lt_proofs) h_len_bus h_balance
@@ -1549,17 +1543,16 @@ namespace InteractionList
         grind [unitary, unitary_inv_perm]
       have h_length' : bus'.length < BB_prime := by have := List.Perm.length_eq h_perm; grind
       have := @unitary_balanced_recvs_perm_sends bus' h_unitary' h_balance' h_length'
-      simp_all [-List.sorted_cons, -List.cons_append]
+      simp_all [-List.pairwise_cons, -List.cons_append]
       let xs := List.mergeSort (List.filterMap (fun x ↦ if x.1 = 1 then some x.2 else none) bus') (fun x₁ x₂ ↦ μ x₁ ≤ μ x₂)
 
       have all_xs_in_send : ∀ x, x ∈ xs → x ∈ send_data bus_data := by grind [List.mem_mergeSort]
 
-      have sorted_xs : List.Sorted (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs
+      have sorted_xs : List.Pairwise (fun x₁ x₂ ↦ decide (μ x₁ ≤ μ x₂)) xs
       := by
         subst xs
-        unfold List.Sorted
         set l := List.filterMap (fun x ↦ if x.1 = 1 then some x.2 else none) bus'
-        apply List.sorted_mergeSort <;> grind
+        apply List.pairwise_mergeSort <;> grind
 
       have data_min : ∀ x ∈ xs, μ ldata < μ x := by grind
       have data_max : ∀ x ∈ xs, μ x ≤ μ rdata := by grind

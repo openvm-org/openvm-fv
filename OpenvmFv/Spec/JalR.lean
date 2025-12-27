@@ -103,8 +103,8 @@ lemma needs_write_eq_is_valid
     simp [row_valid, VmAirWrapper_jalr_constraint_and_interaction_simplification]
       at pa_exec pa_read pa_bit
     simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
-    obtain ⟨ instruction, multiplicity, data, h_transpile,
-            hm, hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
+    obtain ⟨ instruction, data, h_transpile,
+             hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain ⟨ imm, rs1, rd, eq_instr, nz_rd ⟩ := Transpiler.transpiler_opcode_565 h_transpile (by simp_all)
@@ -113,8 +113,7 @@ lemma needs_write_eq_is_valid
     split_ifs at h_transpile with z_rd
     all_goals
       simp [-Vector.mk_eq] at h_transpile
-      obtain ⟨ eq_mul, eq_data ⟩ := h_transpile
-      symm at eq_data
+      symm at h_transpile
       simp_all
 
 include
@@ -153,8 +152,8 @@ theorem spec_jalr
         VmAirWrapper_jalr_constraint_and_interaction_simplification]
     at pa_exec pa_mem pa_range pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
-  obtain ⟨ instruction, multiplicity, data, h_transpile,
-           hm, hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
+  obtain ⟨ instruction, data, h_transpile,
+           hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
   have h_alignment := Transpiler.pc_aligned_of_some h_transpile
   have h_bound := Transpiler.pc_bound_of_some h_transpile
   obtain ⟨ imm, rs1, rd, eq_instr, nz_rd ⟩ := Transpiler.transpiler_opcode_565 h_transpile (by grind)
@@ -163,7 +162,6 @@ theorem spec_jalr
   split_ifs at h_transpile with z_rd
   all_goals
     simp [-Vector.mk_eq] at h_transpile
-    obtain ⟨ hm, hdata ⟩ := h_transpile
     subst data; simp at *
   obtain ⟨ ub_rs1_ptr, ub_rs10, ub_rs11, ub_rs12, ub_rs13,
            ub_rd_ptr, ub_pd0, ub_pd1, ub_pd2, ub_pd3 ⟩ := pa_mem
@@ -370,7 +368,7 @@ theorem spec_jalr
     have : (BitVec.ofNat 32 ↑(air.core.to_pc row 0))[0] = false
     := by
       clear *- ub_tpc al_tpc
-      simp only [BitVec.ofNat, Nat.reducePow]
+      simp only [BitVec.ofNat, Nat.reducePow, Fin.Internal.ofNat]
       rw [BitVec.getElem_ofFin]
       obtain ⟨ x, eq_x ⟩ : ∃ x, x = air.core.to_pc row 0 := by simp
       rw [← eq_x] at al_tpc ⊢

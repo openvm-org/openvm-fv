@@ -7,10 +7,10 @@ namespace Local
         match op with
         | .ADD => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) + (← (LeanRV32D.Functions.rX_bits rs2))))
         | .SLT =>
-          (pure (LeanRV32D.Functions.zero_extend (m := 32)
+          (pure (zero_extend (m := 32)
               (LeanRV32D.Functions.bool_to_bits (LeanRV32D.Functions.zopz0zI_s (← (LeanRV32D.Functions.rX_bits rs1)) (← (LeanRV32D.Functions.rX_bits rs2))))))
         | .SLTU =>
-          (pure (LeanRV32D.Functions.zero_extend (m := 32)
+          (pure (zero_extend (m := 32)
               (LeanRV32D.Functions.bool_to_bits (LeanRV32D.Functions.zopz0zI_u (← (LeanRV32D.Functions.rX_bits rs1)) (← (LeanRV32D.Functions.rX_bits rs2))))))
         | .AND => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) &&& (← (LeanRV32D.Functions.rX_bits rs2))))
         | .OR => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) ||| (← (LeanRV32D.Functions.rX_bits rs2))))

@@ -41,7 +41,7 @@ namespace Local
     | .some e => Sail.SailME.throw ((ExecutionResult.Ext_ControlAddr_Check_Failure e) : ExecutionResult)
     | none => (pure ())
     Sail.assert ((Sail.BitVec.access target 0) == 0#1) "extensions/I/base_insts.sail:59.29-59.30"
-    if (((← (LeanRV32D.Functions.bit_to_bool (Sail.BitVec.access target 1))) && (not (← (LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca)))) : Bool)
+    if ((((LeanRV32D.Functions.bit_to_bool (Sail.BitVec.access target 1))) && (not (← (LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca)))) : Bool)
     then (pure (ExecutionResult.Memory_Exception ((virtaddr.Virtaddr target), (ExceptionType.E_Fetch_Addr_Align ()))))
     else
       (do

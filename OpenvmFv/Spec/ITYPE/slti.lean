@@ -106,10 +106,10 @@ namespace PureSpec
         ]
         by_cases h_lt: slti_input.r1_val.toInt < (BitVec.signExtend 32 slti_input.imm).toInt
         . simp_all [BitVec.slt, LeanRV32D.Functions.sign_extend, Sail.BitVec.signExtend]
-          simp [LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
+          simp [zero_extend, Sail.BitVec.zeroExtend]
         . simp [h_lt, BitVec.slt, LeanRV32D.Functions.sign_extend, Sail.BitVec.signExtend]
           have : (slti_input.r1_val.toInt <b (BitVec.signExtend 32 imm).toInt) = false := by simp_all
-          simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
+          simp [this, zero_extend, Sail.BitVec.zeroExtend]
       . simp [regidx_to_fin] at *
         omega
 

@@ -8,9 +8,9 @@ namespace Local
       (← do
         match op with
         | .ADDI => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) + immext))
-        | .SLTI => (pure (LeanRV32D.Functions.zero_extend (m := 32) (LeanRV32D.Functions.bool_to_bits (LeanRV32D.Functions.zopz0zI_s (← (LeanRV32D.Functions.rX_bits rs1)) immext))))
+        | .SLTI => (pure (zero_extend (m := 32) (LeanRV32D.Functions.bool_to_bits (LeanRV32D.Functions.zopz0zI_s (← (LeanRV32D.Functions.rX_bits rs1)) immext))))
         | .SLTIU =>
-          (pure (LeanRV32D.Functions.zero_extend (m := 32) (LeanRV32D.Functions.bool_to_bits (LeanRV32D.Functions.zopz0zI_u (← (LeanRV32D.Functions.rX_bits rs1)) immext))))
+          (pure (zero_extend (m := 32) (LeanRV32D.Functions.bool_to_bits (LeanRV32D.Functions.zopz0zI_u (← (LeanRV32D.Functions.rX_bits rs1)) immext))))
         | .ANDI => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) &&& immext))
         | .ORI => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) ||| immext))
         | .XORI => (pure ((← (LeanRV32D.Functions.rX_bits rs1)) ^^^ immext))))

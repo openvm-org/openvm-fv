@@ -94,6 +94,7 @@ namespace PureSpec
     unfold EStateM.map
     simp [
       Sail.SailME.run,
+      PreSail.PreSailME.run,
       ExceptT.run,
       Sail.BitVec.addInt
     ]

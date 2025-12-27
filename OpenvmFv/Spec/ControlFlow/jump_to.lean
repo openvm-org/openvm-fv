@@ -20,7 +20,7 @@ lemma jump_to_simplified_equiv:
   unfold jump_to_simplified
   simp [
     liftM, monadLift, MonadLift.monadLift, ExceptT.lift, ExceptT.mk, Functor.map,
-    bind, Sail.SailME.run, EStateM.bind, ExceptT.bind, liftM, monadLift,
+    bind, Sail.SailME.run, PreSail.PreSailME.run, EStateM.bind, ExceptT.bind, liftM, monadLift,
     MonadLift.monadLift, ExceptT.lift, ExceptT.mk, ExceptT.run, Functor.map, ExceptT.bindCont,
   ]
   by_cases h_bit_0 : (BitVec.ofBool target[0]) = 1#1
@@ -37,9 +37,12 @@ lemma jump_to_simplified_equiv:
         simp [readReg_state h_misa]
         by_cases h_bit_1 : (BitVec.ofBool target[1] = 1#1) ∧ misa_val[2] = false
         . simp [h_bit_1]
-        . simp [h_bit_1]
+        . simp [
+            h_bit_1,
+            EStateM.bind,
+            ExceptT.bindCont,
+          ]
           unfold EStateM.map
           simp [
             writeReg_state_success,
-            ExceptT.bindCont
           ]

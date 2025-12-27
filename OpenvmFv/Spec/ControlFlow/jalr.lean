@@ -43,34 +43,81 @@ namespace PureSpec
   := by
     simp [LeanRV32D.Functions.execute]
 
+  lemma cur_privilege_of_write_state
+    {cur_privilege : Privilege}
+    (pc : BitVec 32)
+    (h_cur_privilege : Sail.readReg Register.cur_privilege state = EStateM.Result.ok cur_privilege state)
+  :
+    Sail.readReg Register.cur_privilege (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
+    EStateM.Result.ok cur_privilege (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
+  := by
+    simp [
+      Sail.readReg, PreSail.readReg, write_reg_state
+    ] at ⊢ h_cur_privilege
+    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_cur_privilege
+    dsimp at ⊢ h_cur_privilege
+    have :
+      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.cur_privilege =
+      state.regs.get? Register.cur_privilege
+    := by grind
+    simp [this]
+    rcases h: state.regs.get? Register.cur_privilege
+    . simp [h] at h_cur_privilege
+    . simp [h] at ⊢ h_cur_privilege
+      exact h_cur_privilege
+
+  lemma mseccfg_of_write_state
+    (pc : BitVec 32)
+    (h_mseccfg : Sail.readReg Register.mseccfg state = EStateM.Result.ok mseccfg state)
+  :
+    Sail.readReg Register.mseccfg (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
+    EStateM.Result.ok mseccfg (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
+  := by
+    simp [
+      Sail.readReg, PreSail.readReg, write_reg_state
+    ] at ⊢ h_mseccfg
+    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_mseccfg
+    dsimp at ⊢ h_mseccfg
+    have :
+      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.mseccfg =
+      state.regs.get? Register.mseccfg
+    := by grind
+    simp [this]
+    rcases h: state.regs.get? Register.mseccfg
+    . simp [h] at h_mseccfg
+    . simp [h] at ⊢ h_mseccfg
+      exact h_mseccfg
+
   set_option maxHeartbeats 0 in
   lemma execute_JALR_pure_equiv
-    (jalr_input : JalrInput)
+    (input : JalrInput)
     (imm: BitVec 12)
     (rs1 rd: regidx)
-    (h_input_imm: jalr_input.imm = imm)
-    (h_input_rd: jalr_input.rd = regidx_to_fin rd)
-    (h_input_rs1: read_xreg (regidx_to_fin rs1) state = EStateM.Result.ok (jalr_input.rs1_val) state)
-    (h_input_pc: state.regs.get? Register.PC = .some jalr_input.PC)
-    (h_input_misa: state.regs.get? Register.misa = .some jalr_input.misa)
+    (h_input_imm: input.imm = imm)
+    (h_input_rd: input.rd = regidx_to_fin rd)
+    (h_input_rs1: read_xreg (regidx_to_fin rs1) state = EStateM.Result.ok (input.rs1_val) state)
+    (h_input_pc: state.regs.get? Register.PC = .some input.PC)
+    (h_input_misa: state.regs.get? Register.misa = .some input.misa)
+    (h_cur_privilege : Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state)
+    (h_mseccfg : Sail.readReg Register.mseccfg state = EStateM.Result.ok mseccfg state)
   :
     (
       do
         Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
         LeanRV32D.Functions.execute (instruction.JALR (imm, rs1, rd))
     ) state =
-    let jalr_output := execute_JALR_pure jalr_input
+    let output := execute_JALR_pure input
     (do
-      match jalr_output.nextPC with
+      match output.nextPC with
         | .some nextPC => Sail.writeReg Register.nextPC nextPC
         | .none => pure ()
-      match jalr_output.rd with
+      match output.rd with
         | .some (reg, rd_val) => write_xreg reg rd_val
         | .none => pure ()
-      if !jalr_output.success then
+      if !output.success then
         pure (
           ExecutionResult.Memory_Exception (
-            (virtaddr.Virtaddr (0xFFFFFFFE &&& (jalr_input.rs1_val + BitVec.signExtend 32 jalr_input.imm))),
+            (virtaddr.Virtaddr (0xFFFFFFFE &&& (input.rs1_val + BitVec.signExtend 32 input.imm))),
             (ExceptionType.E_Fetch_Addr_Align ())
           )
         )
@@ -81,7 +128,19 @@ namespace PureSpec
       readReg_state h_input_pc,
       writeReg_state_success,
       rv32d_execute_jalr,
-      LeanRV32D.Functions.execute_JALR,
+      LeanRV32D.Functions.execute_JALR
+    ]
+    replace h_cur_privilege := cur_privilege_of_write_state input.PC h_cur_privilege
+    simp [
+      LeanRV32D.Functions.update_elp_state,
+      LeanRV32D.Functions.currentlyEnabled,
+      h_cur_privilege,
+      LeanRV32D.Functions.get_xLPE
+    ]
+    replace h_mseccfg := mseccfg_of_write_state input.PC h_mseccfg
+    simp [
+      h_mseccfg,
+      LeanRV32D.Functions.hartSupports,
       LeanRV32D.Functions.get_next_pc,
       readReg_state (writeReg_read_same _)
     ]
@@ -107,6 +166,7 @@ namespace PureSpec
     unfold EStateM.map
     simp [
       Sail.SailME.run,
+      PreSail.PreSailME.run,
       ExceptT.run,
       Sail.BitVec.addInt
     ]
@@ -122,7 +182,7 @@ namespace PureSpec
       LeanRV32D.Functions.not,
     ]
 
-    by_cases h_bit1 : BitVec.ofBool (jalr_input.rs1_val + BitVec.signExtend 32 imm)[1] = 0#1
+    by_cases h_bit1 : BitVec.ofBool (input.rs1_val + BitVec.signExtend 32 imm)[1] = 0#1
     . simp [
         h_bit1,
         ExceptT.mk,
@@ -155,7 +215,7 @@ namespace PureSpec
         execute_JALR_pure,
         h_input_imm
       ]
-      by_cases h_misa: jalr_input.misa[2]
+      by_cases h_misa: input.misa[2]
       . simp [
           h_misa,
           ExceptT.map,

@@ -76,7 +76,7 @@ import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Mul
 import OpenvmFv.Equivalence.Mulh
-import OpenvmFv.Equivalence.Shift
+-- import OpenvmFv.Equivalence.Shift
 
 import OpenvmFv.Extraction.AccessAdapterAir_2
 import OpenvmFv.Extraction.AccessAdapterAir_4
@@ -135,7 +135,7 @@ import OpenvmFv.Spec.ITYPE.sltiu
 import OpenvmFv.Spec.ITYPE.xori
 import OpenvmFv.Spec.LoadSignExtend.lh
 import OpenvmFv.Spec.LoadSignExtend.lb
-import OpenvmFv.Spec.LoadStore.local2
+import OpenvmFv.Spec.LoadStore.local_extended
 import OpenvmFv.Spec.LoadStore.lw
 import OpenvmFv.Spec.LoadStore.lhu
 import OpenvmFv.Spec.LoadStore.lbu
@@ -183,6 +183,6 @@ import OpenvmFv.Spec.Mul
 import OpenvmFv.Spec.Mulh
 import OpenvmFv.Spec.run_hart_active
 import OpenvmFv.Spec.rX_bits
-import OpenvmFv.Spec.Shift
+-- import OpenvmFv.Spec.Shift
 
 import OpenvmFv.Util

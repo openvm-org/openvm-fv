@@ -245,11 +245,27 @@ lemma essentials
     constructor
     . clear *- h00 h04 h07 h10 h13 h16 h19 h22 h25 h27
                s_bsm_0 s_bsm_1 s_bsm_2 s_bsm_3 s_bsm_4 s_bsm_5 s_bsm_6 s_bsm_7
-      grind
+      grind (splits := 16)
     . constructor
       . clear *- row_valid h00 h01 h02 h05 h08 h11 h14 h17 h20 h23 h26 h27
                s_bsm_0 s_bsm_1 s_bsm_2 s_bsm_3 s_bsm_4 s_bsm_5 s_bsm_6 s_bsm_7
-        grind (splits := 11)
+        obtain h | h := h05
+        . obtain h | h := h08
+          . obtain h | h := h11
+            . obtain h | h := h14
+              . obtain h | h := h17
+                . obtain h | h := h20
+                  . obtain h | h := h23
+                    . obtain h | h := h26
+                      . omega
+                      . rw [h]; clear *- h00 h01 h02 row_valid; grind
+                    . rw [h]; clear *- h00 h01 h02; grind
+                  . rw [h]; clear *- h00 h01 h02 row_valid; grind
+                . rw [h]; clear *- h00 h01 h02 row_valid; grind
+              . rw [h]; clear *- h00 h01 h02 row_valid; grind
+            . rw [h]; clear *- h00 h01 h02 row_valid; grind
+          . rw [h]; clear *- h00 h01 h02; grind
+        . rw [h]; clear *- h00 h01 h02; grind
       . clear *- h03 h06 h09 h12 h15 h18 h21 h24 h27 s_bsm_0 s_bsm_1 s_bsm_2 s_bsm_3 s_bsm_4 s_bsm_5 s_bsm_6 s_bsm_7 ra2 ra4 ra6 ra8
         split_ands <;> apply lt_of_lt_of_le (by assumption)
         all_goals
@@ -1179,15 +1195,17 @@ theorem spec_base_SRA
 
           zify
           repeat rw [Fin.sub_val_of_le (by omega), Int.natCast_sub (by omega)]
-          simp [Fin.val_add, Fin.val_mul]
-          repeat rw [Int.emod_eq_of_lt (by omega) (by omega)]
+          simp only [Fin.val_add, Fin.val_mul]
+          simp only [Int.natCast_emod, Nat.cast_mul, Nat.cast_add, Nat.cast_ofNat]
+          rw [show ((256 : FBB) : ℤ) = (256 : ℤ) by simp]
+          iterate 8 rw [Int.emod_eq_of_lt (b := 2013265921) (by omega) (by grind)]
           ring_nf
           have : 2 ^ (air.core.bit_shift row 0).val * 4294967296 - 4294967296 = (-1 + air.core.bit_multiplier_right row 0).val * 4294967296
             := by simp [eq_bmr, Fin.add_def]; grind
           rw [this]; clear this
           repeat rw [add_assoc]
           rw [add_comm (b := _ * 16777216)]
-          simp [Nat.shiftRight_eq_div_pow, eq_bmr]
+          simp [Int.shiftRight_eq_div_pow, eq_bmr]
           rw [Int.add_ediv_of_dvd_right
               (by clear *- cases_bmr
                   rcases cases_bmr with h | h | h | h | h | h | h | h <;>
