@@ -108,8 +108,8 @@ theorem spec_lui
   simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
     at pa_exec pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
-  obtain ⟨ instruction, multiplicity, data, h_transpile,
-           hm, hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
+  obtain ⟨ instruction, data, h_transpile,
+           hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
   have h_alignment := Transpiler.pc_aligned_of_some h_transpile
   have h_bound := Transpiler.pc_bound_of_some h_transpile
   obtain ⟨ imm, rd, eq_instr, nz_rd ⟩ := Transpiler.transpiler_opcode_561 h_transpile (by grind)
@@ -118,7 +118,6 @@ theorem spec_lui
   split_ifs at h_transpile with z_rd
   all_goals
     simp [-Vector.mk_eq] at h_transpile
-    obtain ⟨ hm, hdata ⟩ := h_transpile
     subst data; simp at *
   obtain ⟨ h_lui, h_jal ⟩ : air.core.is_jal row 0 = 0 ∧ air.core.is_lui row 0 = 1
   := by
@@ -172,8 +171,8 @@ theorem spec_jal
   simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
     at pa_exec pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
-  obtain ⟨ instruction, multiplicity, data, h_transpile,
-           hm, hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
+  obtain ⟨ instruction, data, h_transpile,
+           hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
   have h_alignment := Transpiler.pc_aligned_of_some h_transpile
   have h_bound := Transpiler.pc_bound_of_some h_transpile
   obtain ⟨ imm, rd, eq_instr, nz_rd ⟩ := Transpiler.transpiler_opcode_560 h_transpile (by grind)
@@ -182,7 +181,6 @@ theorem spec_jal
   split_ifs at h_transpile with z_rd
   all_goals
     simp [-Vector.mk_eq] at h_transpile
-    obtain ⟨ hm, hdata ⟩ := h_transpile
     subst data; simp at *
   obtain ⟨ ci, bool_lui, bool_jal, lui_rd0, lui_imm, jal_imm, bool_nw, ts ⟩ := constraints
   clear ci ts
@@ -285,8 +283,8 @@ lemma needs_write_eq_is_valid
     simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
       at pa_exec pa_read pa_bit
     simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
-    obtain ⟨ instruction, multiplicity, data, h_transpile,
-            hm, hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
+    obtain ⟨ instruction, data, h_transpile,
+             hd0, hd1, hd2, hd3, hd4, hd5, hd6, hd7, hd8 ⟩ := pa_read
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain is_lui | is_lui := c1

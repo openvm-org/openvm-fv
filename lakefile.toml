@@ -13,17 +13,17 @@ pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.23.0-rc2"
+rev = "v4.26.0"
 
 [[require]]
 name = "LeanZKCircuit"
 git = "https://github.com/NethermindEth/leanzkcircuit.git"
-rev = "main"
+rev = "v4.26.0"
 
 [[require]]
 name = "LeanRV"
 git = "https://github.com/NethermindEth/sail-riscv-lean"
-rev = "511e25600eb89f1d4a73e2a3b5e6fda7a0622757"
+rev = "rv32d"
 
 [[lean_lib]]
 name = "OpenvmFv"

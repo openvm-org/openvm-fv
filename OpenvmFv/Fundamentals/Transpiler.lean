@@ -3,6 +3,8 @@ import Mathlib
 
 import OpenvmFv.Fundamentals.BabyBear
 
+notation "OpenVM_memory_address_space_size" => 2 ^ 29
+
 def regidx_to_fin (r: regidx): Fin 32 :=
   match r with
     | regidx.Regidx r => ⟨
@@ -144,19 +146,19 @@ namespace Transpiler
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 561, ind rd, 0, utof imm, 1, 0, 1, 0]))
-      | .MUL (rs2, rs1, rd, { high := false, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
+      | .MUL (rs2, rs1, rd, { result_part := .Low, signed_rs1 := _, signed_rs2 := _ : mul_op}) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 592, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := true : mul_op}) =>
+      | .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Signed : mul_op}) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 593, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := false : mul_op}) =>
+      | .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Unsigned : mul_op}) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 594, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
-      | .MUL (rs2, rs1, rd, { high := true, signed_rs1 := false, signed_rs2 := false : mul_op}) =>
+      | .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Unsigned, signed_rs2 := .Unsigned : mul_op}) =>
         .some (if rd == regidx.Regidx 0
         then (multiplicity, #v[pc, 1, 0, 0, 0, 0, 0, 0, 0])
         else (multiplicity, #v[pc, 595, ind rd, ind rs1, ind rs2, 1, 0, 0, 0]))
@@ -420,7 +422,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -622,7 +624,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -839,7 +841,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -1056,7 +1058,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -1273,7 +1275,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -1490,7 +1492,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -1707,7 +1709,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -1924,7 +1926,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -2141,7 +2143,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -2358,7 +2360,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -2547,7 +2549,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -2762,7 +2764,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -2979,7 +2981,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -3197,7 +3199,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -3379,7 +3381,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -3561,7 +3563,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -3744,7 +3746,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -3959,7 +3961,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -4175,7 +4177,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -4365,7 +4367,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -4555,7 +4557,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -4745,7 +4747,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -4935,7 +4937,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -5125,7 +5127,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -5309,7 +5311,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -5489,7 +5491,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -5673,7 +5675,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -5851,7 +5853,7 @@ namespace Transpiler
             simp_all
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -5955,7 +5957,7 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 592)
     :
-      ∃ rs2 rs1 rd srs1 srs2, inst = .MUL (rs2, rs1, rd, { high := false, signed_rs1 := srs1, signed_rs2 := srs2 }) ∧ rd.1 ≠ 0
+      ∃ rs2 rs1 rd srs1 srs2, inst = .MUL (rs2, rs1, rd, { result_part := .Low, signed_rs1 := srs1, signed_rs2 := srs2 }) ∧ rd.1 ≠ 0
     := by
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
@@ -6037,17 +6039,6 @@ namespace Transpiler
           }
       . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high
-        . rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          simp at h_bound
-          simp [h_alignment, h_bound, -Option.some.injEq] at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          . have := extract_opcode h_transpile
-            omega
-          . have h_rd := non_phantom_rd h_if
-            use rs2, rs1, rd, signed_rs1, signed_rs2
-            simp_all
         . cases signed_rs1 <;> cases signed_rs2
           all_goals
             rewrite [h_op_data] at h_transpile
@@ -6060,6 +6051,17 @@ namespace Transpiler
               clear * - h_opcode this
               omega
             }
+        . rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          simp at h_bound
+          simp [h_alignment, h_bound, -Option.some.injEq] at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            omega
+          . have h_rd := non_phantom_rd h_if
+            use rs2, rs1, rd, signed_rs1, signed_rs2
+            simp_all
       . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
         cases signed
         all_goals {
@@ -6144,7 +6146,7 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 593)
     :
-      ∃ rs2 rs1 rd, inst = .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := true }) ∧ rd.1 ≠ 0
+      ∃ rs2 rs1 rd, inst = .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Signed }) ∧ rd.1 ≠ 0
     := by
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
@@ -6226,14 +6228,6 @@ namespace Transpiler
           }
       . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high
-        . rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          . have := extract_opcode h_transpile
-            omega
-          . have := extract_opcode h_transpile
-            omega
         . cases signed_rs1 <;> cases signed_rs2
           all_goals
             rewrite [h_op_data] at h_transpile
@@ -6256,6 +6250,14 @@ namespace Transpiler
             . have h_rd := non_phantom_rd h_if
               use rs2, rs1, rd
               simp_all
+        . rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            omega
+          . have := extract_opcode h_transpile
+            omega
       . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
         cases signed
         all_goals {
@@ -6340,7 +6342,7 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 594)
     :
-      ∃ rs2 rs1 rd, inst = .MUL (rs2, rs1, rd, { high := true, signed_rs1 := true, signed_rs2 := false }) ∧ rd.1 ≠ 0
+      ∃ rs2 rs1 rd, inst = .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Unsigned }) ∧ rd.1 ≠ 0
     := by
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
@@ -6422,14 +6424,6 @@ namespace Transpiler
           }
       . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high
-        . rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          . have := extract_opcode h_transpile
-            omega
-          . have := extract_opcode h_transpile
-            omega
         . cases signed_rs1 <;> cases signed_rs2
           all_goals
             rewrite [h_op_data] at h_transpile
@@ -6450,6 +6444,14 @@ namespace Transpiler
             . have h_rd := non_phantom_rd h_if
               use rs2, rs1, rd
               simp_all
+        . rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            omega
+          . have := extract_opcode h_transpile
+            omega
       . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
         cases signed
         all_goals {
@@ -6534,7 +6536,7 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 595)
     :
-      ∃ rs2 rs1 rd, inst = .MUL (rs2, rs1, rd, { high := true, signed_rs1 := false, signed_rs2 := false }) ∧ rd.1 ≠ 0
+      ∃ rs2 rs1 rd, inst = .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Unsigned, signed_rs2 := .Unsigned }) ∧ rd.1 ≠ 0
     := by
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
@@ -6616,14 +6618,6 @@ namespace Transpiler
           }
       . obtain ⟨⟨rs2, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high
-        . rewrite [h_op_data] at h_transpile
-          unfold Transpiler.transpile_op at h_transpile
-          dsimp at h_transpile
-          split_ifs at h_transpile with h_if
-          . have := extract_opcode h_transpile
-            omega
-          . have := extract_opcode h_transpile
-            omega
         . cases signed_rs1 <;> cases signed_rs2
           all_goals
             rewrite [h_op_data] at h_transpile
@@ -6644,6 +6638,14 @@ namespace Transpiler
             . have h_rd := non_phantom_rd h_if
               use rs2, rs1, rd
               simp_all
+        . rewrite [h_op_data] at h_transpile
+          unfold Transpiler.transpile_op at h_transpile
+          dsimp at h_transpile
+          split_ifs at h_transpile with h_if
+          . have := extract_opcode h_transpile
+            omega
+          . have := extract_opcode h_transpile
+            omega
       . obtain ⟨⟨rs2, rs1, rd, signed⟩, h_op_data⟩ := h_type -- DIV
         cases signed
         all_goals {
@@ -6812,7 +6814,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -7003,7 +7005,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -7192,7 +7194,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso
@@ -7381,7 +7383,7 @@ namespace Transpiler
           }
       . obtain ⟨⟨imm, rs1, rd, ⟨high, signed_rs1, signed_rs2⟩⟩, h_op_data⟩ := h_type -- MUL
         cases high <;> cases signed_rs1 <;> cases signed_rs2
-        case true.false.true =>
+        case inr.inr.inr.inr.inr.inl.High.Unsigned.Signed =>
           rewrite [h_op_data] at h_transpile
           unfold Transpiler.transpile_op at h_transpile
           exfalso

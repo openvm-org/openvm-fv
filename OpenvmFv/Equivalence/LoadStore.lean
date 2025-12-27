@@ -95,15 +95,6 @@ namespace Equivalence.LoadStore
   def wrap_to_regidx (val : FBB) : Fin 32 :=
     ⟨val / 4 % 32, by grind⟩
 
-  structure RVConfig where
-    plat_ram_size : BitVec 34
-
-  opaque plat_ram_size : BitVec 34
-
-  def config : RVConfig := {
-    plat_ram_size := plat_ram_size
-  }
-
   def LoadStore_instruction_fields.execution (row : LoadStore_instruction_fields) : List (FBB × List FBB) := [
     (-row.is_valid, [row.pc, row.timestamp]),
     (row.is_valid, [row.next_pc, row.next_timestamp])
@@ -486,7 +477,6 @@ namespace Equivalence.LoadStore
     r1_val := BabyBear.toBV32 row.rs1_val
     r2_val := BabyBear.toBV32 row.prev_read_data
     PC := row.pc.toNat
-    plat_ram_size := config.plat_ram_size
     : PureSpec.SwInput
   }
 
@@ -531,9 +521,8 @@ namespace Equivalence.LoadStore
     ] at h_transpile
     obtain ⟨
       instruction,
-      multiplciity,
       data,
-      ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+      ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
     ⟩ := h_transpile
     rewrite [←h_data_imm]
     have := Transpiler.transpiler_opcode_531 h_instruction
@@ -546,7 +535,7 @@ namespace Equivalence.LoadStore
     rewrite [if_pos (by constructor <;> assumption)] at h_instruction
     dsimp at h_instruction
     simp [-Vector.mk_eq] at h_instruction
-    simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+    simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
     bv_decide
 
   lemma imm_extended_limb_upper_mod_of_opcode_531 [Field ExtF]
@@ -574,7 +563,7 @@ namespace Equivalence.LoadStore
   :
     ((get_instruction_fields_row air row).opcode = 531 →
         SwOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_STORE_sw_pure
+          (PureSpec.execute_STORE_pure
             (SwInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -593,7 +582,7 @@ namespace Equivalence.LoadStore
     specialize h_bus_wellformedness row h_row
     simp [
       SwInput_of_LoadStore_instruction_fields,
-      PureSpec.execute_STORE_sw_pure,
+      PureSpec.execute_STORE_pure,
       -BitVec.toNat_add
     ]
     repeat rw [BitVec.toNat_add]
@@ -1017,7 +1006,6 @@ namespace Equivalence.LoadStore
       r1_val := BabyBear.toBV32 row.rs1_val
       r2_val := BabyBear.toBV32 row.prev_read_data
       PC := row.pc.toNat
-      plat_ram_size := config.plat_ram_size
       : PureSpec.ShInput
     }
 
@@ -1112,9 +1100,8 @@ namespace Equivalence.LoadStore
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_532 h_instruction
@@ -1130,7 +1117,7 @@ namespace Equivalence.LoadStore
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -1315,7 +1302,7 @@ set_option maxHeartbeats 0 in
   :
     ((get_instruction_fields_row air row).opcode = 532 →
         ShOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_STOREH_sh_pure
+          (PureSpec.execute_STOREH_pure
             (ShInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -1334,7 +1321,7 @@ set_option maxHeartbeats 0 in
     specialize h_bus_wellformedness row h_row
     simp [
       ShInput_of_LoadStore_instruction_fields,
-      PureSpec.execute_STOREH_sh_pure,
+      PureSpec.execute_STOREH_pure,
       -BitVec.toNat_add
     ]
     have h_needs_write := StoreH.needs_write_of_opcode_532 air row h_bus_wellformedness h_is_valid h_opcode
@@ -1524,7 +1511,6 @@ set_option maxHeartbeats 0 in
       r1_val := BabyBear.toBV32 row.rs1_val
       r2_val := BabyBear.toBV32 row.prev_read_data
       PC := row.pc.toNat
-      plat_ram_size := config.plat_ram_size
       : PureSpec.SbInput
     }
 
@@ -1617,9 +1603,8 @@ set_option maxHeartbeats 0 in
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_533 h_instruction
@@ -1635,7 +1620,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -1820,7 +1805,7 @@ set_option maxHeartbeats 0 in
   :
     ((get_instruction_fields_row air row).opcode = 533 →
         SbOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_STOREB_sb_pure
+          (PureSpec.execute_STOREB_pure
             (SbInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -1839,7 +1824,7 @@ set_option maxHeartbeats 0 in
     specialize h_bus_wellformedness row h_row
     simp [
       SbInput_of_LoadStore_instruction_fields,
-      PureSpec.execute_STOREB_sb_pure,
+      PureSpec.execute_STOREB_pure,
       -BitVec.toNat_add
     ]
     have h_needs_write := StoreB.needs_write_of_opcode_533 air row h_bus_wellformedness h_is_valid h_opcode
@@ -2014,7 +1999,6 @@ set_option maxHeartbeats 0 in
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    plat_ram_size := config.plat_ram_size
     data0 := row.prev_read_data[0]
     data1 := row.prev_read_data[1]
     data2 := row.prev_read_data[2]
@@ -2429,9 +2413,8 @@ set_option maxHeartbeats 0 in
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_528 h_instruction
@@ -2448,7 +2431,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -2633,7 +2616,7 @@ set_option maxHeartbeats 0 in
   :
     ((get_instruction_fields_row air row).opcode = 528 →
         LwOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_LOAD_lw_pure
+          (PureSpec.execute_LOADW_pure
             (LwInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -2650,7 +2633,7 @@ set_option maxHeartbeats 0 in
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
-    simp [LwInput_of_LoadStore_instruction_fields, PureSpec.execute_LOAD_lw_pure]
+    simp [LwInput_of_LoadStore_instruction_fields, PureSpec.execute_LOADW_pure]
 
     split_ands
     . exact lw_spec_of_get_instruction_fields_part_1 air row
@@ -2681,7 +2664,7 @@ set_option maxHeartbeats 0 in
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
-      obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
+      obtain ⟨instruction, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
       have h_bound := Transpiler.pc_bound_of_some h_instruction.1
       have h_rd := Transpiler.transpiler_opcode_528 h_instruction.1
@@ -2704,11 +2687,11 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
-          rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+          rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
           simp
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
@@ -2736,9 +2719,9 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
-        rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
 
@@ -2754,7 +2737,6 @@ set_option maxHeartbeats 0 in
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    plat_ram_size := config.plat_ram_size
     data0 := if (row.shift = 0) then row.prev_read_data[0] else row.prev_read_data[2]
     data1 := if (row.shift = 0) then row.prev_read_data[1] else row.prev_read_data[3]
     : PureSpec.LhuInput
@@ -3172,9 +3154,8 @@ set_option maxHeartbeats 0 in
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_530 h_instruction
@@ -3191,7 +3172,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -3376,7 +3357,7 @@ set_option maxHeartbeats 0 in
   :
     ((get_instruction_fields_row air row).opcode = 530 →
         LhuOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_LOADHU_lhu_pure
+          (PureSpec.execute_LOADHU_pure
             (LhuInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -3393,7 +3374,7 @@ set_option maxHeartbeats 0 in
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
-    simp [LhuInput_of_LoadStore_instruction_fields, PureSpec.execute_LOADHU_lhu_pure]
+    simp [LhuInput_of_LoadStore_instruction_fields, PureSpec.execute_LOADHU_pure]
 
     split_ands
     . exact lhu_spec_of_get_instruction_fields_part_1 air row
@@ -3424,7 +3405,7 @@ set_option maxHeartbeats 0 in
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
-      obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
+      obtain ⟨instruction, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
       have h_bound := Transpiler.pc_bound_of_some h_instruction.1
       have h_rd := Transpiler.transpiler_opcode_530 h_instruction.1
@@ -3447,11 +3428,11 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
-          rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+          rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
           simp
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
@@ -3493,9 +3474,9 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
-        rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
 
@@ -3511,7 +3492,6 @@ set_option maxHeartbeats 0 in
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    plat_ram_size := config.plat_ram_size
     data0 := if (row.shift = 0) then row.prev_read_data[0] else
              if (row.shift = 1) then row.prev_read_data[1] else
              if (row.shift = 2) then row.prev_read_data[2] else
@@ -3930,9 +3910,8 @@ set_option maxHeartbeats 0 in
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_529 h_instruction
@@ -3949,7 +3928,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -4134,7 +4113,7 @@ set_option maxHeartbeats 0 in
   :
     ((get_instruction_fields_row air row).opcode = 529 →
         LbuOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_LOADBU_lbu_pure
+          (PureSpec.execute_LOADBU_pure
             (LbuInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -4151,7 +4130,7 @@ set_option maxHeartbeats 0 in
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
-    simp [LbuInput_of_LoadStore_instruction_fields, PureSpec.execute_LOADBU_lbu_pure]
+    simp [LbuInput_of_LoadStore_instruction_fields, PureSpec.execute_LOADBU_pure]
 
     split_ands
     . exact lbu_spec_of_get_instruction_fields_part_1 air row
@@ -4182,7 +4161,7 @@ set_option maxHeartbeats 0 in
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
-      obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
+      obtain ⟨instruction, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
       have h_bound := Transpiler.pc_bound_of_some h_instruction.1
       have h_rd := Transpiler.transpiler_opcode_529 h_instruction.1
@@ -4205,11 +4184,11 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
-          rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+          rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
           simp
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
@@ -4248,9 +4227,9 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
-        rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
 
@@ -4266,32 +4245,32 @@ set_option maxHeartbeats 0 in
       (row.opcode = 528 →
         LwOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_LOAD_lw_pure (LwInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_LOADW_pure (LwInput_of_LoadStore_instruction_fields row))
       ) ∧
       (row.opcode = 529 →
         LbuOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_LOADBU_lbu_pure (LbuInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_LOADBU_pure (LbuInput_of_LoadStore_instruction_fields row))
       ) ∧
       (row.opcode = 530 →
         LhuOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_LOADHU_lhu_pure (LhuInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_LOADHU_pure (LhuInput_of_LoadStore_instruction_fields row))
       ) ∧
       (row.opcode = 531 →
         SwOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_STORE_sw_pure (SwInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_STORE_pure (SwInput_of_LoadStore_instruction_fields row))
       ) ∧
       (row.opcode = 532 →
         ShOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_STOREH_sh_pure (ShInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_STOREH_pure (ShInput_of_LoadStore_instruction_fields row))
       ) ∧
       (row.opcode = 533 →
         SbOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_STOREB_sb_pure (SbInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_STOREB_pure (SbInput_of_LoadStore_instruction_fields row))
       )
     )
 

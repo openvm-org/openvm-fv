@@ -42,7 +42,7 @@ namespace PureSpec
     (
       do
         Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-        LeanRV32D.Functions.execute (instruction.MUL (r2, r1, rd, { high := false, signed_rs1 := srs1, signed_rs2 := srs2 }))
+        LeanRV32D.Functions.execute (instruction.MUL (r2, r1, rd, { result_part := VectorHalf.Low, signed_rs1 := srs1, signed_rs2 := srs2 }))
     ) state =
     let mul_output := execute_MULH_mul_pure mul_input
     (do

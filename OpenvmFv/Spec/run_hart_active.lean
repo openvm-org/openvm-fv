@@ -5,7 +5,8 @@ import LeanRV32D
 import OpenvmFv.Spec.rX_bits
 import OpenvmFv.Fundamentals.Transpiler
 
--- #eval LeanRV32D.Functions.run_hart_active
+attribute [simp]
+  Sail.BitVec.toNatInt
 
 @[simp]
 lemma pure_equiv :
@@ -44,40 +45,42 @@ lemma sail_assert_equiv :
 lemma regidx_non_zero (h_non_zero: ¬rd = 0):
   regidx_to_fin (regidx.Regidx rd) ∈ Finset.Icc 1 31
 := by
-  by_cases rd = 0; simp_all
-  by_cases h: rd = 1; rewrite [h]; decide
-  by_cases h: rd = 2; rewrite [h]; decide
-  by_cases h: rd = 3; rewrite [h]; decide
-  by_cases h: rd = 4; rewrite [h]; decide
-  by_cases h: rd = 5; rewrite [h]; decide
-  by_cases h: rd = 6; rewrite [h]; decide
-  by_cases h: rd = 7; rewrite [h]; decide
-  by_cases h: rd = 8; rewrite [h]; decide
-  by_cases h: rd = 9; rewrite [h]; decide
-  by_cases h: rd = 10; rewrite [h]; decide
-  by_cases h: rd = 11; rewrite [h]; decide
-  by_cases h: rd = 12; rewrite [h]; decide
-  by_cases h: rd = 13; rewrite [h]; decide
-  by_cases h: rd = 14; rewrite [h]; decide
-  by_cases h: rd = 15; rewrite [h]; decide
-  by_cases h: rd = 16; rewrite [h]; decide
-  by_cases h: rd = 17; rewrite [h]; decide
-  by_cases h: rd = 18; rewrite [h]; decide
-  by_cases h: rd = 19; rewrite [h]; decide
-  by_cases h: rd = 20; rewrite [h]; decide
-  by_cases h: rd = 21; rewrite [h]; decide
-  by_cases h: rd = 22; rewrite [h]; decide
-  by_cases h: rd = 23; rewrite [h]; decide
-  by_cases h: rd = 24; rewrite [h]; decide
-  by_cases h: rd = 25; rewrite [h]; decide
-  by_cases h: rd = 26; rewrite [h]; decide
-  by_cases h: rd = 27; rewrite [h]; decide
-  by_cases h: rd = 28; rewrite [h]; decide
-  by_cases h: rd = 29; rewrite [h]; decide
-  by_cases h: rd = 30; rewrite [h]; decide
-  by_cases h: rd = 31; rewrite [h]; decide
+  obtain ⟨ rd', eq_rd' ⟩ : exists rd' : BitVec 5, rd' = rd := by simp
+  subst rd
+  by_cases rd' = 0; simp_all
+  by_cases h: rd' = 1; rewrite [h]; decide
+  by_cases h: rd' = 2; rewrite [h]; decide
+  by_cases h: rd' = 3; rewrite [h]; decide
+  by_cases h: rd' = 4; rewrite [h]; decide
+  by_cases h: rd' = 5; rewrite [h]; decide
+  by_cases h: rd' = 6; rewrite [h]; decide
+  by_cases h: rd' = 7; rewrite [h]; decide
+  by_cases h: rd' = 8; rewrite [h]; decide
+  by_cases h: rd' = 9; rewrite [h]; decide
+  by_cases h: rd' = 10; rewrite [h]; decide
+  by_cases h: rd' = 11; rewrite [h]; decide
+  by_cases h: rd' = 12; rewrite [h]; decide
+  by_cases h: rd' = 13; rewrite [h]; decide
+  by_cases h: rd' = 14; rewrite [h]; decide
+  by_cases h: rd' = 15; rewrite [h]; decide
+  by_cases h: rd' = 16; rewrite [h]; decide
+  by_cases h: rd' = 17; rewrite [h]; decide
+  by_cases h: rd' = 18; rewrite [h]; decide
+  by_cases h: rd' = 19; rewrite [h]; decide
+  by_cases h: rd' = 20; rewrite [h]; decide
+  by_cases h: rd' = 21; rewrite [h]; decide
+  by_cases h: rd' = 22; rewrite [h]; decide
+  by_cases h: rd' = 23; rewrite [h]; decide
+  by_cases h: rd' = 24; rewrite [h]; decide
+  by_cases h: rd' = 25; rewrite [h]; decide
+  by_cases h: rd' = 26; rewrite [h]; decide
+  by_cases h: rd' = 27; rewrite [h]; decide
+  by_cases h: rd' = 28; rewrite [h]; decide
+  by_cases h: rd' = 29; rewrite [h]; decide
+  by_cases h: rd' = 30; rewrite [h]; decide
+  by_cases h: rd' = 31; rewrite [h]; decide
   exfalso
-  have : rd < 32 := by grind
+  have : rd' < 32 := by bv_decide
   grind
 
 def fin_to_x_reg (r : Fin 32) : Option Register :=
@@ -524,8 +527,7 @@ namespace Local
   @[simp]
   lemma bit_to_bool :
     LeanRV32D.Functions.bit_to_bool =
-    λ b => (do
-      pure (b == 1#1))
+    λ b => b == 1#1
   := by
     unfold LeanRV32D.Functions.bit_to_bool LeanRV32D.Functions.bool_bit_backwards
     funext b
@@ -757,349 +759,354 @@ namespace Local
 
   --   done
 
+  open LeanRV32D.Functions in
   noncomputable def execute (merge_var : instruction) : SailM ExecutionResult := do
     match merge_var with
-  | .ZICBOP (cbop, rs1, offset) => (pure (LeanRV32D.Functions.execute_ZICBOP cbop rs1 offset))
-  | .NTL g__4 => (pure (LeanRV32D.Functions.execute_NTL g__4))
-  | .C_NTL g__5 => (pure (LeanRV32D.Functions.execute_C_NTL g__5))
-  | .PAUSE arg0 => (pure (LeanRV32D.Functions.execute_PAUSE arg0))
-  | .UTYPE (imm, rd, op) => (LeanRV32D.Functions.execute_UTYPE imm rd op)
-  | .JAL (imm, rd) => (LeanRV32D.Functions.execute_JAL imm rd)
-  | .BTYPE (imm, rs2, rs1, op) => (LeanRV32D.Functions.execute_BTYPE imm rs2 rs1 op)
-  | .ITYPE (imm, rs1, rd, op) => (LeanRV32D.Functions.execute_ITYPE imm rs1 rd op)
-  | .SHIFTIOP (shamt, rs1, rd, op) => (LeanRV32D.Functions.execute_SHIFTIOP shamt rs1 rd op)
-  | .RTYPE (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_RTYPE rs2 rs1 rd op)
-  | .LOAD (imm, rs1, rd, is_unsigned, width) => (LeanRV32D.Functions.execute_LOAD imm rs1 rd is_unsigned width)
-  | .STORE (imm, rs2, rs1, width) => (LeanRV32D.Functions.execute_STORE imm rs2 rs1 width)
-  | .ADDIW (imm, rs1, rd) => (LeanRV32D.Functions.execute_ADDIW imm rs1 rd)
-  | .RTYPEW (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_RTYPEW rs2 rs1 rd op)
-  | .SHIFTIWOP (shamt, rs1, rd, op) => (LeanRV32D.Functions.execute_SHIFTIWOP shamt rs1 rd op)
-  | .FENCE (pred, succ) => (LeanRV32D.Functions.execute_FENCE pred succ)
-  | .FENCE_TSO arg0 => (LeanRV32D.Functions.execute_FENCE_TSO arg0)
-  | .ECALL arg0 => (LeanRV32D.Functions.execute_ECALL arg0)
-  | .MRET arg0 => (LeanRV32D.Functions.execute_MRET arg0)
-  | .SRET arg0 => (LeanRV32D.Functions.execute_SRET arg0)
-  | .EBREAK arg0 => (LeanRV32D.Functions.execute_EBREAK arg0)
-  | .WFI arg0 => (LeanRV32D.Functions.execute_WFI arg0)
-  | .SFENCE_VMA (rs1, rs2) => (LeanRV32D.Functions.execute_SFENCE_VMA rs1 rs2)
-  | .FENCE_RESERVED (fm, pred, succ, rs, rd) => (pure (LeanRV32D.Functions.execute_FENCE_RESERVED fm pred succ rs rd))
-  | .FENCEI_RESERVED (imm, rs, rd) => (pure (LeanRV32D.Functions.execute_FENCEI_RESERVED imm rs rd))
-  | .JALR (imm, rs1, rd) => (LeanRV32D.Functions.execute_JALR imm rs1 rd)
-  | .AMO (op, aq, rl, rs2, rs1, width, rd) => (LeanRV32D.Functions.execute_AMO op aq rl rs2 rs1 width rd)
-  | .LOADRES (aq, rl, rs1, width, rd) => (LeanRV32D.Functions.execute_LOADRES aq rl rs1 width rd)
-  | .STORECON (aq, rl, rs2, rs1, width, rd) => (LeanRV32D.Functions.execute_STORECON aq rl rs2 rs1 width rd)
-  | .MUL (rs2, rs1, rd, mul_op) => (LeanRV32D.Functions.execute_MUL rs2 rs1 rd mul_op)
-  | .DIV (rs2, rs1, rd, is_unsigned) => (LeanRV32D.Functions.execute_DIV rs2 rs1 rd is_unsigned)
-  | .REM (rs2, rs1, rd, is_unsigned) => (LeanRV32D.Functions.execute_REM rs2 rs1 rd is_unsigned)
-  | .MULW (rs2, rs1, rd) => (LeanRV32D.Functions.execute_MULW rs2 rs1 rd)
-  | .DIVW (rs2, rs1, rd, is_unsigned) => (LeanRV32D.Functions.execute_DIVW rs2 rs1 rd is_unsigned)
-  | .REMW (rs2, rs1, rd, is_unsigned) => (LeanRV32D.Functions.execute_REMW rs2 rs1 rd is_unsigned)
-  | .SLLIUW (shamt, rs1, rd) => (LeanRV32D.Functions.execute_SLLIUW shamt rs1 rd)
-  | .ZBA_RTYPEUW (rs2, rs1, rd, shamt) => (LeanRV32D.Functions.execute_ZBA_RTYPEUW rs2 rs1 rd shamt)
-  | .ZBA_RTYPE (rs2, rs1, rd, shamt) => (LeanRV32D.Functions.execute_ZBA_RTYPE rs2 rs1 rd shamt)
-  | .RORIW (shamt, rs1, rd) => (LeanRV32D.Functions.execute_RORIW shamt rs1 rd)
-  | .RORI (shamt, rs1, rd) => (LeanRV32D.Functions.execute_RORI shamt rs1 rd)
-  | .ZBB_RTYPEW (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_ZBB_RTYPEW rs2 rs1 rd op)
-  | .ZBB_RTYPE (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_ZBB_RTYPE rs2 rs1 rd op)
-  | .ZBB_EXTOP (rs1, rd, op) => (LeanRV32D.Functions.execute_ZBB_EXTOP rs1 rd op)
-  | .REV8 (rs1, rd) => (LeanRV32D.Functions.execute_REV8 rs1 rd)
-  | .ORCB (rs1, rd) => (LeanRV32D.Functions.execute_ORCB rs1 rd)
-  | .CPOP (rs1, rd) => (LeanRV32D.Functions.execute_CPOP rs1 rd)
-  | .CPOPW (rs1, rd) => (LeanRV32D.Functions.execute_CPOPW rs1 rd)
-  | .CLZ (rs1, rd) => (LeanRV32D.Functions.execute_CLZ rs1 rd)
-  | .CLZW (rs1, rd) => (LeanRV32D.Functions.execute_CLZW rs1 rd)
-  | .CTZ (rs1, rd) => (LeanRV32D.Functions.execute_CTZ rs1 rd)
-  | .CTZW (rs1, rd) => (LeanRV32D.Functions.execute_CTZW rs1 rd)
-  | .CLMUL (rs2, rs1, rd) => (LeanRV32D.Functions.execute_CLMUL rs2 rs1 rd)
-  | .CLMULH (rs2, rs1, rd) => (LeanRV32D.Functions.execute_CLMULH rs2 rs1 rd)
-  | .CLMULR (rs2, rs1, rd) => (LeanRV32D.Functions.execute_CLMULR rs2 rs1 rd)
-  | .ZBS_IOP (shamt, rs1, rd, op) => (LeanRV32D.Functions.execute_ZBS_IOP shamt rs1 rd op)
-  | .ZBS_RTYPE (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_ZBS_RTYPE rs2 rs1 rd op)
-  | .C_NOP g__6 => (pure (LeanRV32D.Functions.execute_C_NOP g__6))
-  | .C_ADDI4SPN (rdc, nzimm) => (LeanRV32D.Functions.execute_C_ADDI4SPN rdc nzimm)
-  | .C_LW (uimm, rsc, rdc) => (LeanRV32D.Functions.execute_C_LW uimm rsc rdc)
-  | .C_LD (uimm, rsc, rdc) => (LeanRV32D.Functions.execute_C_LD uimm rsc rdc)
-  | .C_SW (uimm, rsc1, rsc2) => (LeanRV32D.Functions.execute_C_SW uimm rsc1 rsc2)
-  | .C_SD (uimm, rsc1, rsc2) => (LeanRV32D.Functions.execute_C_SD uimm rsc1 rsc2)
-  | .C_ADDI (imm, rsd) => (LeanRV32D.Functions.execute_C_ADDI imm rsd)
-  | .C_JAL imm => (LeanRV32D.Functions.execute_C_JAL imm)
-  | .C_ADDIW (imm, rsd) => (LeanRV32D.Functions.execute_C_ADDIW imm rsd)
-  | .C_LI (imm, rd) => (LeanRV32D.Functions.execute_C_LI imm rd)
-  | .C_ADDI16SP imm => (LeanRV32D.Functions.execute_C_ADDI16SP imm)
-  | .C_LUI (imm, rd) => (LeanRV32D.Functions.execute_C_LUI imm rd)
-  | .C_SRLI (shamt, rsd) => (LeanRV32D.Functions.execute_C_SRLI shamt rsd)
-  | .C_SRAI (shamt, rsd) => (LeanRV32D.Functions.execute_C_SRAI shamt rsd)
-  | .C_ANDI (imm, rsd) => (LeanRV32D.Functions.execute_C_ANDI imm rsd)
-  | .C_SUB (rsd, rs2) => (LeanRV32D.Functions.execute_C_SUB rsd rs2)
-  | .C_XOR (rsd, rs2) => (LeanRV32D.Functions.execute_C_XOR rsd rs2)
-  | .C_OR (rsd, rs2) => (LeanRV32D.Functions.execute_C_OR rsd rs2)
-  | .C_AND (rsd, rs2) => (LeanRV32D.Functions.execute_C_AND rsd rs2)
-  | .C_SUBW (rsd, rs2) => (LeanRV32D.Functions.execute_C_SUBW rsd rs2)
-  | .C_ADDW (rsd, rs2) => (LeanRV32D.Functions.execute_C_ADDW rsd rs2)
-  | .C_J imm => (LeanRV32D.Functions.execute_C_J imm)
-  | .C_BEQZ (imm, rs) => (LeanRV32D.Functions.execute_C_BEQZ imm rs)
-  | .C_BNEZ (imm, rs) => (LeanRV32D.Functions.execute_C_BNEZ imm rs)
-  | .C_SLLI (shamt, rsd) => (LeanRV32D.Functions.execute_C_SLLI shamt rsd)
-  | .C_LWSP (uimm, rd) => (LeanRV32D.Functions.execute_C_LWSP uimm rd)
-  | .C_LDSP (uimm, rd) => (LeanRV32D.Functions.execute_C_LDSP uimm rd)
-  | .C_SWSP (uimm, rs2) => (LeanRV32D.Functions.execute_C_SWSP uimm rs2)
-  | .C_SDSP (uimm, rs2) => (LeanRV32D.Functions.execute_C_SDSP uimm rs2)
-  | .C_JR rs1 => (LeanRV32D.Functions.execute_C_JR rs1)
-  | .C_JALR rs1 => (LeanRV32D.Functions.execute_C_JALR rs1)
-  | .C_MV (rd, rs2) => (LeanRV32D.Functions.execute_C_MV rd rs2)
-  | .C_EBREAK arg0 => (LeanRV32D.Functions.execute_C_EBREAK arg0)
-  | .C_ADD (rsd, rs2) => (LeanRV32D.Functions.execute_C_ADD rsd rs2)
-  | .C_LBU (uimm, rdc, rsc1) => (LeanRV32D.Functions.execute_C_LBU uimm rdc rsc1)
-  | .C_LHU (uimm, rdc, rsc1) => (LeanRV32D.Functions.execute_C_LHU uimm rdc rsc1)
-  | .C_LH (uimm, rdc, rsc1) => (LeanRV32D.Functions.execute_C_LH uimm rdc rsc1)
-  | .C_SB (uimm, rsc1, rsc2) => (LeanRV32D.Functions.execute_C_SB uimm rsc1 rsc2)
-  | .C_SH (uimm, rsc1, rsc2) => (LeanRV32D.Functions.execute_C_SH uimm rsc1 rsc2)
-  | .C_ZEXT_B rsdc => (LeanRV32D.Functions.execute_C_ZEXT_B rsdc)
-  | .C_SEXT_B rsdc => (LeanRV32D.Functions.execute_C_SEXT_B rsdc)
-  | .C_ZEXT_H rsdc => (LeanRV32D.Functions.execute_C_ZEXT_H rsdc)
-  | .C_SEXT_H rsdc => (LeanRV32D.Functions.execute_C_SEXT_H rsdc)
-  | .C_ZEXT_W rsdc => (LeanRV32D.Functions.execute_C_ZEXT_W rsdc)
-  | .C_NOT rsdc => (LeanRV32D.Functions.execute_C_NOT rsdc)
-  | .C_MUL (rsdc, rsc2) => (LeanRV32D.Functions.execute_C_MUL rsdc rsc2)
-  | .LOAD_FP (imm, rs1, rd, width) => (LeanRV32D.Functions.execute_LOAD_FP imm rs1 rd width)
-  | .STORE_FP (imm, rs2, rs1, width) => (LeanRV32D.Functions.execute_STORE_FP imm rs2 rs1 width)
-  | .F_MADD_TYPE_S (rs3, rs2, rs1, rm, rd, op) => (LeanRV32D.Functions.execute_F_MADD_TYPE_S rs3 rs2 rs1 rm rd op)
-  | .F_BIN_RM_TYPE_S (rs2, rs1, rm, rd, op) => (LeanRV32D.Functions.execute_F_BIN_RM_TYPE_S rs2 rs1 rm rd op)
-  | .F_UN_RM_FF_TYPE_S (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_FF_TYPE_S rs1 rm rd arg3)
-  | .F_UN_RM_FX_TYPE_S (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_FX_TYPE_S rs1 rm rd arg3)
-  | .F_UN_RM_XF_TYPE_S (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_XF_TYPE_S rs1 rm rd arg3)
-  | .F_BIN_TYPE_F_S (rs2, rs1, rd, arg3) => (LeanRV32D.Functions.execute_F_BIN_TYPE_F_S rs2 rs1 rd arg3)
-  | .F_BIN_TYPE_X_S (rs2, rs1, rd, arg3) => (LeanRV32D.Functions.execute_F_BIN_TYPE_X_S rs2 rs1 rd arg3)
-  | .F_UN_TYPE_X_S (rs1, rd, arg2) => (LeanRV32D.Functions.execute_F_UN_TYPE_X_S rs1 rd arg2)
-  | .F_UN_TYPE_F_S (rs1, rd, arg2) => (LeanRV32D.Functions.execute_F_UN_TYPE_F_S rs1 rd arg2)
-  | .C_FLWSP (imm, rd) => (LeanRV32D.Functions.execute_C_FLWSP imm rd)
-  | .C_FSWSP (uimm, rs2) => (LeanRV32D.Functions.execute_C_FSWSP uimm rs2)
-  | .C_FLW (uimm, rsc, rdc) => (LeanRV32D.Functions.execute_C_FLW uimm rsc rdc)
-  | .C_FSW (uimm, rsc1, rsc2) => (LeanRV32D.Functions.execute_C_FSW uimm rsc1 rsc2)
-  | .F_MADD_TYPE_D (rs3, rs2, rs1, rm, rd, op) => (LeanRV32D.Functions.execute_F_MADD_TYPE_D rs3 rs2 rs1 rm rd op)
-  | .F_BIN_RM_TYPE_D (rs2, rs1, rm, rd, op) => (LeanRV32D.Functions.execute_F_BIN_RM_TYPE_D rs2 rs1 rm rd op)
-  | .F_UN_RM_FF_TYPE_D (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_FF_TYPE_D rs1 rm rd arg3)
-  | .F_UN_RM_FX_TYPE_D (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_FX_TYPE_D rs1 rm rd arg3)
-  | .F_UN_RM_XF_TYPE_D (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_XF_TYPE_D rs1 rm rd arg3)
-  | .F_BIN_F_TYPE_D (rs2, rs1, rd, arg3) => (LeanRV32D.Functions.execute_F_BIN_F_TYPE_D rs2 rs1 rd arg3)
-  | .F_BIN_X_TYPE_D (rs2, rs1, rd, arg3) => (LeanRV32D.Functions.execute_F_BIN_X_TYPE_D rs2 rs1 rd arg3)
-  | .F_UN_X_TYPE_D (rs1, rd, arg2) => (LeanRV32D.Functions.execute_F_UN_X_TYPE_D rs1 rd arg2)
-  | .F_UN_F_TYPE_D (rs1, rd, arg2) => (LeanRV32D.Functions.execute_F_UN_F_TYPE_D rs1 rd arg2)
-  | .C_FLDSP (uimm, rd) => (LeanRV32D.Functions.execute_C_FLDSP uimm rd)
-  | .C_FSDSP (uimm, rs2) => (LeanRV32D.Functions.execute_C_FSDSP uimm rs2)
-  | .C_FLD (uimm, rsc, rdc) => (LeanRV32D.Functions.execute_C_FLD uimm rsc rdc)
-  | .C_FSD (uimm, rsc1, rsc2) => (LeanRV32D.Functions.execute_C_FSD uimm rsc1 rsc2)
-  | .F_BIN_RM_TYPE_H (rs2, rs1, rm, rd, op) => (LeanRV32D.Functions.execute_F_BIN_RM_TYPE_H rs2 rs1 rm rd op)
-  | .F_MADD_TYPE_H (rs3, rs2, rs1, rm, rd, op) => (LeanRV32D.Functions.execute_F_MADD_TYPE_H rs3 rs2 rs1 rm rd op)
-  | .F_BIN_F_TYPE_H (rs2, rs1, rd, arg3) => (LeanRV32D.Functions.execute_F_BIN_F_TYPE_H rs2 rs1 rd arg3)
-  | .F_BIN_X_TYPE_H (rs2, rs1, rd, arg3) => (LeanRV32D.Functions.execute_F_BIN_X_TYPE_H rs2 rs1 rd arg3)
-  | .F_UN_RM_FF_TYPE_H (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_FF_TYPE_H rs1 rm rd arg3)
-  | .F_UN_RM_FX_TYPE_H (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_FX_TYPE_H rs1 rm rd arg3)
-  | .F_UN_RM_XF_TYPE_H (rs1, rm, rd, arg3) => (LeanRV32D.Functions.execute_F_UN_RM_XF_TYPE_H rs1 rm rd arg3)
-  | .F_UN_X_TYPE_H (rs1, rd, arg2) => (LeanRV32D.Functions.execute_F_UN_X_TYPE_H rs1 rd arg2)
-  | .F_UN_F_TYPE_H (rs1, rd, arg2) => (LeanRV32D.Functions.execute_F_UN_F_TYPE_H rs1 rd arg2)
-  | .FLI_H (constantidx, rd) => (LeanRV32D.Functions.execute_FLI_H constantidx rd)
-  | .FLI_S (constantidx, rd) => (LeanRV32D.Functions.execute_FLI_S constantidx rd)
-  | .FLI_D (constantidx, rd) => (LeanRV32D.Functions.execute_FLI_D constantidx rd)
-  | .FMINM_H (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMINM_H rs2 rs1 rd)
-  | .FMAXM_H (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMAXM_H rs2 rs1 rd)
-  | .FMINM_S (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMINM_S rs2 rs1 rd)
-  | .FMAXM_S (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMAXM_S rs2 rs1 rd)
-  | .FMINM_D (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMINM_D rs2 rs1 rd)
-  | .FMAXM_D (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMAXM_D rs2 rs1 rd)
-  | .FROUND_H (rs1, rm, rd) => (LeanRV32D.Functions.execute_FROUND_H rs1 rm rd)
-  | .FROUNDNX_H (rs1, rm, rd) => (LeanRV32D.Functions.execute_FROUNDNX_H rs1 rm rd)
-  | .FROUND_S (rs1, rm, rd) => (LeanRV32D.Functions.execute_FROUND_S rs1 rm rd)
-  | .FROUNDNX_S (rs1, rm, rd) => (LeanRV32D.Functions.execute_FROUNDNX_S rs1 rm rd)
-  | .FROUND_D (rs1, rm, rd) => (LeanRV32D.Functions.execute_FROUND_D rs1 rm rd)
-  | .FROUNDNX_D (rs1, rm, rd) => (LeanRV32D.Functions.execute_FROUNDNX_D rs1 rm rd)
-  | .FMVH_X_D (rs1, rd) => (LeanRV32D.Functions.execute_FMVH_X_D rs1 rd)
-  | .FMVP_D_X (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FMVP_D_X rs2 rs1 rd)
-  | .FLEQ_H (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FLEQ_H rs2 rs1 rd)
-  | .FLTQ_H (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FLTQ_H rs2 rs1 rd)
-  | .FLEQ_S (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FLEQ_S rs2 rs1 rd)
-  | .FLTQ_S (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FLTQ_S rs2 rs1 rd)
-  | .FLEQ_D (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FLEQ_D rs2 rs1 rd)
-  | .FLTQ_D (rs2, rs1, rd) => (LeanRV32D.Functions.execute_FLTQ_D rs2 rs1 rd)
-  | .FCVTMOD_W_D (rs1, rd) => (LeanRV32D.Functions.execute_FCVTMOD_W_D rs1 rd)
-  | .VSETVLI (ma, ta, sew, lmul, rs1, rd) => (LeanRV32D.Functions.execute_VSETVLI ma ta sew lmul rs1 rd)
-  | .VSETVL (rs2, rs1, rd) => (LeanRV32D.Functions.execute_VSETVL rs2 rs1 rd)
-  | .VSETIVLI (ma, ta, sew, lmul, uimm, rd) => (LeanRV32D.Functions.execute_VSETIVLI ma ta sew lmul uimm rd)
-  | .VVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VVTYPE funct6 vm vs2 vs1 vd)
-  | .NVSTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_NVSTYPE funct6 vm vs2 vs1 vd)
-  | .NVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_NVTYPE funct6 vm vs2 vs1 vd)
-  | .MASKTYPEV (vs2, vs1, vd) => (LeanRV32D.Functions.execute_MASKTYPEV vs2 vs1 vd)
-  | .MOVETYPEV (vs1, vd) => (LeanRV32D.Functions.execute_MOVETYPEV vs1 vd)
-  | .VXTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VXTYPE funct6 vm vs2 rs1 vd)
-  | .NXSTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_NXSTYPE funct6 vm vs2 rs1 vd)
-  | .NXTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_NXTYPE funct6 vm vs2 rs1 vd)
-  | .VXSG (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VXSG funct6 vm vs2 rs1 vd)
-  | .MASKTYPEX (vs2, rs1, vd) => (LeanRV32D.Functions.execute_MASKTYPEX vs2 rs1 vd)
-  | .MOVETYPEX (rs1, vd) => (LeanRV32D.Functions.execute_MOVETYPEX rs1 vd)
-  | .VITYPE (funct6, vm, vs2, simm, vd) => (LeanRV32D.Functions.execute_VITYPE funct6 vm vs2 simm vd)
-  | .NISTYPE (funct6, vm, vs2, uimm, vd) => (LeanRV32D.Functions.execute_NISTYPE funct6 vm vs2 uimm vd)
-  | .NITYPE (funct6, vm, vs2, uimm, vd) => (LeanRV32D.Functions.execute_NITYPE funct6 vm vs2 uimm vd)
-  | .VISG (funct6, vm, vs2, simm, vd) => (LeanRV32D.Functions.execute_VISG funct6 vm vs2 simm vd)
-  | .MASKTYPEI (vs2, simm, vd) => (LeanRV32D.Functions.execute_MASKTYPEI vs2 simm vd)
-  | .MOVETYPEI (vd, simm) => (LeanRV32D.Functions.execute_MOVETYPEI vd simm)
-  | .VMVRTYPE (vs2, nreg, vd) => (LeanRV32D.Functions.execute_VMVRTYPE vs2 nreg vd)
-  | .MVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_MVVTYPE funct6 vm vs2 vs1 vd)
-  | .MVVMATYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_MVVMATYPE funct6 vm vs2 vs1 vd)
-  | .WVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_WVVTYPE funct6 vm vs2 vs1 vd)
-  | .WVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_WVTYPE funct6 vm vs2 vs1 vd)
-  | .WMVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_WMVVTYPE funct6 vm vs2 vs1 vd)
-  | .VEXTTYPE (funct6, vm, vs2, vd) => (LeanRV32D.Functions.execute_VEXTTYPE funct6 vm vs2 vd)
-  | .VMVXS (vs2, rd) => (LeanRV32D.Functions.execute_VMVXS vs2 rd)
-  | .MVVCOMPRESS (vs2, vs1, vd) => (LeanRV32D.Functions.execute_MVVCOMPRESS vs2 vs1 vd)
-  | .MVXTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_MVXTYPE funct6 vm vs2 rs1 vd)
-  | .MVXMATYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_MVXMATYPE funct6 vm vs2 rs1 vd)
-  | .WVXTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_WVXTYPE funct6 vm vs2 rs1 vd)
-  | .WXTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_WXTYPE funct6 vm vs2 rs1 vd)
-  | .WMVXTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_WMVXTYPE funct6 vm vs2 rs1 vd)
-  | .VMVSX (rs1, vd) => (LeanRV32D.Functions.execute_VMVSX rs1 vd)
-  | .FVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_FVVTYPE funct6 vm vs2 vs1 vd)
-  | .FVVMATYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_FVVMATYPE funct6 vm vs2 vs1 vd)
-  | .FWVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_FWVVTYPE funct6 vm vs2 vs1 vd)
-  | .FWVVMATYPE (funct6, vm, vs1, vs2, vd) => (LeanRV32D.Functions.execute_FWVVMATYPE funct6 vm vs1 vs2 vd)
-  | .FWVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_FWVTYPE funct6 vm vs2 vs1 vd)
-  | .VFUNARY0 (vm, vs2, vfunary0, vd) => (LeanRV32D.Functions.execute_VFUNARY0 vm vs2 vfunary0 vd)
-  | .VFWUNARY0 (vm, vs2, vfwunary0, vd) => (LeanRV32D.Functions.execute_VFWUNARY0 vm vs2 vfwunary0 vd)
-  | .VFNUNARY0 (vm, vs2, vfnunary0, vd) => (LeanRV32D.Functions.execute_VFNUNARY0 vm vs2 vfnunary0 vd)
-  | .VFUNARY1 (vm, vs2, vfunary1, vd) => (LeanRV32D.Functions.execute_VFUNARY1 vm vs2 vfunary1 vd)
-  | .VFMVFS (vs2, rd) => (LeanRV32D.Functions.execute_VFMVFS vs2 rd)
-  | .FVFTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_FVFTYPE funct6 vm vs2 rs1 vd)
-  | .FVFMATYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_FVFMATYPE funct6 vm vs2 rs1 vd)
-  | .FWVFTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_FWVFTYPE funct6 vm vs2 rs1 vd)
-  | .FWVFMATYPE (funct6, vm, rs1, vs2, vd) => (LeanRV32D.Functions.execute_FWVFMATYPE funct6 vm rs1 vs2 vd)
-  | .FWFTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_FWFTYPE funct6 vm vs2 rs1 vd)
-  | .VFMERGE (vs2, rs1, vd) => (LeanRV32D.Functions.execute_VFMERGE vs2 rs1 vd)
-  | .VFMV (rs1, vd) => (LeanRV32D.Functions.execute_VFMV rs1 vd)
-  | .VFMVSF (rs1, vd) => (LeanRV32D.Functions.execute_VFMVSF rs1 vd)
-  | .VLSEGTYPE (nf, vm, rs1, width, vd) => (LeanRV32D.Functions.execute_VLSEGTYPE nf vm rs1 width vd)
-  | .VLSEGFFTYPE (nf, vm, rs1, width, vd) => (LeanRV32D.Functions.execute_VLSEGFFTYPE nf vm rs1 width vd)
-  | .VSSEGTYPE (nf, vm, rs1, width, vs3) => (LeanRV32D.Functions.execute_VSSEGTYPE nf vm rs1 width vs3)
-  | .VLSSEGTYPE (nf, vm, rs2, rs1, width, vd) => (LeanRV32D.Functions.execute_VLSSEGTYPE nf vm rs2 rs1 width vd)
-  | .VSSSEGTYPE (nf, vm, rs2, rs1, width, vs3) => (LeanRV32D.Functions.execute_VSSSEGTYPE nf vm rs2 rs1 width vs3)
-  | .VLUXSEGTYPE (nf, vm, vs2, rs1, width, vd) => (LeanRV32D.Functions.execute_VLUXSEGTYPE nf vm vs2 rs1 width vd)
-  | .VLOXSEGTYPE (nf, vm, vs2, rs1, width, vd) => (LeanRV32D.Functions.execute_VLOXSEGTYPE nf vm vs2 rs1 width vd)
-  | .VSUXSEGTYPE (nf, vm, vs2, rs1, width, vs3) => (LeanRV32D.Functions.execute_VSUXSEGTYPE nf vm vs2 rs1 width vs3)
-  | .VSOXSEGTYPE (nf, vm, vs2, rs1, width, vs3) => (LeanRV32D.Functions.execute_VSOXSEGTYPE nf vm vs2 rs1 width vs3)
-  | .VLRETYPE (nf, rs1, width, vd) => (LeanRV32D.Functions.execute_VLRETYPE nf rs1 width vd)
-  | .VSRETYPE (nf, rs1, vs3) => (LeanRV32D.Functions.execute_VSRETYPE nf rs1 vs3)
-  | .VMTYPE (rs1, vd_or_vs3, op) => (LeanRV32D.Functions.execute_VMTYPE rs1 vd_or_vs3 op)
-  | .MMTYPE (funct6, vs2, vs1, vd) => (LeanRV32D.Functions.execute_MMTYPE funct6 vs2 vs1 vd)
-  | .VCPOP_M (vm, vs2, rd) => (LeanRV32D.Functions.execute_VCPOP_M vm vs2 rd)
-  | .VFIRST_M (vm, vs2, rd) => (LeanRV32D.Functions.execute_VFIRST_M vm vs2 rd)
-  | .VMSBF_M (vm, vs2, vd) => (LeanRV32D.Functions.execute_VMSBF_M vm vs2 vd)
-  | .VMSIF_M (vm, vs2, vd) => (LeanRV32D.Functions.execute_VMSIF_M vm vs2 vd)
-  | .VMSOF_M (vm, vs2, vd) => (LeanRV32D.Functions.execute_VMSOF_M vm vs2 vd)
-  | .VIOTA_M (vm, vs2, vd) => (LeanRV32D.Functions.execute_VIOTA_M vm vs2 vd)
-  | .VID_V (vm, vd) => (LeanRV32D.Functions.execute_VID_V vm vd)
-  | .VVMTYPE (funct6, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VVMTYPE funct6 vs2 vs1 vd)
-  | .VVMCTYPE (funct6, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VVMCTYPE funct6 vs2 vs1 vd)
-  | .VVMSTYPE (funct6, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VVMSTYPE funct6 vs2 vs1 vd)
-  | .VVCMPTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VVCMPTYPE funct6 vm vs2 vs1 vd)
-  | .VXMTYPE (funct6, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VXMTYPE funct6 vs2 rs1 vd)
-  | .VXMCTYPE (funct6, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VXMCTYPE funct6 vs2 rs1 vd)
-  | .VXMSTYPE (funct6, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VXMSTYPE funct6 vs2 rs1 vd)
-  | .VXCMPTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VXCMPTYPE funct6 vm vs2 rs1 vd)
-  | .VIMTYPE (funct6, vs2, simm, vd) => (LeanRV32D.Functions.execute_VIMTYPE funct6 vs2 simm vd)
-  | .VIMCTYPE (funct6, vs2, simm, vd) => (LeanRV32D.Functions.execute_VIMCTYPE funct6 vs2 simm vd)
-  | .VIMSTYPE (funct6, vs2, simm, vd) => (LeanRV32D.Functions.execute_VIMSTYPE funct6 vs2 simm vd)
-  | .VICMPTYPE (funct6, vm, vs2, simm, vd) => (LeanRV32D.Functions.execute_VICMPTYPE funct6 vm vs2 simm vd)
-  | .FVVMTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_FVVMTYPE funct6 vm vs2 vs1 vd)
-  | .FVFMTYPE (funct6, vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_FVFMTYPE funct6 vm vs2 rs1 vd)
-  | .RIVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_RIVVTYPE funct6 vm vs2 vs1 vd)
-  | .RMVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_RMVVTYPE funct6 vm vs2 vs1 vd)
-  | .RFVVTYPE (funct6, vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_RFVVTYPE funct6 vm vs2 vs1 vd)
-  | .SHA256SIG0 (rs1, rd) => (LeanRV32D.Functions.execute_SHA256SIG0 rs1 rd)
-  | .SHA256SIG1 (rs1, rd) => (LeanRV32D.Functions.execute_SHA256SIG1 rs1 rd)
-  | .SHA256SUM0 (rs1, rd) => (LeanRV32D.Functions.execute_SHA256SUM0 rs1 rd)
-  | .SHA256SUM1 (rs1, rd) => (LeanRV32D.Functions.execute_SHA256SUM1 rs1 rd)
-  | .AES32ESMI (bs, rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES32ESMI bs rs2 rs1 rd)
-  | .AES32ESI (bs, rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES32ESI bs rs2 rs1 rd)
-  | .AES32DSMI (bs, rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES32DSMI bs rs2 rs1 rd)
-  | .AES32DSI (bs, rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES32DSI bs rs2 rs1 rd)
-  | .SHA512SIG0H (rs2, rs1, rd) => (LeanRV32D.Functions.execute_SHA512SIG0H rs2 rs1 rd)
-  | .SHA512SIG0L (rs2, rs1, rd) => (LeanRV32D.Functions.execute_SHA512SIG0L rs2 rs1 rd)
-  | .SHA512SIG1H (rs2, rs1, rd) => (LeanRV32D.Functions.execute_SHA512SIG1H rs2 rs1 rd)
-  | .SHA512SIG1L (rs2, rs1, rd) => (LeanRV32D.Functions.execute_SHA512SIG1L rs2 rs1 rd)
-  | .SHA512SUM0R (rs2, rs1, rd) => (LeanRV32D.Functions.execute_SHA512SUM0R rs2 rs1 rd)
-  | .SHA512SUM1R (rs2, rs1, rd) => (LeanRV32D.Functions.execute_SHA512SUM1R rs2 rs1 rd)
-  | .AES64KS1I (rnum, rs1, rd) => (LeanRV32D.Functions.execute_AES64KS1I rnum rs1 rd)
-  | .AES64KS2 (rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES64KS2 rs2 rs1 rd)
-  | .AES64IM (rs1, rd) => (LeanRV32D.Functions.execute_AES64IM rs1 rd)
-  | .AES64ESM (rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES64ESM rs2 rs1 rd)
-  | .AES64ES (rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES64ES rs2 rs1 rd)
-  | .AES64DSM (rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES64DSM rs2 rs1 rd)
-  | .AES64DS (rs2, rs1, rd) => (LeanRV32D.Functions.execute_AES64DS rs2 rs1 rd)
-  | .SHA512SIG0 (rs1, rd) => (LeanRV32D.Functions.execute_SHA512SIG0 rs1 rd)
-  | .SHA512SIG1 (rs1, rd) => (LeanRV32D.Functions.execute_SHA512SIG1 rs1 rd)
-  | .SHA512SUM0 (rs1, rd) => (LeanRV32D.Functions.execute_SHA512SUM0 rs1 rd)
-  | .SHA512SUM1 (rs1, rd) => (LeanRV32D.Functions.execute_SHA512SUM1 rs1 rd)
-  | .SM3P0 (rs1, rd) => (LeanRV32D.Functions.execute_SM3P0 rs1 rd)
-  | .SM3P1 (rs1, rd) => (LeanRV32D.Functions.execute_SM3P1 rs1 rd)
-  | .SM4ED (bs, rs2, rs1, rd) => (LeanRV32D.Functions.execute_SM4ED bs rs2 rs1 rd)
-  | .SM4KS (bs, rs2, rs1, rd) => (LeanRV32D.Functions.execute_SM4KS bs rs2 rs1 rd)
-  | .ZBKB_RTYPE (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_ZBKB_RTYPE rs2 rs1 rd op)
-  | .ZBKB_PACKW (rs2, rs1, rd) => (LeanRV32D.Functions.execute_ZBKB_PACKW rs2 rs1 rd)
-  | .ZIP (rs1, rd) => (LeanRV32D.Functions.execute_ZIP rs1 rd)
-  | .UNZIP (rs1, rd) => (LeanRV32D.Functions.execute_UNZIP rs1 rd)
-  | .BREV8 (rs1, rd) => (LeanRV32D.Functions.execute_BREV8 rs1 rd)
-  | .XPERM8 (rs2, rs1, rd) => (LeanRV32D.Functions.execute_XPERM8 rs2 rs1 rd)
-  | .XPERM4 (rs2, rs1, rd) => (LeanRV32D.Functions.execute_XPERM4 rs2 rs1 rd)
-  | .VANDN_VV (vm, vs1, vs2, vd) => (LeanRV32D.Functions.execute_VANDN_VV vm vs1 vs2 vd)
-  | .VANDN_VX (vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VANDN_VX vm vs2 rs1 vd)
-  | .VBREV_V (vm, vs2, vd) => (LeanRV32D.Functions.execute_VBREV_V vm vs2 vd)
-  | .VBREV8_V (vm, vs2, vd) => (LeanRV32D.Functions.execute_VBREV8_V vm vs2 vd)
-  | .VREV8_V (vm, vs2, vd) => (LeanRV32D.Functions.execute_VREV8_V vm vs2 vd)
-  | .VCLZ_V (vm, vs2, vd) => (LeanRV32D.Functions.execute_VCLZ_V vm vs2 vd)
-  | .VCTZ_V (vm, vs2, vd) => (LeanRV32D.Functions.execute_VCTZ_V vm vs2 vd)
-  | .VCPOP_V (vm, vs2, vd) => (LeanRV32D.Functions.execute_VCPOP_V vm vs2 vd)
-  | .VROL_VV (vm, vs1, vs2, vd) => (LeanRV32D.Functions.execute_VROL_VV vm vs1 vs2 vd)
-  | .VROL_VX (vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VROL_VX vm vs2 rs1 vd)
-  | .VROR_VV (vm, vs1, vs2, vd) => (LeanRV32D.Functions.execute_VROR_VV vm vs1 vs2 vd)
-  | .VROR_VX (vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VROR_VX vm vs2 rs1 vd)
-  | .VROR_VI (vm, vs2, uimm, vd) => (LeanRV32D.Functions.execute_VROR_VI vm vs2 uimm vd)
-  | .VWSLL_VV (vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VWSLL_VV vm vs2 vs1 vd)
-  | .VWSLL_VX (vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VWSLL_VX vm vs2 rs1 vd)
-  | .VWSLL_VI (vm, vs2, uimm, vd) => (LeanRV32D.Functions.execute_VWSLL_VI vm vs2 uimm vd)
-  | .VCLMUL_VV (vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VCLMUL_VV vm vs2 vs1 vd)
-  | .VCLMUL_VX (vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VCLMUL_VX vm vs2 rs1 vd)
-  | .VCLMULH_VV (vm, vs2, vs1, vd) => (LeanRV32D.Functions.execute_VCLMULH_VV vm vs2 vs1 vd)
-  | .VCLMULH_VX (vm, vs2, rs1, vd) => (LeanRV32D.Functions.execute_VCLMULH_VX vm vs2 rs1 vd)
-  | .VGHSH_VV (vs2, vs1, vd) => (LeanRV32D.Functions.execute_VGHSH_VV vs2 vs1 vd)
-  | .VGMUL_VV (vs2, vd) => (LeanRV32D.Functions.execute_VGMUL_VV vs2 vd)
-  | .VAESDF (funct6, vs2, vd) => (LeanRV32D.Functions.execute_VAESDF funct6 vs2 vd)
-  | .VAESDM (funct6, vs2, vd) => (LeanRV32D.Functions.execute_VAESDM funct6 vs2 vd)
-  | .VAESEF (funct6, vs2, vd) => (LeanRV32D.Functions.execute_VAESEF funct6 vs2 vd)
-  | .VAESEM (funct6, vs2, vd) => (LeanRV32D.Functions.execute_VAESEM funct6 vs2 vd)
-  | .VAESKF1_VI (vs2, rnd, vd) => (LeanRV32D.Functions.execute_VAESKF1_VI vs2 rnd vd)
-  | .VAESKF2_VI (vs2, rnd, vd) => (LeanRV32D.Functions.execute_VAESKF2_VI vs2 rnd vd)
-  | .VAESZ_VS (vs2, vd) => (LeanRV32D.Functions.execute_VAESZ_VS vs2 vd)
-  | .VSM4K_VI (vs2, uimm, vd) => (LeanRV32D.Functions.execute_VSM4K_VI vs2 uimm vd)
-  | .ZVKSM4RTYPE (funct6, vs2, vd) => (LeanRV32D.Functions.execute_ZVKSM4RTYPE funct6 vs2 vd)
-  | .VSHA2MS_VV (vs2, vs1, vd) => (LeanRV32D.Functions.execute_VSHA2MS_VV vs2 vs1 vd)
-  | .ZVKSHA2TYPE (funct6, vs2, vs1, vd) => (LeanRV32D.Functions.execute_ZVKSHA2TYPE funct6 vs2 vs1 vd)
-  | .VSM3ME_VV (vs2, vs1, vd) => (LeanRV32D.Functions.execute_VSM3ME_VV vs2 vs1 vd)
-  | .VSM3C_VI (vs2, uimm, vd) => (LeanRV32D.Functions.execute_VSM3C_VI vs2 uimm vd)
-  | .CSRReg (csr, rs1, rd, op) => (LeanRV32D.Functions.execute_CSRReg csr rs1 rd op)
-  | .CSRImm (csr, imm, rd, op) => (LeanRV32D.Functions.execute_CSRImm csr imm rd op)
-  | .SINVAL_VMA (rs1, rs2) => (LeanRV32D.Functions.execute_SINVAL_VMA rs1 rs2)
-  | .SFENCE_W_INVAL arg0 => (LeanRV32D.Functions.execute_SFENCE_W_INVAL arg0)
-  | .SFENCE_INVAL_IR arg0 => (LeanRV32D.Functions.execute_SFENCE_INVAL_IR arg0)
-  | .WRS arg0 => (pure (LeanRV32D.Functions.execute_WRS arg0))
-  | .ZICOND_RTYPE (rs2, rs1, rd, op) => (LeanRV32D.Functions.execute_ZICOND_RTYPE rs2 rs1 rd op)
-  | .ZICBOM (arg0, rs1) => (LeanRV32D.Functions.execute_ZICBOM arg0 rs1)
-  | .ZICBOZ rs1 => (LeanRV32D.Functions.execute_ZICBOZ rs1)
-  | .FENCEI arg0 => (pure (LeanRV32D.Functions.execute_FENCEI arg0))
-  | .FCVT_BF16_S (rs1, rm, rd) => (LeanRV32D.Functions.execute_FCVT_BF16_S rs1 rm rd)
-  | .FCVT_S_BF16 (rs1, rm, rd) => (LeanRV32D.Functions.execute_FCVT_S_BF16 rs1 rm rd)
-  | .ZIMOP_MOP_R (mop, rs1, rd) => (LeanRV32D.Functions.execute_ZIMOP_MOP_R mop rs1 rd)
-  | .ZIMOP_MOP_RR (mop, rs2, rs1, rd) => (LeanRV32D.Functions.execute_ZIMOP_MOP_RR mop rs2 rs1 rd)
-  | .ZCMOP mop => (pure (LeanRV32D.Functions.execute_ZCMOP mop))
-  | .ILLEGAL s => (pure (LeanRV32D.Functions.execute_ILLEGAL s))
-  | .C_ILLEGAL s => (pure (LeanRV32D.Functions.execute_C_ILLEGAL s))
+    | .ZICBOP (_cbop, _rs1, _offset) => (pure (execute_ZICBOP _cbop _rs1 _offset))
+    | .NTL g__123 => (pure (execute_NTL g__123))
+    | .C_NTL g__124 => (pure (execute_C_NTL g__124))
+    | .PAUSE arg0 => (pure (execute_PAUSE arg0))
+    | .LPAD lpl => (execute_LPAD lpl)
+    | .UTYPE (imm, rd, op) => (execute_UTYPE imm rd op)
+    | .JAL (imm, rd) => (execute_JAL imm rd)
+    | .BTYPE (imm, rs2, rs1, op) => (execute_BTYPE imm rs2 rs1 op)
+    | .ITYPE (imm, rs1, rd, op) => (execute_ITYPE imm rs1 rd op)
+    | .SHIFTIOP (shamt, rs1, rd, op) => (execute_SHIFTIOP shamt rs1 rd op)
+    | .RTYPE (rs2, rs1, rd, op) => (execute_RTYPE rs2 rs1 rd op)
+    | .LOAD (imm, rs1, rd, is_unsigned, width) => (execute_LOAD imm rs1 rd is_unsigned width)
+    | .STORE (imm, rs2, rs1, width) => (execute_STORE imm rs2 rs1 width)
+    | .ADDIW (imm, rs1, rd) => (execute_ADDIW imm rs1 rd)
+    | .RTYPEW (rs2, rs1, rd, op) => (execute_RTYPEW rs2 rs1 rd op)
+    | .SHIFTIWOP (shamt, rs1, rd, op) => (execute_SHIFTIWOP shamt rs1 rd op)
+    | .FENCE_TSO arg0 => (execute_FENCE_TSO arg0)
+    | .FENCE (_fm, pred, succ, _rs, _rd) => (execute_FENCE _fm pred succ _rs _rd)
+    | .ECALL arg0 => (execute_ECALL arg0)
+    | .MRET arg0 => (execute_MRET arg0)
+    | .SRET arg0 => (execute_SRET arg0)
+    | .EBREAK arg0 => (execute_EBREAK arg0)
+    | .WFI arg0 => (execute_WFI arg0)
+    | .SFENCE_VMA (rs1, rs2) => (execute_SFENCE_VMA rs1 rs2)
+    | .JALR (imm, rs1, rd) => (execute_JALR imm rs1 rd)
+    | .AMO (op, aq, rl, rs2, rs1, width, rd) => (execute_AMO op aq rl rs2 rs1 width rd)
+    | .LOADRES (aq, rl, rs1, width, rd) => (execute_LOADRES aq rl rs1 width rd)
+    | .STORECON (aq, rl, rs2, rs1, width, rd) => (execute_STORECON aq rl rs2 rs1 width rd)
+    | .MUL (rs2, rs1, rd, mul_op) => (execute_MUL rs2 rs1 rd mul_op)
+    | .DIV (rs2, rs1, rd, is_unsigned) => (execute_DIV rs2 rs1 rd is_unsigned)
+    | .REM (rs2, rs1, rd, is_unsigned) => (execute_REM rs2 rs1 rd is_unsigned)
+    | .MULW (rs2, rs1, rd) => (execute_MULW rs2 rs1 rd)
+    | .DIVW (rs2, rs1, rd, is_unsigned) => (execute_DIVW rs2 rs1 rd is_unsigned)
+    | .REMW (rs2, rs1, rd, is_unsigned) => (execute_REMW rs2 rs1 rd is_unsigned)
+    | .SLLIUW (shamt, rs1, rd) => (execute_SLLIUW shamt rs1 rd)
+    | .ZBA_RTYPEUW (rs2, rs1, rd, shamt) => (execute_ZBA_RTYPEUW rs2 rs1 rd shamt)
+    | .ZBA_RTYPE (rs2, rs1, rd, shamt) => (execute_ZBA_RTYPE rs2 rs1 rd shamt)
+    | .RORIW (shamt, rs1, rd) => (execute_RORIW shamt rs1 rd)
+    | .RORI (shamt, rs1, rd) => (execute_RORI shamt rs1 rd)
+    | .ZBB_RTYPEW (rs2, rs1, rd, op) => (execute_ZBB_RTYPEW rs2 rs1 rd op)
+    | .ZBB_RTYPE (rs2, rs1, rd, op) => (execute_ZBB_RTYPE rs2 rs1 rd op)
+    | .ZBB_EXTOP (rs1, rd, op) => (execute_ZBB_EXTOP rs1 rd op)
+    | .REV8 (rs1, rd) => (execute_REV8 rs1 rd)
+    | .ORCB (rs1, rd) => (execute_ORCB rs1 rd)
+    | .CPOP (rs1, rd) => (execute_CPOP rs1 rd)
+    | .CPOPW (rs1, rd) => (execute_CPOPW rs1 rd)
+    | .CLZ (rs1, rd) => (execute_CLZ rs1 rd)
+    | .CLZW (rs1, rd) => (execute_CLZW rs1 rd)
+    | .CTZ (rs1, rd) => (execute_CTZ rs1 rd)
+    | .CTZW (rs1, rd) => (execute_CTZW rs1 rd)
+    | .CLMUL (rs2, rs1, rd) => (execute_CLMUL rs2 rs1 rd)
+    | .CLMULH (rs2, rs1, rd) => (execute_CLMULH rs2 rs1 rd)
+    | .CLMULR (rs2, rs1, rd) => (execute_CLMULR rs2 rs1 rd)
+    | .ZBS_IOP (shamt, rs1, rd, op) => (execute_ZBS_IOP shamt rs1 rd op)
+    | .ZBS_RTYPE (rs2, rs1, rd, op) => (execute_ZBS_RTYPE rs2 rs1 rd op)
+    | .C_NOP g__125 => (pure (execute_C_NOP g__125))
+    | .C_ADDI4SPN (rdc, nzimm) => (pure (execute_C_ADDI4SPN rdc nzimm))
+    | .C_LW (uimm, rsc, rdc) => (pure (execute_C_LW uimm rsc rdc))
+    | .C_LD (uimm, rsc, rdc) => (pure (execute_C_LD uimm rsc rdc))
+    | .C_SW (uimm, rsc1, rsc2) => (pure (execute_C_SW uimm rsc1 rsc2))
+    | .C_SD (uimm, rsc1, rsc2) => (pure (execute_C_SD uimm rsc1 rsc2))
+    | .C_ADDI (imm, rsd) => (pure (execute_C_ADDI imm rsd))
+    | .C_JAL imm => (pure (execute_C_JAL imm))
+    | .C_ADDIW (imm, rsd) => (pure (execute_C_ADDIW imm rsd))
+    | .C_LI (imm, rd) => (pure (execute_C_LI imm rd))
+    | .C_ADDI16SP imm => (pure (execute_C_ADDI16SP imm))
+    | .C_LUI (imm, rd) => (pure (execute_C_LUI imm rd))
+    | .C_SRLI (shamt, rsd) => (pure (execute_C_SRLI shamt rsd))
+    | .C_SRAI (shamt, rsd) => (pure (execute_C_SRAI shamt rsd))
+    | .C_ANDI (imm, rsd) => (pure (execute_C_ANDI imm rsd))
+    | .C_SUB (rsd, rs2) => (pure (execute_C_SUB rsd rs2))
+    | .C_XOR (rsd, rs2) => (pure (execute_C_XOR rsd rs2))
+    | .C_OR (rsd, rs2) => (pure (execute_C_OR rsd rs2))
+    | .C_AND (rsd, rs2) => (pure (execute_C_AND rsd rs2))
+    | .C_SUBW (rsd, rs2) => (pure (execute_C_SUBW rsd rs2))
+    | .C_ADDW (rsd, rs2) => (pure (execute_C_ADDW rsd rs2))
+    | .C_J imm => (pure (execute_C_J imm))
+    | .C_BEQZ (imm, rs) => (pure (execute_C_BEQZ imm rs))
+    | .C_BNEZ (imm, rs) => (pure (execute_C_BNEZ imm rs))
+    | .C_SLLI (shamt, rsd) => (pure (execute_C_SLLI shamt rsd))
+    | .C_LWSP (uimm, rd) => (pure (execute_C_LWSP uimm rd))
+    | .C_LDSP (uimm, rd) => (pure (execute_C_LDSP uimm rd))
+    | .C_SWSP (uimm, rs2) => (pure (execute_C_SWSP uimm rs2))
+    | .C_SDSP (uimm, rs2) => (pure (execute_C_SDSP uimm rs2))
+    | .C_JR rs1 => (pure (execute_C_JR rs1))
+    | .C_JALR rs1 => (pure (execute_C_JALR rs1))
+    | .C_MV (rd, rs2) => (pure (execute_C_MV rd rs2))
+    | .C_EBREAK arg0 => (pure (execute_C_EBREAK arg0))
+    | .C_ADD (rsd, rs2) => (pure (execute_C_ADD rsd rs2))
+    | .C_LBU (uimm, rdc, rsc1) => (pure (execute_C_LBU uimm rdc rsc1))
+    | .C_LHU (uimm, rdc, rsc1) => (pure (execute_C_LHU uimm rdc rsc1))
+    | .C_LH (uimm, rdc, rsc1) => (pure (execute_C_LH uimm rdc rsc1))
+    | .C_SB (uimm, rsc1, rsc2) => (pure (execute_C_SB uimm rsc1 rsc2))
+    | .C_SH (uimm, rsc1, rsc2) => (pure (execute_C_SH uimm rsc1 rsc2))
+    | .C_ZEXT_B rsdc => (execute_C_ZEXT_B rsdc)
+    | .C_SEXT_B rsdc => (pure (execute_C_SEXT_B rsdc))
+    | .C_ZEXT_H rsdc => (pure (execute_C_ZEXT_H rsdc))
+    | .C_SEXT_H rsdc => (pure (execute_C_SEXT_H rsdc))
+    | .C_ZEXT_W rsdc => (pure (execute_C_ZEXT_W rsdc))
+    | .C_NOT rsdc => (execute_C_NOT rsdc)
+    | .C_MUL (rsdc, rsc2) => (pure (execute_C_MUL rsdc rsc2))
+    | .LOAD_FP (imm, rs1, rd, width) => (execute_LOAD_FP imm rs1 rd width)
+    | .STORE_FP (imm, rs2, rs1, width) => (execute_STORE_FP imm rs2 rs1 width)
+    | .F_MADD_TYPE_S (rs3, rs2, rs1, rm, rd, op) => (execute_F_MADD_TYPE_S rs3 rs2 rs1 rm rd op)
+    | .F_BIN_RM_TYPE_S (rs2, rs1, rm, rd, op) => (execute_F_BIN_RM_TYPE_S rs2 rs1 rm rd op)
+    | .F_UN_RM_FF_TYPE_S (rs1, rm, rd, arg3) => (execute_F_UN_RM_FF_TYPE_S rs1 rm rd arg3)
+    | .F_UN_RM_FX_TYPE_S (rs1, rm, rd, arg3) => (execute_F_UN_RM_FX_TYPE_S rs1 rm rd arg3)
+    | .F_UN_RM_XF_TYPE_S (rs1, rm, rd, arg3) => (execute_F_UN_RM_XF_TYPE_S rs1 rm rd arg3)
+    | .F_BIN_TYPE_F_S (rs2, rs1, rd, arg3) => (execute_F_BIN_TYPE_F_S rs2 rs1 rd arg3)
+    | .F_BIN_TYPE_X_S (rs2, rs1, rd, arg3) => (execute_F_BIN_TYPE_X_S rs2 rs1 rd arg3)
+    | .F_UN_TYPE_X_S (rs1, rd, arg2) => (execute_F_UN_TYPE_X_S rs1 rd arg2)
+    | .F_UN_TYPE_F_S (rs1, rd, arg2) => (execute_F_UN_TYPE_F_S rs1 rd arg2)
+    | .C_FLWSP (imm, rd) => (execute_C_FLWSP imm rd)
+    | .C_FSWSP (uimm, rs2) => (execute_C_FSWSP uimm rs2)
+    | .C_FLW (uimm, rsc, rdc) => (execute_C_FLW uimm rsc rdc)
+    | .C_FSW (uimm, rsc1, rsc2) => (execute_C_FSW uimm rsc1 rsc2)
+    | .F_MADD_TYPE_D (rs3, rs2, rs1, rm, rd, op) => (execute_F_MADD_TYPE_D rs3 rs2 rs1 rm rd op)
+    | .F_BIN_RM_TYPE_D (rs2, rs1, rm, rd, op) => (execute_F_BIN_RM_TYPE_D rs2 rs1 rm rd op)
+    | .F_UN_RM_FF_TYPE_D (rs1, rm, rd, arg3) => (execute_F_UN_RM_FF_TYPE_D rs1 rm rd arg3)
+    | .F_UN_RM_FX_TYPE_D (rs1, rm, rd, arg3) => (execute_F_UN_RM_FX_TYPE_D rs1 rm rd arg3)
+    | .F_UN_RM_XF_TYPE_D (rs1, rm, rd, arg3) => (execute_F_UN_RM_XF_TYPE_D rs1 rm rd arg3)
+    | .F_BIN_F_TYPE_D (rs2, rs1, rd, arg3) => (execute_F_BIN_F_TYPE_D rs2 rs1 rd arg3)
+    | .F_BIN_X_TYPE_D (rs2, rs1, rd, arg3) => (execute_F_BIN_X_TYPE_D rs2 rs1 rd arg3)
+    | .F_UN_X_TYPE_D (rs1, rd, arg2) => (execute_F_UN_X_TYPE_D rs1 rd arg2)
+    | .F_UN_F_TYPE_D (rs1, rd, arg2) => (execute_F_UN_F_TYPE_D rs1 rd arg2)
+    | .C_FLDSP (uimm, rd) => (execute_C_FLDSP uimm rd)
+    | .C_FSDSP (uimm, rs2) => (execute_C_FSDSP uimm rs2)
+    | .C_FLD (uimm, rsc, rdc) => (execute_C_FLD uimm rsc rdc)
+    | .C_FSD (uimm, rsc1, rsc2) => (execute_C_FSD uimm rsc1 rsc2)
+    | .F_BIN_RM_TYPE_H (rs2, rs1, rm, rd, op) => (execute_F_BIN_RM_TYPE_H rs2 rs1 rm rd op)
+    | .F_MADD_TYPE_H (rs3, rs2, rs1, rm, rd, op) => (execute_F_MADD_TYPE_H rs3 rs2 rs1 rm rd op)
+    | .F_BIN_F_TYPE_H (rs2, rs1, rd, arg3) => (execute_F_BIN_F_TYPE_H rs2 rs1 rd arg3)
+    | .F_BIN_X_TYPE_H (rs2, rs1, rd, arg3) => (execute_F_BIN_X_TYPE_H rs2 rs1 rd arg3)
+    | .F_UN_RM_FF_TYPE_H (rs1, rm, rd, arg3) => (execute_F_UN_RM_FF_TYPE_H rs1 rm rd arg3)
+    | .F_UN_RM_FX_TYPE_H (rs1, rm, rd, arg3) => (execute_F_UN_RM_FX_TYPE_H rs1 rm rd arg3)
+    | .F_UN_RM_XF_TYPE_H (rs1, rm, rd, arg3) => (execute_F_UN_RM_XF_TYPE_H rs1 rm rd arg3)
+    | .F_UN_X_TYPE_H (rs1, rd, arg2) => (execute_F_UN_X_TYPE_H rs1 rd arg2)
+    | .F_UN_F_TYPE_H (rs1, rd, arg2) => (execute_F_UN_F_TYPE_H rs1 rd arg2)
+    | .FLI_H (constantidx, rd) => (execute_FLI_H constantidx rd)
+    | .FLI_S (constantidx, rd) => (execute_FLI_S constantidx rd)
+    | .FLI_D (constantidx, rd) => (execute_FLI_D constantidx rd)
+    | .FMINM_H (rs2, rs1, rd) => (execute_FMINM_H rs2 rs1 rd)
+    | .FMAXM_H (rs2, rs1, rd) => (execute_FMAXM_H rs2 rs1 rd)
+    | .FMINM_S (rs2, rs1, rd) => (execute_FMINM_S rs2 rs1 rd)
+    | .FMAXM_S (rs2, rs1, rd) => (execute_FMAXM_S rs2 rs1 rd)
+    | .FMINM_D (rs2, rs1, rd) => (execute_FMINM_D rs2 rs1 rd)
+    | .FMAXM_D (rs2, rs1, rd) => (execute_FMAXM_D rs2 rs1 rd)
+    | .FROUND_H (rs1, rm, rd) => (execute_FROUND_H rs1 rm rd)
+    | .FROUNDNX_H (rs1, rm, rd) => (execute_FROUNDNX_H rs1 rm rd)
+    | .FROUND_S (rs1, rm, rd) => (execute_FROUND_S rs1 rm rd)
+    | .FROUNDNX_S (rs1, rm, rd) => (execute_FROUNDNX_S rs1 rm rd)
+    | .FROUND_D (rs1, rm, rd) => (execute_FROUND_D rs1 rm rd)
+    | .FROUNDNX_D (rs1, rm, rd) => (execute_FROUNDNX_D rs1 rm rd)
+    | .FMVH_X_D (rs1, rd) => (execute_FMVH_X_D rs1 rd)
+    | .FMVP_D_X (rs2, rs1, rd) => (execute_FMVP_D_X rs2 rs1 rd)
+    | .FLEQ_H (rs2, rs1, rd) => (execute_FLEQ_H rs2 rs1 rd)
+    | .FLTQ_H (rs2, rs1, rd) => (execute_FLTQ_H rs2 rs1 rd)
+    | .FLEQ_S (rs2, rs1, rd) => (execute_FLEQ_S rs2 rs1 rd)
+    | .FLTQ_S (rs2, rs1, rd) => (execute_FLTQ_S rs2 rs1 rd)
+    | .FLEQ_D (rs2, rs1, rd) => (execute_FLEQ_D rs2 rs1 rd)
+    | .FLTQ_D (rs2, rs1, rd) => (execute_FLTQ_D rs2 rs1 rd)
+    | .FCVTMOD_W_D (rs1, rd) => (execute_FCVTMOD_W_D rs1 rd)
+    | .VSETVLI (ma, ta, sew, lmul, rs1, rd) => (execute_VSETVLI ma ta sew lmul rs1 rd)
+    | .VSETVL (rs2, rs1, rd) => (execute_VSETVL rs2 rs1 rd)
+    | .VSETIVLI (ma, ta, sew, lmul, uimm, rd) => (execute_VSETIVLI ma ta sew lmul uimm rd)
+    | .VVTYPE (funct6, vm, vs2, vs1, vd) => (execute_VVTYPE funct6 vm vs2 vs1 vd)
+    | .NVSTYPE (funct6, vm, vs2, vs1, vd) => (execute_NVSTYPE funct6 vm vs2 vs1 vd)
+    | .NVTYPE (funct6, vm, vs2, vs1, vd) => (execute_NVTYPE funct6 vm vs2 vs1 vd)
+    | .MASKTYPEV (vs2, vs1, vd) => (execute_MASKTYPEV vs2 vs1 vd)
+    | .MOVETYPEV (vs1, vd) => (execute_MOVETYPEV vs1 vd)
+    | .VXTYPE (funct6, vm, vs2, rs1, vd) => (execute_VXTYPE funct6 vm vs2 rs1 vd)
+    | .NXSTYPE (funct6, vm, vs2, rs1, vd) => (execute_NXSTYPE funct6 vm vs2 rs1 vd)
+    | .NXTYPE (funct6, vm, vs2, rs1, vd) => (execute_NXTYPE funct6 vm vs2 rs1 vd)
+    | .VXSG (funct6, vm, vs2, rs1, vd) => (execute_VXSG funct6 vm vs2 rs1 vd)
+    | .MASKTYPEX (vs2, rs1, vd) => (execute_MASKTYPEX vs2 rs1 vd)
+    | .MOVETYPEX (rs1, vd) => (execute_MOVETYPEX rs1 vd)
+    | .VITYPE (funct6, vm, vs2, simm, vd) => (execute_VITYPE funct6 vm vs2 simm vd)
+    | .NISTYPE (funct6, vm, vs2, uimm, vd) => (execute_NISTYPE funct6 vm vs2 uimm vd)
+    | .NITYPE (funct6, vm, vs2, uimm, vd) => (execute_NITYPE funct6 vm vs2 uimm vd)
+    | .VISG (funct6, vm, vs2, simm, vd) => (execute_VISG funct6 vm vs2 simm vd)
+    | .MASKTYPEI (vs2, simm, vd) => (execute_MASKTYPEI vs2 simm vd)
+    | .MOVETYPEI (vd, simm) => (execute_MOVETYPEI vd simm)
+    | .VMVRTYPE (vs2, nreg, vd) => (execute_VMVRTYPE vs2 nreg vd)
+    | .MVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_MVVTYPE funct6 vm vs2 vs1 vd)
+    | .MVVMATYPE (funct6, vm, vs2, vs1, vd) => (execute_MVVMATYPE funct6 vm vs2 vs1 vd)
+    | .WVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_WVVTYPE funct6 vm vs2 vs1 vd)
+    | .WVTYPE (funct6, vm, vs2, vs1, vd) => (execute_WVTYPE funct6 vm vs2 vs1 vd)
+    | .WMVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_WMVVTYPE funct6 vm vs2 vs1 vd)
+    | .VEXTTYPE (funct6, vm, vs2, vd) => (execute_VEXTTYPE funct6 vm vs2 vd)
+    | .VMVXS (vs2, rd) => (execute_VMVXS vs2 rd)
+    | .MVVCOMPRESS (vs2, vs1, vd) => (execute_MVVCOMPRESS vs2 vs1 vd)
+    | .MVXTYPE (funct6, vm, vs2, rs1, vd) => (execute_MVXTYPE funct6 vm vs2 rs1 vd)
+    | .MVXMATYPE (funct6, vm, vs2, rs1, vd) => (execute_MVXMATYPE funct6 vm vs2 rs1 vd)
+    | .WVXTYPE (funct6, vm, vs2, rs1, vd) => (execute_WVXTYPE funct6 vm vs2 rs1 vd)
+    | .WXTYPE (funct6, vm, vs2, rs1, vd) => (execute_WXTYPE funct6 vm vs2 rs1 vd)
+    | .WMVXTYPE (funct6, vm, vs2, rs1, vd) => (execute_WMVXTYPE funct6 vm vs2 rs1 vd)
+    | .VMVSX (rs1, vd) => (execute_VMVSX rs1 vd)
+    | .FVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_FVVTYPE funct6 vm vs2 vs1 vd)
+    | .FVVMATYPE (funct6, vm, vs2, vs1, vd) => (execute_FVVMATYPE funct6 vm vs2 vs1 vd)
+    | .FWVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_FWVVTYPE funct6 vm vs2 vs1 vd)
+    | .FWVVMATYPE (funct6, vm, vs1, vs2, vd) => (execute_FWVVMATYPE funct6 vm vs1 vs2 vd)
+    | .FWVTYPE (funct6, vm, vs2, vs1, vd) => (execute_FWVTYPE funct6 vm vs2 vs1 vd)
+    | .VFUNARY0 (vm, vs2, vfunary0, vd) => (execute_VFUNARY0 vm vs2 vfunary0 vd)
+    | .VFWUNARY0 (vm, vs2, vfwunary0, vd) => (execute_VFWUNARY0 vm vs2 vfwunary0 vd)
+    | .VFNUNARY0 (vm, vs2, vfnunary0, vd) => (execute_VFNUNARY0 vm vs2 vfnunary0 vd)
+    | .VFUNARY1 (vm, vs2, vfunary1, vd) => (execute_VFUNARY1 vm vs2 vfunary1 vd)
+    | .VFMVFS (vs2, rd) => (execute_VFMVFS vs2 rd)
+    | .FVFTYPE (funct6, vm, vs2, rs1, vd) => (execute_FVFTYPE funct6 vm vs2 rs1 vd)
+    | .FVFMATYPE (funct6, vm, vs2, rs1, vd) => (execute_FVFMATYPE funct6 vm vs2 rs1 vd)
+    | .FWVFTYPE (funct6, vm, vs2, rs1, vd) => (execute_FWVFTYPE funct6 vm vs2 rs1 vd)
+    | .FWVFMATYPE (funct6, vm, rs1, vs2, vd) => (execute_FWVFMATYPE funct6 vm rs1 vs2 vd)
+    | .FWFTYPE (funct6, vm, vs2, rs1, vd) => (execute_FWFTYPE funct6 vm vs2 rs1 vd)
+    | .VFMERGE (vs2, rs1, vd) => (execute_VFMERGE vs2 rs1 vd)
+    | .VFMV (rs1, vd) => (execute_VFMV rs1 vd)
+    | .VFMVSF (rs1, vd) => (execute_VFMVSF rs1 vd)
+    | .VLSEGTYPE (nf, vm, rs1, width, vd) => (execute_VLSEGTYPE nf vm rs1 width vd)
+    | .VLSEGFFTYPE (nf, vm, rs1, width, vd) => (execute_VLSEGFFTYPE nf vm rs1 width vd)
+    | .VSSEGTYPE (nf, vm, rs1, width, vs3) => (execute_VSSEGTYPE nf vm rs1 width vs3)
+    | .VLSSEGTYPE (nf, vm, rs2, rs1, width, vd) => (execute_VLSSEGTYPE nf vm rs2 rs1 width vd)
+    | .VSSSEGTYPE (nf, vm, rs2, rs1, width, vs3) => (execute_VSSSEGTYPE nf vm rs2 rs1 width vs3)
+    | .VLXSEGTYPE (nf, vm, vs2, rs1, width, vd, mop) =>
+      (execute_VLXSEGTYPE nf vm vs2 rs1 width vd mop)
+    | .VSXSEGTYPE (nf, vm, vs2, rs1, width, vs3, mop) =>
+      (execute_VSXSEGTYPE nf vm vs2 rs1 width vs3 mop)
+    | .VLRETYPE (nf, rs1, width, vd) => (execute_VLRETYPE nf rs1 width vd)
+    | .VSRETYPE (nf, rs1, vs3) => (execute_VSRETYPE nf rs1 vs3)
+    | .VMTYPE (rs1, vd_or_vs3, op) => (execute_VMTYPE rs1 vd_or_vs3 op)
+    | .MMTYPE (funct6, vs2, vs1, vd) => (execute_MMTYPE funct6 vs2 vs1 vd)
+    | .VCPOP_M (vm, vs2, rd) => (execute_VCPOP_M vm vs2 rd)
+    | .VFIRST_M (vm, vs2, rd) => (execute_VFIRST_M vm vs2 rd)
+    | .VMSBF_M (vm, vs2, vd) => (execute_VMSBF_M vm vs2 vd)
+    | .VMSIF_M (vm, vs2, vd) => (execute_VMSIF_M vm vs2 vd)
+    | .VMSOF_M (vm, vs2, vd) => (execute_VMSOF_M vm vs2 vd)
+    | .VIOTA_M (vm, vs2, vd) => (execute_VIOTA_M vm vs2 vd)
+    | .VID_V (vm, vd) => (execute_VID_V vm vd)
+    | .VVMTYPE (funct6, vs2, vs1, vd) => (execute_VVMTYPE funct6 vs2 vs1 vd)
+    | .VVMCTYPE (funct6, vs2, vs1, vd) => (execute_VVMCTYPE funct6 vs2 vs1 vd)
+    | .VVMSTYPE (funct6, vs2, vs1, vd) => (execute_VVMSTYPE funct6 vs2 vs1 vd)
+    | .VVCMPTYPE (funct6, vm, vs2, vs1, vd) => (execute_VVCMPTYPE funct6 vm vs2 vs1 vd)
+    | .VXMTYPE (funct6, vs2, rs1, vd) => (execute_VXMTYPE funct6 vs2 rs1 vd)
+    | .VXMCTYPE (funct6, vs2, rs1, vd) => (execute_VXMCTYPE funct6 vs2 rs1 vd)
+    | .VXMSTYPE (funct6, vs2, rs1, vd) => (execute_VXMSTYPE funct6 vs2 rs1 vd)
+    | .VXCMPTYPE (funct6, vm, vs2, rs1, vd) => (execute_VXCMPTYPE funct6 vm vs2 rs1 vd)
+    | .VIMTYPE (funct6, vs2, simm, vd) => (execute_VIMTYPE funct6 vs2 simm vd)
+    | .VIMCTYPE (funct6, vs2, simm, vd) => (execute_VIMCTYPE funct6 vs2 simm vd)
+    | .VIMSTYPE (funct6, vs2, simm, vd) => (execute_VIMSTYPE funct6 vs2 simm vd)
+    | .VICMPTYPE (funct6, vm, vs2, simm, vd) => (execute_VICMPTYPE funct6 vm vs2 simm vd)
+    | .FVVMTYPE (funct6, vm, vs2, vs1, vd) => (execute_FVVMTYPE funct6 vm vs2 vs1 vd)
+    | .FVFMTYPE (funct6, vm, vs2, rs1, vd) => (execute_FVFMTYPE funct6 vm vs2 rs1 vd)
+    | .RIVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_RIVVTYPE funct6 vm vs2 vs1 vd)
+    | .RMVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_RMVVTYPE funct6 vm vs2 vs1 vd)
+    | .RFVVTYPE (funct6, vm, vs2, vs1, vd) => (execute_RFVVTYPE funct6 vm vs2 vs1 vd)
+    | .RFWVVTYPE (_funct6, vm, vs2, vs1, vd) => (execute_RFWVVTYPE _funct6 vm vs2 vs1 vd)
+    | .SHA256SIG0 (rs1, rd) => (execute_SHA256SIG0 rs1 rd)
+    | .SHA256SIG1 (rs1, rd) => (execute_SHA256SIG1 rs1 rd)
+    | .SHA256SUM0 (rs1, rd) => (execute_SHA256SUM0 rs1 rd)
+    | .SHA256SUM1 (rs1, rd) => (execute_SHA256SUM1 rs1 rd)
+    | .AES32ESMI (bs, rs2, rs1, rd) => (execute_AES32ESMI bs rs2 rs1 rd)
+    | .AES32ESI (bs, rs2, rs1, rd) => (execute_AES32ESI bs rs2 rs1 rd)
+    | .AES32DSMI (bs, rs2, rs1, rd) => (execute_AES32DSMI bs rs2 rs1 rd)
+    | .AES32DSI (bs, rs2, rs1, rd) => (execute_AES32DSI bs rs2 rs1 rd)
+    | .SHA512SIG0H (rs2, rs1, rd) => (execute_SHA512SIG0H rs2 rs1 rd)
+    | .SHA512SIG0L (rs2, rs1, rd) => (execute_SHA512SIG0L rs2 rs1 rd)
+    | .SHA512SIG1H (rs2, rs1, rd) => (execute_SHA512SIG1H rs2 rs1 rd)
+    | .SHA512SIG1L (rs2, rs1, rd) => (execute_SHA512SIG1L rs2 rs1 rd)
+    | .SHA512SUM0R (rs2, rs1, rd) => (execute_SHA512SUM0R rs2 rs1 rd)
+    | .SHA512SUM1R (rs2, rs1, rd) => (execute_SHA512SUM1R rs2 rs1 rd)
+    | .AES64KS1I (rnum, rs1, rd) => (execute_AES64KS1I rnum rs1 rd)
+    | .AES64KS2 (rs2, rs1, rd) => (execute_AES64KS2 rs2 rs1 rd)
+    | .AES64IM (rs1, rd) => (execute_AES64IM rs1 rd)
+    | .AES64ESM (rs2, rs1, rd) => (execute_AES64ESM rs2 rs1 rd)
+    | .AES64ES (rs2, rs1, rd) => (execute_AES64ES rs2 rs1 rd)
+    | .AES64DSM (rs2, rs1, rd) => (execute_AES64DSM rs2 rs1 rd)
+    | .AES64DS (rs2, rs1, rd) => (execute_AES64DS rs2 rs1 rd)
+    | .SHA512SIG0 (rs1, rd) => (execute_SHA512SIG0 rs1 rd)
+    | .SHA512SIG1 (rs1, rd) => (execute_SHA512SIG1 rs1 rd)
+    | .SHA512SUM0 (rs1, rd) => (execute_SHA512SUM0 rs1 rd)
+    | .SHA512SUM1 (rs1, rd) => (execute_SHA512SUM1 rs1 rd)
+    | .SM3P0 (rs1, rd) => (execute_SM3P0 rs1 rd)
+    | .SM3P1 (rs1, rd) => (execute_SM3P1 rs1 rd)
+    | .SM4ED (bs, rs2, rs1, rd) => (execute_SM4ED bs rs2 rs1 rd)
+    | .SM4KS (bs, rs2, rs1, rd) => (execute_SM4KS bs rs2 rs1 rd)
+    | .ZBKB_RTYPE (rs2, rs1, rd, op) => (execute_ZBKB_RTYPE rs2 rs1 rd op)
+    | .ZBKB_PACKW (rs2, rs1, rd) => (execute_ZBKB_PACKW rs2 rs1 rd)
+    | .ZIP (rs1, rd) => (execute_ZIP rs1 rd)
+    | .UNZIP (rs1, rd) => (execute_UNZIP rs1 rd)
+    | .BREV8 (rs1, rd) => (execute_BREV8 rs1 rd)
+    | .XPERM8 (rs2, rs1, rd) => (execute_XPERM8 rs2 rs1 rd)
+    | .XPERM4 (rs2, rs1, rd) => (execute_XPERM4 rs2 rs1 rd)
+    | .VANDN_VV (vm, vs1, vs2, vd) => (execute_VANDN_VV vm vs1 vs2 vd)
+    | .VANDN_VX (vm, vs2, rs1, vd) => (execute_VANDN_VX vm vs2 rs1 vd)
+    | .VBREV_V (vm, vs2, vd) => (execute_VBREV_V vm vs2 vd)
+    | .VBREV8_V (vm, vs2, vd) => (execute_VBREV8_V vm vs2 vd)
+    | .VREV8_V (vm, vs2, vd) => (execute_VREV8_V vm vs2 vd)
+    | .VCLZ_V (vm, vs2, vd) => (execute_VCLZ_V vm vs2 vd)
+    | .VCTZ_V (vm, vs2, vd) => (execute_VCTZ_V vm vs2 vd)
+    | .VCPOP_V (vm, vs2, vd) => (execute_VCPOP_V vm vs2 vd)
+    | .VROL_VV (vm, vs1, vs2, vd) => (execute_VROL_VV vm vs1 vs2 vd)
+    | .VROL_VX (vm, vs2, rs1, vd) => (execute_VROL_VX vm vs2 rs1 vd)
+    | .VROR_VV (vm, vs1, vs2, vd) => (execute_VROR_VV vm vs1 vs2 vd)
+    | .VROR_VX (vm, vs2, rs1, vd) => (execute_VROR_VX vm vs2 rs1 vd)
+    | .VROR_VI (vm, vs2, uimm, vd) => (execute_VROR_VI vm vs2 uimm vd)
+    | .VWSLL_VV (vm, vs2, vs1, vd) => (execute_VWSLL_VV vm vs2 vs1 vd)
+    | .VWSLL_VX (vm, vs2, rs1, vd) => (execute_VWSLL_VX vm vs2 rs1 vd)
+    | .VWSLL_VI (vm, vs2, uimm, vd) => (execute_VWSLL_VI vm vs2 uimm vd)
+    | .VCLMUL_VV (vm, vs2, vs1, vd) => (execute_VCLMUL_VV vm vs2 vs1 vd)
+    | .VCLMUL_VX (vm, vs2, rs1, vd) => (execute_VCLMUL_VX vm vs2 rs1 vd)
+    | .VCLMULH_VV (vm, vs2, vs1, vd) => (execute_VCLMULH_VV vm vs2 vs1 vd)
+    | .VCLMULH_VX (vm, vs2, rs1, vd) => (execute_VCLMULH_VX vm vs2 rs1 vd)
+    | .VGHSH_VV (vs2, vs1, vd) => (execute_VGHSH_VV vs2 vs1 vd)
+    | .VGMUL_VV (vs2, vd) => (execute_VGMUL_VV vs2 vd)
+    | .VAESDF (funct6, vs2, vd) => (execute_VAESDF funct6 vs2 vd)
+    | .VAESDM (funct6, vs2, vd) => (execute_VAESDM funct6 vs2 vd)
+    | .VAESEF (funct6, vs2, vd) => (execute_VAESEF funct6 vs2 vd)
+    | .VAESEM (funct6, vs2, vd) => (execute_VAESEM funct6 vs2 vd)
+    | .VAESKF1_VI (vs2, rnd, vd) => (execute_VAESKF1_VI vs2 rnd vd)
+    | .VAESKF2_VI (vs2, rnd, vd) => (execute_VAESKF2_VI vs2 rnd vd)
+    | .VAESZ_VS (vs2, vd) => (execute_VAESZ_VS vs2 vd)
+    | .VSM4K_VI (vs2, uimm, vd) => (execute_VSM4K_VI vs2 uimm vd)
+    | .ZVKSM4RTYPE (funct6, vs2, vd) => (execute_ZVKSM4RTYPE funct6 vs2 vd)
+    | .VSHA2MS_VV (vs2, vs1, vd) => (execute_VSHA2MS_VV vs2 vs1 vd)
+    | .ZVKSHA2TYPE (funct6, vs2, vs1, vd) => (execute_ZVKSHA2TYPE funct6 vs2 vs1 vd)
+    | .VSM3ME_VV (vs2, vs1, vd) => (execute_VSM3ME_VV vs2 vs1 vd)
+    | .VSM3C_VI (vs2, uimm, vd) => (execute_VSM3C_VI vs2 uimm vd)
+    | .CSRReg (csr, rs1, rd, op) => (execute_CSRReg csr rs1 rd op)
+    | .CSRImm (csr, imm, rd, op) => (execute_CSRImm csr imm rd op)
+    | .SINVAL_VMA (rs1, rs2) => (execute_SINVAL_VMA rs1 rs2)
+    | .SFENCE_W_INVAL arg0 => (execute_SFENCE_W_INVAL arg0)
+    | .SFENCE_INVAL_IR arg0 => (execute_SFENCE_INVAL_IR arg0)
+    | .WRS arg0 => (pure (execute_WRS arg0))
+    | .ZICOND_RTYPE (rs2, rs1, rd, op) => (execute_ZICOND_RTYPE rs2 rs1 rd op)
+    | .ZICBOM (arg0, rs1) => (execute_ZICBOM arg0 rs1)
+    | .ZICBOZ rs1 => (execute_ZICBOZ rs1)
+    | .FENCEI (_imm, _rs, _rd) => (execute_FENCEI _imm _rs _rd)
+    | .FCVT_BF16_S (rs1, rm, rd) => (execute_FCVT_BF16_S rs1 rm rd)
+    | .FCVT_S_BF16 (rs1, rm, rd) => (execute_FCVT_S_BF16 rs1 rm rd)
+    | .VFNCVTBF16_F_F_W (vm, vs2, vd) => (execute_VFNCVTBF16_F_F_W vm vs2 vd)
+    | .VFWCVTBF16_F_F_V (vm, vs2, vd) => (execute_VFWCVTBF16_F_F_V vm vs2 vd)
+    | .VFWMACCBF16_VV (vm, vs2, vs1, vd) => (execute_VFWMACCBF16_VV vm vs2 vs1 vd)
+    | .VFWMACCBF16_VF (vm, vs2, rs1, vd) => (execute_VFWMACCBF16_VF vm vs2 rs1 vd)
+    | .ZIMOP_MOP_R (_mop, _rs1, rd) => (execute_ZIMOP_MOP_R _mop _rs1 rd)
+    | .ZIMOP_MOP_RR (_mop, _rs2, _rs1, rd) => (execute_ZIMOP_MOP_RR _mop _rs2 _rs1 rd)
+    | .ZCMOP _mop => (pure (execute_ZCMOP _mop))
+    | .ILLEGAL _s => (pure (execute_ILLEGAL _s))
+    | .C_ILLEGAL _s => (pure (execute_C_ILLEGAL _s))
 
   lemma execute_equiv :
     execute = LeanRV32D.Functions.execute
@@ -1111,231 +1118,95 @@ namespace Local
     (LeanRV32D.Functions.execute_BTYPE imm r1 r2 op)
   := rfl
 
-  /-- Type quantifiers: step_no : Nat, 0 ≤ step_no -/
+  open LeanRV32D.Functions in
   noncomputable def run_hart_active (step_no : Nat) : SailM Step := do
-    match (← (LeanRV32D.Functions.dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
+    match (← (dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
     | .some (intr, priv) => (pure (Step.Step_Pending_Interrupt (intr, priv)))
     | none =>
       (do
-        match (LeanRV32D.Functions.ext_fetch_hook (← (LeanRV32D.Functions.fetch ()))) with
+        match (ext_fetch_hook (← (fetch ()))) with
         | .F_Ext_Error e => (pure (Step.Step_Ext_Fetch_Failure e))
         | .F_Error (e, addr) => (pure (Step.Step_Fetch_Failure ((virtaddr.Virtaddr addr), e)))
         | .F_RVC h =>
           (do
-            let _ : Unit := (LeanRV32D.Functions.sail_instr_announce h)
-            let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) h)
-            let instruction ← do (LeanRV32D.Functions.ext_decode_compressed h)
-            if ((LeanRV32D.Functions.get_config_print_instr ()) : Bool)
+            let _ : Unit := (sail_instr_announce h)
+            let _ : Unit := (fetch_callback h)
+            let instbits : instbits := (zero_extend (m := 32) h)
+            let instruction ← do (ext_decode_compressed h)
+            if ((get_config_print_instr ()) : Bool)
             then
-              (pure (LeanRV32D.Functions.print_log_instr
+              (pure (print_log_instr
                   (HAppend.hAppend "["
                     (HAppend.hAppend (Int.repr step_no)
                       (HAppend.hAppend "] ["
-                        (HAppend.hAppend (←(LeanRV32D.Functions.privLevel_to_str (← Sail.readReg Register.cur_privilege)))
+                        (HAppend.hAppend (← (privLevel_to_str (← Sail.readReg Register.cur_privilege)))
                           (HAppend.hAppend "]: "
                             (HAppend.hAppend (Sail.BitVec.toFormatted (← Sail.readReg Register.PC))
                               (HAppend.hAppend " ("
                                 (HAppend.hAppend (Sail.BitVec.toFormatted h)
-                                  (HAppend.hAppend ") " (← (LeanRV32D.Functions.print_insn instruction)))))))))))
-                  (LeanRV32D.Functions.zero_extend (m := 64) (← Sail.readReg Register.PC))))
+                                  (HAppend.hAppend ") " (← (instruction_to_str instruction)))))))))))
+                  (zero_extend (m := 64) (← Sail.readReg Register.PC))))
             else (pure ())
-            if ((← (LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca)) : Bool)
+            if ((← (is_landing_pad_expected ())) : Bool)
             then
               (do
-                Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 2)
-                let r ← do (LeanRV32D.Functions.execute instruction)
+                let r ← do
+                  (pure (ExecutionResult.Trap
+                      ((← Sail.readReg Register.cur_privilege), (ctl_result.CTL_TRAP (make_landing_pad_exception ())), (← Sail.readReg Register.PC))))
                 (pure (Step.Step_Execute (r, instbits))))
-            else (pure (Step.Step_Execute ((ExecutionResult.Illegal_Instruction ()), instbits))))
+            else
+              (do
+                if ((← (currentlyEnabled extension.Ext_Zca)) : Bool)
+                then
+                  (do
+                    Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 2)
+                    let result ← (( do
+                      match (← (execute instruction)) with
+                      | .ExecuteAs other_inst => (execute other_inst)
+                      | result => (pure result) ) : SailM ExecutionResult )
+                    (pure (Step.Step_Execute (result, instbits))))
+                else (pure (Step.Step_Execute ((ExecutionResult.Illegal_Instruction ()), instbits)))))
         | .F_Base w =>
           (do
-            let _ : Unit := (LeanRV32D.Functions.sail_instr_announce w)
-            let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) w)
-            let instruction ← do (LeanRV32D.Functions.ext_decode w)
-            if ((LeanRV32D.Functions.get_config_print_instr ()) : Bool)
+            let _ : Unit := (sail_instr_announce w)
+            let _ : Unit := (fetch_callback w)
+            let instbits : instbits := (zero_extend (m := 32) w)
+            let instruction ← do (ext_decode w)
+            if ((get_config_print_instr ()) : Bool)
             then
-              (pure (LeanRV32D.Functions.print_log_instr
+              (pure (print_log_instr
                   (HAppend.hAppend "["
                     (HAppend.hAppend (Int.repr step_no)
                       (HAppend.hAppend "] ["
-                        (HAppend.hAppend (←(LeanRV32D.Functions.privLevel_to_str (← Sail.readReg Register.cur_privilege)))
+                        (HAppend.hAppend (← (privLevel_to_str (← Sail.readReg Register.cur_privilege)))
                           (HAppend.hAppend "]: "
                             (HAppend.hAppend (Sail.BitVec.toFormatted (← Sail.readReg Register.PC))
                               (HAppend.hAppend " ("
                                 (HAppend.hAppend (Sail.BitVec.toFormatted w)
-                                  (HAppend.hAppend ") " (← (LeanRV32D.Functions.print_insn instruction)))))))))))
-                  (LeanRV32D.Functions.zero_extend (m := 64) (← Sail.readReg Register.PC))))
+                                  (HAppend.hAppend ") " (← (instruction_to_str instruction)))))))))))
+                  (zero_extend (m := 64) (← Sail.readReg Register.PC))))
             else (pure ())
-            Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-            let r ← do (LeanRV32D.Functions.execute instruction)
-            (pure (Step.Step_Execute (r, instbits)))))
+            if (((← (is_landing_pad_expected ())) && (LeanRV32D.Functions.not (is_lpad_instruction instruction))) : Bool)
+            then
+              (do
+                let r ← do
+                  (pure (ExecutionResult.Trap
+                      ((← Sail.readReg Register.cur_privilege), (ctl_result.CTL_TRAP (make_landing_pad_exception ())), (← Sail.readReg Register.PC))))
+                (pure (Step.Step_Execute (r, instbits))))
+            else
+              (do
+                Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
+                let result ← (( do
+                  match (← (execute instruction)) with
+                  | .ExecuteAs other_inst => (execute other_inst)
+                  | result => (pure result) ) : SailM ExecutionResult )
+                (pure (Step.Step_Execute (result, instbits))))))
 
   lemma run_hart_active_equiv :
     run_hart_active = LeanRV32D.Functions.run_hart_active
   := rfl
+
 end Local
-
--- noncomputable def run_hart_active_1 (step_no : Nat) : SailM Step := do
---   match (← (LeanRV32D.Functions.dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
---   | .some (intr, priv) => (pure (Step.Step_Pending_Interrupt (intr, priv)))
---   | none =>
---     (do
---       match (LeanRV32D.Functions.ext_fetch_hook (← (LeanRV32D.Functions.fetch ()))) with
---       | .F_Ext_Error e => (pure (Step.Step_Ext_Fetch_Failure e))
---       | .F_Error (e, addr) => (pure (Step.Step_Fetch_Failure ((virtaddr.Virtaddr addr), e)))
---       | .F_RVC h =>
---         (do
---           let _ : Unit := (LeanRV32D.Functions.sail_instr_announce h)
---           let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) h)
---           let instruction ← do (LeanRV32D.Functions.ext_decode_compressed h)
---           bif (LeanRV32D.Functions.get_config_print_instr ())
---           then
---             (pure (Sail.print_endline
---                 (HAppend.hAppend "["
---                   (HAppend.hAppend (Int.repr step_no)
---                     (HAppend.hAppend "] ["
---                       (HAppend.hAppend (LeanRV32D.Functions.privLevel_to_str (← Sail.readReg Register.cur_privilege))
---                         (HAppend.hAppend "]: "
---                           (HAppend.hAppend (Sail.BitVec.toFormatted (← Sail.readReg Register.PC))
---                             (HAppend.hAppend " ("
---                               (HAppend.hAppend (Sail.BitVec.toFormatted h)
---                                 (HAppend.hAppend ") " (← (LeanRV32D.Functions.print_insn instruction)))))))))))))
---           else (pure ())
---           bif (← (LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca))
---           then
---             (do
---               Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 2)
---               let r ← do (LeanRV32D.Functions.execute instruction)
---               (pure (Step.Step_Execute (r, instbits))))
---           else (pure (Step.Step_Execute ((ExecutionResult.Illegal_Instruction ()), instbits))))
---       | .F_Base w =>
---         (do
---           let _ : Unit := (LeanRV32D.Functions.sail_instr_announce w)
---           let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) w)
---           let instruction ← do (LeanRV32D.Functions.ext_decode w)
---           bif (LeanRV32D.Functions.get_config_print_instr ())
---           then
---             (pure (Sail.print_endline
---                 (HAppend.hAppend "["
---                   (HAppend.hAppend (Int.repr step_no)
---                     (HAppend.hAppend "] ["
---                       (HAppend.hAppend (LeanRV32D.Functions.privLevel_to_str (← Sail.readReg Register.cur_privilege))
---                         (HAppend.hAppend "]: "
---                           (HAppend.hAppend (Sail.BitVec.toFormatted (← Sail.readReg Register.PC))
---                             (HAppend.hAppend " ("
---                               (HAppend.hAppend (Sail.BitVec.toFormatted w)
---                                 (HAppend.hAppend ") " (← (LeanRV32D.Functions.print_insn instruction)))))))))))))
---           else (pure ())
---           Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
---           let r ← do (LeanRV32D.Functions.execute instruction)
---           (pure (Step.Step_Execute (r, instbits)))))
-
--- lemma run_hart_active_1_equiv :
---   run_hart_active_1 =
---   LeanRV32D.Functions.run_hart_active
--- := by
---   unfold LeanRV32D.Functions.run_hart_active
---   funext
---   unfold run_hart_active_1
---   congr
-
--- -- noncomputable def run_hart_active_2 (step_no : Nat) : SailM Step := do
--- --   match (← (LeanRV32D.Functions.dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
--- --   | .some (intr, priv) => (pure (Step.Step_Pending_Interrupt (intr, priv)))
--- --   | none =>
--- --     (do
--- --       match (LeanRV32D.Functions.ext_fetch_hook (← (LeanRV32D.Functions.fetch ()))) with
--- --       | .F_Ext_Error e => (pure (Step.Step_Ext_Fetch_Failure e))
--- --       | .F_Error (e, addr) => (pure (Step.Step_Fetch_Failure ((virtaddr.Virtaddr addr), e)))
--- --       | .F_RVC h =>
--- --         (do
--- --           let _ : Unit := (LeanRV32D.Functions.sail_instr_announce h)
--- --           let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) h)
--- --           let instruction ← do (LeanRV32D.Functions.ext_decode_compressed h)
--- --           bif (← (LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca))
--- --           then
--- --             (do
--- --               Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 2)
--- --               let r ← do (LeanRV32D.Functions.execute instruction)
--- --               (pure (Step.Step_Execute (r, instbits))))
--- --           else (pure (Step.Step_Execute ((ExecutionResult.Illegal_Instruction ()), instbits))))
--- --       | .F_Base w =>
--- --         (do
--- --           let _ : Unit := (LeanRV32D.Functions.sail_instr_announce w)
--- --           let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) w)
--- --           let instruction ← do (LeanRV32D.Functions.ext_decode w)
--- --           Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
--- --           let r ← do (LeanRV32D.Functions.execute instruction)
--- --           (pure (Step.Step_Execute (r, instbits)))))
-
--- -- lemma run_hart_active_2_equiv :
--- --   run_hart_active_1 state =
--- --   run_hart_active_2 state
--- -- := by
--- --   unfold run_hart_active_1 run_hart_active_2
-
--- --   unfold bind Monad.toBind EStateM.instMonad
--- --   dsimp
--- --   unfold EStateM.bind EStateM.pure
--- --   dsimp
-
--- --   unfold LeanRV32D.Functions.get_config_print_instr
--- --   simp
-
--- --   funext state1; congr
--- --   funext state2; congr
--- --   funext state3; congr
--- --   funext data state4
--- --   cases data <;> dsimp
--- --   congr
--- --   funext data1 state5; congr
-
-
-
-
-
--- noncomputable def run_hart_active_2 (step_no : Nat) : SailM Step := do
---   match (← (LeanRV32D.Functions.dispatchInterrupt (← Sail.readReg Register.cur_privilege))) with
---   | .some (intr, priv) => (pure (Step.Step_Pending_Interrupt (intr, priv)))
---   | none =>
---     (do
---       match (← (LeanRV32D.Functions.fetch ())) with
---       | .F_Ext_Error e => (pure (Step.Step_Ext_Fetch_Failure e))
---       | .F_Error (e, addr) => (pure (Step.Step_Fetch_Failure ((virtaddr.Virtaddr addr), e)))
---       | .F_RVC h =>
---         (do
---           let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) h)
---           let instruction ← do (LeanRV32D.Functions.ext_decode_compressed h)
---           bif (← (LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca))
---           then
---             (do
---               Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 2)
---               let r ← do (LeanRV32D.Functions.execute instruction)
---               (pure (Step.Step_Execute (r, instbits))))
---           else (pure (Step.Step_Execute ((ExecutionResult.Illegal_Instruction ()), instbits))))
---       | .F_Base w =>
---         (do
---           let instbits : instbits := (LeanRV32D.Functions.zero_extend (m := 32) w)
---           let instruction ← do (LeanRV32D.Functions.ext_decode w)
---           Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
---           let r ← do (LeanRV32D.Functions.execute instruction)
---           (pure (Step.Step_Execute (r, instbits)))))
-
--- -- def is_pending_machine_interrupt
--- --   (RegisterType: Register → Type)
--- --   (cur_privilege_val: Privilege)
--- --   (mstatus_val: BitVec 64)
--- --   (mip_val: RegisterType Register.mip)
--- --   (mie_val: RegisterType Register.mie)
--- --   (mideleg_val: RegisterType Register.mideleg)
--- --   [Complement (RegisterType Register.mideleg)]
--- --   [HAnd (RegisterType Register.mie) (RegisterType Register.mideleg) (RegisterType Register.mie)]
--- --   [HAnd (RegisterType Register.mip) (RegisterType Register.mie) (RegisterType Register.mip)]
--- --   [BEq (RegisterType Register.mip)]
-
--- -- : Bool :=
--- --   (cur_privilege_val == Privilege.Machine && BitVec.extractLsb 3 3 mstatus_val == 1#1 ||
--- --               (cur_privilege_val == Privilege.Supervisor || cur_privilege_val == Privilege.User)) &&
--- --             mip_val &&& (mie_val &&& ~~~mideleg_val) != 0#32
 
 lemma dispatchInterrupt_none
   (cur_privilege_val: Privilege)
@@ -1382,54 +1253,6 @@ lemma dispatchInterrupt_none
 
   simp [readReg_state, *]
 
-lemma instructionFetch_neq_false:
-  (@AccessType.InstructionFetch Unit () != AccessType.InstructionFetch ()) = false
-:= rfl
-
--- lemma ext_fetch_check_ok:
---   LeanRV32D.Functions.ext_fetch_check_pc pc_val pc_val = Ext_FetchAddr_Check.Ext_FetchAddr_OK ⟨pc_val⟩
--- := rfl
-
--- lemma currentlyEnabled_Ext_Zca
---   (h_misa: state.regs.get? Register.misa = .some misa_val)
--- :
---   LeanRV32D.Functions.currentlyEnabled extension.Ext_Zca state =
---   EStateM.Result.ok (Sail.BitVec.extractLsb misa_val 2 2 == 1#1) state
--- := by
---   simp [
---     LeanRV32D.Functions.currentlyEnabled.eq_def,
---     LeanRV32D.Functions.hartSupports.eq_def,
---     Functor.map, EStateM.map,
---     LeanRV32D.Functions.not,
---     readReg_state, *
---   ]
---   have (a b: ℕ): (a == b || a != b) = true := by grind only
---   have (a b: ℕ): (!a == b && !a != b) = false := by grind only
---   simp [LeanRV32D.Functions._get_Misa_C, *]
-
--- lemma unwrap_bits_of_virtaddr:
---   LeanRV32D.Functions.bits_of_virtaddr (virtaddr.Virtaddr pc_val) =
---   pc_val
--- := rfl
-
-lemma effectivePrivilege_instructionFetch
-:
-  LeanRV32D.Functions.effectivePrivilege (AccessType.InstructionFetch ()) mstatus_val cur_privilege_val state =
-  EStateM.Result.ok cur_privilege_val state
-:= by
-  unfold LeanRV32D.Functions.effectivePrivilege
-  simp [
-    instructionFetch_neq_false,
-    pure, EStateM.pure
-  ]
-
--- -- example (b: BitVec 1) :
--- --   0#3 ++ b = 0#4
--- -- := by
--- --   match b with
--- --     | 0#1 => rfl
--- --     | 1#1 => rfl
-
 lemma extract_all_satp
   (satp_val: RegisterType Register.satp)
 :
@@ -1441,34 +1264,17 @@ lemma extract_all_satp
   ]
 
 lemma translationMode
-  (h_satp: state.regs.get? Register.satp = .some satp_val)
+  (h_privilege: cur_privilege_val == Privilege.Machine)
 :
   LeanRV32D.Functions.translationMode cur_privilege_val state =
-  EStateM.Result.ok (
-    bif (cur_privilege_val == Privilege.Machine || Sail.BitVec.extractLsb satp_val 31 31 == 0#1)
-    then SATPMode.Bare
-    else SATPMode.Sv32
-  ) state
+  EStateM.Result.ok ( SATPMode.Bare) state
 := by
   unfold LeanRV32D.Functions.translationMode
 
   unfold bind Monad.toBind EStateM.instMonad
   dsimp
   unfold EStateM.bind EStateM.pure
-  dsimp
-
-  by_cases h: cur_privilege_val == Privilege.Machine
-  . simp_all
-  . simp_all [
-      readReg_state,
-      LeanRV32D.Functions.satpMode_of_bits,
-      LeanRV32D.Functions._get_Satp32_Mode,
-      LeanRV32D.Functions.Mk_Satp32,
-      extract_all_satp
-    ]
-    match (Sail.BitVec.extractLsb satp_val 31 31) with
-      | 0#1 => simp
-      | 1#1 => simp
+  simp_all
 
 lemma satp_mode_bare_eq: (SATPMode.Bare == SATPMode.Bare) = true := rfl
 lemma satp_mode_sv32_neq_bare: (SATPMode.Sv32 == SATPMode.Bare) = false := rfl
@@ -1487,227 +1293,6 @@ lemma sign_extend_extract_all_pc(pc_val: xlenbits):
     LeanRV32D.Functions.sign_extend,
     Sail.BitVec.signExtend
   ]
-
--- lemma translateAddr_instructionFetch
---   (h_cur_privilege: state.regs.get? Register.cur_privilege = .some cur_privilege_val)
---   (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
---   (h_satp: state.regs.get? Register.satp = .some satp_val)
---   (h_tlb: state.regs.get? Register.tlb = .some tlb_val)
--- :
---   LeanRV32D.Functions.translateAddr (virtaddr.Virtaddr pc_val) (AccessType.InstructionFetch ()) state =
---   bif (cur_privilege_val == Privilege.Machine || Sail.BitVec.extractLsb satp_val 31 31 == 0#1)
---   then EStateM.Result.ok (Sail.Ok (⟨BitVec.setWidth 34 pc_val⟩, ())) state
---   else EStateM.Result.ok (Sail.Ok (ppclo, snd)) s
--- := by
---   unfold LeanRV32D.Functions.translateAddr
-
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
-
---   simp [readReg_state, *]
---   simp [effectivePrivilege_instructionFetch]
---   simp [translationMode, *]
---   simp [unwrap_bits_of_virtaddr]
-
---   by_cases h_case: cur_privilege_val == Privilege.Machine || Sail.BitVec.extractLsb satp_val 31 31 == 0#1
---   . simp [satp_mode_bare_eq, *]
---     simp [LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
---   . simp [satp_mode_sv32_neq_bare, *]
---     simp [LeanRV32D.Functions.satp_mode_width_forwards, pure, EStateM.pure]
---     simp [
---       LeanRV32D.Functions.get_satp,
---       Sail.assert,
---       PreSail.assert,
---       -- Functor.map, EStateM.map,
---       readReg_state, pure, EStateM.pure, bind, EStateM.bind,
---       *
---     ]
---     simp [
---       sign_extend_extract_all_pc,
---       readReg_state, *
---     ]
---     have (a b: ℕ) : (bif decide (32 = 32) then a else b) = a := by grind only
---     rewrite [this 32 64]
---     simp [
---       Sail.BitVec.extractLsb,
---       LeanRV32D.Functions.satp_to_ppn, LeanRV32D.Functions.Mk_Satp32,
---       LeanRV32D.Functions._get_Satp32_PPN,
---       LeanRV32D.Functions.pagesize_bits,
---       LeanRV32D.Functions._get_Mstatus_MXR,
---       LeanRV32D.Functions._get_Mstatus_SUM,
---       LeanRV32D.Functions.init_ext_ptw,
---       LeanRV32D.Functions.satp_to_asid,
---       LeanRV32D.Functions._get_Satp32_Asid,
---       LeanRV32D.Functions.zero_extend,
---       Sail.BitVec.zeroExtend
---     ]
---     simp [LeanRV32D.Functions.translate, LeanRV32D.Functions.lookup_TLB]
-
---     unfold bind Monad.toBind EStateM.instMonad
---     dsimp
---     unfold EStateM.bind EStateM.pure
---     dsimp
-
---     simp [readReg_state, *]
-
---     simp? [
---       LeanRV32D.Functions.tlb_hash,
---       LeanRV32D.Functions.match_TLB_Entry,
---       Sail.BitVec.extractLsb,
---       extract_all_pc,
---       -BitVec.extractLsb_toNat
---     ]
-
---     have : BitVec.extractLsb 5 0 (BitVec.extractLsb 31 12 pc_val) = BitVec.extractLsb 17 12 pc_val := by bv_decide
---     simp [
---       this,
---       LeanRV32D.Functions.sign_extend,
---       LeanRV32D.Functions.translate_TLB_hit,
---       LeanRV32D.Functions.check_PTE_permission,
---       -BitVec.extractLsb_toNat
---     ]
-
---     cases h_tlb_entry: tlb_val[(BitVec.extractLsb 17 12 pc_val).toNat]! with
---       | none =>
---         simp [LeanRV32D.Functions.translate_TLB_miss]
-
---         unfold bind Monad.toBind EStateM.instMonad
---         dsimp
---         unfold EStateM.bind EStateM.pure
---         dsimp
-
---         unfold LeanRV32D.Functions.pt_walk
-
---         simp
---         unfold bind Monad.toBind EStateM.instMonad
---         dsimp
---         unfold EStateM.bind EStateM.pure
---         dsimp
-
---         done
---       | some entry =>
---         done
-
-
-
---   done
-
--- lemma fetch_F_Base
---   (h_misa: state.regs.get? Register.misa = .some misa_val)
---   (h_pc: state.regs.get? Register.PC = .some pc_val)
---   (h_fetch_error: (
---     Sail.BitVec.access pc_val 0 != 0#1 ||
---     (Sail.BitVec.access pc_val 1 != 0#1 &&
---     !Sail.BitVec.extractLsb misa_val 2 2 == 1#1)
---   ) = false)
--- :
---   LeanRV32D.Functions.fetch () state = EStateM.Result.ok (FetchResult.F_Base w) s
--- := by
---   unfold LeanRV32D.Functions.fetch LeanRV32D.Functions.get_config_rvfi
---   dsimp
-
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
-
---   simp [readReg_state, *]
---   simp [ext_fetch_check_ok]
---   simp [
---     currentlyEnabled_Ext_Zca,
---     readReg_state,
---     unwrap_bits_of_virtaddr,
---     LeanRV32D.Functions.not,
---     *
---   ]
-
---   done
-
-
--- lemma run_hart_active_2_equiv
---   (h_cur_privilege: state.regs.get? Register.cur_privilege = .some cur_privilege_val)
---   (h_mideleg: state.regs.get? Register.mideleg = .some mideleg_val)
---   (h_mie: state.regs.get? Register.mie = .some mie_val)
---   (h_mip: state.regs.get? Register.mip = .some mip_val)
---   (h_misa: state.regs.get? Register.misa = .some misa_val)
---   (h_mstatus: state.regs.get? Register.mstatus = .some mstatus_val)
---   (h_pc: state.regs.get? Register.PC = .some pc_val)
---   (h_assert: BitVec.extractLsb 18 18 misa_val = 1#1 ∨ mideleg_val = 0#32)
---   (h_machine_interrupt: ((
---     cur_privilege_val == Privilege.Machine && BitVec.extractLsb 3 3 mstatus_val == 1#1 ||
---     (cur_privilege_val == Privilege.Supervisor || cur_privilege_val == Privilege.User)
---   ) && mip_val &&& (mie_val &&& ~~~mideleg_val) != 0#32) = false)
---   (h_supervisor_interrupt: ((
---     cur_privilege_val == Privilege.Supervisor && BitVec.extractLsb 1 1 mstatus_val == 1#1 ||
---     cur_privilege_val == Privilege.User
---   ) && mip_val &&& (mie_val &&& mideleg_val) != 0#32) = false)
---   (h_fetch_error: (
---     Sail.BitVec.access pc_val 0 != 0#1 ||
---     (Sail.BitVec.access pc_val 1 != 0#1 &&
---     !Sail.BitVec.extractLsb misa_val 2 2 == 1#1)
---   ) = false)
--- :
---   run_hart_active_1 step_no state =
---   run_hart_active_2 step_no state
--- := by
---   unfold run_hart_active_1 run_hart_active_2
---   unfold LeanRV32D.Functions.ext_fetch_hook
---   unfold LeanRV32D.Functions.sail_instr_announce
---   unfold LeanRV32D.Functions.get_config_print_instr
---   simp
-
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
-
---   simp [readReg_state, dispatchInterrupt_none, *]
-
---   unfold LeanRV32D.Functions.fetch LeanRV32D.Functions.get_config_rvfi
-
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
-
---   simp [readReg_state, *]
-
---   unfold LeanRV32D.Functions.ext_fetch_check_pc
---   dsimp
---   simp [
---     LeanRV32D.Functions.currentlyEnabled,
---     Functor.map, EStateM.map,
---     readReg_state, *
---   ]
---   unfold LeanRV32D.Functions.bits_of_virtaddr
---   simp [
---     LeanRV32D.Functions.hartSupports,
---     LeanRV32D.Functions.xlen,
---     LeanRV32D.Functions._get_Misa_C,
---     LeanRV32D.Functions.not, *
---   ]
---   unfold LeanRV32D.Functions.translateAddr
-
---   unfold bind Monad.toBind EStateM.instMonad
---   dsimp
---   unfold EStateM.bind EStateM.pure
---   dsimp
-
---   simp [readReg_state, *]
---   unfold LeanRV32D.Functions.effectivePrivilege
---   simp [instructionFetch_neq_false]
---   unfold pure EStateM.instMonad EStateM.pure
---   dsimp
-
---   unfold LeanRV32D.Functions.translationMode
-
-
-
-
---   sorry
---   -- done
 
 def write_xreg (reg : Finset.Icc 1 31) (val : BitVec 32) : SailM Unit :=
   match reg.1 with
@@ -1769,7 +1354,7 @@ lemma wX_write_xreg_equiv
   simp [h_rd]
   obtain ⟨rd, h_rd_range⟩ := rd
   obtain ⟨h_rd_low, h_rd_high⟩ := Finset.mem_Icc.mp h_rd_range
-  rewrite [Nat.mod_eq_of_lt (by {simp; omega})]
+  rewrite [Int.emod_eq_of_lt (by grind) (by grind)]
   unfold LeanRV32D.Functions.wX
   dsimp
   simp [LeanRV32D.Functions.regval_into_reg]
@@ -1780,8 +1365,6 @@ lemma wX_write_xreg_equiv
     LeanRV32D.Functions.xreg_full_write_callback,
     LeanRV32D.Functions.reg_name_forwards,
     LeanRV32D.Functions.encdec_reg_forwards,
-    LeanRV32D.Functions.zero_extend,
-    Sail.BitVec.zeroExtend,
     LeanRV32D.Functions.get_config_use_abi_names,
     LeanRV32D.Functions.not,
     LeanRV32D.Functions.encdec_reg_forwards_matches,
@@ -1901,7 +1484,7 @@ lemma currentlyEnabled_Zca_equiv :
 
 @[simp]
 lemma pure_except_equiv :
-  @pure (Sail.SailME ExecutionResult) ExceptT.instMonad.toPure T val state =
+  @pure (SailME ExecutionResult) ExceptT.instMonad.toPure T val state =
   EStateM.Result.ok (Except.ok val) state
 := by
   unfold pure ExceptT.instMonad ExceptT.pure ExceptT.mk

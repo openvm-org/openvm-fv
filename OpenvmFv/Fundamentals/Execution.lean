@@ -8,6 +8,7 @@ open LeanRV32D.Functions
 
 attribute [simp]
   bool_to_bits
+  mult_to_bits_half
   shift_bits_right_arith
   shift_right_arith
   sign_extend
@@ -17,6 +18,7 @@ attribute [simp]
   Sail.BitVec.extractLsb
   Sail.BitVec.signExtend
   Sail.BitVec.zeroExtend
+  Sail.BitVec.toNatInt
   Sail.shift_bits_left
   Sail.shift_bits_right
 
@@ -147,11 +149,11 @@ inductive mop where | MUL | MULH | MULHU | MULHUS | MULHSU
 /-- Conversion from RISC-V spec representation to `mop` -/
 def mop_of_mul_op (m : mul_op) : mop :=
   match m with
-  | { high := false, signed_rs1 := _, signed_rs2 := _ } => .MUL
-  | { high := true, signed_rs1 := false, signed_rs2 := false } => .MULHU
-  | { high := true, signed_rs1 := false, signed_rs2 := true } => .MULHUS
-  | { high := true, signed_rs1 := true, signed_rs2 := false } => .MULHSU
-  | { high := true, signed_rs1 := true, signed_rs2 := true } => .MULH
+  | { result_part := .Low, signed_rs1 := _, signed_rs2 := _ } => .MUL
+  | { result_part := .High, signed_rs1 := .Unsigned, signed_rs2 := .Unsigned } => .MULHU
+  | { result_part := .High, signed_rs1 := .Unsigned, signed_rs2 := .Signed } => .MULHUS
+  | { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Unsigned } => .MULHSU
+  | { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Signed } => .MULH
 
 /-- Pure part of 32-bit `execute_MUL` -/
 def execute_MUL_pure (op1 : BitVec 32) (op2 : BitVec 32) (op : mop) : BitVec 32 :=
@@ -186,61 +188,10 @@ lemma execute_MUL_eq_execute_MUL' :
     ext s; simp_all; congr 3
     have mod_65_to_64 : forall (a : ℤ), (a % 36893488147419103232).toNat % 18446744073709551616 = (a % 18446744073709551616).toNat := by omega
 
-  . rw [Int.toNat_emod (by nlinarith) (by simp)]
-    rw [Int.toNat_mul (by simp) (by simp)]
-    simp
-
-  . rw [Int.toNat_emod (by nlinarith) (by simp)]
-    rw [Int.toNat_mul (by simp) (by simp)]
-    simp
-
-  . unfold BitVec.toInt
-    split_ifs <;> simp_all
-    . rw [Int.toNat_emod (by nlinarith) (by simp)]
-      simp; congr
-    . simp [← BitVec.toNat_inj]
-      trans (- (((4294967296 : ℤ) - r1.toNat) * r2.toNat) % 18446744073709551616).toNat % 4294967296
-      . congr 3
-        ring_nf
-      . rw [Int.neg_emod_eq_sub_emod]
-        have := bounds_toNat_32 r1
-        have := bounds_toNat_32 r2
-        rw [Int.toNat_emod (by nlinarith) (by simp)]
-        rw [Int.toNat_sub'' (by simp) (by nlinarith)]
-        simp only [Int.reduceToNat]
-        rw [Int.toNat_mul (by omega) (by omega)]
-        simp
-        rw [Nat.mul_sub_right_distrib]
-        rw [Nat.sub_sub_right _ (by nlinarith)]
-        omega
-
   . congr 2
     rw [mod_65_to_64]
-    apply toInt_toNat_as_toNat_64
-
-  . unfold BitVec.toInt
-    split_ifs <;> simp_all
-    . rw [Int.toNat_emod (by nlinarith) (by simp)]
-      simp; congr
-    . simp [← BitVec.toNat_inj]
-      trans (- ((r1.toNat : ℤ) * ((4294967296 : ℤ) - r2.toNat)) % 18446744073709551616).toNat % 4294967296
-      . congr 3
-        ring_nf
-      . rw [Int.neg_emod_eq_sub_emod]
-        have := bounds_toNat_32 r1
-        have := bounds_toNat_32 r2
-        rw [Int.toNat_emod (by nlinarith) (by simp)]
-        rw [Int.toNat_sub'' (by simp) (by nlinarith)]
-        simp only [Int.reduceToNat]
-        rw [Int.toNat_mul (by omega) (by omega)]
-        simp
-        rw [Nat.mul_sub_left_distrib]
-        rw [Nat.sub_sub_right _ (by nlinarith)]
-        omega
-
-  . congr 2
-    rw [mod_65_to_64]
-    apply toNat_toInt_as_toNat_64
+    . rw [← BitVec.toNat_mul]
+      apply toInt_toInt_as_toNat_64
 
   . unfold BitVec.toInt
     split_ifs <;> simp_all
@@ -302,8 +253,59 @@ lemma execute_MUL_eq_execute_MUL' :
 
   . congr 2
     rw [mod_65_to_64]
-    . rw [← BitVec.toNat_mul]
-      apply toInt_toInt_as_toNat_64
+    apply toNat_toInt_as_toNat_64
+
+  . unfold BitVec.toInt
+    split_ifs <;> simp_all
+    . rw [Int.toNat_emod (by nlinarith) (by simp)]
+      simp; congr
+    . simp [← BitVec.toNat_inj]
+      trans (- ((r1.toNat : ℤ) * ((4294967296 : ℤ) - r2.toNat)) % 18446744073709551616).toNat % 4294967296
+      . congr 3
+        ring_nf
+      . rw [Int.neg_emod_eq_sub_emod]
+        have := bounds_toNat_32 r1
+        have := bounds_toNat_32 r2
+        rw [Int.toNat_emod (by nlinarith) (by simp)]
+        rw [Int.toNat_sub'' (by simp) (by nlinarith)]
+        simp only [Int.reduceToNat]
+        rw [Int.toNat_mul (by omega) (by omega)]
+        simp
+        rw [Nat.mul_sub_left_distrib]
+        rw [Nat.sub_sub_right _ (by nlinarith)]
+        omega
+
+  . congr 2
+    rw [mod_65_to_64]
+    apply toInt_toNat_as_toNat_64
+
+  . unfold BitVec.toInt
+    split_ifs <;> simp_all
+    . rw [Int.toNat_emod (by nlinarith) (by simp)]
+      simp; congr
+    . simp [← BitVec.toNat_inj]
+      trans (- (((4294967296 : ℤ) - r1.toNat) * r2.toNat) % 18446744073709551616).toNat % 4294967296
+      . congr 3
+        ring_nf
+      . rw [Int.neg_emod_eq_sub_emod]
+        have := bounds_toNat_32 r1
+        have := bounds_toNat_32 r2
+        rw [Int.toNat_emod (by nlinarith) (by simp)]
+        rw [Int.toNat_sub'' (by simp) (by nlinarith)]
+        simp only [Int.reduceToNat]
+        rw [Int.toNat_mul (by omega) (by omega)]
+        simp
+        rw [Nat.mul_sub_right_distrib]
+        rw [Nat.sub_sub_right _ (by nlinarith)]
+        omega
+
+  . rw [Int.toNat_emod (by nlinarith) (by simp)]
+    rw [Int.toNat_mul (by simp) (by simp)]
+    simp
+
+  . rw [Int.toNat_emod (by nlinarith) (by simp)]
+    rw [Int.toNat_mul (by simp) (by simp)]
+    simp
 
 end MUL
 

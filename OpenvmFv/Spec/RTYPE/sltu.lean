@@ -111,11 +111,11 @@ lemma execute_RTYPE_sltu_pure_equiv
       . simp [h_lt]
         have : sltu_input.r1_val.toNat<bsltu_input.r2_val.toNat := by
           simp [h_lt, BitVec.lt_def.mp]
-        simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
+        simp [this, zero_extend, Sail.BitVec.zeroExtend]
       . simp [h_lt]
         have : ¬(sltu_input.r1_val.toNat<bsltu_input.r2_val.toNat) := by
           simp_all [BitVec.le_def]
-        simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
+        simp [this, zero_extend, Sail.BitVec.zeroExtend]
     . simp [regidx_to_fin] at *
       omega
 

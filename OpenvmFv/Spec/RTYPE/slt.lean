@@ -110,10 +110,10 @@ lemma execute_RTYPE_slt_pure_equiv
       by_cases h_lt: slt_input.r1_val.slt slt_input.r2_val
       . simp [h_lt]
         have : slt_input.r1_val.toInt<bslt_input.r2_val.toInt := h_lt
-        simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
+        simp [this, zero_extend, Sail.BitVec.zeroExtend]
       . simp [h_lt]
         have : ¬(slt_input.r1_val.toInt<bslt_input.r2_val.toInt) := h_lt
-        simp [this, LeanRV32D.Functions.zero_extend, Sail.BitVec.zeroExtend]
+        simp [this, zero_extend, Sail.BitVec.zeroExtend]
     . simp [regidx_to_fin] at *
       omega
 

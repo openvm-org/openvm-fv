@@ -87,15 +87,6 @@ namespace Equivalence.LoadSignExtend
   def wrap_to_regidx (val : FBB) : Fin 32 :=
     ⟨val / 4 % 32, by grind⟩
 
-  structure RVConfig where
-    plat_ram_size : BitVec 34
-
-  opaque plat_ram_size : BitVec 34
-
-  def config : RVConfig := {
-    plat_ram_size := plat_ram_size
-  }
-
   def LoadSignExtend_instruction_fields.execution (row : LoadSignExtend_instruction_fields) : List (FBB × List FBB) := [
     (-row.is_valid, [row.pc, row.timestamp]),
     (row.is_valid, [row.next_pc, row.next_timestamp])
@@ -458,7 +449,6 @@ namespace Equivalence.LoadSignExtend
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    plat_ram_size := config.plat_ram_size
     data0 := if (row.shift = 0) then row.prev_read_data[0] else row.prev_read_data[2]
     data1 := if (row.shift = 0) then row.prev_read_data[1] else row.prev_read_data[3]
     : PureSpec.LhInput
@@ -881,9 +871,8 @@ namespace Equivalence.LoadSignExtend
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_535 h_instruction
@@ -900,7 +889,7 @@ namespace Equivalence.LoadSignExtend
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -1086,7 +1075,7 @@ namespace Equivalence.LoadSignExtend
   :
     ((get_instruction_fields_row air row).opcode = 535 →
         LhOutput_matches_LoadSignExtend_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_LOADH_lh_pure
+          (PureSpec.execute_LOADH_pure
             (LhInput_of_LoadSignExtend_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -1103,7 +1092,7 @@ namespace Equivalence.LoadSignExtend
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
-    simp [LhInput_of_LoadSignExtend_instruction_fields, PureSpec.execute_LOADH_lh_pure]
+    simp [LhInput_of_LoadSignExtend_instruction_fields, PureSpec.execute_LOADH_pure]
 
     split_ands
     . exact lh_spec_of_get_instruction_fields_part_1 air row
@@ -1134,7 +1123,7 @@ namespace Equivalence.LoadSignExtend
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
-      obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
+      obtain ⟨instruction, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
       have h_bound := Transpiler.pc_bound_of_some h_instruction.1
       have h_rd := Transpiler.transpiler_opcode_535 h_instruction.1
@@ -1157,11 +1146,11 @@ namespace Equivalence.LoadSignExtend
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
-          rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+          rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
           simp
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
@@ -1211,9 +1200,9 @@ namespace Equivalence.LoadSignExtend
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
-        rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
 
@@ -1229,7 +1218,6 @@ namespace Equivalence.LoadSignExtend
     rd := BitVec.ofFin (wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
-    plat_ram_size := config.plat_ram_size
     data0 := if (row.shift = 0) then row.prev_read_data[0] else
              if (row.shift = 1) then row.prev_read_data[1] else
              if (row.shift = 2) then row.prev_read_data[2] else
@@ -1655,9 +1643,8 @@ namespace Equivalence.LoadSignExtend
       ] at h_transpile
       obtain ⟨
         instruction,
-        multiplciity,
         data,
-        ⟨h_instruction, _, _, h_data_opcode, _, _, h_data_imm, _⟩
+        ⟨h_instruction, _, h_data_opcode, _, _, h_data_imm, _⟩
       ⟩ := h_transpile
       rewrite [←h_data_imm]
       have := Transpiler.transpiler_opcode_534 h_instruction
@@ -1674,7 +1661,7 @@ namespace Equivalence.LoadSignExtend
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        simp (disch := omega) [←h_instruction.2, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
+        simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
         bv_decide
       }
     convert this using 1
@@ -1860,7 +1847,7 @@ namespace Equivalence.LoadSignExtend
   :
     ((get_instruction_fields_row air row).opcode = 534 →
         LbOutput_matches_LoadSignExtend_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_LOADB_lb_pure
+          (PureSpec.execute_LOADB_pure
             (LbInput_of_LoadSignExtend_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -1877,7 +1864,7 @@ namespace Equivalence.LoadSignExtend
     specialize h_constraints ⟨row, by omega⟩
     specialize h_bus_axioms row h_row
     specialize h_bus_wellformedness row h_row
-    simp [LbInput_of_LoadSignExtend_instruction_fields, PureSpec.execute_LOADB_lb_pure]
+    simp [LbInput_of_LoadSignExtend_instruction_fields, PureSpec.execute_LOADB_pure]
 
     split_ands
     . exact lb_spec_of_get_instruction_fields_part_1 air row
@@ -1908,7 +1895,7 @@ namespace Equivalence.LoadSignExtend
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
-      obtain ⟨instruction, multiplicity, data, h_instruction⟩ := h_transpile
+      obtain ⟨instruction, data, h_instruction⟩ := h_transpile
       have h_aligned := Transpiler.pc_aligned_of_some h_instruction.1
       have h_bound := Transpiler.pc_bound_of_some h_instruction.1
       have h_rd := Transpiler.transpiler_opcode_534 h_instruction.1
@@ -1931,11 +1918,11 @@ namespace Equivalence.LoadSignExtend
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
-          rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+          rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
           simp
           obtain ⟨⟨rd: Fin 32⟩⟩ := rd
           split_ands
@@ -2020,9 +2007,9 @@ namespace Equivalence.LoadSignExtend
         dsimp at h_instruction
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
-        rewrite [←h_instruction.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
         simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
-        rewrite [←h_instruction.2.2.2.2.2.2.2.2.2.1, ←h_instruction.1.2]
+        rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
 
@@ -2038,12 +2025,12 @@ namespace Equivalence.LoadSignExtend
       (row.opcode = 534 →
         LbOutput_matches_LoadSignExtend_instruction_fields
           row
-          (PureSpec.execute_LOADB_lb_pure (LbInput_of_LoadSignExtend_instruction_fields row))
+          (PureSpec.execute_LOADB_pure (LbInput_of_LoadSignExtend_instruction_fields row))
       ) ∧
       (row.opcode = 535 →
         LhOutput_matches_LoadSignExtend_instruction_fields
           row
-          (PureSpec.execute_LOADH_lh_pure (LhInput_of_LoadSignExtend_instruction_fields row))
+          (PureSpec.execute_LOADH_pure (LhInput_of_LoadSignExtend_instruction_fields row))
       )
     )
 

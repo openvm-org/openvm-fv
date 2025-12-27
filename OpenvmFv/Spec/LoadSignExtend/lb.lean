@@ -1,4 +1,4 @@
-import OpenvmFv.Spec.LoadStore.local2
+import OpenvmFv.Spec.LoadStore.local_extended
 import OpenvmFv.Spec.rX_bits
 
 namespace PureSpec
@@ -11,7 +11,6 @@ namespace PureSpec
     -- registers
     r1_val : BitVec 32
     PC : BitVec 32
-    plat_ram_size : BitVec 34
     -- memory
     data0 : BitVec 8
 
@@ -27,7 +26,7 @@ namespace PureSpec
     obtain ⟨x: Fin 32⟩ := bv
     fin_cases x <;> simp_all
 
-  def execute_LOADB_lb_pure (input : LbInput) : LbOutput := {
+  def execute_LOADB_pure (input : LbInput) : LbOutput := {
     nextPC := input.PC + 4#32
     rd := if h: input.rd = 0
       then .none
@@ -41,42 +40,7 @@ namespace PureSpec
     : LbOutput
   }
 
-  -- just used to allow the same tactics to handle the case for each non-zero register
-  private def bitvec_to_reg (bv: BitVec 5) : Register :=
-    match bv with
-      | 0#5 => Register.x1 -- purely used for totality, does not come up
-      | 1#5 => Register.x1
-      | 2#5 => Register.x2
-      | 3#5 => Register.x3
-      | 4#5 => Register.x4
-      | 5#5 => Register.x5
-      | 6#5 => Register.x6
-      | 7#5 => Register.x7
-      | 8#5 => Register.x8
-      | 9#5 => Register.x9
-      | 10#5 => Register.x10
-      | 11#5 => Register.x11
-      | 12#5 => Register.x12
-      | 13#5 => Register.x13
-      | 14#5 => Register.x14
-      | 15#5 => Register.x15
-      | 16#5 => Register.x16
-      | 17#5 => Register.x17
-      | 18#5 => Register.x18
-      | 19#5 => Register.x19
-      | 20#5 => Register.x20
-      | 21#5 => Register.x21
-      | 22#5 => Register.x22
-      | 23#5 => Register.x23
-      | 24#5 => Register.x24
-      | 25#5 => Register.x25
-      | 26#5 => Register.x26
-      | 27#5 => Register.x27
-      | 28#5 => Register.x28
-      | 29#5 => Register.x29
-      | 30#5 => Register.x30
-      | 31#5 => Register.x31
-      | _ => Register.x1
+  open Local.RegisterInvariants
 
   def lb_state_assumptions
     (i : LbInput)
@@ -85,343 +49,56 @@ namespace PureSpec
     -- Connecting the registers
     state.regs.get? Register.PC = .some i.PC ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
-    state.mem[(i.r1_val + BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
-    Sail.readReg Register.plat_ram_size state = EStateM.Result.ok i.plat_ram_size state ∧
-    -- General memory assumptions
-    Local.Assumptions.general_memory_assumptions state ∧
-    -- Address is correctly aligned
-    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 1 = true ∧
-    -- Operation does not overflow
-    (i.r1_val + BitVec.signExtend 32 i.imm).toNat + 1 < i.plat_ram_size
+    state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
+    -- Assumptions
+    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_memory_address_space_size ∧
+    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 1 = true
 
   set_option maxHeartbeats 0 in
-  lemma r1_of_write_state
-    {r1 : BitVec 5}
-    {r1_val : BitVec 32}
-    (pc : BitVec 32)
-    (h_r1_val : LeanRV32D.Functions.rX_bits (regidx.Regidx r1) state = EStateM.Result.ok r1_val state)
-  :
-    LeanRV32D.Functions.rX_bits (regidx.Regidx r1) (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok r1_val (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    by_cases h_r1: r1 = 0
-    . simp [
-        h_r1, LeanRV32D.Functions.rX_bits, LeanRV32D.Functions.rX
-      ] at ⊢ h_r1_val
-      exact h_r1_val
-    by_cases h_r1 : r1 = 1 <;> [
-      skip ; by_cases h_r1 : r1 = 2 <;> [
-      skip ; by_cases h_r1 : r1 = 3 <;> [
-      skip ; by_cases h_r1 : r1 = 4 <;> [
-      skip ; by_cases h_r1 : r1 = 5 <;> [
-      skip ; by_cases h_r1 : r1 = 6 <;> [
-      skip ; by_cases h_r1 : r1 = 7 <;> [
-      skip ; by_cases h_r1 : r1 = 8 <;> [
-      skip ; by_cases h_r1 : r1 = 9 <;> [
-      skip ; by_cases h_r1 : r1 = 10 <;> [
-      skip ; by_cases h_r1 : r1 = 11 <;> [
-      skip ; by_cases h_r1 : r1 = 12 <;> [
-      skip ; by_cases h_r1 : r1 = 13 <;> [
-      skip ; by_cases h_r1 : r1 = 14 <;> [
-      skip ; by_cases h_r1 : r1 = 15 <;> [
-      skip ; by_cases h_r1 : r1 = 16 <;> [
-      skip ; by_cases h_r1 : r1 = 17 <;> [
-      skip ; by_cases h_r1 : r1 = 18 <;> [
-      skip ; by_cases h_r1 : r1 = 19 <;> [
-      skip ; by_cases h_r1 : r1 = 20 <;> [
-      skip ; by_cases h_r1 : r1 = 21 <;> [
-      skip ; by_cases h_r1 : r1 = 22 <;> [
-      skip ; by_cases h_r1 : r1 = 23 <;> [
-      skip ; by_cases h_r1 : r1 = 24 <;> [
-      skip ; by_cases h_r1 : r1 = 25 <;> [
-      skip ; by_cases h_r1 : r1 = 26 <;> [
-      skip ; by_cases h_r1 : r1 = 27 <;> [
-      skip ; by_cases h_r1 : r1 = 28 <;> [
-      skip ; by_cases h_r1 : r1 = 29 <;> [
-      skip ; by_cases h_r1 : r1 = 30 <;> [
-      skip ; by_cases h_r1 : r1 = 31 <;> [
-        skip; (exfalso; grind)
-      ]
-    ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
-    all_goals {
-      simp [
-        h_r1, LeanRV32D.Functions.rX_bits, LeanRV32D.Functions.rX,
-        Sail.readReg, PreSail.readReg, write_reg_state,
-        LeanRV32D.Functions.regval_from_reg
-      ] at ⊢ h_r1_val
-      unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_r1_val
-      dsimp at ⊢ h_r1_val
-      have :
-        (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? (bitvec_to_reg r1) =
-        state.regs.get? (bitvec_to_reg r1)
-      := by rewrite [h_r1]; simp [bitvec_to_reg]; grind
-      rewrite [h_r1] at this
-      simp [bitvec_to_reg] at this
-      simp [this]
-      have : ∃ x_val, state.regs.get? (bitvec_to_reg r1) = .some x_val := by
-        by_cases h_contr : ∃ x_val, state.regs.get? (bitvec_to_reg r1) = .some x_val
-        . assumption
-        . rewrite [h_r1] at h_contr
-          simp [bitvec_to_reg] at h_contr
-          apply Option.eq_none_iff_forall_ne_some.mpr at h_contr
-          simp [h_contr] at h_r1_val
-      rewrite [h_r1] at this
-      simp [bitvec_to_reg] at this
-      obtain ⟨x, h_x⟩ := this
-      simp [h_x] at ⊢ h_r1_val
-      exact h_r1_val
-    }
-
-  lemma mstatus_of_write_state
-    {mstatus : BitVec 64}
-    (pc : BitVec 32)
-    (h_mstatus : Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state)
-  :
-    Sail.readReg Register.mstatus (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok mstatus (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_mstatus
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_mstatus
-    dsimp at ⊢ h_mstatus
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.mstatus =
-      state.regs.get? Register.mstatus
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.mstatus
-    . simp [h] at h_mstatus
-    . simp [h] at ⊢ h_mstatus
-      exact h_mstatus
-
-  lemma cur_privilege_of_write_state
-    {cur_privilege : Privilege}
-    (pc : BitVec 32)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege state = EStateM.Result.ok cur_privilege state)
-  :
-    Sail.readReg Register.cur_privilege (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok cur_privilege (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_cur_privilege
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_cur_privilege
-    dsimp at ⊢ h_cur_privilege
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.cur_privilege =
-      state.regs.get? Register.cur_privilege
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.cur_privilege
-    . simp [h] at h_cur_privilege
-    . simp [h] at ⊢ h_cur_privilege
-      exact h_cur_privilege
-
-  lemma clint_base_of_write_state
-    {clint_base : BitVec 34}
-    (pc : BitVec 32)
-    (h_clint_base : Sail.readReg Register.plat_clint_base state = EStateM.Result.ok clint_base state)
-  :
-    Sail.readReg Register.plat_clint_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok clint_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_clint_base
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_clint_base
-    dsimp at ⊢ h_clint_base
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.plat_clint_base =
-      state.regs.get? Register.plat_clint_base
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.plat_clint_base
-    . simp [h] at h_clint_base
-    . simp [h] at ⊢ h_clint_base
-      exact h_clint_base
-
-  lemma clint_size_of_write_state
-    {clint_size : BitVec 34}
-    (pc : BitVec 32)
-    (h_clint_size : Sail.readReg Register.plat_clint_size state = EStateM.Result.ok clint_size state)
-  :
-    Sail.readReg Register.plat_clint_size (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok clint_size (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_clint_size
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_clint_size
-    dsimp at ⊢ h_clint_size
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.plat_clint_size =
-      state.regs.get? Register.plat_clint_size
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.plat_clint_size
-    . simp [h] at h_clint_size
-    . simp [h] at ⊢ h_clint_size
-      exact h_clint_size
-
-  lemma ram_base_of_write_state
-    {ram_base : BitVec 34}
-    (pc : BitVec 32)
-    (h_ram_base : Sail.readReg Register.plat_ram_base state = EStateM.Result.ok ram_base state)
-  :
-    Sail.readReg Register.plat_ram_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok ram_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_ram_base
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_ram_base
-    dsimp at ⊢ h_ram_base
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.plat_ram_base =
-      state.regs.get? Register.plat_ram_base
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.plat_ram_base
-    . simp [h] at h_ram_base
-    . simp [h] at ⊢ h_ram_base
-      exact h_ram_base
-
-  lemma ram_size_of_write_state
-    {ram_size : BitVec 34}
-    (pc : BitVec 32)
-    (h_ram_size : Sail.readReg Register.plat_ram_size state = EStateM.Result.ok ram_size state)
-  :
-    Sail.readReg Register.plat_ram_size (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok ram_size (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_ram_size
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_ram_size
-    dsimp at ⊢ h_ram_size
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.plat_ram_size =
-      state.regs.get? Register.plat_ram_size
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.plat_ram_size
-    . simp [h] at h_ram_size
-    . simp [h] at ⊢ h_ram_size
-      exact h_ram_size
-
-  lemma rom_base_of_write_state
-    {rom_base : BitVec 34}
-    (pc : BitVec 32)
-    (h_rom_base : Sail.readReg Register.plat_rom_base state = EStateM.Result.ok rom_base state)
-  :
-    Sail.readReg Register.plat_rom_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok rom_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_rom_base
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_rom_base
-    dsimp at ⊢ h_rom_base
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.plat_rom_base =
-      state.regs.get? Register.plat_rom_base
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.plat_rom_base
-    . simp [h] at h_rom_base
-    . simp [h] at ⊢ h_rom_base
-      exact h_rom_base
-
-  lemma rom_size_of_write_state
-    {rom_size : BitVec 34}
-    (pc : BitVec 32)
-    (h_rom_size : Sail.readReg Register.plat_rom_size state = EStateM.Result.ok rom_size state)
-  :
-    Sail.readReg Register.plat_rom_size (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok rom_size (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_rom_size
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_rom_size
-    dsimp at ⊢ h_rom_size
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.plat_rom_size =
-      state.regs.get? Register.plat_rom_size
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.plat_rom_size
-    . simp [h] at h_rom_size
-    . simp [h] at ⊢ h_rom_size
-      exact h_rom_size
-
-  lemma htif_tohost_base_of_write_state
-    {htif_tohost_base : Option (BitVec 34)}
-    (pc : BitVec 32)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok htif_tohost_base state)
-  :
-    Sail.readReg Register.htif_tohost_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4)) =
-    EStateM.Result.ok htif_tohost_base (write_reg_state state Register.nextPC (Sail.BitVec.addInt pc 4))
-  := by
-    simp [
-      Sail.readReg, PreSail.readReg, write_reg_state
-    ] at ⊢ h_htif_tohost_base
-    unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get EStateM.instMonadStateOf EStateM.get at ⊢ h_htif_tohost_base
-    dsimp at ⊢ h_htif_tohost_base
-    have :
-      (state.regs.insert Register.nextPC (Sail.BitVec.addInt pc 4)).get? Register.htif_tohost_base =
-      state.regs.get? Register.htif_tohost_base
-    := by grind
-    simp [this]
-    rcases h: state.regs.get? Register.htif_tohost_base
-    . simp [h] at h_htif_tohost_base
-    . simp [h] at ⊢ h_htif_tohost_base
-      exact h_htif_tohost_base
-
-  set_option maxHeartbeats 0 in
-  lemma execute_LOADB_lb_pure_equiv
-    (lb_input : LbInput)
-    (h_assumptions : lb_state_assumptions lb_input state)
+  lemma execute_LOADB_pure_equiv
+    (input : LbInput)
+    (h_assumptions : Local.Assumptions.general_memory_assumptions state)
+    (h_lb_assumptions : lb_state_assumptions input state)
   :
     (
       do
         Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
         LeanRV32D.Functions.execute (instruction.LOAD (
-          lb_input.imm,
-          regidx.Regidx lb_input.r1,
-          regidx.Regidx lb_input.rd,
+          input.imm,
+          regidx.Regidx input.r1,
+          regidx.Regidx input.rd,
           false,
           1
         ))
     ) state =
-    let lb_output := execute_LOADB_lb_pure lb_input
+    let output := execute_LOADB_pure input
     (do
-      Sail.writeReg Register.nextPC lb_output.nextPC
-      match lb_output.rd with
+      Sail.writeReg Register.nextPC output.nextPC
+      match output.rd with
         | .some (rd, rd_val) => write_xreg rd rd_val
         | .none => pure ()
       pure (ExecutionResult.Retire_Success ())
     ) state
   := by
     obtain ⟨
+      h_htif_tohost_base,
+      h_cur_privilege,
+      ⟨ mstatus, ⟨ h_mstatus, h_plat_mstatus_val⟩ ⟩,
+      pmaRegion,
+      h_pma_regions,
+      h_pma_region_base_val,
+      h_pma_region_size_ub,
+      h_pma_region_size_readable,
+      h_pma_region_size_writable,
+      h_pma_region_size_misaligned
+    ⟩ := h_assumptions
+    obtain ⟨
       h_pc,
       h_r1_val,
       h_mem_0,
-      h_plat_ram_size,
-      ⟨
-        h_cur_privilege,
-        ⟨ mstatus, ⟨ h_mstatus, h_plat_mstatus_val⟩ ⟩,
-        h_plat_clint_base_val,
-        h_plat_clint_size_val,
-        h_plat_rom_base_val,
-        h_plat_rom_size_val,
-        h_plat_ram_base_val,
-        h_htif_tohost_base_val
-      ⟩,
-      h_aligned,
-      h_does_fit
-    ⟩ := h_assumptions
+      h_does_fit,
+      h_aligned
+    ⟩ := h_lb_assumptions
 
     simp [
       readReg_state h_pc,
@@ -434,44 +111,34 @@ namespace PureSpec
     ]
     simp
 
-    replace h_r1_val := r1_of_write_state lb_input.PC h_r1_val
-    replace h_mstatus := mstatus_of_write_state lb_input.PC h_mstatus
-    replace h_cur_privilege := cur_privilege_of_write_state lb_input.PC h_cur_privilege
-    replace h_clint_base := clint_base_of_write_state lb_input.PC h_plat_clint_base_val
-    replace h_clint_size := clint_size_of_write_state lb_input.PC h_plat_clint_size_val
-    replace h_plat_ram_base := ram_base_of_write_state lb_input.PC h_plat_ram_base_val
-    replace h_plat_ram_size := ram_size_of_write_state lb_input.PC h_plat_ram_size
-    replace h_plat_rom_base := rom_base_of_write_state lb_input.PC h_plat_rom_base_val
-    replace h_plat_rom_size := rom_size_of_write_state lb_input.PC h_plat_rom_size_val
-    replace h_htif_tohost_base := htif_tohost_base_of_write_state lb_input.PC h_htif_tohost_base_val
+    replace h_r1_val := r1_of_write_state input.PC h_r1_val
+    replace h_mstatus := mstatus_of_write_state input.PC h_mstatus
+    replace h_cur_privilege := cur_privilege_of_write_state input.PC h_cur_privilege
+    replace h_pma_regions := pma_regions_of_write_state input.PC h_pma_regions
+    replace h_htif_tohost_base := htif_tohost_base_of_write_state input.PC h_htif_tohost_base
 
     have h_execute_load := Local.execute_LOADB_simplified
-      (write_reg_state state Register.nextPC (Sail.BitVec.addInt lb_input.PC 4))
-      (regidx.Regidx lb_input.rd)
-      lb_input.data0
-      h_aligned
+      (write_reg_state state Register.nextPC (Sail.BitVec.addInt input.PC 4))
+      (regidx.Regidx input.rd)
+      input.data0
       h_r1_val
       h_mstatus
       h_cur_privilege
-      h_clint_base
-      h_clint_size
-      h_plat_ram_base
-      h_plat_rom_base
-      h_plat_ram_size
-      h_plat_rom_size
       h_htif_tohost_base
-      h_plat_mstatus_val
+      h_mem_0
       h_does_fit
-      h_mem_0 -- this works because write_reg_state doesn't affect state.mem
-
-    rewrite [
-      h_execute_load
-    ]
+      h_aligned
+      (by simp)
+      h_plat_mstatus_val
+      h_pma_regions
+      h_pma_region_base_val
+      h_pma_region_size_ub
+      (by grind)
 
     simp [
-      execute_LOADB_lb_pure
+      h_execute_load,
+      execute_LOADB_pure
     ]
-
     split_ifs with h_rd
     . simp [
         LeanRV32D.Functions.wX_bits,
@@ -482,10 +149,15 @@ namespace PureSpec
     . simp [Sail.BitVec.addInt]
       rewrite [
         wX_write_xreg_equiv _ _
-          (regidx.Regidx lb_input.rd)
-          ⟨lb_input.rd.toNat, range lb_input.rd h_rd⟩
+          (regidx.Regidx input.rd)
+          ⟨input.rd.toNat, range input.rd h_rd⟩
       ]
-      . split <;> aesop
+      . obtain s | s := write_xreg
+          ⟨input.rd.toNat, _⟩
+          ((input.data0).extend 32 true)
+          (write_reg_state state Register.nextPC (input.PC + 4#32))
+        . simp
+        . simp
       . simp
 
 end PureSpec

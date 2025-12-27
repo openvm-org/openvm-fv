@@ -23,9 +23,9 @@ namespace LoadB
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
-    obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_534 h_transpile
-    simp [h_data.2.2.1, h_opcode] at this
+    simp [h_data.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain
@@ -33,8 +33,8 @@ namespace LoadB
       ⟨h_needs_write, imm, rs1, h_instruction⟩
        := this
     . rewrite [
-        ←h_data.2.2.2.2.2.2.2.2.1,
-        ←h_data.2.2.2.1,
+        ←h_data.2.2.2.2.2.2.2.1,
+        ←h_data.2.2.1,
         h_needs_write
       ]
       rewrite [h_instruction] at h_transpile
@@ -43,7 +43,7 @@ namespace LoadB
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
-        ←h_transpile.2,
+        ←h_transpile,
         Transpiler.ind,
         regidx_to_fin
       ]
@@ -51,8 +51,8 @@ namespace LoadB
       clear *- h_rd
       fin_cases rd <;> grind
     . rewrite [
-        ←h_data.2.2.2.2.2.2.2.2.1,
-        ←h_data.2.2.2.1,
+        ←h_data.2.2.2.2.2.2.2.1,
+        ←h_data.2.2.1,
         h_needs_write
       ]
       rewrite [h_instruction] at h_transpile
@@ -61,7 +61,7 @@ namespace LoadB
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
-        ←h_transpile.2,
+        ←h_transpile,
         Transpiler.ind,
         regidx_to_fin
       ]
@@ -82,9 +82,9 @@ namespace LoadB
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
-    obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_534 h_transpile
-    simp [h_data.2.2.1, h_opcode] at this
+    simp [h_data.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain
@@ -92,8 +92,8 @@ namespace LoadB
       ⟨h_needs_write, imm, rs1, h_instruction⟩
        := this
     . rewrite [
-        ←h_data.2.2.2.2.2.2.2.2.1,
-        ←h_data.2.2.2.1,
+        ←h_data.2.2.2.2.2.2.2.1,
+        ←h_data.2.2.1,
         h_needs_write
       ]
       rewrite [h_instruction] at h_transpile
@@ -102,7 +102,7 @@ namespace LoadB
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
-        ←h_transpile.2,
+        ←h_transpile,
         Transpiler.ind,
         regidx_to_fin
       ]
@@ -110,8 +110,8 @@ namespace LoadB
       clear *- h_rd
       fin_cases rd <;> grind
     . rewrite [
-        ←h_data.2.2.2.2.2.2.2.2.1,
-        ←h_data.2.2.2.1,
+        ←h_data.2.2.2.2.2.2.2.1,
+        ←h_data.2.2.1,
         h_needs_write
       ]
       rewrite [h_instruction] at h_transpile
@@ -120,7 +120,7 @@ namespace LoadB
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
-        ←h_transpile.2,
+        ←h_transpile,
         Transpiler.ind,
         regidx_to_fin
       ]
@@ -140,12 +140,12 @@ namespace LoadB
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
-    obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_534 h_transpile
-    simp [h_data.2.2.1, h_opcode] at this
+    simp [h_data.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
-    rewrite [←h_data.2.2.2.2.2.2.2.2.2]
+    rewrite [←h_data.2.2.2.2.2.2.2.2]
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
       ⟨h_needs_write, imm, rs1, h_instruction⟩
@@ -156,9 +156,9 @@ namespace LoadB
       rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
-      rewrite [←h_data.2.2.2.2.2.1]
+      rewrite [←h_data.2.2.2.2.1]
       simp [
-        ←h_transpile.2,
+        ←h_transpile,
         Transpiler.sign_of,
         Transpiler.utof,
         Transpiler.sign_extend_16
@@ -208,12 +208,12 @@ namespace LoadB
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
-    obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_534 h_transpile
-    simp [h_data.2.2.1, h_opcode] at this
+    simp [h_data.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
-    rewrite [←h_data.2.2.2.2.2.2.2.1]
+    rewrite [←h_data.2.2.2.2.2.2.1]
     obtain
       ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
       ⟨h_needs_write, imm, rs1, h_instruction⟩
@@ -224,7 +224,7 @@ namespace LoadB
       rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
-      simp [←h_transpile.2]
+      simp [←h_transpile]
     }
 
   lemma loadb0_loadb1_exclusive [Field ExtF]
@@ -609,10 +609,6 @@ namespace LoadB
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.1
     clear *- h_bus_wellformedness
 
-    have : (1509949441: FBB) = 4⁻¹ := eq_inv_of_mul_eq_one_left rfl
-
-    rewrite [this] at h_bus_wellformedness
-    clear this
     simp [Valid_VmAirWrapper_load_sign_extend.shift_amount, Valid_LoadSignExtendCoreAir_4.store_shift_amount] at *
 
     rewrite [show 16384 = (16384: FBB).val by simp, ←Fin.lt_def] at h_bus_wellformedness
@@ -621,8 +617,14 @@ namespace LoadB
     ]
     obtain ⟨ diff, eq_diff ⟩ : ∃ diff, diff = air.adapter.mem_ptr_limbs_0 row 0 - air.core.load_shift_amount row 0 := by simp
     rw [← eq_diff] at h_bus_wellformedness ⊢
-    clear eq_diff
-    grind
+    have : (1509949441: FBB) = 4⁻¹ := eq_inv_of_mul_eq_one_left rfl
+    rw [← this]
+    clear *- h_bus_wellformedness
+    simp [Fin.lt_def, Fin.val_mul] at h_bus_wellformedness ⊢
+    simp [Nat.mul_mod] at *
+    simp only [show forall x, x % 2013265921 % 2013265921 = x % 2013265921 by omega] at *
+    rw [Nat.mod_eq_of_lt (a := _ * _) (by omega)]
+    omega
 
   lemma mem_ptr_limbs_1_range [Field ExtF]
     (air: Valid_VmAirWrapper_load_sign_extend FBB ExtF)
@@ -650,7 +652,7 @@ namespace LoadB
     (h_constraints : VmAirWrapper_load_sign_extend.constraints.allHold air row h_row)
     (h_bus_wellformedness : VmAirWrapper_load_sign_extend.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-  : air.adapter.mem_ptr row 0 - air.shift_amount row 0 < 2^29
+  : air.adapter.mem_ptr row 0 - air.shift_amount row 0 < OpenVM_memory_address_space_size
   := by
     unfold Valid_Rv32LoadStoreAdapterAir.mem_ptr
     have hm0 := mem_ptr_limbs_0_range air row h_bus_wellformedness h_is_valid
@@ -759,9 +761,9 @@ namespace LoadB
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
-    obtain ⟨instruction, multiplicity, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
     have := Transpiler.transpiler_opcode_534 h_transpile
-    simp [h_data.2.2.1, h_opcode] at this
+    simp [h_data.2.1, h_opcode] at this
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile
     have h_bound := Transpiler.pc_bound_of_some h_transpile
     obtain
@@ -769,14 +771,14 @@ namespace LoadB
       ⟨h_needs_write, imm, rs1, h_instruction⟩
       := this
     all_goals {
-      rewrite [←h_data.2.2.2.2.2.1]
+      rewrite [←h_data.2.2.2.2.1]
       rewrite [h_instruction] at h_transpile
       unfold Transpiler.transpile_op at h_transpile
       rewrite [if_pos (by constructor <;> assumption)] at h_transpile
       dsimp at h_transpile
       simp [-Vector.mk_eq] at h_transpile
       simp [
-        ←h_transpile.2,
+        ←h_transpile,
         Transpiler.sign_extend_16,
         Transpiler.utof,
         Fin.lt_def
@@ -1044,7 +1046,7 @@ lemma imm_extend_range [Field ExtF]
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness'
-    obtain ⟨ inst, a, b, h_transpile, h_a, h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8 ⟩ := h_bus_wellformedness'
+    obtain ⟨ inst, b, h_transpile, h_b0, h_b1, h_b2, h_b3, h_b4, h_b5, h_b6, h_b7, h_b8 ⟩ := h_bus_wellformedness'
     have := Transpiler.transpiler_opcode_534 h_transpile (by simp; grind)
     simp [*] at this
     have h_eq_b : b = #v[b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8]]
@@ -1079,7 +1081,7 @@ lemma imm_extend_range [Field ExtF]
     . obtain ⟨ h_needs_write, ⟨ imm, rs1, rd, h_inst, h_nz⟩  ⟩ := real
       -- Transpilation
       subst inst; unfold Transpiler.transpile_op at h_transpile
-      simp at h_transpile; obtain ⟨ h_pc, h_a', h_eq_b' ⟩ := h_transpile
+      simp at h_transpile; obtain ⟨ h_pc, h_eq_b' ⟩ := h_transpile
       symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
       obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
       -- Rest
@@ -1102,9 +1104,7 @@ lemma imm_extend_range [Field ExtF]
         rw [Nat.mod_eq_of_lt (by omega)]
         simp [Fin.ext_iff]; congr 2
         simp [BitVec.msb_signExtend]
-      . exists air.adapter.read_data_aux.base.prev_timestamp row 0
-        exists air.adapter.write_base_aux.prev_timestamp row 0
-        exists air.shift_amount row 0
+      . exists air.shift_amount row 0
         have h_eq := mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
         simp [← BitVec.toNat_inj] at h_eq
         rw [Nat.mod_eq_of_lt (a := (air.adapter.mem_ptr row 0).val) (by omega)] at h_eq
@@ -1121,7 +1121,7 @@ lemma imm_extend_range [Field ExtF]
         obtain ⟨ sh, lsh, rsh ⟩ := shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
         obtain ⟨ wd0, wd1, wd2, wd3 ⟩ := write_data_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
         split_ands <;> try rfl
-        rotate_left; rotate_left
+        rotate_left
         . simp [wd0, sh]; grind
         . simp [wd1, sh]; grind
         . simp [wd2, sh]; grind
@@ -1136,7 +1136,7 @@ lemma imm_extend_range [Field ExtF]
     . obtain ⟨ h_needs_write, ⟨ imm, rs1, h_inst ⟩  ⟩ := phantom
       -- Transpilation
       subst inst; unfold Transpiler.transpile_op at h_transpile
-      simp at h_transpile; obtain ⟨ h_pc, h_a', h_eq_b' ⟩ := h_transpile
+      simp at h_transpile; obtain ⟨ h_pc, h_eq_b' ⟩ := h_transpile
       symm at h_eq_b'; simp [h_eq_b] at h_eq_b'
       obtain ⟨ h_opcode', h_rs2_ptr, h_rs1_ptr, h_imm, h_mem_as, h_needs_write, h_imm_sgn ⟩ := h_eq_b'
       rw [if_pos (by grind)] at h_needs_write
@@ -1166,9 +1166,7 @@ lemma imm_extend_range [Field ExtF]
         rw [Nat.mod_eq_of_lt (by omega)]
         simp [Fin.ext_iff]; congr 2
         simp [BitVec.msb_signExtend]
-      . exists air.adapter.read_data_aux.base.prev_timestamp row 0
-        exists air.adapter.write_base_aux.prev_timestamp row 0
-        exists air.shift_amount row 0
+      . exists air.shift_amount row 0
         have h_eq := mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
         simp [← BitVec.toNat_inj] at h_eq
         rw [Nat.mod_eq_of_lt (a := (air.adapter.mem_ptr row 0).val) (by omega)] at h_eq
@@ -1184,7 +1182,7 @@ lemma imm_extend_range [Field ExtF]
         obtain ⟨ sh, lsh, rsh ⟩ := shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
         obtain ⟨ wd0, wd1, wd2, wd3 ⟩ := write_data_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
         split_ands <;> try rfl
-        rotate_left; rotate_left
+        rotate_left
         . simp [wd0, sh]; grind
         . simp [wd1, sh]; grind
         . simp [wd2, sh]; grind

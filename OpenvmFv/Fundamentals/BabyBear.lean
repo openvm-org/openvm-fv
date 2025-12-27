@@ -17,6 +17,11 @@ lemma prime_BabyBearPrime : Nat.Prime BB_prime := by native_decide
 instance Fact_BBPrime : Fact (Nat.Prime BB_prime) := ⟨prime_BabyBearPrime⟩
 instance : NeZero BB_prime := by constructor; decide
 
+instance : NatCast FBB where
+
+
+  natCast := (Lean.Grind.Fin.instCommRingFinOfNeZeroNat BB_prime).toCommSemiring.toSemiring.natCast.natCast
+
 instance : Field FBB := ZMod.instField BB_prime
 instance : NoZeroDivisors FBB := Fin.noZeroDivisors_of_prime _ (hp := Fact_BBPrime)
 
