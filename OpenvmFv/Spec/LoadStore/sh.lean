@@ -40,43 +40,6 @@ namespace PureSpec
     : ShOutput
   }
 
-  -- just used to allow the same tactics to handle the case for each non-zero register
-  private def bitvec_to_reg (bv: BitVec 5) : Register :=
-    match bv with
-      | 0#5 => Register.x1 -- purely used for totality, does not come up
-      | 1#5 => Register.x1
-      | 2#5 => Register.x2
-      | 3#5 => Register.x3
-      | 4#5 => Register.x4
-      | 5#5 => Register.x5
-      | 6#5 => Register.x6
-      | 7#5 => Register.x7
-      | 8#5 => Register.x8
-      | 9#5 => Register.x9
-      | 10#5 => Register.x10
-      | 11#5 => Register.x11
-      | 12#5 => Register.x12
-      | 13#5 => Register.x13
-      | 14#5 => Register.x14
-      | 15#5 => Register.x15
-      | 16#5 => Register.x16
-      | 17#5 => Register.x17
-      | 18#5 => Register.x18
-      | 19#5 => Register.x19
-      | 20#5 => Register.x20
-      | 21#5 => Register.x21
-      | 22#5 => Register.x22
-      | 23#5 => Register.x23
-      | 24#5 => Register.x24
-      | 25#5 => Register.x25
-      | 26#5 => Register.x26
-      | 27#5 => Register.x27
-      | 28#5 => Register.x28
-      | 29#5 => Register.x29
-      | 30#5 => Register.x30
-      | 31#5 => Register.x31
-      | _ => Register.x1
-
   def modify_memory_2
     (s: PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
     (output: ShOutput)
