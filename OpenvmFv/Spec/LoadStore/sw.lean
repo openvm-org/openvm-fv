@@ -29,7 +29,7 @@ namespace PureSpec
     obtain ⟨x: Fin 32⟩ := bv
     fin_cases x <;> simp_all
 
-  def execute_STORE_pure (input : SwInput) : SwOutput := {
+  def execute_STOREW_pure (input : SwInput) : SwOutput := {
     nextPC := input.PC + 4#32
     data0 := (
       (input.r1_val + BitVec.signExtend 32 input.imm).toNat,
@@ -82,7 +82,7 @@ namespace PureSpec
     LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 4 = true
 
   set_option maxHeartbeats 0 in
-  lemma execute_STORE_pure_equiv
+  lemma execute_STOREW_pure_equiv
     (input : SwInput)
     (h_assumptions : Local.Assumptions.general_memory_assumptions state)
     (h_sw_assumptions : sw_state_assumptions input state)
@@ -97,7 +97,7 @@ namespace PureSpec
           4
         ))
     ) state =
-    let output := execute_STORE_pure input
+    let output := execute_STOREW_pure input
     (do
       Sail.writeReg Register.nextPC output.nextPC
       set (modify_memory_4 (← get) output)
@@ -136,7 +136,7 @@ namespace PureSpec
     replace h_pma_regions := pma_regions_of_write_state input.PC h_pma_regions
     replace h_htif_tohost_base := htif_tohost_base_of_write_state input.PC h_htif_tohost_base
 
-    have h_execute_store := Local.execute_STORE_simplified
+    have h_execute_store := Local.execute_STOREW_simplified
       (write_reg_state state Register.nextPC (Sail.BitVec.addInt input.PC 4))
       h_r1_val
       h_r2_val
@@ -162,6 +162,6 @@ namespace PureSpec
 
     unfold write_reg_state
     unfold get instMonadStateOfMonadStateOf getThe MonadStateOf.get
-    simp [EStateM.instMonadStateOf, EStateM.get, EStateM.set, modify_memory_4, execute_STORE_pure, Sail.BitVec.addInt]
+    simp [EStateM.instMonadStateOf, EStateM.get, EStateM.set, modify_memory_4, execute_STOREW_pure, Sail.BitVec.addInt]
 
 end PureSpec

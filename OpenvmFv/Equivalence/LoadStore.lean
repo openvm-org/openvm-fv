@@ -563,7 +563,7 @@ namespace Equivalence.LoadStore
   :
     ((get_instruction_fields_row air row).opcode = 531 →
         SwOutput_matches_LoadStore_instruction_fields (get_instruction_fields_row air row)
-          (PureSpec.execute_STORE_pure
+          (PureSpec.execute_STOREW_pure
             (SwInput_of_LoadStore_instruction_fields (get_instruction_fields_row air row))))
   := by
     intro h_opcode
@@ -582,7 +582,7 @@ namespace Equivalence.LoadStore
     specialize h_bus_wellformedness row h_row
     simp [
       SwInput_of_LoadStore_instruction_fields,
-      PureSpec.execute_STORE_pure,
+      PureSpec.execute_STOREW_pure,
       -BitVec.toNat_add
     ]
     repeat rw [BitVec.toNat_add]
@@ -4260,7 +4260,7 @@ set_option maxHeartbeats 0 in
       (row.opcode = 531 →
         SwOutput_matches_LoadStore_instruction_fields
           row
-          (PureSpec.execute_STORE_pure (SwInput_of_LoadStore_instruction_fields row))
+          (PureSpec.execute_STOREW_pure (SwInput_of_LoadStore_instruction_fields row))
       ) ∧
       (row.opcode = 532 →
         ShOutput_matches_LoadStore_instruction_fields

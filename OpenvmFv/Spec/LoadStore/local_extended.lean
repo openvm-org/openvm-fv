@@ -644,7 +644,7 @@ namespace Local
     LeanRV32D.Functions.execute_LOAD imm rs1 rd is_unsigned width
   := rfl
 
-  lemma execute_STORE_simplified
+  lemma execute_STOREW_simplified
     (s)
     (h_rs1_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok rs1_val s)
     (h_rs2_val : LeanRV32D.Functions.rX_bits rs2 s = EStateM.Result.ok rs2_val s)
