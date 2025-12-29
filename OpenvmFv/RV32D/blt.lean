@@ -1,0 +1,92 @@
+import OpenvmFv.RV32D.Auxiliaries
+
+namespace PureSpec
+
+  structure BltInput where
+    -- operands
+    imm : BitVec 13
+    r1_val: BitVec 32
+    r2_val: BitVec 32
+    -- registers
+    PC : BitVec 32
+
+  structure BltOutput where
+    -- registers
+    nextPC : BitVec 32
+    -- result
+    success : Bool
+    throws : Bool
+
+  def execute_BLT_pure (input : BltInput) : BltOutput :=
+    let skip := !(input.r1_val.toInt <b input.r2_val.toInt)
+    let throws := !skip && BitVec.ofBool (input.PC + BitVec.signExtend 32 input.imm)[0] == 1#1
+    let fails := throws || (!skip && BitVec.ofBool (input.PC + BitVec.signExtend 32 input.imm)[1] == 1#1)
+    {
+      nextPC := if skip || fails
+        then (input.PC + 4)
+        else (input.PC + BitVec.signExtend 32 input.imm)
+      success := !fails
+      throws := throws
+      : BltOutput
+    }
+
+  lemma execute_BLT_pure_equiv
+    (blt_input : BltInput)
+    (imm: BitVec 13)
+    (h_input_imm: blt_input.imm = imm)
+    (h_input_r1: read_xreg (regidx_to_fin r1) state = EStateM.Result.ok (blt_input.r1_val) state)
+    (h_input_r2: read_xreg (regidx_to_fin r2) state = EStateM.Result.ok (blt_input.r2_val) state)
+    (h_input_pc: state.regs.get? Register.PC = .some blt_input.PC)
+    (h_input_misa: state.regs.get? Register.misa = .some misa)
+  :
+    (
+      do
+        Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
+        LeanRV32D.Functions.execute (instruction.BTYPE (imm, r2, r1, bop.BLT ))
+    ) state =
+    let blt_output := execute_BLT_pure blt_input
+    (do
+      Sail.writeReg Register.nextPC blt_output.nextPC
+      if blt_output.throws then
+        throw (Sail.Error.Assertion "extensions/I/base_insts.sail:59.29-59.30")
+      else if !blt_output.success then
+        pure (
+          ExecutionResult.Memory_Exception (
+            (virtaddr.Virtaddr (blt_input.PC + BitVec.signExtend 32 blt_input.imm)),
+            (ExceptionType.E_Fetch_Addr_Align ())
+          )
+        )
+      else
+        (pure (ExecutionResult.Retire_Success ()))) state
+  := by
+    simp [
+      readReg_succ h_input_pc,
+      LeanRV32D.Functions.execute,
+      writeReg_state_success,
+      LeanRV32D.Functions.execute_BTYPE
+    ]
+    rewrite [rX_read_xreg_equiv _ r1 (regidx_to_fin r1) (by { simp [regidx_to_fin] })]
+    rewrite [read_xreg_write_other_reg_state _ h_input_r1 reg_of_fin_neq_nextPC]
+    simp
+    rewrite [rX_read_xreg_equiv _ r2 (regidx_to_fin r2) (by { simp [regidx_to_fin] })]
+    rewrite [read_xreg_write_other_reg_state _ h_input_r2 reg_of_fin_neq_nextPC]
+    simp
+
+    by_cases h_eq: blt_input.r1_val.toInt < blt_input.r2_val.toInt <;>
+    simp [h_eq, execute_BLT_pure]
+    rewrite [(readReg_succ (writeReg_read_diff h_input_pc (by trivial)))]
+    simp
+    rewrite [writeReg_read_diff h_input_misa (by trivial)]
+    simp
+
+    by_cases h_throws : (execute_BLT_pure blt_input).throws <;>
+    simp_all [execute_BLT_pure]
+    . by_cases h_success : (execute_BLT_pure blt_input).success
+      . simp [execute_BLT_pure, h_eq, h_throws, h_input_imm] at h_success
+        repeat rw [if_neg (by omega)]
+        simp
+      . simp [execute_BLT_pure, h_eq, h_throws, h_input_imm] at h_success
+        repeat rw [if_pos (by omega)]
+        simp
+
+end PureSpec

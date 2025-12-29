@@ -1,7 +1,7 @@
-import OpenvmFv.Spec.JalLui
+import OpenvmFv.RV32D.jal
+import OpenvmFv.RV32D.lui
 
-import OpenvmFv.Spec.ControlFlow.jal
-import OpenvmFv.Spec.ControlFlow.lui
+import OpenvmFv.Spec.JalLui
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -240,7 +240,6 @@ namespace Equivalence.JalLui
     rd := wrap_to_regidx row.rd_ptr
     imm := BitVec.ofInt 21 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := LeanRV32D.Functions.misa
     : PureSpec.JalInput
   }
 

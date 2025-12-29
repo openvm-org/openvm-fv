@@ -1,6 +1,5 @@
 import LeanRV32D
 import OpenvmFv.Fundamentals.Core
-import OpenvmFv.Fundamentals.RV32D
 import OpenvmFv.Fundamentals.U32
 
 open PreSail

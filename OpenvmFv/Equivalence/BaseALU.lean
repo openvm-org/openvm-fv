@@ -1,16 +1,14 @@
+import OpenvmFv.RV32D.add
+import OpenvmFv.RV32D.sub
+import OpenvmFv.RV32D.xor
+import OpenvmFv.RV32D.or
+import OpenvmFv.RV32D.and
+import OpenvmFv.RV32D.addi
+import OpenvmFv.RV32D.andi
+import OpenvmFv.RV32D.ori
+import OpenvmFv.RV32D.xori
+
 import OpenvmFv.Spec.BaseALU
-
-import OpenvmFv.Spec.RTYPE.add
-import OpenvmFv.Spec.RTYPE.sub
-import OpenvmFv.Spec.RTYPE.xor
-import OpenvmFv.Spec.RTYPE.or
-import OpenvmFv.Spec.RTYPE.and
-
-import OpenvmFv.Spec.ITYPE.addi
-import OpenvmFv.Spec.ITYPE.andi
-import OpenvmFv.Spec.ITYPE.ori
-import OpenvmFv.Spec.ITYPE.xori
-
 
 namespace Equivalence.BaseALU
 

@@ -1,6 +1,6 @@
-import OpenvmFv.Spec.Auipc
+import OpenvmFv.RV32D.auipc
 
-import OpenvmFv.Spec.ControlFlow.auipc
+import OpenvmFv.Spec.Auipc
 
 set_option maxHeartbeats 1_000_000_000
 

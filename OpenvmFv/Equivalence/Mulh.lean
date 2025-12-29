@@ -1,8 +1,8 @@
 import OpenvmFv.Spec.Mulh
 
-import OpenvmFv.Spec.MULH.mulh
-import OpenvmFv.Spec.MULH.mulhsu
-import OpenvmFv.Spec.MULH.mulhu
+import OpenvmFv.RV32D.mulh
+import OpenvmFv.RV32D.mulhsu
+import OpenvmFv.RV32D.mulhu
 
 namespace Equivalence.Mulh
 
