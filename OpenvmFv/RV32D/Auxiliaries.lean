@@ -64,6 +64,7 @@ attribute [simp]
 
   LeanRV32D.Functions._get_Misa_C
   LeanRV32D.Functions._get_Mstatus_MPRV
+  LeanRV32D.Functions.allowed_misaligned
   LeanRV32D.Functions.bits_of_physaddr
   LeanRV32D.Functions.bits_of_virtaddr
   LeanRV32D.Functions.check_misaligned
@@ -81,6 +82,8 @@ attribute [simp]
   LeanRV32D.Functions.get_config_use_abi_names
   LeanRV32D.Functions.get_next_pc
   LeanRV32D.Functions.hartSupports
+  LeanRV32D.Functions.is_aligned_vaddr
+  LeanRV32D.Functions.is_aligned_paddr
   LeanRV32D.Functions.matching_pma
   LeanRV32D.Functions.matching_pma_bits_range
   LeanRV32D.Functions.mem_read
@@ -145,6 +148,9 @@ attribute [simp]
   Sail.ConcurrencyInterfaceV1.sail_mem_read
   Sail.ConcurrencyInterfaceV1.sail_mem_write
   Sail.SailME.run
+
+attribute [local simp]
+  Int.tmod_eq_emod
 
 section SimplerMonadicReasoning
 
@@ -669,332 +675,82 @@ section Memory
   -- OpenVM address space size
   notation "OpenVM_address_space_size" => 2 ^ 29
 
-  lemma run_vmem_read_of_width_4
-    (offset : BitVec 32)
-    (data₀ data₁ data₂ data₃ : BitVec 8)
-    (h_reg_val : LeanRV32D.Functions.rX_bits rs s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
-    (hmem₀ : s.mem[reg_val.toNat + offset.toNat]? = some data₀)
-    (hmem₁ : s.mem[reg_val.toNat + offset.toNat + 1]? = some data₁)
-    (hmem₂ : s.mem[reg_val.toNat + offset.toNat + 2]? = some data₂)
-    (hmem₃ : s.mem[reg_val.toNat + offset.toNat + 3]? = some data₃)
-    -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + offset)) 4 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + offset.toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+  @[simp]
+  lemma bare_is_bare : (SATPMode.Bare == SATPMode.Bare) = true := rfl
+
+  lemma arithmetic_helper
+    (h_ub : a + b < OpenVM_address_space_size)
   :
-    let width := 4
-    let data := data₃ ++ data₂ ++ data₁ ++ data₀
-    (LeanRV32D.Functions.vmem_read
-      rs
-      offset
-      width (MemoryAccessType.Load ())
-      false false false
-    ).run s = .ok (.Ok data) s
+    (a + b) % 4294967296 = (a + b) ∧
+    (a + b) % 17179869184 = (a + b) ∧
+    (a + b) % 18446744073709551616 = (a + b)
   := by
-  subst privilege
+    omega
 
-  unfold
-    LeanRV32D.Functions.vmem_read
+  def general_memory_assumptions
+    (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
+    (mstatus : RegisterType Register.mstatus)
+    (pmaRegion : PMA_Region)
+  : Prop :=
+    -- Assumption A2: no host-target interface
+    Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state ∧
+    -- Assumption A3: machine privilege
+    Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state ∧
+    -- Assumption A3: MPRV bit of the mstatus register not set
+    (Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state ∧ BitVec.extractLsb 17 17 mstatus = 0#1) ∧
+    -- A4.1 : Single PMA region
+    Sail.readReg Register.pma_regions state = EStateM.Result.ok [ pmaRegion ] state ∧
+    -- A4.2 : with base 0 and at least 2^29 bytes in size
+    pmaRegion.base = 0 ∧
+    OpenVM_address_space_size ≤ pmaRegion.size.toNat ∧
+    -- A4.3 : with all addresses readable and writable, and misaligned accesses treated as errors
+    pmaRegion.attributes.readable ∧
+    pmaRegion.attributes.writable ∧
+    pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault
 
-  -- From vmem_read to vmem_read_addr
-  simp [
-    EStateM.run,
-    EStateM.map,
-    h_reg_val,
-  ]
-  -- Entering vmem_read_addr
-  simp [
-    LeanRV32D.Functions.vmem_read_addr,
-    ExceptT.run,
-    assumption_alignment
-  ]
-  unfold_projs
-  simp [
-    h_mstatus,
-    h_cur_privilege,
-    assumption_MPRV_not_set,
-  ]
-  obtain ⟨ is_readable, is_writable, is_misaligned_fault ⟩ := assumption_pma_attributes
-  simp [assumption_pma_regions]
-  rw [if_pos
-      (by
-        simp [assumption_pma_base]
-        repeat rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)]
-        repeat rw [Int.emod_eq_of_lt (b := 4294967296) (by omega) (by omega)]
-        simp [
-          LeanRV32D.Functions.is_aligned_vaddr,
-          Int.tmod_eq_emod
-        ] at assumption_alignment
-        omega)
-    ]
-  simp [is_misaligned_fault]
-  rw [if_neg
-     (by
-        simp [LeanRV32D.Functions.is_aligned_vaddr] at assumption_alignment
-        simp [LeanRV32D.Functions.is_aligned_paddr]
-        rw [Int.emod_eq_of_lt (b := 17179869184) (by omega) (by omega)]
-        omega)]
-  simp [is_readable, h_htif_tohost_base]
-  rw [if_neg
-      (by
-        simp; intro h_le
-        iterate 2 rw [Int.emod_eq_of_lt (by omega) (by omega)] at h_le
-        simp [Int.nonneg_def] at h_le
-        grind)]
-  repeat rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
-  repeat rw [Nat.mod_eq_of_lt (b := 4294967296) (by omega)]
-  simp [*]
-
-  lemma run_vmem_read_of_width_2
-    (offset : BitVec 32)
-    (data₀ data₁ : BitVec 8)
-    (h_reg_val : LeanRV32D.Functions.rX_bits rs s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
-    (hmem₀ : s.mem[reg_val.toNat + offset.toNat]? = some data₀)
-    (hmem₁ : s.mem[reg_val.toNat + offset.toNat + 1]? = some data₁)
-    -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + offset)) 2 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + offset.toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+  lemma gma_invariant_under_pc_increment
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
   :
-    let width := 2
-    let data := data₁ ++ data₀
-    (LeanRV32D.Functions.vmem_read
-      rs
-      offset
-      width (MemoryAccessType.Load ())
-      false false false
-    ).run s = .ok (.Ok data) s
+    general_memory_assumptions (write_reg_state s Register.nextPC val) mstatus pmaRegion
   := by
-  subst privilege
-
-  unfold
-    LeanRV32D.Functions.vmem_read
-
-  -- From vmem_read to vmem_read_addr
-  simp [
-    EStateM.run,
-    EStateM.map,
-    h_reg_val,
-  ]
-  -- Entering vmem_read_addr
-  simp [
-    LeanRV32D.Functions.vmem_read_addr,
-    ExceptT.run,
-    assumption_alignment
-  ]
-  unfold_projs
-  simp [
-    h_mstatus,
-    h_cur_privilege,
-    assumption_MPRV_not_set,
-  ]
-  obtain ⟨ is_readable, is_writable, is_misaligned_fault ⟩ := assumption_pma_attributes
-  simp [assumption_pma_regions]
-  rw [if_pos
-      (by
-        simp [assumption_pma_base]
-        repeat rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)]
-        repeat rw [Int.emod_eq_of_lt (b := 4294967296) (by omega) (by omega)]
-        simp [
-          LeanRV32D.Functions.is_aligned_vaddr,
-          Int.tmod_eq_emod
-        ] at assumption_alignment
-        omega)
-    ]
-  simp [is_misaligned_fault]
-  rw [if_neg
-     (by
-        simp [LeanRV32D.Functions.is_aligned_vaddr] at assumption_alignment
-        simp [LeanRV32D.Functions.is_aligned_paddr]
-        rw [Int.emod_eq_of_lt (b := 17179869184) (by omega) (by omega)]
-        omega)]
-  simp [is_readable, h_htif_tohost_base]
-  rw [if_neg
-      (by
-        simp; intro h_le
-        iterate 2 rw [Int.emod_eq_of_lt (by omega) (by omega)] at h_le
-        simp [Int.nonneg_def] at h_le
-        grind)]
-  repeat rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
-  repeat rw [Nat.mod_eq_of_lt (b := 4294967296) (by omega)]
-  simp [*]
-
-  lemma run_vmem_read_of_width_1
-    (offset : BitVec 32)
-    (data₀ : BitVec 8)
-    (h_reg_val : LeanRV32D.Functions.rX_bits rs s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
-    (hmem₀ : s.mem[reg_val.toNat + offset.toNat]? = some data₀)
-    -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + offset)) 1 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + offset.toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
-  :
-    let width := 1
-    let data := data₀
-    (LeanRV32D.Functions.vmem_read
-      rs
-      offset
-      width (MemoryAccessType.Load ())
-      false false false
-    ).run s = .ok (.Ok data) s
-  := by
-  subst privilege
-
-  unfold
-    LeanRV32D.Functions.vmem_read
-
-  -- From vmem_read to vmem_read_addr
-  simp [
-    EStateM.run,
-    EStateM.map,
-    h_reg_val,
-  ]
-  -- Entering vmem_read_addr
-  simp [
-    LeanRV32D.Functions.vmem_read_addr,
-    ExceptT.run,
-    assumption_alignment
-  ]
-  unfold_projs
-  simp [
-    h_mstatus,
-    h_cur_privilege,
-    assumption_MPRV_not_set,
-  ]
-  obtain ⟨ is_readable, is_writable, is_misaligned_fault ⟩ := assumption_pma_attributes
-  simp [assumption_pma_regions]
-  rw [if_pos
-      (by
-        simp [assumption_pma_base]
-        repeat rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)]
-        repeat rw [Int.emod_eq_of_lt (b := 4294967296) (by omega) (by omega)]
-        simp [
-          LeanRV32D.Functions.is_aligned_vaddr,
-          Int.tmod_eq_emod
-        ] at assumption_alignment
-        omega)
-    ]
-  simp [is_misaligned_fault]
-  rw [if_neg
-     (by
-        simp [LeanRV32D.Functions.is_aligned_vaddr] at assumption_alignment
-        simp [LeanRV32D.Functions.is_aligned_paddr])]
-  simp [is_readable, h_htif_tohost_base]
-  rw [if_neg
-      (by
-        simp; intro h_le
-        iterate 2 rw [Int.emod_eq_of_lt (by omega) (by omega)] at h_le
-        simp [Int.nonneg_def] at h_le
-        grind)]
-  repeat rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
-  repeat rw [Nat.mod_eq_of_lt (b := 4294967296) (by omega)]
-  simp [*]
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    simp [general_memory_assumptions]
+    split_ands
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_htif (by trivial)]
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_priv (by trivial)]
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_mprv.1 (by trivial)]
+    . exact h_mprv.2
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_pma_regions (by trivial)]
+    all_goals assumption
 
   lemma execute_LOADW
     (s)
     (rd : regidx)
     (data₀ data₁ data₂ data₃ : BitVec 8)
     (h_reg_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
     (hmem₁ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
     (hmem₂ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 2]? = some data₂)
     (hmem₃ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 3]? = some data₃)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + (BitVec.signExtend 32 imm))) 4 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- A1 : Alignment assumption
+    (assumption_alignment : (4 : ℤ) ∣ reg_val.toNat + (BitVec.signExtend 32 imm).toNat)
+    -- Assumption: load stays within address space
+    (assumption_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_LOAD imm rs1 rd true 4 s =
     match LeanRV32D.Functions.wX_bits rd (data₃ ++ data₂ ++ data₁ ++ data₀) s with
       | EStateM.Result.ok _ s => EStateM.Result.ok (ExecutionResult.Retire_Success ()) s
       | EStateM.Result.error e s => EStateM.Result.error e s
   := by
-    have := run_vmem_read_of_width_4
-      (BitVec.signExtend 32 imm)
-      data₀ data₁ data₂ data₃
-      h_reg_val
-      h_mstatus
-      h_cur_privilege
-      h_htif_tohost_base
-      hmem₀ hmem₁ hmem₂ hmem₃
-      assumption_alignment
-      assumption_privilege
-      assumption_MPRV_not_set
-      assumption_pma_regions
-      assumption_pma_base
-      assumption_pma_size
-      assumption_pma_fit
-      assumption_pma_attributes
-    simp [EStateM.run] at this
-    simp [LeanRV32D.Functions.execute_LOAD, this]
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have := arithmetic_helper assumption_fit
+
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [*]
     aesop
 
   lemma execute_LOADH
@@ -1002,53 +758,27 @@ section Memory
     (rd : regidx)
     (data₀ data₁ : BitVec 8)
     (h_reg_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
     (hmem₁ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + (BitVec.signExtend 32 imm))) 2 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- A1 : Alignment assumption
+    (assumption_alignment : (2 : ℤ) ∣ reg_val.toNat + (BitVec.signExtend 32 imm).toNat)
+    -- Assumption: load stays within address space
+    (assumption_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_LOAD imm rs1 rd false 2 s =
     match LeanRV32D.Functions.wX_bits rd (BitVec.signExtend 32 (data₁ ++ data₀)) s with
       | EStateM.Result.ok _ s => EStateM.Result.ok (ExecutionResult.Retire_Success ()) s
       | EStateM.Result.error e s => EStateM.Result.error e s
   := by
-    have := run_vmem_read_of_width_2
-      (BitVec.signExtend 32 imm)
-      data₀ data₁
-      h_reg_val
-      h_mstatus
-      h_cur_privilege
-      h_htif_tohost_base
-      hmem₀ hmem₁
-      assumption_alignment
-      assumption_privilege
-      assumption_MPRV_not_set
-      assumption_pma_regions
-      assumption_pma_base
-      assumption_pma_size
-      assumption_pma_fit
-      assumption_pma_attributes
-    simp [EStateM.run] at this
-    simp [LeanRV32D.Functions.execute_LOAD, this]
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have := arithmetic_helper assumption_fit
+
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [*]
     aesop
 
   lemma execute_LOADHU
@@ -1056,53 +786,27 @@ section Memory
     (rd : regidx)
     (data₀ data₁ : BitVec 8)
     (h_reg_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
     (hmem₁ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1]? = some data₁)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + (BitVec.signExtend 32 imm))) 2 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- A1 : Alignment assumption
+    (assumption_alignment : (2 : ℤ) ∣ reg_val.toNat + (BitVec.signExtend 32 imm).toNat)
+    -- Assumption: load stays within address space
+    (assumption_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_LOAD imm rs1 rd true 2 s =
     match LeanRV32D.Functions.wX_bits rd (BitVec.setWidth 32 (data₁ ++ data₀)) s with
       | EStateM.Result.ok _ s => EStateM.Result.ok (ExecutionResult.Retire_Success ()) s
       | EStateM.Result.error e s => EStateM.Result.error e s
   := by
-    have := run_vmem_read_of_width_2
-      (BitVec.signExtend 32 imm)
-      data₀ data₁
-      h_reg_val
-      h_mstatus
-      h_cur_privilege
-      h_htif_tohost_base
-      hmem₀ hmem₁
-      assumption_alignment
-      assumption_privilege
-      assumption_MPRV_not_set
-      assumption_pma_regions
-      assumption_pma_base
-      assumption_pma_size
-      assumption_pma_fit
-      assumption_pma_attributes
-    simp [EStateM.run] at this
-    simp [LeanRV32D.Functions.execute_LOAD, this]
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have := arithmetic_helper assumption_fit
+
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [*]
     aesop
 
   lemma execute_LOADB
@@ -1110,52 +814,25 @@ section Memory
     (rd : regidx)
     (data₀ : BitVec 8)
     (h_reg_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + (BitVec.signExtend 32 imm))) 1 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- Assumption: load stays within address space
+    (assumption_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
+
   :
     LeanRV32D.Functions.execute_LOAD imm rs1 rd false 1 s =
     match LeanRV32D.Functions.wX_bits rd (BitVec.signExtend 32 data₀) s with
       | EStateM.Result.ok _ s => EStateM.Result.ok (ExecutionResult.Retire_Success ()) s
       | EStateM.Result.error e s => EStateM.Result.error e s
   := by
-    have := run_vmem_read_of_width_1
-      (BitVec.signExtend 32 imm)
-      data₀
-      h_reg_val
-      h_mstatus
-      h_cur_privilege
-      h_htif_tohost_base
-      hmem₀
-      assumption_alignment
-      assumption_privilege
-      assumption_MPRV_not_set
-      assumption_pma_regions
-      assumption_pma_base
-      assumption_pma_size
-      assumption_pma_fit
-      assumption_pma_attributes
-    simp [EStateM.run] at this
-    simp [LeanRV32D.Functions.execute_LOAD, this]
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have := arithmetic_helper assumption_fit
+
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [*]
     aesop
 
   lemma execute_LOADBU
@@ -1163,79 +840,39 @@ section Memory
     (rd : regidx)
     (data₀ : BitVec 8)
     (h_reg_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok reg_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     (hmem₀ : s.mem[reg_val.toNat + (BitVec.signExtend 32 imm).toNat]? = some data₀)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (reg_val + (BitVec.signExtend 32 imm))) 1 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- Assumption: load stays within address space
+    (assumption_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_LOAD imm rs1 rd true 1 s =
     match LeanRV32D.Functions.wX_bits rd (BitVec.setWidth 32 data₀) s with
       | EStateM.Result.ok _ s => EStateM.Result.ok (ExecutionResult.Retire_Success ()) s
       | EStateM.Result.error e s => EStateM.Result.error e s
   := by
-    have := run_vmem_read_of_width_1
-      (BitVec.signExtend 32 imm)
-      data₀
-      h_reg_val
-      h_mstatus
-      h_cur_privilege
-      h_htif_tohost_base
-      hmem₀
-      assumption_alignment
-      assumption_privilege
-      assumption_MPRV_not_set
-      assumption_pma_regions
-      assumption_pma_base
-      assumption_pma_size
-      assumption_pma_fit
-      assumption_pma_attributes
-    simp [EStateM.run] at this
-    simp [LeanRV32D.Functions.execute_LOAD, this]
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have eq_satp_mode : (SATPMode.Bare == SATPMode.Bare) = true := rfl
+    have ptr_mod_32 : (reg_val.toNat + (BitVec.signExtend 32 imm).toNat) % 4294967296 = (reg_val.toNat + (BitVec.signExtend 32 imm).toNat) := by omega
+    have ptr_mod_34 : (reg_val.toNat + (BitVec.signExtend 32 imm).toNat) % 17179869184 = (reg_val.toNat + (BitVec.signExtend 32 imm).toNat) := by omega
+    have ptr_mod_64 : (reg_val.toNat + (BitVec.signExtend 32 imm).toNat) % 18446744073709551616 = (reg_val.toNat + (BitVec.signExtend 32 imm).toNat) := by omega
+
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [*]
     aesop
 
   lemma execute_STOREW
     (s)
     (h_rs1_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok rs1_val s)
     (h_rs2_val : LeanRV32D.Functions.rX_bits rs2 s = EStateM.Result.ok rs2_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (rs1_val + (BitVec.signExtend 32 imm))) 4 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- A1 : Alignment assumption
+    (assumption_alignment : (4 : ℤ) ∣ rs1_val.toNat + (BitVec.signExtend 32 imm).toNat)
+    -- Assumption: load stays within address space
+    (assumption_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_STORE imm rs2 rs1 4 s =
     EStateM.Result.ok (ExecutionResult.Retire_Success ()) {
@@ -1251,86 +888,24 @@ section Memory
         ).insert ((rs1_val + BitVec.signExtend 32 imm).toNat + 3) (BitVec.extractLsb 31 24 rs2_val)
     }
   := by
-    subst privilege
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have := arithmetic_helper assumption_fit
 
-    simp [
-      LeanRV32D.Functions.execute_STORE,
-      h_rs2_val,
-      LeanRV32D.Functions.vmem_write,
-      h_rs1_val
-    ]
-    simp [
-      ExceptT.run,
-      LeanRV32D.Functions.vmem_write_addr,
-      assumption_alignment,
-      liftM, monadLift, MonadLift.monadLift
-    ]
-    iterate 2 (unfold_projs; simp)
-    simp [
-      h_mstatus,
-      h_cur_privilege,
-      assumption_MPRV_not_set,
-      assumption_pma_regions,
-      assumption_pma_base
-    ]
-    rw [if_pos
-        (by
-          repeat rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)]
-          repeat rw [Int.emod_eq_of_lt (b := 4294967296) (by omega) (by omega)]
-          simp [
-            LeanRV32D.Functions.is_aligned_vaddr,
-            Int.tmod_eq_emod
-          ] at assumption_alignment
-          omega)]
-    obtain ⟨ is_readable, is_writable, is_misaligned_fault ⟩ := assumption_pma_attributes
-    simp [is_misaligned_fault]
-    rw [if_neg
-        (by
-            simp [LeanRV32D.Functions.is_aligned_vaddr] at assumption_alignment
-            simp [LeanRV32D.Functions.is_aligned_paddr]
-            rw [Int.emod_eq_of_lt (b := 17179869184) (by omega) (by omega)]
-            omega)]
-    simp [is_writable, h_htif_tohost_base]
-    rw [if_neg
-        (by
-          simp; intro h_le
-          iterate 2 rw [Int.emod_eq_of_lt (by omega) (by omega)] at h_le
-          simp [Int.nonneg_def] at h_le
-          grind)]
-    unfold_projs
-    simp [
-      BitVec.extractLsb,
-      BitVec.extractLsb'
-    ]
-    have back_to_usual_mod : forall (a b : ℕ), a.mod b = a % b := by tauto
-    repeat rw [back_to_usual_mod]
-    repeat rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
+    simp [LeanRV32D.Functions.execute_STORE, LeanRV32D.Functions.vmem_write, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_write_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [BitVec.extractLsb, BitVec.extractLsb', *]
 
-lemma execute_STOREH
+  lemma execute_STOREH
     (s)
     (h_rs1_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok rs1_val s)
     (h_rs2_val : LeanRV32D.Functions.rX_bits rs2 s = EStateM.Result.ok rs2_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (rs1_val + (BitVec.signExtend 32 imm))) 2 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
-    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- A1 : Alignment assumption
+    (assumption_alignment : (2 : ℤ) ∣ rs1_val.toNat + (BitVec.signExtend 32 imm).toNat)
+    -- Assumption: load stays within address space
+    (assumption_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_STORE imm rs2 rs1 2 s =
     EStateM.Result.ok (ExecutionResult.Retire_Success ()) {
@@ -1344,90 +919,27 @@ lemma execute_STOREH
         ).insert ((rs1_val + BitVec.signExtend 32 imm).toNat + 1) (BitVec.extractLsb 15 8 rs2_val))
     }
   := by
-    subst privilege
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have eq_satp_mode : (SATPMode.Bare == SATPMode.Bare) = true := rfl
+    have ptr_mod_32 : (rs1_val.toNat + (BitVec.signExtend 32 imm).toNat) % 4294967296 = (rs1_val.toNat + (BitVec.signExtend 32 imm).toNat) := by omega
+    have ptr_mod_34 : (rs1_val.toNat + (BitVec.signExtend 32 imm).toNat) % 17179869184 = (rs1_val.toNat + (BitVec.signExtend 32 imm).toNat) := by omega
+    have ptr_mod_64 : (rs1_val.toNat + (BitVec.signExtend 32 imm).toNat) % 18446744073709551616 = (rs1_val.toNat + (BitVec.signExtend 32 imm).toNat) := by omega
 
-    simp [
-      LeanRV32D.Functions.execute_STORE,
-      h_rs2_val,
-      LeanRV32D.Functions.vmem_write,
-      h_rs1_val
-    ]
-    simp [
-      ExceptT.run,
-      LeanRV32D.Functions.vmem_write_addr,
-      assumption_alignment,
-      liftM, monadLift, MonadLift.monadLift
-    ]
-    iterate 2 (unfold_projs; simp)
-    simp [
-      h_mstatus,
-      h_cur_privilege,
-      assumption_MPRV_not_set,
-      assumption_pma_regions,
-      assumption_pma_base
-    ]
-    rw [if_pos
-        (by
-          repeat rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)]
-          repeat rw [Int.emod_eq_of_lt (b := 4294967296) (by omega) (by omega)]
-          simp [
-            LeanRV32D.Functions.is_aligned_vaddr,
-            Int.tmod_eq_emod
-          ] at assumption_alignment
-          omega)]
-    obtain ⟨ is_readable, is_writable, is_misaligned_fault ⟩ := assumption_pma_attributes
-    simp [is_misaligned_fault]
-    rw [if_neg
-        (by
-            simp [LeanRV32D.Functions.is_aligned_vaddr] at assumption_alignment
-            simp [LeanRV32D.Functions.is_aligned_paddr]
-            rw [Int.emod_eq_of_lt (b := 17179869184) (by omega) (by omega)]
-            omega)]
-    simp [is_writable, h_htif_tohost_base]
-    rw [if_neg
-        (by
-          simp; intro h_le
-          iterate 2 rw [Int.emod_eq_of_lt (by omega) (by omega)] at h_le
-          simp [Int.nonneg_def] at h_le
-          grind)]
-    unfold_projs
-    simp [
-      BitVec.extractLsb,
-      BitVec.extractLsb'
-    ]
-    have back_to_usual_mod : forall (a b : ℕ), a.mod b = a % b := by tauto
-    repeat rw [back_to_usual_mod]
-    repeat rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
-    repeat rw [Nat.mod_eq_of_lt (b := 4294967296) (by omega)]
-    congr 1
-    . congr 1; simp [← BitVec.toNat_inj]
-    . simp [← BitVec.toNat_inj]
-      omega
+    simp [LeanRV32D.Functions.execute_STORE, LeanRV32D.Functions.vmem_write, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_write_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [BitVec.extractLsb, BitVec.extractLsb', *]
+    congr 1 <;> [ congr 1; skip ] <;> simp [← BitVec.toNat_inj]
+    omega
 
-lemma execute_STOREB
+  lemma execute_STOREB
     (s)
     (h_rs1_val : LeanRV32D.Functions.rX_bits rs1 s = EStateM.Result.ok rs1_val s)
     (h_rs2_val : LeanRV32D.Functions.rX_bits rs2 s = EStateM.Result.ok rs2_val s)
-    (h_mstatus : Sail.readReg Register.mstatus s = EStateM.Result.ok mstatus s)
-    (h_cur_privilege : Sail.readReg Register.cur_privilege s = EStateM.Result.ok privilege s)
-    (h_htif_tohost_base : Sail.readReg Register.htif_tohost_base s = EStateM.Result.ok .none s)
     -- Assumptions
-    (assumption_alignment : LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (rs1_val + (BitVec.signExtend 32 imm))) 1 = true)
-    (assumption_privilege : privilege = Privilege.Machine)
-    (assumption_MPRV_not_set : BitVec.extractLsb 17 17 mstatus = 0)
-    -- PMA assumptions
-    -- Single region
-    (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
-    -- Starting from zero
-    (assumption_pma_base : pmaRegion.base = 0)
-    -- and not smaller than the OpenVM address space size
-    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
-    -- and the pointer is in the OpenVM address space
-    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)    -- All addresses are readable, writable, and misaligned accesses throw
-    (assumption_pma_attributes :
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    (assumptions : general_memory_assumptions s mstatus pmaRegion)
+    -- Assumption: load stays within address space
+    (assumption_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
   :
     LeanRV32D.Functions.execute_STORE imm rs2 rs1 1 s =
     EStateM.Result.ok (ExecutionResult.Retire_Success ()) {
@@ -1440,81 +952,14 @@ lemma execute_STOREB
         s.mem.insert (rs1_val + BitVec.signExtend 32 imm).toNat (BitVec.extractLsb 7 0 rs2_val)
     }
   := by
-    subst privilege
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
+    have := arithmetic_helper assumption_fit
 
-    simp [
-      LeanRV32D.Functions.execute_STORE,
-      h_rs2_val,
-      LeanRV32D.Functions.vmem_write,
-      h_rs1_val
-    ]
-    simp [
-      ExceptT.run,
-      LeanRV32D.Functions.vmem_write_addr,
-      assumption_alignment,
-      liftM, monadLift, MonadLift.monadLift
-    ]
-    iterate 2 (unfold_projs; simp)
-    simp [
-      h_mstatus,
-      h_cur_privilege,
-      assumption_MPRV_not_set,
-      assumption_pma_regions,
-      assumption_pma_base
-    ]
-    rw [if_pos
-        (by
-          repeat rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)]
-          repeat rw [Int.emod_eq_of_lt (b := 4294967296) (by omega) (by omega)]
-          simp [
-            LeanRV32D.Functions.is_aligned_vaddr,
-            Int.tmod_eq_emod
-          ] at assumption_alignment
-          omega)]
-    obtain ⟨ is_readable, is_writable, is_misaligned_fault ⟩ := assumption_pma_attributes
-    simp [is_misaligned_fault]
-    rw [if_neg
-        (by
-            simp [LeanRV32D.Functions.is_aligned_vaddr] at assumption_alignment
-            simp [LeanRV32D.Functions.is_aligned_paddr])]
-    simp [is_writable, h_htif_tohost_base]
-    rw [if_neg
-        (by
-          simp; intro h_le
-          iterate 2 rw [Int.emod_eq_of_lt (by omega) (by omega)] at h_le
-          simp [Int.nonneg_def] at h_le
-          grind)]
-    unfold_projs
-    simp [
-      BitVec.extractLsb,
-      BitVec.extractLsb'
-    ]
-    have back_to_usual_mod : forall (a b : ℕ), a.mod b = a % b := by tauto
-    repeat rw [back_to_usual_mod]
-    repeat rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
-    repeat rw [Nat.mod_eq_of_lt (b := 4294967296) (by omega)]
-    congr 1
-    simp [← BitVec.toNat_inj]
-
-  def general_memory_assumptions
-    (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
-  : Prop :=
-    -- Assumption A2: no host-target interface
-    Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state ∧
-    -- Assumption A3: machine privilege
-    Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state ∧
-    -- Assumption A3: MPRV bit of the mstatus register not set
-    (∃ mstatus, Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state ∧ BitVec.extractLsb 17 17 mstatus = 0#1) ∧
-    (∃ pmaRegion,
-      -- A4.1 : Single PMA region
-      Sail.readReg Register.pma_regions state = EStateM.Result.ok [ pmaRegion ] state ∧
-      -- A4.2 : with base 0 and at least 2^29 bytes in size
-      pmaRegion.base = 0 ∧
-      OpenVM_address_space_size ≤ pmaRegion.size.toNat ∧
-      -- A4.3 : with all addresses readable and writable, and misaligned accesses treated as errors
-      pmaRegion.attributes.readable ∧
-      pmaRegion.attributes.writable ∧
-      pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)
+    simp [LeanRV32D.Functions.execute_STORE, LeanRV32D.Functions.vmem_write, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_write_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]; simp [BitVec.extractLsb, BitVec.extractLsb', *]
+    congr 1; simp [← BitVec.toNat_inj]
 
 end Memory
 

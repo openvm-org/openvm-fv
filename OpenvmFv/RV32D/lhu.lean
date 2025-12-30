@@ -54,12 +54,12 @@ namespace PureSpec
     --        a static guarantee that all addresses on the memory bus must be less than 2 ^ 29
     i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
     -- Assumption A1 : Memory address alignment
-    LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 2 = true
+    (2 : ℤ) ∣ i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat
 
   set_option maxHeartbeats 0 in
   lemma execute_LOADHU_pure_equiv
     (input : LhuInput)
-    (h_assumptions : general_memory_assumptions state)
+    (h_assumptions : general_memory_assumptions state mstatus pmaRegion)
     (h_lhu_assumptions : lhu_state_assumptions input state)
   :
     (
@@ -82,18 +82,7 @@ namespace PureSpec
       pure (ExecutionResult.Retire_Success ())
     ) state
   := by
-    obtain ⟨
-      h_htif_tohost_base,
-      h_cur_privilege,
-      ⟨ mstatus, ⟨ h_mstatus, h_plat_mstatus_val⟩ ⟩,
-      pmaRegion,
-      h_pma_regions,
-      h_pma_region_base_val,
-      h_pma_region_size_ub,
-      h_pma_region_size_readable,
-      h_pma_region_size_writable,
-      h_pma_region_size_misaligned
-    ⟩ := h_assumptions
+    have next_gma := gma_invariant_under_pc_increment h_assumptions (val := input.PC + 4#32)
     obtain ⟨
       h_pc,
       h_r1_val,
@@ -106,16 +95,12 @@ namespace PureSpec
     simp [
       Sail.readReg,
       PreSail.readReg,
-      h_pc,
       writeReg_state_success,
-      LeanRV32D.Functions.execute
+      LeanRV32D.Functions.execute,
+      *
     ]
 
     replace h_r1_val := rX_bits_write_other_reg_state (r := input.r1) (val := input.PC + 4#32) h_r1_val reg_of_fin_neq_nextPC
-    replace h_mstatus := readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := input.PC + 4#32) h_mstatus (by trivial)
-    replace h_cur_privilege := readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := input.PC + 4#32) h_cur_privilege (by trivial)
-    replace h_pma_regions := readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := input.PC + 4#32) h_pma_regions (by trivial)
-    replace h_htif_tohost_base := readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := input.PC + 4#32) h_htif_tohost_base (by trivial)
 
     have h_execute_load := execute_LOADHU
       (write_reg_state state Register.nextPC (input.PC + 4#32))
@@ -123,19 +108,11 @@ namespace PureSpec
       input.data0
       input.data1
       h_r1_val
-      h_mstatus
-      h_cur_privilege
-      h_htif_tohost_base
       h_mem_0
       h_mem_1
+      next_gma
       h_aligned
-      (by simp)
-      h_plat_mstatus_val
-      h_pma_regions
-      h_pma_region_base_val
-      h_pma_region_size_ub
-      (by grind)
-      (by grind)
+      h_does_fit
 
     simp [
       h_execute_load,
