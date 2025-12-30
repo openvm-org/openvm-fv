@@ -7,7 +7,6 @@ import Mathlib
   bind
   LeanRV32D.Functions.translationMode
   LeanRV32D.Functions.set_next_pc
-
 -/
 
 attribute [simp]
@@ -1532,7 +1531,6 @@ section ControlFlow
             if (BitVec.ofBool target[1] == 1#1)
             then EStateM.Result.ok (ExecutionResult.Memory_Exception ((virtaddr.Virtaddr target), (ExceptionType.E_Fetch_Addr_Align ()))) state
             else EStateM.Result.ok (ExecutionResult.Retire_Success ()) (write_reg_state state Register.nextPC target)
-
   := by
     simp [
       LeanRV32D.Functions.jump_to,
