@@ -1499,20 +1499,19 @@ lemma execute_STOREB
   def general_memory_assumptions
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
   : Prop :=
-    -- Host-target interface disabled
+    -- Assumption A2: no host-target interface
     Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state ∧
-    -- Current privilege is Machine
+    -- Assumption A3: machine privilege
     Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state ∧
-    -- MPRV bit is not set
+    -- Assumption A3: MPRV bit of the mstatus register not set
     (∃ mstatus, Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state ∧ BitVec.extractLsb 17 17 mstatus = 0#1) ∧
-    -- Single PMA region
     (∃ pmaRegion,
+      -- A4.1 : Single PMA region
       Sail.readReg Register.pma_regions state = EStateM.Result.ok [ pmaRegion ] state ∧
-      -- Starting from zero
+      -- A4.2 : with base 0 and at least 2^29 bytes in size
       pmaRegion.base = 0 ∧
-      -- and at least as large as the OpenVM address space
       OpenVM_address_space_size ≤ pmaRegion.size.toNat ∧
-      -- and all addresses are readable, writable, and misaligned accesses throw
+      -- A4.3 : with all addresses readable and writable, and misaligned accesses treated as errors
       pmaRegion.attributes.readable ∧
       pmaRegion.attributes.writable ∧
       pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault)

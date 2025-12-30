@@ -53,8 +53,11 @@ namespace PureSpec
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 1]? = .some i.data1 ∧
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 2]? = .some i.data2 ∧
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat + 3]? = .some i.data3 ∧
-    -- Assumptions
+    -- Assumption : Memory address is not outside address space
+    -- Note : This is an assumption for this proof, but is not an assumption in general because there is
+    --        a static guarantee that all addresses on the memory bus must be less than 2 ^ 29
     i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
+    -- Assumption A1 : Memory address alignment
     LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 4 = true
 
   set_option maxHeartbeats 0 in

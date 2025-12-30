@@ -47,8 +47,11 @@ namespace PureSpec
     state.regs.get? Register.PC = .some i.PC ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
-    -- Assumptions
+    -- Assumption : Memory address is not outside address space
+    -- Note : This is an assumption for this proof, but is not an assumption in general because there is
+    --        a static guarantee that all addresses on the memory bus must be less than 2 ^ 29
     i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
+    -- Assumption A1 : Memory address alignment
     LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 1 = true
 
   set_option maxHeartbeats 0 in
