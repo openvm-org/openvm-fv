@@ -4,8 +4,6 @@ import Mathlib
 import OpenvmFv.Fundamentals.BabyBear
 import OpenvmFv.RV32D.Auxiliaries
 
-notation "OpenVM_memory_address_space_size" => 2 ^ 29
-
 namespace Transpiler
 
   def ind (rd : regidx) : FBB :=

@@ -667,6 +667,9 @@ end SimplerFunctions
 
 section Memory
 
+  -- OpenVM address space size
+  notation "OpenVM_address_space_size" => 2 ^ 29
+
   lemma run_vmem_read_of_width_4
     (offset : BitVec 32)
     (data₀ data₁ data₂ data₃ : BitVec 8)
@@ -687,10 +690,11 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + offset.toNat + 4 ≤ pmaRegion.size.toNat)    -- All addresses are readable, writable, and misaligned accesses throw
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + offset.toNat < OpenVM_address_space_size)
+    -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
       pmaRegion.attributes.writable ∧
@@ -777,10 +781,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + offset.toNat + 2 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + offset.toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -867,10 +871,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + offset.toNat + 1 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + offset.toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -959,10 +963,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1013,10 +1017,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 2 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1067,10 +1071,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 2 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1120,10 +1124,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1173,10 +1177,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat + 1 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : reg_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1224,10 +1228,10 @@ section Memory
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat + 4 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1319,10 +1323,10 @@ lemma execute_STOREH
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat + 2 ≤ pmaRegion.size.toNat)
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)
     -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
@@ -1417,10 +1421,10 @@ lemma execute_STOREB
     (assumption_pma_regions : Sail.readReg Register.pma_regions s = EStateM.Result.ok [ pmaRegion ] s)
     -- Starting from zero
     (assumption_pma_base : pmaRegion.base = 0)
-    -- and not larger than 2^32
-    (assumption_pma_size : pmaRegion.size.toNat ≤ 4294967296)
-    -- and the memory read does not overflow
-    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat + 1 ≤ pmaRegion.size.toNat)    -- All addresses are readable, writable, and misaligned accesses throw
+    -- and not smaller than the OpenVM address space size
+    (assumption_pma_size : OpenVM_address_space_size ≤ pmaRegion.size.toNat)
+    -- and the pointer is in the OpenVM address space
+    (assumption_pma_fit : rs1_val.toNat + (BitVec.signExtend 32 imm).toNat < OpenVM_address_space_size)    -- All addresses are readable, writable, and misaligned accesses throw
     (assumption_pma_attributes :
       pmaRegion.attributes.readable ∧
       pmaRegion.attributes.writable ∧
@@ -1495,7 +1499,6 @@ lemma execute_STOREB
 
   def general_memory_assumptions
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
-    (ptr width : ℕ)
   : Prop :=
     -- Host-target interface disabled
     Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state ∧
@@ -1508,10 +1511,8 @@ lemma execute_STOREB
       Sail.readReg Register.pma_regions state = EStateM.Result.ok [ pmaRegion ] state ∧
       -- Starting from zero
       pmaRegion.base = 0 ∧
-      -- and not larger than 2^32
-      pmaRegion.size.toNat ≤ 4294967296 ∧
-      -- and the memory access does not overflow
-      ptr + width ≤ pmaRegion.size.toNat ∧
+      -- and at least as large as the OpenVM address space
+      OpenVM_address_space_size ≤ pmaRegion.size.toNat ∧
       -- and all addresses are readable, writable, and misaligned accesses throw
       pmaRegion.attributes.readable ∧
       pmaRegion.attributes.writable ∧

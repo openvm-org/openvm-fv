@@ -75,12 +75,13 @@ namespace PureSpec
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r2) state = EStateM.Result.ok i.r2_val state ∧
     -- Assumptions
+    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
     LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 4 = true
 
   set_option maxHeartbeats 0 in
   lemma execute_STOREW_pure_equiv
     (input : SwInput)
-    (h_assumptions : general_memory_assumptions state (input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat) 4)
+    (h_assumptions : general_memory_assumptions state)
     (h_sw_assumptions : sw_state_assumptions input state)
   :
     (
@@ -116,6 +117,7 @@ namespace PureSpec
       h_pc,
       h_r1_val,
       h_r2_val,
+      h_does_fit,
       h_aligned
     ⟩ := h_sw_assumptions
 

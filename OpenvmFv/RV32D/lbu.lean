@@ -48,13 +48,14 @@ namespace PureSpec
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
     -- Assumptions
+    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
     LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 1 = true
 
   set_option maxHeartbeats 0 in
   lemma execute_LOADBU_pure_equiv
     (input : LbuInput)
-    (h_assumptions : general_memory_assumptions state (input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat) 1)
-    (h_lbuassumptions : lbustate_assumptions input state)
+    (h_assumptions : general_memory_assumptions state)
+    (h_lbu_assumptions : lbustate_assumptions input state)
   :
     (
       do
@@ -84,7 +85,6 @@ namespace PureSpec
       h_pma_regions,
       h_pma_region_base_val,
       h_pma_region_size_ub,
-      h_pma_region_fit,
       h_pma_region_size_readable,
       h_pma_region_size_writable,
       h_pma_region_size_misaligned
@@ -93,8 +93,9 @@ namespace PureSpec
       h_pc,
       h_r1_val,
       h_mem_0,
+      h_does_fit,
       h_aligned
-    ⟩ := h_lbuassumptions
+    ⟩ := h_lbu_assumptions
 
     simp [
       Sail.readReg,

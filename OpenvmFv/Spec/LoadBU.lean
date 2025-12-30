@@ -938,7 +938,7 @@ namespace LoadBU
     (h_constraints : VmAirWrapper_loadstore.constraints.allHold air row h_row)
     (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
     (h_is_valid : air.core.is_valid row 0 = 1)
-  : air.adapter.mem_ptr row 0 - air.shift_amount row 0 < OpenVM_memory_address_space_size
+  : air.adapter.mem_ptr row 0 - air.shift_amount row 0 < OpenVM_address_space_size
   := by
     unfold Valid_Rv32LoadStoreAdapterAir.mem_ptr
     have hm0 := mem_ptr_limbs_0_range_of_opcode_529 air row h_bus_wellformedness h_is_valid

@@ -50,12 +50,13 @@ namespace PureSpec
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
     state.mem[(i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat) + 1]? = .some i.data1 ∧
     -- Assumptions
+    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
     LeanRV32D.Functions.is_aligned_vaddr (virtaddr.Virtaddr (i.r1_val + (BitVec.signExtend 32 i.imm))) 2 = true
 
   set_option maxHeartbeats 0 in
   lemma execute_LOADHU_pure_equiv
     (input : LhuInput)
-    (h_assumptions : general_memory_assumptions state (input.r1_val.toNat + (BitVec.signExtend 32 input.imm).toNat) 2)
+    (h_assumptions : general_memory_assumptions state)
     (h_lhu_assumptions : lhu_state_assumptions input state)
   :
     (
@@ -86,7 +87,6 @@ namespace PureSpec
       h_pma_regions,
       h_pma_region_base_val,
       h_pma_region_size_ub,
-      h_pma_region_fit,
       h_pma_region_size_readable,
       h_pma_region_size_writable,
       h_pma_region_size_misaligned
@@ -96,6 +96,7 @@ namespace PureSpec
       h_r1_val,
       h_mem_0,
       h_mem_1,
+      h_does_fit,
       h_aligned
     ⟩ := h_lhu_assumptions
 
