@@ -1,12 +1,11 @@
+import OpenvmFv.RV32D.sll
+import OpenvmFv.RV32D.sra
+import OpenvmFv.RV32D.srl
+import OpenvmFv.RV32D.slli
+import OpenvmFv.RV32D.srai
+import OpenvmFv.RV32D.srli
+
 import OpenvmFv.Spec.Shift
-
-import OpenvmFv.Spec.RTYPE.sll
-import OpenvmFv.Spec.RTYPE.sra
-import OpenvmFv.Spec.RTYPE.srl
-
-import OpenvmFv.Spec.SHIFTIOP.slli
-import OpenvmFv.Spec.SHIFTIOP.srai
-import OpenvmFv.Spec.SHIFTIOP.srli
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -510,11 +509,11 @@ namespace Equivalence.Shift
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
-    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    obtain ⟨instruction, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
-    have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.2.1
+    have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.1
     cases h_cases with
       | inl h_slli =>
         exfalso
@@ -529,7 +528,7 @@ namespace Equivalence.Shift
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [h_non_imm] at h_transpile
-          rewrite [←h_transpile.1.2] at h_transpile
+          rewrite [←h_transpile.1] at h_transpile
           simp at h_transpile
       | inr h_sll =>
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sll
@@ -543,7 +542,7 @@ namespace Equivalence.Shift
           exfalso
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
-          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          rewrite [←h_transpile.2.2.2.1, ←h_transpile.1]
           simp [Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt (by omega)]
           split_ands
@@ -706,11 +705,11 @@ namespace Equivalence.Shift
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
-    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    obtain ⟨instruction, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
-    have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.2.1
+    have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.1
     cases h_cases with
       | inl h_srli =>
         exfalso
@@ -725,7 +724,7 @@ namespace Equivalence.Shift
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [h_non_imm] at h_transpile
-          rewrite [←h_transpile.1.2] at h_transpile
+          rewrite [←h_transpile.1] at h_transpile
           simp at h_transpile
       | inr h_srl =>
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_srl
@@ -739,7 +738,7 @@ namespace Equivalence.Shift
           exfalso
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
-          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          rewrite [←h_transpile.2.2.2.1, ←h_transpile.1]
           simp [Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt (by omega)]
           split_ands
@@ -901,11 +900,11 @@ namespace Equivalence.Shift
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
-    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    obtain ⟨instruction, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
-    have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.2.1
+    have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.1
     cases h_cases with
       | inl h_srai =>
         exfalso
@@ -920,7 +919,7 @@ namespace Equivalence.Shift
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [h_non_imm] at h_transpile
-          rewrite [←h_transpile.1.2] at h_transpile
+          rewrite [←h_transpile.1] at h_transpile
           simp at h_transpile
       | inr h_sra =>
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sra
@@ -934,7 +933,7 @@ namespace Equivalence.Shift
           exfalso
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
-          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          rewrite [←h_transpile.2.2.2.1, ←h_transpile.1]
           simp [Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt (by omega)]
           split_ands
@@ -1100,11 +1099,11 @@ namespace Equivalence.Shift
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
-    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    obtain ⟨instruction, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
-    have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.2.1
+    have h_cases := Transpiler.transpiler_opcode_517 h_transpile.1 h_transpile.2.2.1
     cases h_cases with
       | inl h_slli =>
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_slli
@@ -1118,7 +1117,7 @@ namespace Equivalence.Shift
           exfalso
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
-          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          rewrite [←h_transpile.2.2.2.1, ←h_transpile.1]
           simp [Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt (by omega)]
           split_ands
@@ -1128,10 +1127,7 @@ namespace Equivalence.Shift
               convert h_contr
           . use rd
           . use shamt
-            obtain ⟨a, ⟨_, _, _, _, _, b, _, _, _⟩⟩ := h_transpile
-            rewrite [←a.2] at b
-            rewrite [←b]
-            simp
+            simp [← h_transpile.2.2.2.2.2.1, ← h_transpile.1]
       | inr h_sll =>
         exfalso
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sll
@@ -1145,7 +1141,7 @@ namespace Equivalence.Shift
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [h_imm] at h_transpile
-          rewrite [←h_transpile.1.2] at h_transpile
+          rewrite [←h_transpile.1] at h_transpile
           simp at h_transpile
 
   lemma slli_spec_of_get_instruction_fields [Field ExtF]
@@ -1299,11 +1295,11 @@ namespace Equivalence.Shift
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
-    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    obtain ⟨instruction, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
-    have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.2.1
+    have h_cases := Transpiler.transpiler_opcode_518 h_transpile.1 h_transpile.2.2.1
     cases h_cases with
       | inl h_srli =>
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srli
@@ -1317,7 +1313,7 @@ namespace Equivalence.Shift
           exfalso
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
-          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          rewrite [←h_transpile.2.2.2.1, ←h_transpile.1]
           simp [Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt (by omega)]
           split_ands
@@ -1327,10 +1323,7 @@ namespace Equivalence.Shift
               convert h_contr
           . use rd
           . use shamt
-            obtain ⟨a, ⟨_, _, _, _, _, b, _, _, _⟩⟩ := h_transpile
-            rewrite [←a.2] at b
-            rewrite [←b]
-            simp
+            simp [← h_transpile.2.2.2.2.2.1, ← h_transpile.1]
       | inr h_srl =>
         exfalso
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_srl
@@ -1344,7 +1337,7 @@ namespace Equivalence.Shift
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [h_imm] at h_transpile
-          rewrite [←h_transpile.1.2] at h_transpile
+          rewrite [←h_transpile.1] at h_transpile
           simp at h_transpile
 
   lemma srli_spec_of_get_instruction_fields [Field ExtF]
@@ -1498,11 +1491,11 @@ namespace Equivalence.Shift
       h_is_valid
     ] at h_bus_wellformedness
     simp [wrap_to_regidx, get_instruction_fields_row]
-    obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+    obtain ⟨instruction, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
-    have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.2.1
+    have h_cases := Transpiler.transpiler_opcode_519 h_transpile.1 h_transpile.2.2.1
     cases h_cases with
       | inl h_srai =>
         obtain ⟨h_rs2_as, ⟨shamt, rs1, rd, h_instruction, h_rd⟩⟩ := h_srai
@@ -1516,7 +1509,7 @@ namespace Equivalence.Shift
           exfalso
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
-          rewrite [←h_transpile.2.2.2.2.1, ←h_transpile.1.2]
+          rewrite [←h_transpile.2.2.2.1, ←h_transpile.1]
           simp [Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt (by omega)]
           split_ands
@@ -1526,10 +1519,7 @@ namespace Equivalence.Shift
               convert h_contr
           . use rd
           . use shamt
-            obtain ⟨a, ⟨_, _, _, _, _, b, _, _, _⟩⟩ := h_transpile
-            rewrite [←a.2] at b
-            rewrite [←b]
-            simp
+            simp [← h_transpile.2.2.2.2.2.1, ← h_transpile.1]
       | inr h_sra =>
         exfalso
         obtain ⟨h_rs2_as, ⟨rs2, rs1, rd, h_instruction, h_rd⟩⟩ := h_sra
@@ -1543,7 +1533,7 @@ namespace Equivalence.Shift
           simp [this] at h_transpile
         . simp [-Vector.mk_eq] at h_transpile
           rewrite [h_imm] at h_transpile
-          rewrite [←h_transpile.1.2] at h_transpile
+          rewrite [←h_transpile.1] at h_transpile
           simp at h_transpile
 
   lemma srai_spec_of_get_instruction_fields [Field ExtF]

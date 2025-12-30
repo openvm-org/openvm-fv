@@ -158,7 +158,7 @@ namespace Interaction
           wf_properties :=
             fun ⟨_, as, ptr, x0, x1, x2, x3, _⟩ =>
               as.val < 3 ∧
-              ptr.val < OpenVM_memory_address_space_size ∧
+              ptr.val < OpenVM_address_space_size ∧
               x0.val < 256 ∧ x1.val < 256 ∧
               x2.val < 256 ∧ x3.val < 256
 

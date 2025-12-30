@@ -1,9 +1,9 @@
-import OpenvmFv.Spec.BranchLessThan
+import OpenvmFv.RV32D.blt
+import OpenvmFv.RV32D.bltu
+import OpenvmFv.RV32D.bge
+import OpenvmFv.RV32D.bgeu
 
-import OpenvmFv.Spec.ControlFlow.blt
-import OpenvmFv.Spec.ControlFlow.bltu
-import OpenvmFv.Spec.ControlFlow.bge
-import OpenvmFv.Spec.ControlFlow.bgeu
+import OpenvmFv.Spec.BranchLessThan
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -33,8 +33,6 @@ namespace Equivalence.BranchLessThan
 
     prefix_sum : FBB
 
-    misa : BitVec 32
-
     range_checked_vals : Vector FBB 4
     bitwise_vals : Vector (Vector FBB 3) 2
 
@@ -46,7 +44,6 @@ namespace Equivalence.BranchLessThan
     r2_val := BabyBear.toBV32 row.b
     imm := BitVec.ofInt 13 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := row.misa
     : PureSpec.BltInput
   }
 
@@ -55,7 +52,6 @@ namespace Equivalence.BranchLessThan
     r2_val := BabyBear.toBV32 row.b
     imm := BitVec.ofInt 13 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := row.misa
     : PureSpec.BltuInput
   }
 
@@ -64,7 +60,6 @@ namespace Equivalence.BranchLessThan
     r2_val := BabyBear.toBV32 row.b
     imm := BitVec.ofInt 13 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := row.misa
     : PureSpec.BgeInput
   }
 
@@ -73,7 +68,6 @@ namespace Equivalence.BranchLessThan
     r2_val := BabyBear.toBV32 row.b
     imm := BitVec.ofInt 13 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := row.misa
     : PureSpec.BgeuInput
   }
 
@@ -196,7 +190,6 @@ namespace Equivalence.BranchLessThan
                0],
             #v[air.core.diff_val row 0 - 1, 0, 0]
         ]
-      misa := LeanRV32D.Functions.misa
       : BranchLessThan_instruction_fields
     })
 
@@ -315,8 +308,7 @@ namespace Equivalence.BranchLessThan
                 simp [Fin.mod_def] at h_next_pc_mod_4
                 omega
               simp [this]
-            . left
-              right
+            . right
               rewrite [←spec_blt]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
               rewrite [Nat.mod_eq_of_lt (by omega)]
@@ -362,7 +354,6 @@ namespace Equivalence.BranchLessThan
             apply le_of_not_gt
             convert h_lt
           . left
-            left
             apply le_of_not_gt
             convert h_lt
           . apply eq_true
@@ -397,8 +388,7 @@ namespace Equivalence.BranchLessThan
                 simp [Fin.mod_def] at h_next_pc_mod_4
                 omega
               simp [this]
-            . left
-              right
+            . right
               rewrite [←spec_bltu]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
               rewrite [Nat.mod_eq_of_lt (by omega)]
@@ -444,7 +434,6 @@ namespace Equivalence.BranchLessThan
             apply le_of_not_gt
             convert h_ltu
           . left
-            left
             apply le_of_not_gt
             convert h_ltu
           . apply eq_true
@@ -479,8 +468,7 @@ namespace Equivalence.BranchLessThan
                 simp [Fin.mod_def] at h_next_pc_mod_4
                 omega
               simp [this]
-            . left
-              right
+            . right
               rewrite [←spec_bge]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
               rewrite [Nat.mod_eq_of_lt (by omega)]
@@ -526,7 +514,6 @@ namespace Equivalence.BranchLessThan
             apply lt_of_not_ge
             convert h_ge
           . left
-            left
             apply lt_of_not_ge
             convert h_ge
           . apply eq_true
@@ -561,8 +548,7 @@ namespace Equivalence.BranchLessThan
                 simp [Fin.mod_def] at h_next_pc_mod_4
                 omega
               simp [this]
-            . left
-              right
+            . right
               rewrite [←spec_bgeu]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
               rewrite [Nat.mod_eq_of_lt (by omega)]
@@ -608,7 +594,6 @@ namespace Equivalence.BranchLessThan
             apply lt_of_not_ge
             convert h_geu
           . left
-            left
             apply lt_of_not_ge
             convert h_geu
           . apply eq_true

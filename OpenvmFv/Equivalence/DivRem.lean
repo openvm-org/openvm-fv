@@ -1,9 +1,9 @@
-import OpenvmFv.Spec.DivRem
+import OpenvmFv.RV32D.div
+import OpenvmFv.RV32D.divu
+import OpenvmFv.RV32D.rem
+import OpenvmFv.RV32D.remu
 
-import OpenvmFv.Spec.DIVREM.div
-import OpenvmFv.Spec.DIVREM.divu
-import OpenvmFv.Spec.DIVREM.rem
-import OpenvmFv.Spec.DIVREM.remu
+import OpenvmFv.Spec.DivRem
 
 namespace Equivalence.DivRem
 

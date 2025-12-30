@@ -1,7 +1,7 @@
-import OpenvmFv.Spec.BranchEqual
+import OpenvmFv.RV32D.beq
+import OpenvmFv.RV32D.bne
 
-import OpenvmFv.Spec.ControlFlow.beq
-import OpenvmFv.Spec.ControlFlow.bne
+import OpenvmFv.Spec.BranchEqual
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -29,8 +29,6 @@ namespace Equivalence.BranchEqual
     a : Vector FBB 4
     b : Vector FBB 4
 
-    misa : BitVec 32
-
     range_checked_vals : Vector FBB 4
 
   def wrap_to_regidx (val : FBB) : Fin 32 :=
@@ -41,7 +39,6 @@ namespace Equivalence.BranchEqual
     r2_val := BabyBear.toBV32 row.b
     imm := BitVec.ofInt 13 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := row.misa
     : PureSpec.BeqInput
   }
 
@@ -50,7 +47,6 @@ namespace Equivalence.BranchEqual
     r2_val := BabyBear.toBV32 row.b
     imm := BitVec.ofInt 13 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
-    misa := row.misa
     : PureSpec.BneInput
   }
 
@@ -137,7 +133,6 @@ namespace Equivalence.BranchEqual
            air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0,
            air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0,
            air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0,]
-      misa := LeanRV32D.Functions.misa
       : BranchEqual_instruction_fields
     })
 
@@ -251,8 +246,7 @@ namespace Equivalence.BranchEqual
                 simp [Fin.mod_def] at h_next_pc_mod_4
                 omega
               simp [this]
-            . left
-              right
+            . right
               rewrite [←spec_beq]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
               rewrite [Nat.mod_eq_of_lt (by omega)]
@@ -298,7 +292,6 @@ namespace Equivalence.BranchEqual
           . left
             convert h_eq
           . left
-            left
             convert h_eq
           . apply eq_true
             left
@@ -325,7 +318,6 @@ namespace Equivalence.BranchEqual
           . left
             convert h_ne
           . left
-            left
             convert h_ne
           . apply eq_true
             left
@@ -353,8 +345,7 @@ namespace Equivalence.BranchEqual
                 simp [Fin.mod_def] at h_next_pc_mod_4
                 omega
               simp [this]
-            . left
-              right
+            . right
               rewrite [←spec_bne]
               simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
               rewrite [Nat.mod_eq_of_lt (by omega)]

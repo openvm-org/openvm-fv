@@ -1,11 +1,9 @@
+import OpenvmFv.RV32D.slt
+import OpenvmFv.RV32D.sltu
+import OpenvmFv.RV32D.slti
+import OpenvmFv.RV32D.sltiu
+
 import OpenvmFv.Spec.Lt
-
-import OpenvmFv.Spec.RTYPE.slt
-import OpenvmFv.Spec.RTYPE.sltu
-
-import OpenvmFv.Spec.ITYPE.slti
-import OpenvmFv.Spec.ITYPE.sltiu
-
 
 namespace Equivalence.Lt
 

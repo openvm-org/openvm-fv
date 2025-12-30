@@ -1,6 +1,6 @@
-import OpenvmFv.Spec.JalR
+import OpenvmFv.RV32D.jalr
 
-import OpenvmFv.Spec.ControlFlow.jalr
+import OpenvmFv.Spec.JalR
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -228,7 +228,6 @@ namespace Equivalence.JalR
     rs1_val := BabyBear.toBV32 row.rs1_data
     imm := BitVec.ofNat 16 row.imm
     PC := row.pc.toNat
-    misa := LeanRV32D.Functions.misa
     : PureSpec.JalrInput
   }
 
@@ -396,12 +395,11 @@ namespace Equivalence.JalR
         simp [*] at h_if
         rw [← hb1] at h_if
         exfalso
-        apply h_if.1
+        apply h_if
         rfl
       case h_2 w rd rd_val h_if =>
         simp at h_if
         obtain ⟨ ⟨ x, eq_rd ⟩, eq_rd_val ⟩ := h_if
-        rw [if_neg (by grind)]
         simp [*, Valid_Rv32JalrCoreAir_4.rd_data]
         split_ands
         . omega

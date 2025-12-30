@@ -1,9 +1,10 @@
-import OpenvmFv.Spec.LoadStore.lw
-import OpenvmFv.Spec.LoadStore.lhu
-import OpenvmFv.Spec.LoadStore.lbu
-import OpenvmFv.Spec.LoadStore.sw
-import OpenvmFv.Spec.LoadStore.sh
-import OpenvmFv.Spec.LoadStore.sb
+import OpenvmFv.RV32D.lw
+import OpenvmFv.RV32D.lhu
+import OpenvmFv.RV32D.lbu
+import OpenvmFv.RV32D.sw
+import OpenvmFv.RV32D.sh
+import OpenvmFv.RV32D.sb
+
 import OpenvmFv.Spec.LoadW
 import OpenvmFv.Spec.LoadHU
 import OpenvmFv.Spec.LoadBU
@@ -3448,13 +3449,13 @@ set_option maxHeartbeats 0 in
             simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
             split_ifs
             . clear *-; symm
-              simp [BitVec.extend, ← BitVec.toNat_inj]
+              simp [← BitVec.toNat_inj]
               repeat rw [BitVec.toNat_append]
               simp
               rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)]
               omega
             . clear *-; symm
-              simp [BitVec.extend, ← BitVec.toNat_inj]
+              simp [← BitVec.toNat_inj]
               repeat rw [BitVec.toNat_append]
               simp
               rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)]
@@ -4206,7 +4207,7 @@ set_option maxHeartbeats 0 in
             split_ifs
             all_goals {
               symm
-              simp [BitVec.extend, ← BitVec.toNat_inj]
+              simp [← BitVec.toNat_inj]
               split_ifs <;> (try (exfalso; tauto)) <;>
               (repeat rw [BitVec.toNat_append]) <;>
               simp <;>

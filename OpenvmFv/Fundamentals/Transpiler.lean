@@ -2,33 +2,12 @@ import LeanRV32D
 import Mathlib
 
 import OpenvmFv.Fundamentals.BabyBear
-
-notation "OpenVM_memory_address_space_size" => 2 ^ 29
-
-def regidx_to_fin (r: regidx): Fin 32 :=
-  match r with
-    | regidx.Regidx r => ⟨
-        r.toNat,
-        by {
-          have : (if false = true then 4 else 5) ≤ 5 := by decide
-          convert BitVec.toNat_lt_twoPow_of_le this
-        }
-      ⟩
+import OpenvmFv.RV32D.Auxiliaries
 
 namespace Transpiler
 
   def ind (rd : regidx) : FBB :=
     ⟨4 * (regidx_to_fin rd).val, by omega⟩
-
-  lemma ind_range : ind rd < 128 := by
-    unfold ind regidx_to_fin
-    simp
-    have : rd.1.toNat < 2^5 := by
-      apply BitVec.toNat_lt_twoPow_of_le
-      simp
-    apply Fin.lt_def.mpr
-    simp
-    omega
 
   def itof (bv : BitVec w) : FBB :=
     bv.toInt

@@ -1,5 +1,6 @@
-import OpenvmFv.Spec.LoadSignExtend.lh
-import OpenvmFv.Spec.LoadSignExtend.lb
+import OpenvmFv.RV32D.lh
+import OpenvmFv.RV32D.lb
+
 import OpenvmFv.Spec.LoadH
 import OpenvmFv.Spec.LoadB
 
@@ -1162,7 +1163,6 @@ namespace Equivalence.LoadSignExtend
             simp [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification] at h_bus_wellformedness
             split_ifs
             . simp [← BitVec.toInt_inj,
-                    BitVec.extend,
                     BitVec.toInt_signExtend_of_le]
               repeat rw [BitVec.toInt_append]
               simp [Int.bmod_def]
@@ -1174,7 +1174,6 @@ namespace Equivalence.LoadSignExtend
                 simp [BitVec.msb_eq_decide] at hmsb
                 omega
             . simp [← BitVec.toInt_inj,
-                    BitVec.extend,
                     BitVec.toInt_signExtend_of_le]
               repeat rw [BitVec.toInt_append]
               simp [Int.bmod_def]
@@ -1937,7 +1936,6 @@ namespace Equivalence.LoadSignExtend
             ] at h_bus_wellformedness
             split_ifs with hif0 hif1 hif2
             . simp [← BitVec.toInt_inj,
-                    BitVec.extend,
                     BitVec.toInt_signExtend_of_le]
               simp [U32.toInt, ← U32.msb_3_negative, U32.toNat, BitVec.msb_eq_decide]
               simp [hif0]
@@ -1950,7 +1948,6 @@ namespace Equivalence.LoadSignExtend
                 rw [decide_eq_false (by omega)]
                 simp; omega
             . simp [← BitVec.toInt_inj,
-                    BitVec.extend,
                     BitVec.toInt_signExtend_of_le]
               simp [U32.toInt, ← U32.msb_3_negative, U32.toNat, BitVec.msb_eq_decide]
               simp [hif1]
@@ -1964,7 +1961,6 @@ namespace Equivalence.LoadSignExtend
                 rw [decide_eq_false (by omega)]
                 simp; omega
             . simp [← BitVec.toInt_inj,
-                    BitVec.extend,
                     BitVec.toInt_signExtend_of_le]
               simp [U32.toInt, ← U32.msb_3_negative, U32.toNat, BitVec.msb_eq_decide]
               simp [hif2] at hif0 hif1 ⊢
@@ -1977,7 +1973,6 @@ namespace Equivalence.LoadSignExtend
                 rw [decide_eq_false (by omega)]
                 simp; omega
             . simp [← BitVec.toInt_inj,
-                    BitVec.extend,
                     BitVec.toInt_signExtend_of_le]
               simp [U32.toInt, ← U32.msb_3_negative, U32.toNat, BitVec.msb_eq_decide]
               have shift_msb_is_bool := LoadB.shift_msb_is_bool air row h_opcode h_row h_constraints h_is_valid

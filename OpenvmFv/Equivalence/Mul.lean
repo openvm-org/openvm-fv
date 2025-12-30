@@ -1,6 +1,6 @@
-import OpenvmFv.Spec.Mul
+import OpenvmFv.RV32D.mul
 
-import OpenvmFv.Spec.MULH.mul
+import OpenvmFv.Spec.Mul
 
 namespace Equivalence.Mul
 
