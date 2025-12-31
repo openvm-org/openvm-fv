@@ -56,6 +56,9 @@ variable
 
 section General
 
+attribute [-simp]
+  Int.tmod_eq_emod
+
 set_option maxRecDepth 1_000_000 in
 include
   row_valid

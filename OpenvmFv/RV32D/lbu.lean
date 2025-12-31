@@ -39,7 +39,7 @@ namespace PureSpec
     : LbuOutput
   }
 
-  def lbustate_assumptions
+  def lbu_state_assumptions
     (i : LbuInput)
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
   : Prop :=
@@ -55,8 +55,8 @@ namespace PureSpec
   set_option maxHeartbeats 0 in
   lemma execute_LOADBU_pure_equiv
     (input : LbuInput)
-    (h_assumptions : general_memory_assumptions state mstatus pmaRegion)
-    (h_lbu_assumptions : lbustate_assumptions input state)
+    (h_general_assumptions : general_memory_assumptions state mstatus pmaRegion)
+    (h_opcode_assumptions : lbu_state_assumptions input state)
   :
     (
       do
@@ -78,13 +78,8 @@ namespace PureSpec
       pure (ExecutionResult.Retire_Success ())
     ) state
   := by
-    have next_gma := gma_invariant_under_pc_increment h_assumptions (val := input.PC + 4#32)
-    obtain ⟨
-      h_pc,
-      h_r1_val,
-      h_mem_0,
-      h_does_fit
-    ⟩ := h_lbu_assumptions
+    have next_gma := gma_invariant_under_pc_increment h_general_assumptions (val := input.PC + 4#32)
+    unfold lbu_state_assumptions at h_opcode_assumptions
 
     simp [
       Sail.readReg,
@@ -94,39 +89,22 @@ namespace PureSpec
       *
     ]
 
-    replace h_r1_val := rX_bits_write_other_reg_state (r := input.r1) (val := input.PC + 4#32) h_r1_val reg_of_fin_neq_nextPC
+    have h_r1_val := rX_bits_write_other_reg_state (val := input.PC + 4#32) h_opcode_assumptions.2.1 reg_of_fin_neq_nextPC
 
-    have h_execute_load := execute_LOADBU
-      (write_reg_state state Register.nextPC (input.PC + 4#32))
-      (regidx.Regidx input.rd)
-      input.data0
-      h_r1_val
-      h_mem_0
-      next_gma
-      h_does_fit
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := next_gma
+    have := arithmetic_helper (a := input.r1_val.toNat) (b := (BitVec.signExtend 32 input.imm).toNat) (by grind)
 
-    simp [
-      h_execute_load,
-      execute_LOADBU_pure
-    ]
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]
+
+    simp [write_reg_state, execute_LOADBU_pure, *]
+
     split_ifs with h_rd
-    . simp [
-        LeanRV32D.Functions.wX_bits,
-        LeanRV32D.Functions.wX,
-        h_rd,
-      ]
-    . simp
-      rewrite [
-        wX_write_xreg_non_zero_equiv _ _
-          (regidx.Regidx input.rd)
-          ⟨input.rd.toNat, range input.rd h_rd⟩
-      ]
-      . obtain s | s := write_xreg
-          ⟨input.rd.toNat, _⟩
-          (BitVec.setWidth 32 (input.data0))
-          (write_reg_state state Register.nextPC (input.PC + 4#32))
-        . simp
-        . simp
-      . simp
+    . simp [LeanRV32D.Functions.wX_bits, LeanRV32D.Functions.wX, *]
+    . let r  : Finset.Icc 1 31 := ⟨input.rd.toNat, range input.rd h_rd⟩
+      rewrite [ wX_write_xreg_non_zero_equiv _ _ _ r (by simp [r])]
+      grind
 
 end PureSpec

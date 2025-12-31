@@ -84,8 +84,8 @@ namespace PureSpec
   set_option maxHeartbeats 0 in
   lemma execute_STOREW_pure_equiv
     (input : SwInput)
-    (h_assumptions : general_memory_assumptions state mstatus pmaRegion)
-    (h_sw_assumptions : sw_state_assumptions input state)
+    (h_general_assumptions : general_memory_assumptions state mstatus pmaRegion)
+    (h_opcode_assumptions : sw_state_assumptions input state)
   :
     (
       do
@@ -104,14 +104,8 @@ namespace PureSpec
       pure (ExecutionResult.Retire_Success ())
     ) state
   := by
-    have next_gma := gma_invariant_under_pc_increment h_assumptions (val := input.PC + 4#32)
-    obtain ⟨
-      h_pc,
-      h_r1_val,
-      h_r2_val,
-      h_does_fit,
-      h_aligned
-    ⟩ := h_sw_assumptions
+    have next_gma := gma_invariant_under_pc_increment h_general_assumptions (val := input.PC + 4#32)
+    unfold sw_state_assumptions at h_opcode_assumptions
 
     simp [
       Sail.readReg,
@@ -121,22 +115,18 @@ namespace PureSpec
       *
     ]
 
-    replace h_r1_val := rX_bits_write_other_reg_state (r := input.r1) (val := input.PC + 4#32) h_r1_val reg_of_fin_neq_nextPC
-    replace h_r2_val := rX_bits_write_other_reg_state (r := input.r2) (val := input.PC + 4#32) h_r2_val reg_of_fin_neq_nextPC
+    have h_r1_val := rX_bits_write_other_reg_state (val := input.PC + 4#32) h_opcode_assumptions.2.1 reg_of_fin_neq_nextPC
+    have h_r2_val := rX_bits_write_other_reg_state (val := input.PC + 4#32) h_opcode_assumptions.2.2.1 reg_of_fin_neq_nextPC
 
-    have h_execute_store := execute_STOREW
-      (write_reg_state state Register.nextPC (input.PC + 4#32))
-      h_r1_val
-      h_r2_val
-      next_gma
-      h_aligned
-      h_does_fit
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := next_gma
+    have := arithmetic_helper (a := input.r1_val.toNat) (b := (BitVec.signExtend 32 input.imm).toNat) (by grind)
 
-    simp [
-      h_execute_store,
-      execute_STOREW_pure,
-      EStateM.set,
-      modify_memory_4
-    ]
+    simp [LeanRV32D.Functions.execute_STORE, LeanRV32D.Functions.vmem_write, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_write_addr, ExceptT.run, *]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg (by omega)]
+
+    simp [execute_STOREW_pure, EStateM.set, modify_memory_4,
+          BitVec.extractLsb, BitVec.extractLsb', *]
 
 end PureSpec
