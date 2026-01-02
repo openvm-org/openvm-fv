@@ -9,6 +9,9 @@ namespace Transpiler
   def ind (rd : regidx) : FBB :=
     ⟨4 * (regidx_to_fin rd).val, by omega⟩
 
+  def wrap_to_regidx (val : FBB) : Fin 32 :=
+    ⟨val / 4 % 32, by grind⟩
+
   def itof (bv : BitVec w) : FBB :=
     bv.toInt
 

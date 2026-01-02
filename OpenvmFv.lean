@@ -70,6 +70,7 @@ import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
 import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
+import OpenvmFv.Equivalence.Equivalence
 import OpenvmFv.Equivalence.JalLui
 import OpenvmFv.Equivalence.JalR
 import OpenvmFv.Equivalence.LoadSignExtend
@@ -110,6 +111,7 @@ import OpenvmFv.Fundamentals.Transpiler
 import OpenvmFv.Fundamentals.U32
 
 import OpenvmFv.RV32D.Auxiliaries
+import OpenvmFv.RV32D.BusEffect
 import OpenvmFv.RV32D.auipc
 import OpenvmFv.RV32D.beq
 import OpenvmFv.RV32D.bge

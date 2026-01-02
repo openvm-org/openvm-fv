@@ -70,13 +70,11 @@ namespace Equivalence.Lt
     intro field_eq
     ext <;> grind
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
 
   def SltInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.SltInput
   }
@@ -84,7 +82,7 @@ namespace Equivalence.Lt
   def SltiInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltiInput := {
     r1_val := BabyBear.toBV32 row.b
     imm := BitVec.ofNat 12 row.rs2_ptr.toNat
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.SltiInput
   }
@@ -92,7 +90,7 @@ namespace Equivalence.Lt
   def SltuInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltuInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.SltuInput
   }
@@ -100,7 +98,7 @@ namespace Equivalence.Lt
   def SltiuInput_of_Lt_instruction_fields (row : Lt_instruction_fields) : PureSpec.SltiuInput := {
     r1_val := BabyBear.toBV32 row.b
     imm := BitVec.ofNat 12 row.rs2_ptr.toNat
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.SltiuInput
   }
@@ -460,11 +458,11 @@ namespace Equivalence.Lt
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 520)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -585,7 +583,7 @@ namespace Equivalence.Lt
       simp [
         true_and,
         h_cmp_result,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_cmp_result h_rd_ind
@@ -635,11 +633,11 @@ namespace Equivalence.Lt
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 521)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -760,7 +758,7 @@ namespace Equivalence.Lt
       simp [
         true_and,
         h_cmp_result,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_cmp_result h_rd_ind
@@ -809,7 +807,7 @@ namespace Equivalence.Lt
     (h_imm : air.adapter.rs2_as row 0 = 0)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 520)
   :
-    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
     (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
     (∃ (imm: BitVec 12),
       (get_instruction_fields_row air row).rs2_ptr =
@@ -817,7 +815,7 @@ namespace Equivalence.Lt
     )
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -942,7 +940,7 @@ namespace Equivalence.Lt
       simp [
         true_and,
         h_cmp_result,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_cmp_result h_rd_ind
@@ -994,7 +992,7 @@ namespace Equivalence.Lt
     (h_imm : air.adapter.rs2_as row 0 = 0)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 521)
   :
-    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
     (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
     (∃ (imm: BitVec 12),
       (get_instruction_fields_row air row).rs2_ptr =
@@ -1002,7 +1000,7 @@ namespace Equivalence.Lt
     )
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1127,7 +1125,7 @@ namespace Equivalence.Lt
       simp [
         true_and,
         h_cmp_result,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_cmp_result h_rd_ind

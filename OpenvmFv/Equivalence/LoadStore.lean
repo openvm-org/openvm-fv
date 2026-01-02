@@ -93,8 +93,6 @@ namespace Equivalence.LoadStore
     intro field_eq
     ext <;> grind
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
 
   def LoadStore_instruction_fields.execution (row : LoadStore_instruction_fields) : List (FBB × List FBB) := [
     (-row.is_valid, [row.pc, row.timestamp]),
@@ -472,9 +470,9 @@ namespace Equivalence.LoadStore
   -/
 
   def SwInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.SwInput := {
-    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
     imm := BabyBear.toBV32 row.imm
-    r2 := BitVec.ofFin (wrap_to_regidx row.rd)
+    r2 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     r2_val := BabyBear.toBV32 row.prev_read_data
     PC := row.pc.toNat
@@ -1001,9 +999,9 @@ namespace Equivalence.LoadStore
   -/
 
   def ShInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.ShInput := {
-      r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+      r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
       imm := BabyBear.toBV32 row.imm
-      r2 := BitVec.ofFin (wrap_to_regidx row.rd)
+      r2 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
       r1_val := BabyBear.toBV32 row.rs1_val
       r2_val := BabyBear.toBV32 row.prev_read_data
       PC := row.pc.toNat
@@ -1506,9 +1504,9 @@ set_option maxHeartbeats 0 in
   -/
 
   def SbInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.SbInput := {
-      r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+      r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
       imm := BabyBear.toBV32 row.imm
-      r2 := BitVec.ofFin (wrap_to_regidx row.rd)
+      r2 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
       r1_val := BabyBear.toBV32 row.rs1_val
       r2_val := BabyBear.toBV32 row.prev_read_data
       PC := row.pc.toNat
@@ -1995,9 +1993,9 @@ set_option maxHeartbeats 0 in
   -/
 
   def LwInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.LwInput := {
-    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
     imm := BabyBear.toBV32 row.imm
-    rd := BitVec.ofFin (wrap_to_regidx row.rd)
+    rd := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
     data0 := row.prev_read_data[0]
@@ -2689,7 +2687,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
           rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
@@ -2721,7 +2719,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
@@ -2733,9 +2731,9 @@ set_option maxHeartbeats 0 in
   -/
 
   def LhuInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.LhuInput := {
-    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
     imm := BabyBear.toBV32 row.imm
-    rd := BitVec.ofFin (wrap_to_regidx row.rd)
+    rd := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
     data0 := if (row.shift = 0) then row.prev_read_data[0] else row.prev_read_data[2]
@@ -3430,7 +3428,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
           rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
@@ -3476,7 +3474,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
@@ -3488,9 +3486,9 @@ set_option maxHeartbeats 0 in
   -/
 
   def LbuInput_of_LoadStore_instruction_fields (row : LoadStore_instruction_fields) : PureSpec.LbuInput := {
-    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
     imm := BabyBear.toBV32 row.imm
-    rd := BitVec.ofFin (wrap_to_regidx row.rd)
+    rd := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
     data0 := if (row.shift = 0) then row.prev_read_data[0] else
@@ -4186,7 +4184,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
           rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
@@ -4229,7 +4227,7 @@ set_option maxHeartbeats 0 in
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide

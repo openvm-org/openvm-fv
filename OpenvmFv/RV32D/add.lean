@@ -38,11 +38,7 @@ namespace PureSpec
     (h_input_rd: add_input.rd = regidx_to_fin rd)
     (h_input_pc: state.regs.get? Register.PC = .some add_input.PC)
   :
-    (
-      do
-        Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
-        LeanRV32D.Functions.execute (instruction.RTYPE (r2, r1, rd, rop.ADD))
-    ) state =
+    execute_instruction (instruction.RTYPE (r2, r1, rd, rop.ADD)) state =
     let add_output := execute_RTYPE_add_pure add_input
     (do
       Sail.writeReg Register.nextPC add_output.nextPC

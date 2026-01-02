@@ -33,8 +33,6 @@ namespace Equivalence.JalR
     range_checked_vals : Vector FBB 8
     bitwise_vals : Vector (Vector FBB 3) 1
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
 
   def JalR_instruction_fields.execution (row : JalR_instruction_fields) : List (FBB × List FBB) := [
     (-row.is_valid, [row.pc, row.timestamp]),
@@ -224,7 +222,7 @@ namespace Equivalence.JalR
   -/
 
   def JalrInput_of_JalR_instruction_fields (row : JalR_instruction_fields) : PureSpec.JalrInput := {
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     rs1_val := BabyBear.toBV32 row.rs1_data
     imm := BitVec.ofNat 16 row.imm
     PC := row.pc.toNat
@@ -264,11 +262,11 @@ namespace Equivalence.JalR
     (h_constraints : VmAirWrapper_jalr.constraints.allHold air row row_in_range)
     (h_bus_wellformedness : VmAirWrapper_jalr.constraints.wf_propertiesToAssumePerRow air row)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
@@ -408,7 +406,7 @@ namespace Equivalence.JalR
           simp [*, Valid_Rv32JalrCoreAir_4.rd_data]
           congr
         . simp [← eq_rd]
-          simp [wrap_to_regidx, Transpiler.ind, regidx_to_fin]
+          simp [Transpiler.wrap_to_regidx, Transpiler.ind, regidx_to_fin]
           rw [mul_comm]; congr
           omega
         . congr

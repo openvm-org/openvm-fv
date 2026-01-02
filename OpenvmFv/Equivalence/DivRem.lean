@@ -72,13 +72,11 @@ namespace Equivalence.DivRem
     intro field_eq
     ext <;> grind
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
 
   def DivInput_of_DIVREM_instruction_fields (row : DIVREM_instruction_fields) : PureSpec.DivInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.DivInput
   }
@@ -86,7 +84,7 @@ namespace Equivalence.DivRem
   def DivuInput_of_DIVREM_instruction_fields (row : DIVREM_instruction_fields) : PureSpec.DivuInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.DivuInput
   }
@@ -94,7 +92,7 @@ namespace Equivalence.DivRem
   def RemInput_of_DIVREM_instruction_fields (row : DIVREM_instruction_fields) : PureSpec.RemInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.RemInput
   }
@@ -102,7 +100,7 @@ namespace Equivalence.DivRem
   def RemuInput_of_DIVREM_instruction_fields (row : DIVREM_instruction_fields) : PureSpec.RemuInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.RemuInput
   }
@@ -467,11 +465,11 @@ namespace Equivalence.DivRem
     (h_bus_wellformedness : VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 596)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     have h_bound := Transpiler.pc_bound_of_some h_transpile.1
@@ -505,11 +503,11 @@ namespace Equivalence.DivRem
     (h_bus_wellformedness : VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 597)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     have h_bound := Transpiler.pc_bound_of_some h_transpile.1
@@ -543,11 +541,11 @@ namespace Equivalence.DivRem
     (h_bus_wellformedness : VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 598)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     have h_bound := Transpiler.pc_bound_of_some h_transpile.1
@@ -581,11 +579,11 @@ namespace Equivalence.DivRem
     (h_bus_wellformedness : VmAirWrapper_divrem.constraints.wf_propertiesToAssumePerRow air row)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 599)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_alignment := Transpiler.pc_aligned_of_some h_transpile.1
     have h_bound := Transpiler.pc_bound_of_some h_transpile.1
@@ -687,7 +685,7 @@ namespace Equivalence.DivRem
         . simp at this; obtain ⟨ hq, hr ⟩ := this
           rw [hq]; congr
       . rw [h_rd_ind]
-        simp [Transpiler.ind, regidx_to_fin, wrap_to_regidx]
+        simp [Transpiler.ind, regidx_to_fin, Transpiler.wrap_to_regidx]
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
@@ -768,7 +766,7 @@ namespace Equivalence.DivRem
         . simp at this; obtain ⟨ hq, hr ⟩ := this
           rw [hq]; congr
       . rw [h_rd_ind]
-        simp [Transpiler.ind, regidx_to_fin, wrap_to_regidx]
+        simp [Transpiler.ind, regidx_to_fin, Transpiler.wrap_to_regidx]
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
@@ -849,7 +847,7 @@ namespace Equivalence.DivRem
         . simp at this; obtain ⟨ hq, hr ⟩ := this
           rw [hr]; congr
       . rw [h_rd_ind]
-        simp [Transpiler.ind, regidx_to_fin, wrap_to_regidx]
+        simp [Transpiler.ind, regidx_to_fin, Transpiler.wrap_to_regidx]
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1
@@ -930,7 +928,7 @@ namespace Equivalence.DivRem
         . simp at this; obtain ⟨ hq, hr ⟩ := this
           rw [hr]; congr
       . rw [h_rd_ind]
-        simp [Transpiler.ind, regidx_to_fin, wrap_to_regidx]
+        simp [Transpiler.ind, regidx_to_fin, Transpiler.wrap_to_regidx]
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd.1

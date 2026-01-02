@@ -67,6 +67,7 @@ namespace Interaction
         multiplicity : F
         pc : F
         timestamp : F
+      deriving BEq, DecidableEq, Inhabited
 
       @[simp, grind]
       def ExecutionBusEntry.deserialise
@@ -123,6 +124,7 @@ namespace Interaction
         x2 : F
         x3 : F
         timestamp : F
+      deriving BEq, DecidableEq, Inhabited
 
       @[simp, grind]
       def MemoryBusEntry.deserialise
@@ -183,6 +185,7 @@ namespace Interaction
         multiplicity : F
         val : F
         deg : F
+      deriving BEq, DecidableEq, Inhabited
 
       @[simp, grind]
       def RangeCheckerBusEntry.deserialise
@@ -244,6 +247,7 @@ namespace Interaction
         xe : F
         xf : F
         xg : F
+      deriving BEq, DecidableEq, Inhabited
 
       @[simp, grind]
       def ProgramBusEntry.deserialise
@@ -306,6 +310,7 @@ namespace Interaction
         b : F
         c : F
         op : F
+      deriving BEq, DecidableEq, Inhabited
 
       @[simp, grind]
       def BitwiseBusEntry.deserialise
@@ -364,6 +369,7 @@ namespace Interaction
         multiplicity : F
         x1 : F
         x2 : F
+      deriving BEq, DecidableEq, Inhabited
 
       @[simp, grind]
       def RangeTupleCheckerBusEntry.deserialise
@@ -1652,7 +1658,5 @@ namespace InteractionList
               grind
 
   end consistency
-
-
 
 end InteractionList

@@ -29,8 +29,6 @@ namespace Equivalence.JalLui
     range_checked_vals : Vector FBB 2
     bitwise_vals : Vector (Vector FBB 3) 3
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
 
   def JalLui_instruction_fields.execution (row : JalLui_instruction_fields) : List (FBB × List FBB) := [
     (-row.is_valid, [row.pc, row.timestamp]),
@@ -213,7 +211,7 @@ namespace Equivalence.JalLui
   -/
 
   def LuiInput_of_JalLui_instruction_fields (row : JalLui_instruction_fields) : PureSpec.LuiInput := {
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     imm := BitVec.ofNat 21 (row.imm.val)
     PC := row.pc.toNat
     : PureSpec.LuiInput
@@ -237,7 +235,7 @@ namespace Equivalence.JalLui
   -/
 
   def JalInput_of_JalLui_instruction_fields (row : JalLui_instruction_fields) : PureSpec.JalInput := {
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     imm := BitVec.ofInt 21 (BabyBear.toInt row.imm)
     PC := row.pc.toNat
     : PureSpec.JalInput
@@ -283,11 +281,11 @@ namespace Equivalence.JalLui
     (h_constraints : VmAirWrapper_jallui.constraints.allHold air row row_in_range)
     (h_bus_wellformedness : VmAirWrapper_jallui.constraints.wf_propertiesToAssumePerRow air row)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
@@ -395,7 +393,7 @@ namespace Equivalence.JalLui
                   VmAirWrapper_jallui_constraint_and_interaction_simplification]
         split_ands
         . assumption
-        . simp [wrap_to_regidx, Transpiler.ind, regidx_to_fin]
+        . simp [Transpiler.wrap_to_regidx, Transpiler.ind, regidx_to_fin]
           rewrite [Nat.mod_eq_of_lt]
           . simp [Nat.toNat, mul_comm]
           . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd'.1
@@ -461,7 +459,7 @@ namespace Equivalence.JalLui
         split_ands
         . rw [← jspec_pc]
           congr
-        . simp [wrap_to_regidx, Transpiler.ind, regidx_to_fin]
+        . simp [Transpiler.wrap_to_regidx, Transpiler.ind, regidx_to_fin]
           rw [mul_comm]; congr
           apply Nat.mod_eq_of_lt
           omega

@@ -28,11 +28,8 @@ namespace Equivalence.Auipc
     range_checked_vals : Vector FBB 2
     bitwise_vals : Vector (Vector FBB 3) 5
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
-
   def AuipcInput_of_Auipc_instruction_fields (row : Auipc_instruction_fields) : PureSpec.AuipcInput := {
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     imm := BitVec.ofNat 20 (row.imm.val >>> 4)
     PC := row.pc.toNat
     : PureSpec.AuipcInput
@@ -173,11 +170,11 @@ namespace Equivalence.Auipc
     (h_is_valid : air.core.is_valid row 0 = 1)
     (h_bus_wellformedness : VmAirWrapper_auipc.constraints.wf_propertiesToAssumePerRow air row)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     obtain ⟨ imm, rd, h_instruction, h_rd ⟩ := Transpiler.transpiler_opcode_576 h_transpile.1 h_transpile.2.2.2.1
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -279,7 +276,7 @@ namespace Equivalence.Auipc
                 VmAirWrapper_auipc_constraint_and_interaction_simplification]
       split_ands
       . assumption
-      . simp [wrap_to_regidx, Transpiler.ind, regidx_to_fin]
+      . simp [Transpiler.wrap_to_regidx, Transpiler.ind, regidx_to_fin]
         rewrite [Nat.mod_eq_of_lt]
         . simp [Nat.toNat, mul_comm]
         . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd'.1

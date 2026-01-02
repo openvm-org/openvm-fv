@@ -31,7 +31,7 @@ namespace Equivalence.BranchEqual
 
     range_checked_vals : Vector FBB 4
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
+  def Transpiler.wrap_to_regidx (val : FBB) : Fin 32 :=
     ⟨val % 32, by grind⟩
 
   def BeqInput_of_BranchEqual_instruction_fields (row : BranchEqual_instruction_fields) : PureSpec.BeqInput := {

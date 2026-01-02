@@ -85,8 +85,6 @@ namespace Equivalence.LoadSignExtend
     intro field_eq
     ext <;> grind
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
 
   def LoadSignExtend_instruction_fields.execution (row : LoadSignExtend_instruction_fields) : List (FBB × List FBB) := [
     (-row.is_valid, [row.pc, row.timestamp]),
@@ -445,9 +443,9 @@ namespace Equivalence.LoadSignExtend
   -/
 
   def LhInput_of_LoadSignExtend_instruction_fields (row : LoadSignExtend_instruction_fields) : PureSpec.LhInput := {
-    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
     imm := BabyBear.toBV32 row.imm
-    rd := BitVec.ofFin (wrap_to_regidx row.rd)
+    rd := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
     data0 := if (row.shift = 0) then row.prev_read_data[0] else row.prev_read_data[2]
@@ -1148,7 +1146,7 @@ namespace Equivalence.LoadSignExtend
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
           rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
@@ -1200,7 +1198,7 @@ namespace Equivalence.LoadSignExtend
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide
@@ -1212,9 +1210,9 @@ namespace Equivalence.LoadSignExtend
   -/
 
   def LbInput_of_LoadSignExtend_instruction_fields (row : LoadSignExtend_instruction_fields) : PureSpec.LbInput := {
-    r1 := BitVec.ofFin (wrap_to_regidx row.rs1)
+    r1 := BitVec.ofFin (Transpiler.wrap_to_regidx row.rs1)
     imm := BabyBear.toBV32 row.imm
-    rd := BitVec.ofFin (wrap_to_regidx row.rd)
+    rd := BitVec.ofFin (Transpiler.wrap_to_regidx row.rd)
     r1_val := BabyBear.toBV32 row.rs1_val
     PC := row.pc.toNat
     data0 := if (row.shift = 0) then row.prev_read_data[0] else
@@ -1918,7 +1916,7 @@ namespace Equivalence.LoadSignExtend
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [dite_cond_eq_false]
         . simp
           rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
@@ -2003,7 +2001,7 @@ namespace Equivalence.LoadSignExtend
         rewrite [if_pos (by constructor <;> assumption)] at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         rewrite [←h_instruction.2.2.2.1, ←h_instruction.1]
-        simp [Transpiler.ind, wrap_to_regidx, regidx_to_fin]
+        simp [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
         rewrite [←h_instruction.2.2.2.2.2.2.2.2.1, ←h_instruction.1]
         simp
         decide

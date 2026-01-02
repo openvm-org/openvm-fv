@@ -1,6 +1,27 @@
 import LeanRV32D
 import Mathlib
 
+namespace ExtDHashMap
+
+  lemma insert_eq_self [BEq K] [LawfulBEq K] [Hashable K]
+    (m : Std.ExtDHashMap K V)
+    (h : m.get? k = .some v)
+  :
+    m.insert k v = m
+  := by
+    grind
+
+  lemma insert_comm [BEq K] [LawfulBEq K] [Hashable K]
+    (m : Std.ExtDHashMap K V)
+    (h_neq : ¬ K₁ = K₂)
+  :
+    (m.insert K₁ V₁).insert K₂ V₂ = (m.insert K₂ V₂).insert K₁ V₁
+  := by
+    grind
+
+
+end ExtDHashMap
+
 /-
   No need to simplify the following:
 
@@ -274,19 +295,24 @@ section RegisterManipulation
       | 30 => Register.x30
       | _ => Register.x31
 
-  lemma register_type_equiv (r : Fin 32) :
+  @[simp]
+  lemma register_type_reg_of_fin_equiv (r : Fin 32) :
     RegisterType (reg_of_fin r) = BitVec 32
   := by
     fin_cases r <;>
     simp [reg_of_fin, RegisterType]
 
+  @[simp]
+  lemma register_type_pc_equiv :
+    RegisterType Register.PC = BitVec 32
+  := by
+    simp [RegisterType]
+
   /-- Register read in terms of Fin 32 -/
   def read_xreg (reg : Fin 32) : SailM (BitVec 32) :=
     match reg.1 with
       | 0 => pure (0#32)
-      | _ =>
-        let result := Sail.readReg (reg_of_fin reg)
-        cast (by rw [register_type_equiv]) result
+      | _ => (register_type_reg_of_fin_equiv reg) ▸ (Sail.readReg (reg_of_fin reg))
 
   set_option maxHeartbeats 0 in
   /-- Equivalence of register reading when in Fin 32 -/
@@ -373,7 +399,7 @@ section RegisterManipulation
     match reg.1 with
       | _ =>
         let result := Sail.writeReg (reg_of_fin ⟨ reg, by grind ⟩ )
-        (result (cast (by rw [register_type_equiv]) val))
+        (result (cast (by rw [register_type_reg_of_fin_equiv]) val))
 
   lemma wX_write_xreg_zero_equiv :
     LeanRV32D.Functions.wX_bits (regidx.Regidx 0) data state =
@@ -507,7 +533,7 @@ section RegisterManipulation
       read_val
       (write_reg_state state register write_val)
   := by
-    have h_reg : (¬ r1 = 0) → state.regs.get? (reg_of_fin r1) = .some (cast (by rw [register_type_equiv]) read_val)
+    have h_reg : (¬ r1 = 0) → state.regs.get? (reg_of_fin r1) = .some (cast (by rw [register_type_reg_of_fin_equiv]) read_val)
     := by
       clear h_neq; intro h_neq
       simp [read_xreg, PreSail.readReg] at *
@@ -608,6 +634,23 @@ section RegisterManipulation
     . simp [h] at h_reg
     . simp [h] at ⊢ h_reg
       exact h_reg
+
+  lemma insert_reg_eq_self
+    {state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource}
+    {r : Fin 32}
+    (h_r_not_zero : ¬ r.val = 0)
+    (h_read_xreg : (read_xreg r state = EStateM.Result.ok val state))
+  :
+    state.regs.insert (reg_of_fin r) ((register_type_reg_of_fin_equiv r) ▸ val) = state.regs
+  := by
+    rw [ExtDHashMap.insert_eq_self]
+    suffices h_some : ((register_type_reg_of_fin_equiv r) ▸ (state.regs.get? (reg_of_fin r))) = .some val
+    . generalize_proofs pfl pft at h_some
+      rw [← eq_rec_inj (h := pft)]
+      grind
+    . simp [read_xreg, Sail.readReg, PreSail.readReg] at h_read_xreg
+      cases h : state.regs.get? (reg_of_fin r) <;>
+        fin_cases r <;> simp_all
 
 end RegisterManipulation
 
@@ -751,3 +794,17 @@ section ControlFlow
     . grind
 
 end ControlFlow
+
+section Spec
+
+  @[simp]
+  noncomputable def execute_instruction
+    (instr : instruction)
+    (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
+  :=
+    (do
+      Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
+      LeanRV32D.Functions.execute instr
+    ) state
+
+end Spec

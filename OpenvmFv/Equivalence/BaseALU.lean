@@ -9,6 +9,7 @@ import OpenvmFv.RV32D.ori
 import OpenvmFv.RV32D.xori
 
 import OpenvmFv.Spec.BaseALU
+import OpenvmFv.RV32D.BusEffect
 
 namespace Equivalence.BaseALU
 
@@ -72,13 +73,10 @@ namespace Equivalence.BaseALU
     intro field_eq
     ext <;> grind
 
-  def wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val / 4 % 32, by grind⟩
-
   def AddInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AddInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.AddInput
   }
@@ -86,7 +84,7 @@ namespace Equivalence.BaseALU
   def AddiInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AddiInput := {
     r1_val := BabyBear.toBV32 row.b
     imm := BitVec.ofNat 12 row.rs2_ptr.toNat
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.AddiInput
   }
@@ -94,7 +92,7 @@ namespace Equivalence.BaseALU
   def SubInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.SubInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.SubInput
   }
@@ -102,7 +100,7 @@ namespace Equivalence.BaseALU
   def XorInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.XorInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.XorInput
   }
@@ -110,7 +108,7 @@ namespace Equivalence.BaseALU
   def XoriInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.XoriInput := {
     r1_val := BabyBear.toBV32 row.b
     imm := BitVec.ofNat 12 row.rs2_ptr.toNat
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.XoriInput
   }
@@ -118,7 +116,7 @@ namespace Equivalence.BaseALU
   def OrInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.OrInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.OrInput
   }
@@ -126,7 +124,7 @@ namespace Equivalence.BaseALU
   def OriInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.OriInput := {
     r1_val := BabyBear.toBV32 row.b
     imm := BitVec.ofNat 12 row.rs2_ptr.toNat
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.OriInput
   }
@@ -134,7 +132,7 @@ namespace Equivalence.BaseALU
   def AndInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AndInput := {
     r1_val := BabyBear.toBV32 row.b
     r2_val := BabyBear.toBV32 row.c
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.AndInput
   }
@@ -142,7 +140,7 @@ namespace Equivalence.BaseALU
   def AndiInput_of_ALU_instruction_fields (row : ALU_instruction_fields) : PureSpec.AndiInput := {
     r1_val := BabyBear.toBV32 row.b
     imm := BitVec.ofNat 12 row.rs2_ptr.toNat
-    rd := wrap_to_regidx row.rd_ptr
+    rd := Transpiler.wrap_to_regidx row.rd_ptr
     PC := row.pc.toNat
     : PureSpec.AndiInput
   }
@@ -598,11 +596,11 @@ namespace Equivalence.BaseALU
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 512)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -723,7 +721,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -759,11 +757,11 @@ namespace Equivalence.BaseALU
     (h_bus_wellformedness : VmAirWrapper_alu.constraints.wf_propertiesToAssumePerRow air row)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 513)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -866,7 +864,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -903,11 +901,11 @@ namespace Equivalence.BaseALU
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 514)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1028,7 +1026,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -1065,11 +1063,11 @@ namespace Equivalence.BaseALU
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 515)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1190,7 +1188,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -1227,11 +1225,11 @@ namespace Equivalence.BaseALU
     (h_non_imm : air.adapter.rs2_as row 0 = 1)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 516)
   :
-    ¬wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
+    ¬Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0 ∧
     ∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1352,7 +1350,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -1389,7 +1387,7 @@ namespace Equivalence.BaseALU
     (h_imm : air.adapter.rs2_as row 0 = 0)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 512)
   :
-    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
     (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
     (∃ (imm: BitVec 12),
       (get_instruction_fields_row air row).rs2_ptr =
@@ -1397,7 +1395,7 @@ namespace Equivalence.BaseALU
     )
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1522,7 +1520,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -1582,7 +1580,7 @@ namespace Equivalence.BaseALU
     (h_imm : air.adapter.rs2_as row 0 = 0)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 514)
   :
-    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
     (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
     (∃ (imm: BitVec 12),
       (get_instruction_fields_row air row).rs2_ptr =
@@ -1590,7 +1588,7 @@ namespace Equivalence.BaseALU
     )
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1715,7 +1713,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -1753,7 +1751,7 @@ namespace Equivalence.BaseALU
     (h_imm : air.adapter.rs2_as row 0 = 0)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 515)
   :
-    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
     (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
     (∃ (imm: BitVec 12),
       (get_instruction_fields_row air row).rs2_ptr =
@@ -1761,7 +1759,7 @@ namespace Equivalence.BaseALU
     )
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -1886,7 +1884,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -1924,7 +1922,7 @@ namespace Equivalence.BaseALU
     (h_imm : air.adapter.rs2_as row 0 = 0)
     (h_opcode : (air.core.ctx row 0).instruction.opcode = 516)
   :
-    ¬(wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
+    ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0) ∧
     (∃ rd, (get_instruction_fields_row air row).rd_ptr = Transpiler.ind rd) ∧
     (∃ (imm: BitVec 12),
       (get_instruction_fields_row air row).rs2_ptr =
@@ -1932,7 +1930,7 @@ namespace Equivalence.BaseALU
     )
   := by
     replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
-    simp [wrap_to_regidx, get_instruction_fields_row]
+    simp [Transpiler.wrap_to_regidx, get_instruction_fields_row]
     obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
     rewrite [h_opcode] at h_transpile
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
@@ -2057,7 +2055,7 @@ namespace Equivalence.BaseALU
       simp [
         true_and,
         h_a0, h_a1, h_a2, h_a3,
-        wrap_to_regidx,
+        Transpiler.wrap_to_regidx,
         h_rd_ind
       ]
       clear h_a0 h_a1 h_a2 h_a3 h_rd_ind
@@ -2221,5 +2219,229 @@ namespace Equivalence.BaseALU
       spec_of_get_instruction_fields air h_constraints h_bus_axioms h_bus_wellformedness
     ]
     trivial
+
+section RISC_V_equivalence
+
+  open VmAirWrapper_alu.constraints
+
+    lemma rd_neq_0 [Field ExtF]
+      (air : Valid_VmAirWrapper_alu FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : VmAirWrapper_alu.constraints.wf_propertiesToAssumePerRow air row)
+    :
+      ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0)
+    := by
+      have h_transpile := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
+      obtain ⟨instruction, mult, result, h_transpile⟩ := h_transpile
+
+      have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_alu_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        grind
+
+      have h_opcode := opcode_bounds air row h_row h_constraints h_is_valid
+      clear h_constraints
+
+      obtain h_op | h_op | h_op | h_op | h_op := h_opcode
+      . have h_op' := Transpiler.transpiler_opcode_512 h_transpile.1 (by simp [h_transpile]; assumption)
+        obtain h_op' | h_op' := h_op'
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          have := addi_register_properties air row h_is_valid h_bus_wellformedness (by omega) h_op
+          exact this.1
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+          subst instruction; simp [Transpiler.transpile_op] at h_transpile
+          have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+          rw [if_neg h_nrd'] at h_transpile
+          simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+          simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+          obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+      . have h_op' := Transpiler.transpiler_opcode_513 h_transpile.1 (by simp [h_transpile]; assumption)
+        simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+        obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+        subst instruction; simp [Transpiler.transpile_op] at h_transpile
+        have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+        rw [if_neg h_nrd'] at h_transpile
+        simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+        simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+        obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+      . have h_op' := Transpiler.transpiler_opcode_514 h_transpile.1 (by simp [h_transpile]; assumption)
+        obtain h_op' | h_op' := h_op'
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          have := xori_register_properties air row h_is_valid h_bus_wellformedness (by omega) h_op
+          exact this.1
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+          subst instruction; simp [Transpiler.transpile_op] at h_transpile
+          have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+          rw [if_neg h_nrd'] at h_transpile
+          simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+          simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+          obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+      . have h_op' := Transpiler.transpiler_opcode_515 h_transpile.1 (by simp [h_transpile]; assumption)
+        obtain h_op' | h_op' := h_op'
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          have := ori_register_properties air row h_is_valid h_bus_wellformedness (by omega) h_op
+          exact this.1
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+          subst instruction; simp [Transpiler.transpile_op] at h_transpile
+          have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+          rw [if_neg h_nrd'] at h_transpile
+          simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+          simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+          obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+      . have h_op' := Transpiler.transpiler_opcode_516 h_transpile.1 (by simp [h_transpile]; assumption)
+        obtain h_op' | h_op' := h_op'
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          have := andi_register_properties air row h_is_valid h_bus_wellformedness (by omega) h_op
+          exact this.1
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+          subst instruction; simp [Transpiler.transpile_op] at h_transpile
+          have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+          rw [if_neg h_nrd'] at h_transpile
+          simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+          simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+          obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_hypotheses [Field ExtF]
+      (air : Valid_VmAirWrapper_alu FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1 =
+      (
+        Sail.readReg Register.PC state = EStateM.Result.ok (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0)) state ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0]) state ∧
+        (air.adapter.rs2_as row 0 = 1 →
+          read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs2 row 0)) state =
+            EStateM.Result.ok (U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0]) state
+        ) ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.adapter.writes_aux.prev_data_0 row 0, air.adapter.writes_aux.prev_data_1 row 0, air.adapter.writes_aux.prev_data_2 row 0, air.adapter.writes_aux.prev_data_3 row 0]) state)
+    := by
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_alu_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        grind
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        h_nzd,
+        show ((2013265920 : FBB) = -1) by decide,
+      ]
+
+      by_cases h_rs1 : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rs1]
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] <;>
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast, and_assoc]
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;>
+            simp [h_rs2, and_assoc];
+            intro h_pc h_rs1 h_rs2
+          . rw [insert_reg_eq_self (by omega) h_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] <;>
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast, and_assoc]
+        . intro h_pc h_rs1
+          rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;>
+            simp [h_rs2, and_assoc] <;>
+            intro h_pc h_rs1 <;>
+            simp [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+          . intro h_rs2
+            rw [insert_reg_eq_self (by omega) h_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_effect [Field ExtF]
+      (air : Valid_VmAirWrapper_alu FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2 =
+        let val := U32.toBV #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0]
+        let reg_idx := Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)
+        EStateM.Result.ok (ExecutionResult.Retire_Success ())
+          { state with
+            regs := (state.regs.insert (reg_of_fin reg_idx) ((register_type_reg_of_fin_equiv reg_idx) ▸ val)
+                    ).insert Register.nextPC (BitVec.ofNat 32 ((_executionBus_row air row)[0]!.pc).val + 4#32)
+          }
+    := by
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
+      obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+      have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
+
+      have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_alu_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        grind
+
+      clear h_constraints
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        h_nzd,
+        show ((2013265920 : FBB) = -1) by decide,
+        write_xreg,
+        Sail.writeReg,
+        PreSail.writeReg,
+        cast
+      ] at h_bus ⊢
+
+      by_cases h_rs1 : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rs1] at h_bus ⊢
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] at h_bus ⊢
+        . simp [and_assoc] at h_bus ⊢
+          obtain ⟨ hmem_pc, hmem_rs1, hmem_rd ⟩ := h_bus
+          congr; simp [Fin.val_add]; grind
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;> simp [h_rs2, and_assoc] at h_bus ⊢
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            congr; simp [Fin.val_add]; grind
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            rw [insert_reg_eq_self (by omega) hmem_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+            congr; simp [Fin.val_add]; grind
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] at h_bus ⊢
+        . simp [and_assoc] at h_bus ⊢
+          obtain ⟨ hmem_pc, hmem_rs1, hmem_rd ⟩ := h_bus
+          rw [insert_reg_eq_self (by omega) hmem_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+          congr; simp [Fin.val_add]; grind
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;> simp [h_rs2, and_assoc] at h_bus ⊢
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            rw [insert_reg_eq_self (by omega) hmem_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+            congr; simp [Fin.val_add]; grind
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            rw [insert_reg_eq_self (by omega) hmem_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])] at *
+            rw [insert_reg_eq_self (by omega) hmem_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+            congr; simp [Fin.val_add]; grind
+
+  end RISC_V_equivalence
 
 end Equivalence.BaseALU
