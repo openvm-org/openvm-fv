@@ -36,9 +36,6 @@ namespace Equivalence.BranchLessThan
     range_checked_vals : Vector FBB 4
     bitwise_vals : Vector (Vector FBB 3) 2
 
-  def Transpiler.wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val % 32, by grind⟩
-
   def BltInput_of_BranchLessThan_instruction_fields (row : BranchLessThan_instruction_fields) : PureSpec.BltInput := {
     r1_val := BabyBear.toBV32 row.a
     r2_val := BabyBear.toBV32 row.b

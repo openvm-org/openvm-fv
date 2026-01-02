@@ -2220,9 +2220,9 @@ namespace Equivalence.BaseALU
     ]
     trivial
 
-section RISC_V_equivalence
+  section RISC_V_equivalence
 
-  open VmAirWrapper_alu.constraints
+    open VmAirWrapper_alu.constraints
 
     lemma rd_neq_0 [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF)

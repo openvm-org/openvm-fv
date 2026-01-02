@@ -2,6 +2,7 @@ import OpenvmFv.RV32D.beq
 import OpenvmFv.RV32D.bne
 
 import OpenvmFv.Spec.BranchEqual
+import OpenvmFv.RV32D.BusEffect
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -30,9 +31,6 @@ namespace Equivalence.BranchEqual
     b : Vector FBB 4
 
     range_checked_vals : Vector FBB 4
-
-  def Transpiler.wrap_to_regidx (val : FBB) : Fin 32 :=
-    ⟨val % 32, by grind⟩
 
   def BeqInput_of_BranchEqual_instruction_fields (row : BranchEqual_instruction_fields) : PureSpec.BeqInput := {
     r1_val := BabyBear.toBV32 row.a
@@ -374,5 +372,88 @@ namespace Equivalence.BranchEqual
                 clear *-h_next_pc_mod_4
                 grind
               simp [this]
+
+  section RISC_V_equivalence
+
+    open VmAirWrapper_branch_eq.constraints
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_hypotheses [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (_h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (_h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1 =
+      (
+        Sail.readReg Register.PC state = EStateM.Result.ok (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0)) state ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0]) state ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0]) state)
+    := by
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide,
+      ]
+
+      by_cases h_rs1 : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rs1]
+      . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0) = 0 <;> simp [h_rs2, and_assoc]
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+      . simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+        by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0) = 0 <;> simp [h_rs2, and_assoc]
+        . intro h_pc h_rs1
+          rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0])]
+        . intro h_pc h_rs1
+          rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0])]
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_effect [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2 =
+      EStateM.Result.ok
+        (ExecutionResult.Retire_Success ())
+        { state with regs := state.regs.insert Register.nextPC (BitVec.ofNat 32 ↑(air.to_pc row 0)) }
+    := by
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rs1, h_rs2 ⟩ := h_bus
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide,
+        write_xreg,
+        Sail.writeReg,
+        PreSail.writeReg,
+        cast
+      ]
+
+      by_cases h_rs1_ptr : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rs1_ptr]
+      . by_cases h_rs2_ptr : Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0) = 0 <;> simp [h_rs2_ptr]
+        rw [insert_reg_eq_self (by omega) h_rs2 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+      . by_cases h_rs2_ptr : Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0) = 0 <;> simp [h_rs2_ptr] <;>
+        rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0])]
+        rw [insert_reg_eq_self (by omega) h_rs2 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+
+  end RISC_V_equivalence
 
 end Equivalence.BranchEqual
