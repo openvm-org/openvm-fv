@@ -1,18 +1,9 @@
-import OpenvmFv.RV32D.add
-import OpenvmFv.RV32D.sub
-import OpenvmFv.RV32D.xor
-import OpenvmFv.RV32D.or
-import OpenvmFv.RV32D.and
-import OpenvmFv.RV32D.addi
-import OpenvmFv.RV32D.andi
-import OpenvmFv.RV32D.ori
-import OpenvmFv.RV32D.xori
-
-import OpenvmFv.RV32D.beq
-import OpenvmFv.RV32D.bne
-
 import OpenvmFv.Equivalence.BaseALU
 import OpenvmFv.Equivalence.BranchEqual
+import OpenvmFv.Equivalence.BranchLessThan
+
+set_option maxHeartbeats 2_000_000
+set_option maxRecDepth 20_000
 
 namespace RV32IM.Equivalence
 
@@ -22,10 +13,8 @@ namespace RV32IM.Equivalence
     open Equivalence.BaseALU
 
     attribute [local simp]
-      _executionBus_row
-      _memoryBus_row
-      executionBus_row
-      memoryBus_row
+      _programBus_row
+      programBus_row
       execute_RTYPE'
       execute_ITYPE'
       execute_RTYPE_pure
@@ -111,9 +100,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 512)
       (h_imm : air.adapter.rs2_as row 0 = 1)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let rs2_ptr := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -126,9 +115,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 512)
       (h_imm : air.adapter.rs2_as row 0 = 0)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let imm := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -141,9 +130,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 513)
       (h_imm : air.adapter.rs2_as row 0 = 1)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let rs2_ptr := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -156,9 +145,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 514)
       (h_imm : air.adapter.rs2_as row 0 = 1)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let rs2_ptr := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -171,9 +160,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 514)
       (h_imm : air.adapter.rs2_as row 0 = 0)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let imm := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -186,9 +175,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 516)
       (h_imm : air.adapter.rs2_as row 0 = 1)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let rs2_ptr := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -201,9 +190,9 @@ namespace RV32IM.Equivalence
       (h_opcode : (air.core.ctx row 0).instruction.opcode = 516)
       (h_imm : air.adapter.rs2_as row 0 = 0)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let imm := (_memoryBus_row air row)[2]!.ptr
-      let rd_ptr := (_memoryBus_row air row)[4]!.ptr
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
@@ -215,6 +204,26 @@ namespace RV32IM.Equivalence
   end BaseALU
 
   section BranchEqual
+
+    open VmAirWrapper_branch_eq.constraints
+    open Equivalence.BranchEqual
+
+    attribute [local simp]
+      _programBus_row
+      programBus_row
+      LeanRV32D.Functions.execute
+      LeanRV32D.Functions.execute_BTYPE
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_axioms : axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
 
     section ProofMacros
 
@@ -229,8 +238,8 @@ namespace RV32IM.Equivalence
         have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
         rw [this] at h_bus; clear this
         obtain ⟨ h_pc, h_rs1, h_rs2 ⟩ := h_bus
-        extract_lets rs1_ptr rs2_ptr rd_ptr r2 r1 instr
-        subst rs1_ptr rs2_ptr rd_ptr r2 r1 instr
+        extract_lets rs1_ptr rs2_ptr imm r2 r1 imm instr
+        subst rs1_ptr rs2_ptr imm r2 r1 imm instr
         -- Get the axioms
         simp [h_is_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
         obtain ⟨ ub_pc, al_pc, ub_tpc, al_tpc, rest ⟩ := h_bus_axioms; clear rest
@@ -239,10 +248,6 @@ namespace RV32IM.Equivalence
         simp [
           h_pc,
           writeReg_state_success,
-          LeanRV32D.Functions.execute,
-          LeanRV32D.Functions.execute_BTYPE,
-          _memoryBus_row,
-          memoryBus_row
         ]
         rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
         rotate_left
@@ -258,32 +263,18 @@ namespace RV32IM.Equivalence
 
     end ProofMacros
 
-    open VmAirWrapper_branch_eq.constraints
-    open Equivalence.BranchEqual
-
-    variable
-      [Field ExtF]
-      (air : Valid_VmAirWrapper_branch_eq FBB ExtF)
-      (row : ℕ)
-      (h_row : row ≤ air.last_row)
-      (h_constraints : allHold air row h_row)
-      (h_is_valid : air.core.is_valid row 0 = 1)
-      (h_bus_axioms : axiomsPerRow air row)
-      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
-      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
-
     include h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_bus
 
-    set_option maxRecDepth 2_000_000 in
     theorem equiv_BEQ
       (h_misa : state.regs.get? Register.misa = .some misa)
       (h_opcode : air.core.expected_opcode row 0 = 544)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let rs2_ptr := (_memoryBus_row air row)[2]!.ptr
+      let rs1_ptr := (_programBus_row air row)[0]!.xa
+      let rs2_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
-      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0))
+      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt imm)
       let instr : instruction := instruction.BTYPE (imm, r2, r1, bop.BEQ)
       execute_instruction instr state =
       (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
@@ -308,16 +299,16 @@ namespace RV32IM.Equivalence
       . rw [if_neg (by assumption), h_spec]
         simp [write_reg_state]
 
-    set_option maxRecDepth 2_000_000 in
     theorem equiv_BNE
       (h_misa : state.regs.get? Register.misa = .some misa)
       (h_opcode : air.core.expected_opcode row 0 = 545)
     :
-      let rs1_ptr := (_memoryBus_row air row)[0]!.ptr
-      let rs2_ptr := (_memoryBus_row air row)[2]!.ptr
+      let rs1_ptr := (_programBus_row air row)[0]!.xa
+      let rs2_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
       let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
       let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
-      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt (air.core.imm row 0))
+      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt imm)
       let instr : instruction := instruction.BTYPE (imm, r2, r1, bop.BNE)
       execute_instruction instr state =
       (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
@@ -343,5 +334,147 @@ namespace RV32IM.Equivalence
           grind
 
   end BranchEqual
+
+  section BranchLessThan
+
+    open VmAirWrapper_branch_lt.constraints
+    open Equivalence.BranchLessThan
+
+    attribute [local simp]
+      _programBus_row
+      programBus_row
+      LeanRV32D.Functions.execute
+      LeanRV32D.Functions.execute_BTYPE
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_branch_lt FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_axioms : axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+
+    section ProofMacros
+
+      set_option hygiene false
+
+      macro "proof_common" : tactic => `(tactic| (
+        have h_spec := BranchLessThan.ValidRows.spec_BLT_BLTU_BGE_BGEU_pc ExtF air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness
+        simp [h_opcode] at h_spec
+        -- Apply the bus equivalence
+        rw [chip_bus_effect air row h_row h_constraints h_is_valid h_bus_wellformedness h_bus]
+        -- Get the hypotheses
+        have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
+        rw [this] at h_bus; clear this
+        obtain ⟨ h_pc, h_rs1, h_rs2 ⟩ := h_bus
+        extract_lets rs1_ptr rs2_ptr imm r1 r2 imm instr
+        subst rs1_ptr rs2_ptr imm r1 r2 imm instr
+        -- Get the axioms
+        simp [h_is_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+        obtain ⟨ ub_pc, al_pc, ub_tpc, al_tpc, rest ⟩ := h_bus_axioms; clear rest
+        replace al_tpc : (BitVec.ofNat 32 (air.to_pc row 0)).toNat % 4 = 0
+          := by simp; clear *- al_tpc; grind
+        simp [
+          h_pc,
+          writeReg_state_success,
+        ]
+        rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+        rotate_left
+        rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) (h_rd := by simp)]
+        assumption
+        simp
+        rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+        rotate_left
+        rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0)) (h_rd := by simp)]
+        assumption
+        simp
+        split_ifs at h_spec
+        . rw [if_pos (by assumption), h_spec]
+          rw [readReg_of_write_other_reg_state h_pc (by simp)]
+          simp
+          rw [if_neg,
+              writeReg_read_diff h_misa (by simp)]
+          . simp
+            rw [if_neg]
+            . simp [write_reg_state]
+            . rw [← h_spec]; clear *- ub_tpc al_tpc
+              simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+              rw [Nat.mod_eq_of_lt (by omega)]
+              grind
+          . rw [← h_spec]; clear *- ub_tpc al_tpc
+            simp [BitVec.ofBool, BitVec.getElem_eq_testBit_toNat]
+            grind
+        . rw [if_neg (by assumption), h_spec]
+          simp [write_reg_state]
+      ))
+
+    end ProofMacros
+
+    include h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_bus
+
+    theorem equiv_BLT
+      (h_misa : state.regs.get? Register.misa = .some misa)
+      (h_opcode : air.core.expected_opcode row 0 = 549)
+    :
+      let rs1_ptr := (_programBus_row air row)[0]!.xa
+      let rs2_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt imm)
+      let instr : instruction := instruction.BTYPE (imm, r2, r1, bop.BLT)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by proof_common
+
+    theorem equiv_BLTU
+      (h_misa : state.regs.get? Register.misa = .some misa)
+      (h_opcode : air.core.expected_opcode row 0 = 550)
+    :
+      let rs1_ptr := (_programBus_row air row)[0]!.xa
+      let rs2_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt imm)
+      let instr : instruction := instruction.BTYPE (imm, r2, r1, bop.BLTU)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by proof_common
+
+    theorem equiv_BGE
+      (h_misa : state.regs.get? Register.misa = .some misa)
+      (h_opcode : air.core.expected_opcode row 0 = 551)
+    :
+      let rs1_ptr := (_programBus_row air row)[0]!.xa
+      let rs2_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt imm)
+      let instr : instruction := instruction.BTYPE (imm, r2, r1, bop.BGE)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by proof_common
+
+    theorem equiv_BGEU
+      (h_misa : state.regs.get? Register.misa = .some misa)
+      (h_opcode : air.core.expected_opcode row 0 = 552)
+    :
+      let rs1_ptr := (_programBus_row air row)[0]!.xa
+      let rs2_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let imm : BitVec 13 := BitVec.ofInt 13 (BabyBear.toInt imm)
+      let instr : instruction := instruction.BTYPE (imm, r2, r1, bop.BGEU)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by proof_common
+
+  end BranchLessThan
 
 end RV32IM.Equivalence

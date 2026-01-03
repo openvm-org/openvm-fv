@@ -114,9 +114,9 @@ namespace Transpiler
         .some (multiplicity, #v[pc, 545, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BLT) =>
         .some (multiplicity, #v[pc, 549, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
-      | .BTYPE (imm, rs2, rs1, bop.BGE) =>
-        .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BLTU) =>
+        .some (multiplicity, #v[pc, 550, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
+      | .BTYPE (imm, rs2, rs1, bop.BGE) =>
         .some (multiplicity, #v[pc, 551, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
       | .BTYPE (imm, rs2, rs1, bop.BGEU) =>
         .some (multiplicity, #v[pc, 552, ind rs1, ind rs2, itof imm, 1, 1, 0, 0])
@@ -4641,7 +4641,7 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 550)
     :
-      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BGE)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BLTU)
     := by
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
@@ -4693,7 +4693,7 @@ namespace Transpiler
         }
       . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
         cases op
-        case BGE =>
+        case BLTU =>
           use imm, rs2, rs1
         all_goals {
           exfalso
@@ -4831,7 +4831,7 @@ namespace Transpiler
       (h_transpile : transpile_op inst mult pc = .some result)
       (h_opcode: result.2[1] = 551)
     :
-      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BLTU)
+      ∃ imm rs2 rs1, inst = .BTYPE (imm, rs2, rs1, bop.BGE)
     := by
       have h_alignment := pc_aligned_of_some h_transpile
       have h_bound := pc_bound_of_some h_transpile
@@ -4883,7 +4883,7 @@ namespace Transpiler
         }
       . obtain ⟨⟨imm, rs2, rs1, op⟩, h_op_data⟩ := h_type -- BTYPE
         cases op
-        case BLTU =>
+        case BGE =>
           use imm, rs2, rs1
         all_goals {
           exfalso
