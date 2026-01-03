@@ -2230,7 +2230,7 @@ namespace Equivalence.BaseALU
       (h_row : row ≤ air.last_row)
       (h_constraints : allHold air row h_row)
       (h_is_valid : air.core.is_valid row 0 = 1)
-      (h_bus_wellformedness : VmAirWrapper_alu.constraints.wf_propertiesToAssumePerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
     :
       ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0)
     := by

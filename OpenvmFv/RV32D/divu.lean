@@ -56,7 +56,6 @@ namespace PureSpec
       readReg_succ h_input_pc,
       writeReg_state_success,
       LeanRV32D.Functions.execute,
-      execute_DIV'_eq_execute_DIV,
       execute_DIV'
     ]
 

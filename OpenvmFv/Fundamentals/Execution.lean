@@ -352,7 +352,8 @@ def execute_REM' (rs2 : regidx) (rs1 : regidx) (rd : regidx) (is_unsigned : Bool
   (pure RETIRE_SUCCESS)
 
 set_option maxHeartbeats 100000000 in
-lemma execute_DIV'_eq_execute_DIV :
+@[simp]
+lemma execute_DIV_eq_execute_DIV' :
   execute_DIV rs2 rs1 rd usgn = execute_DIV' rs2 rs1 rd usgn := by
   simp_all [execute_DIV, execute_DIV']
   refine bind_congr ?_; intro r1
@@ -380,7 +381,8 @@ lemma execute_DIV'_eq_execute_DIV :
     congr; simp [Fin.ext_iff]
     omega
 
-lemma execute_REM'_eq_execute_REM :
+@[simp]
+lemma execute_REM_eq_execute_REM' :
   execute_REM rs2 rs1 rd usgn = execute_REM' rs2 rs1 rd usgn := by
   simp_all [execute_REM, execute_REM']
   refine bind_congr ?_; intro r1
