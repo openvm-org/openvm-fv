@@ -2,6 +2,7 @@ import OpenvmFv.RV32D.jal
 import OpenvmFv.RV32D.lui
 
 import OpenvmFv.Spec.JalLui
+import OpenvmFv.RV32D.BusEffect
 
 set_option maxHeartbeats 1_000_000_000
 
@@ -391,6 +392,7 @@ namespace Equivalence.JalLui
         rw [VmAirWrapper_jallui.constraints.allHold_simplified_of_allHold] at h_constraints
         simp_all [get_instruction_fields_row,
                   VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        obtain ⟨ spec, _ ⟩ := spec
         split_ands
         . assumption
         . simp [Transpiler.wrap_to_regidx, Transpiler.ind, regidx_to_fin]
@@ -398,14 +400,6 @@ namespace Equivalence.JalLui
           . simp [Nat.toNat, mul_comm]
           . convert @BitVec.toNat_lt_twoPow_of_le _ 5 _ rd'.1
             simp
-        . simp [Valid_VmAirWrapper_jallui.to_pc]
-          have := h_bus_axioms.1.1.1
-          simp_all [← BitVec.toNat_inj, ← Rv32JalLuiCoreAir_4.is_valid_def]
-          simp [← Rv32JalLuiCoreAir_4.expected_opcode_def] at h_is_lui
-          have ⟨ h_lui, h_jal ⟩ : air.core.is_lui row 0 = 1 ∧ air.core.is_jal row 0 = 0
-            := by omega
-          simp_all
-          grind
       . intro h_is_jal
         simp [JalInput_of_JalLui_instruction_fields,
               JalOutput_matches_JalLui_instruction_fields,
@@ -463,5 +457,135 @@ namespace Equivalence.JalLui
           rw [mul_comm]; congr
           apply Nat.mod_eq_of_lt
           omega
+
+  section RISC_V_equivalence
+
+    open VmAirWrapper_jallui.constraints
+
+    lemma rd_neq_0 [Field ExtF]
+      (air : Valid_VmAirWrapper_jallui FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+    :
+      ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0)
+    := by
+      have h_transpile := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
+      obtain ⟨instr, mult, result, h_transpile⟩ := h_transpile
+      have h_opcode : air.core.expected_opcode row 0 = 560 ∨ air.core.expected_opcode row 0 = 561
+      := by
+        simp [Valid_Rv32JalLuiCoreAir_4.expected_opcode]
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h_constraints
+        omega
+
+      obtain h_op | h_op := h_opcode
+
+      . have h_op' := Transpiler.transpiler_opcode_560 h_transpile.1 (by simpa [h_transpile])
+        obtain ⟨ imm, rd, h_instr, h_nrd ⟩ := h_op'
+        subst instr; simp [Transpiler.transpile_op] at h_transpile
+        have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+        rw [if_neg h_nrd'] at h_transpile
+        simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+        simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+        obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢
+        clear *- h_nrd prd
+        simp [← BitVec.toNat_inj] at h_nrd
+        omega
+      . have h_op' := Transpiler.transpiler_opcode_561 h_transpile.1 (by simpa [h_transpile])
+        obtain ⟨ imm, rd, h_instr, h_nrd ⟩ := h_op'
+        subst instr; simp [Transpiler.transpile_op] at h_transpile
+        have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+        rw [if_neg h_nrd'] at h_transpile
+        simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+        simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+        obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢
+        clear *- h_nrd prd
+        simp [← BitVec.toNat_inj] at h_nrd
+        omega
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_hypotheses [Field ExtF]
+      (air : Valid_VmAirWrapper_jallui FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1 =
+      (
+        Sail.readReg Register.PC state = EStateM.Result.ok (BitVec.ofNat 32 ↑(air.adapter.inner.from_state.pc row 0)) state ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.inner.rd_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.adapter.inner.rd_aux_cols.prev_data_0 row 0, air.adapter.inner.rd_aux_cols.prev_data_1 row 0, air.adapter.inner.rd_aux_cols.prev_data_2 row 0, air.adapter.inner.rd_aux_cols.prev_data_3 row 0]) state)
+    := by
+      have h_nw := @JalLui.ValidRows.needs_write_eq_is_valid _ _ air row (by omega) h_constraints h_bus_wellformedness
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        h_nw,
+        h_nzd,
+        show ((2013265920 : FBB) = -1) by decide,
+      ]
+      simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_effect [Field ExtF]
+      (air : Valid_VmAirWrapper_jallui FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+    :
+      let val := U32.toBV #v[air.core.rd_data_0 row 0,
+                             air.core.rd_data_1 row 0,
+                             air.core.rd_data_2 row 0,
+                             air.core.rd_data_3 row 0]
+      let reg_idx := Transpiler.wrap_to_regidx (air.adapter.inner.rd_ptr row 0)
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2 =
+      EStateM.Result.ok
+        (ExecutionResult.Retire_Success ())
+        { state with
+          regs :=
+            (state.regs.insert (reg_of_fin reg_idx) ((register_type_reg_of_fin_equiv reg_idx) ▸ val)
+            ).insert Register.nextPC (BitVec.ofNat 32 (air.to_pc row 0)) }
+    := by
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      have h_nw := @JalLui.ValidRows.needs_write_eq_is_valid _ _ air row (by omega) h_constraints h_bus_wellformedness
+
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rd ⟩ := h_bus
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        h_nw,
+        h_nzd,
+        show ((2013265920 : FBB) = -1) by decide,
+        write_xreg,
+        Sail.writeReg,
+        PreSail.writeReg,
+        cast
+      ]
+
+  end RISC_V_equivalence
 
 end Equivalence.JalLui

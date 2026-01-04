@@ -100,6 +100,9 @@ theorem spec_lui
               (air.core.rd_data_3 row 0).val]
     =
   (BitVec.ofNat 20 ((air.core.imm row 0).val) ++ 0#12)
+  ∧
+  BitVec.ofNat 32 (air.to_pc row 0) =
+    BitVec.ofNat 32 ↑(air.adapter.inner.from_state.pc row 0) + 4#32
 := by
   simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at row_valid
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
@@ -136,11 +139,14 @@ theorem spec_lui
     omega
   rw [Nat.mod_eq_of_lt ub_imm]
   simp_all
-  trans (air.core.imm row 0 * 16).val * 256
-  . rw [← constraints.2.2.1,
-        ← Rv32JalLuiCoreAir_4.intermed_val_def]
-    grind
-  . grind
+  split_ands
+  . trans (air.core.imm row 0 * 16).val * 256
+    . rw [← constraints.2.2.1,
+          ← Rv32JalLuiCoreAir_4.intermed_val_def]
+      grind
+    . grind
+  . simp [Valid_VmAirWrapper_jallui.to_pc, *]
+    omega
 
 include
   row_valid
