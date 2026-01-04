@@ -4,6 +4,7 @@ import OpenvmFv.RV32D.slti
 import OpenvmFv.RV32D.sltiu
 
 import OpenvmFv.Spec.Lt
+import OpenvmFv.RV32D.BusEffect
 
 namespace Equivalence.Lt
 
@@ -1269,5 +1270,194 @@ namespace Equivalence.Lt
       spec_of_get_instruction_fields air h_constraints h_bus_axioms h_bus_wellformedness
     ]
     trivial
+
+  section RISC_V_equivalence
+
+    open VmAirWrapper_lt.constraints
+
+    lemma rd_neq_0 [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+    :
+      ¬(Transpiler.wrap_to_regidx (get_instruction_fields_row air row).rd_ptr = 0)
+    := by
+      have h_transpile := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
+      obtain ⟨instruction, mult, result, h_transpile⟩ := h_transpile
+
+      have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_lt_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        grind
+
+      have h_opcode := opcode_bounds air row h_row h_constraints h_is_valid
+      clear h_constraints
+
+      obtain h_op | h_op := h_opcode
+      . have h_op' := Transpiler.transpiler_opcode_520 h_transpile.1 (by simp [h_transpile]; assumption)
+        obtain h_op' | h_op' := h_op'
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          have := slti_register_properties air row h_is_valid h_bus_wellformedness (by omega) h_op
+          exact this.1
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+          subst instruction; simp [Transpiler.transpile_op] at h_transpile
+          have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+          rw [if_neg h_nrd'] at h_transpile
+          simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+          simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+          obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+      . have h_op' := Transpiler.transpiler_opcode_521 h_transpile.1 (by simp [h_transpile]; assumption)
+        obtain h_op' | h_op' := h_op'
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          have := sltiu_register_properties air row h_is_valid h_bus_wellformedness (by omega) h_op
+          exact this.1
+        . simp [h_transpile.2.2.2.2.2.2.2.2.1] at h_op'
+          obtain ⟨ h_rs2, imm, rs1, rd, h_instr, h_nrd ⟩ := h_op'
+          subst instruction; simp [Transpiler.transpile_op] at h_transpile
+          have h_nrd' : ¬ ((rd == regidx.Regidx 0#5) = true) := by obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd; interval_cases rd <;> simp at h_nrd ⊢ <;> rfl
+          rw [if_neg h_nrd'] at h_transpile
+          simp [-Vector.mk_eq, and_assoc] at h_transpile; simp [← h_transpile.2.2.2.1] at h_transpile
+          simp [Transpiler.wrap_to_regidx, get_instruction_fields_row, ← h_transpile.2.2.2.2.1, Transpiler.ind, regidx_to_fin]
+          obtain ⟨ rd, prd ⟩ := rd; simp at h_nrd prd ⊢; clear *- h_nrd prd; simp [← BitVec.toNat_inj] at h_nrd; omega
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_hypotheses [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1 =
+      (
+        Sail.readReg Register.PC state = EStateM.Result.ok (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0)) state ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0]) state ∧
+        (air.adapter.rs2_as row 0 = 1 →
+          read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs2 row 0)) state =
+            EStateM.Result.ok (U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0]) state
+        ) ∧
+        read_xreg (Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)) state =
+          EStateM.Result.ok (U32.toBV #v[air.adapter.writes_aux.prev_data_0 row 0, air.adapter.writes_aux.prev_data_1 row 0, air.adapter.writes_aux.prev_data_2 row 0, air.adapter.writes_aux.prev_data_3 row 0]) state)
+    := by
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_lt_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        grind
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        h_nzd,
+        show ((2013265920 : FBB) = -1) by decide,
+      ]
+
+      by_cases h_rs1 : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rs1]
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] <;>
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast, and_assoc]
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;>
+            simp [h_rs2, and_assoc];
+            intro h_pc h_rs1 h_rs2
+          . rw [insert_reg_eq_self (by omega) h_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] <;>
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast, and_assoc]
+        . intro h_pc h_rs1
+          rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;>
+            simp [h_rs2, and_assoc] <;>
+            intro h_pc h_rs1 <;>
+            simp [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+          . intro h_rs2
+            rw [insert_reg_eq_self (by omega) h_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_effect [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2 =
+        let val := U32.toBV #v[(air.core.cmp_result row 0).val, 0, 0, 0]
+        let reg_idx := Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)
+        EStateM.Result.ok (ExecutionResult.Retire_Success ())
+          { state with
+            regs := (state.regs.insert (reg_of_fin reg_idx) ((register_type_reg_of_fin_equiv reg_idx) ▸ val)
+                    ).insert Register.nextPC (BitVec.ofNat 32 ((_executionBus_row air row)[0]!.pc).val + 4#32)
+          }
+    := by
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      replace h_bus_wellformedness := transpile_of_bus_wellformedness air row h_is_valid h_bus_wellformedness
+      obtain ⟨instruction, mult, result, h_transpile⟩ := h_bus_wellformedness
+      have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
+
+      have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_lt_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        grind
+
+      clear h_constraints
+
+      simp [
+        bus_effect,
+        _executionBus_row,
+        _memoryBus_row,
+        executionBus_row,
+        memoryBus_row,
+        h_is_valid,
+        h_nzd,
+        show ((2013265920 : FBB) = -1) by decide,
+        write_xreg,
+        Sail.writeReg,
+        PreSail.writeReg,
+        cast
+      ] at h_bus ⊢
+
+      by_cases h_rs1 : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rs1] at h_bus ⊢
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] at h_bus ⊢
+        . simp [and_assoc] at h_bus ⊢
+          obtain ⟨ hmem_pc, hmem_rs1, hmem_rd ⟩ := h_bus
+          congr; simp [Fin.val_add]; grind
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;> simp [h_rs2, and_assoc] at h_bus ⊢
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            congr; simp [Fin.val_add]; grind
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            rw [insert_reg_eq_self (by omega) hmem_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+            congr; simp [Fin.val_add]; grind
+      . obtain h_rs2_as | h_rs2_as := h_rs2_as <;> simp [h_rs2_as] at h_bus ⊢
+        . simp [and_assoc] at h_bus ⊢
+          obtain ⟨ hmem_pc, hmem_rs1, hmem_rd ⟩ := h_bus
+          rw [insert_reg_eq_self (by omega) hmem_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+          congr; simp [Fin.val_add]; grind
+        . by_cases h_rs2 : Transpiler.wrap_to_regidx (air.adapter.rs2 row 0) = 0 <;> simp [h_rs2, and_assoc] at h_bus ⊢
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            rw [insert_reg_eq_self (by omega) hmem_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])]
+            congr; simp [Fin.val_add]; grind
+          . obtain ⟨ hmem_pc, hmem_rs1, hmem_rs2, hmem_rd ⟩ := h_bus
+            rw [insert_reg_eq_self (by omega) hmem_rs1 (val := U32.toBV #v[air.core.b_0 row 0, air.core.b_1 row 0, air.core.b_2 row 0, air.core.b_3 row 0])] at *
+            rw [insert_reg_eq_self (by omega) hmem_rs2 (val := U32.toBV #v[air.core.c_0 row 0, air.core.c_1 row 0, air.core.c_2 row 0, air.core.c_3 row 0])]
+            congr; simp [Fin.val_add]; grind
+
+  end RISC_V_equivalence
 
 end Equivalence.Lt

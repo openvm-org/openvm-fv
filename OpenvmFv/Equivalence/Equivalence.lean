@@ -5,6 +5,8 @@ import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.JalLui
 import OpenvmFv.Equivalence.JalR
+import OpenvmFv.Equivalence.Lt
+import OpenvmFv.Equivalence.Shift
 
 set_option maxHeartbeats 2_000_000
 set_option maxRecDepth 20_000
@@ -948,5 +950,252 @@ namespace RV32IM.Equivalence
       rw [h_spec_rd, h_spec_pc]
 
   end JalLui
+
+  section Lt
+
+    open VmAirWrapper_lt.constraints
+    open Equivalence.Lt
+
+    attribute [local simp]
+      _programBus_row
+      programBus_row
+      execute_RTYPE'
+      execute_ITYPE'
+      execute_RTYPE_pure
+      execute_ITYPE_pure
+      ALU.ValidRows.rop_of_ALU_opcode
+      ALU.ValidRows.iop_of_ALU_opcode
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_lt FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_axioms : axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+
+    section ProofMacros
+
+      set_option hygiene false
+
+      macro "lt_non_imm_proof" : tactic => `(tactic| (
+        -- Get the spec
+        have h_spec := Lt.ValidRows.spec_base_Lt_non_imm ExtF air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_imm
+        proof_start; proof_non_imm_specific; proof_end
+      ))
+
+      macro "lt_imm_proof" : tactic => `(tactic| (
+        -- Get the spec
+        have h_spec := Lt.ValidRows.spec_base_Lt_imm ExtF air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_imm
+        proof_start; proof_end
+      ))
+
+    end ProofMacros
+
+    include h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_bus
+
+    theorem equiv_SLT
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 520)
+      (h_imm : air.adapter.rs2_as row 0 = 1)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.RTYPE (r2, r1, rd, rop.SLT)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by lt_non_imm_proof
+
+    theorem equiv_SLTI
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 520)
+      (h_imm : air.adapter.rs2_as row 0 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.ITYPE (imm, r1, rd, iop.SLTI)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by lt_imm_proof
+
+    theorem equiv_SLTU
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 521)
+      (h_imm : air.adapter.rs2_as row 0 = 1)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.RTYPE (r2, r1, rd, rop.SLTU)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by lt_non_imm_proof
+
+    theorem equiv_SLTIU
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 521)
+      (h_imm : air.adapter.rs2_as row 0 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.ITYPE (imm, r1, rd, iop.SLTIU)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by lt_imm_proof
+
+  end Lt
+
+  section Shift
+
+    open VmAirWrapper_shift.constraints
+    open Equivalence.Shift
+
+    attribute [local simp]
+      _programBus_row
+      programBus_row
+      execute_RTYPE'
+      execute_ITYPE'
+      execute_SHIFTIOP'
+      execute_RTYPE_pure
+      execute_ITYPE_pure
+      ALU.ValidRows.rop_of_ALU_opcode
+      ALU.ValidRows.iop_of_ALU_opcode
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_shift FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_axioms : axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+
+    section ProofMacros
+
+      set_option hygiene false
+
+      macro "shift_non_imm_proof" : tactic => `(tactic| (
+        -- Get the spec
+        have h_spec := Shift.ValidRows.spec_base_Shift_non_imm ExtF air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_imm
+        proof_start; proof_non_imm_specific; proof_end
+      ))
+
+      macro "shift_imm_proof" : tactic => `(tactic| (
+        -- Get the spec
+        have h_spec := Shift.ValidRows.spec_base_Shift_imm ExtF air row (by omega) h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_imm
+        proof_start; proof_end
+      ))
+
+    end ProofMacros
+
+    include h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_bus
+
+    theorem equiv_SLL
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 517)
+      (h_imm : air.adapter.rs2_as row 0 = 1)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.RTYPE (r2, r1, rd, rop.SLL)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by shift_non_imm_proof
+
+    theorem equiv_SLLI
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 517)
+      (h_imm : air.adapter.rs2_as row 0 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.SHIFTIOP (imm, r1, rd, .SLLI)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by shift_imm_proof
+
+    theorem equiv_SRL
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 518)
+      (h_imm : air.adapter.rs2_as row 0 = 1)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.RTYPE (r2, r1, rd, rop.SRL)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by shift_non_imm_proof
+
+    theorem equiv_SRLI
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 518)
+      (h_imm : air.adapter.rs2_as row 0 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.SHIFTIOP (imm, r1, rd, .SRLI)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by shift_imm_proof
+
+    theorem equiv_SRA
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 519)
+      (h_imm : air.adapter.rs2_as row 0 = 1)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.RTYPE (r2, r1, rd, rop.SRA)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by shift_non_imm_proof
+
+    theorem equiv_SRAI
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 519)
+      (h_imm : air.adapter.rs2_as row 0 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.SHIFTIOP (imm, r1, rd, .SRAI)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by shift_imm_proof
+
+  end Shift
 
 end RV32IM.Equivalence
