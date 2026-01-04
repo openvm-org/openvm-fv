@@ -6,6 +6,8 @@ import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.JalLui
 import OpenvmFv.Equivalence.JalR
 import OpenvmFv.Equivalence.Lt
+import OpenvmFv.Equivalence.Mul
+import OpenvmFv.Equivalence.Mulh
 import OpenvmFv.Equivalence.Shift
 
 set_option maxHeartbeats 2_000_000
@@ -142,7 +144,7 @@ namespace RV32IM.Equivalence
         rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)).val, by simp; omega ⟩) (h_rd := by simp)]
         simp [write_xreg, Sail.writeReg, PreSail.writeReg, write_reg_state, cast]
         rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; grind)]
-        congr; symm
+        congr 3; symm
         assumption
       ))
 
@@ -233,6 +235,36 @@ namespace RV32IM.Equivalence
       let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
       let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
       let instr : instruction := instruction.ITYPE (imm, r1, rd, iop.XORI)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by alu_imm_proof
+
+    theorem equiv_OR
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 515)
+      (h_imm : air.adapter.rs2_as row 0 = 1)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let r2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.RTYPE (r2, r1, rd, rop.OR)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by alu_non_imm_proof
+
+    theorem equiv_ORI
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 515)
+      (h_imm : air.adapter.rs2_as row 0 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let r1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm.toNat
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := instruction.ITYPE (imm, r1, rd, iop.ORI)
       execute_instruction instr state =
       (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
     := by alu_imm_proof
@@ -1058,6 +1090,226 @@ namespace RV32IM.Equivalence
     := by lt_imm_proof
 
   end Lt
+
+  section Mul
+
+    open VmAirWrapper_mul.constraints
+    open Equivalence.Mul
+
+    attribute [local simp]
+      _executionBus_row
+      executionBus_row
+      _programBus_row
+      programBus_row
+      execute_MUL'
+      execute_MUL_pure
+      Mul.ValidRows.rop_of_Mul_opcode
+      mop_of_mul_op
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_mul FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+
+    include h_constraints h_is_valid h_bus_wellformedness h_bus
+
+    theorem equiv_MUL
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 592)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let rs1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let rs2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := .MUL (rs2, rs1, rd, { result_part := .Low, signed_rs1 := srs1, signed_rs2 := srs2 : mul_op})
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by
+      have h_spec := Mul.ValidRows.spec_MUL ExtF air row h_is_valid h_bus_wellformedness
+      simp [h_opcode, execute_MUL_pure] at h_spec
+      -- Apply the bus equivalence
+      rw [chip_bus_effect air row h_row h_constraints h_is_valid h_bus_wellformedness h_bus]
+      -- Get the hypotheses
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rs1, h_rs2, h_rd ⟩ := h_bus; clear h_rd
+      -- Get the fact that rd is non-zero
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      extract_lets rd_ptr rs1_ptr rs2_ptr rs1 rs2 rd instr val reg_idx
+      subst rd_ptr rs1_ptr rs2_ptr rs1 rs2 rd instr val reg_idx
+      simp [
+        h_pc,
+        writeReg_state_success,
+        LeanRV32D.Functions.execute,
+      ]
+      rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+      rotate_left
+      rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) (h_rd := by simp)]
+      assumption
+      simp
+      rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+      rotate_left
+      rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0)) (h_rd := by simp)]
+      assumption
+      simp [h_spec]
+      rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_nzd ⊢; omega ⟩) (h_rd := by simp)]
+      simp [write_xreg, Sail.writeReg, PreSail.writeReg, write_reg_state, cast]
+      rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+
+
+  end Mul
+
+  section Mulh
+
+    open VmAirWrapper_mulh.constraints
+    open Equivalence.Mulh
+
+    attribute [local simp]
+      _executionBus_row
+      executionBus_row
+      _programBus_row
+      programBus_row
+      execute_MUL'
+      execute_MUL_pure
+      Mulh.ValidRows.rop_of_Mulh_opcode
+      mop_of_mul_op
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_mulh FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+
+    section ProofMacros
+
+      set_option hygiene false
+
+      macro "proof_common" : tactic => `(tactic| (
+        have h_spec := Mulh.ValidRows.spec_mulh ExtF air row h_row h_constraints h_is_valid h_bus_wellformedness
+        simp [h_opcode, execute_MUL_pure] at h_spec
+        -- Apply the bus equivalence
+        rw [chip_bus_effect air row h_row h_constraints h_is_valid h_bus_wellformedness h_bus]
+        -- Get the hypotheses
+        have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
+        rw [this] at h_bus; clear this
+        obtain ⟨ h_pc, h_rs1, h_rs2, h_rd ⟩ := h_bus; clear h_rd
+        -- Get the fact that rd is non-zero
+        have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+        simp [get_instruction_fields_row] at h_nzd
+
+        extract_lets rd_ptr rs1_ptr rs2_ptr rs1 rs2 rd instr val reg_idx
+        subst rd_ptr rs1_ptr rs2_ptr rs1 rs2 rd instr val reg_idx
+        simp [
+          h_pc,
+          writeReg_state_success,
+          LeanRV32D.Functions.execute,
+        ]
+        rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+        rotate_left
+        rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) (h_rd := by simp)]
+        assumption
+        simp
+        rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+        rotate_left
+        rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0)) (h_rd := by simp)]
+        assumption
+        simp [h_spec]
+        rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_nzd ⊢; omega ⟩) (h_rd := by simp)]
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, write_reg_state, cast]
+        rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+      ))
+
+    end ProofMacros
+
+    include h_constraints h_is_valid h_bus_wellformedness h_bus
+
+    theorem equiv_MULH
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 593)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let rs1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let rs2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Signed : mul_op})
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by
+      have h_spec := Mulh.ValidRows.spec_mulh ExtF air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [h_opcode, execute_MUL_pure] at h_spec
+      -- Apply the bus equivalence
+      rw [chip_bus_effect air row h_row h_constraints h_is_valid h_bus_wellformedness h_bus]
+      -- Get the hypotheses
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rs1, h_rs2, h_rd ⟩ := h_bus; clear h_rd
+      -- Get the fact that rd is non-zero
+      have h_nzd := rd_neq_0 air row h_row h_constraints h_is_valid h_bus_wellformedness
+      simp [get_instruction_fields_row] at h_nzd
+
+      extract_lets rd_ptr rs1_ptr rs2_ptr rs1 rs2 rd instr val reg_idx
+      subst rd_ptr rs1_ptr rs2_ptr rs1 rs2 rd instr val reg_idx
+      simp [
+        h_pc,
+        writeReg_state_success,
+        LeanRV32D.Functions.execute,
+      ]
+      rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+      rotate_left
+      rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) (h_rd := by simp)]
+      assumption
+      simp
+      rw [rX_bits_write_other_reg_state (h_neq := by apply reg_of_fin_neq_nextPC)]
+      rotate_left
+      rw [rX_read_xreg_equiv (rd := Transpiler.wrap_to_regidx (air.adapter.rs2_ptr row 0)) (h_rd := by simp)]
+      assumption
+      simp [h_spec]
+      rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_nzd ⊢; omega ⟩) (h_rd := by simp)]
+      simp [write_xreg, Sail.writeReg, PreSail.writeReg, write_reg_state, cast]
+      rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+
+    theorem equiv_MULHSU
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 594)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let rs1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let rs2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Signed, signed_rs2 := .Unsigned : mul_op})
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by proof_common
+
+    theorem equiv_MULHU
+      (h_opcode : (air.core.ctx row 0).instruction.opcode = 595)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let rs2_ptr := (_programBus_row air row)[0]!.xc
+      let rs1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let rs2 : regidx := ⟨ (Transpiler.wrap_to_regidx rs2_ptr).val, by simp ⟩
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let instr : instruction := .MUL (rs2, rs1, rd, { result_part := .High, signed_rs1 := .Unsigned, signed_rs2 := .Unsigned : mul_op})
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+    := by proof_common
+
+  end Mulh
 
   section Shift
 
