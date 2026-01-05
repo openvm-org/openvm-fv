@@ -5,6 +5,7 @@ import OpenvmFv.Equivalence.BranchLessThan
 import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.JalLui
 import OpenvmFv.Equivalence.JalR
+import OpenvmFv.Equivalence.LoadSignExtend
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Mul
 import OpenvmFv.Equivalence.Mulh
@@ -1449,5 +1450,183 @@ namespace RV32IM.Equivalence
     := by shift_imm_proof
 
   end Shift
+
+  section LoadSignExtend
+
+    open VmAirWrapper_load_sign_extend.constraints
+
+    attribute [local simp]
+      _executionBus_row
+      executionBus_row
+      _programBus_row
+      programBus_row
+
+    variable
+      [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_axioms : axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+
+    include h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_bus
+
+    theorem equiv_LOADB
+      (h_opcode : air.core.expected_opcode row 0 = 534)
+
+      (h_general_assumptions : general_memory_assumptions state mstatus pmaRegion)
+      (assumption_alignment : (air.read_ptr row 0).val % 4 = 0)
+    :
+      let rd_ptr := (_programBus_row air row)[0]!.xa
+      let rs1_ptr := (_programBus_row air row)[0]!.xb
+      let imm := (_programBus_row air row)[0]!.xc
+      let rd : regidx := ⟨ (Transpiler.wrap_to_regidx rd_ptr).val, by simp ⟩
+      let rs1 : regidx := ⟨ (Transpiler.wrap_to_regidx rs1_ptr).val, by simp ⟩
+      let imm : BitVec 12 := BitVec.ofNat 12 imm
+      let instr : instruction := .LOAD (imm, rs1, rd, false, 1)
+      execute_instruction instr state =
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2
+  := by
+    extract_lets rd_ptr rs1_ptr imm rd rs1 imm instruction
+    subst instruction
+
+    have effect_z := LoadB.chip_bus_effect_rdz air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_opcode h_bus
+    have effect_nz := LoadB.chip_bus_effect_rdnz air row h_row h_constraints h_is_valid h_bus_axioms h_bus_wellformedness h_opcode h_bus
+
+    have h_ub_read_ptr := h_bus_wellformedness
+    simp [
+      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      h_is_valid,
+      show ((2013265920 : FBB) = -1) by decide,
+    ] at h_ub_read_ptr
+    replace h_ub_read_ptr := h_ub_read_ptr.1.2.1.2.1
+
+    have := LoadB.chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness h_opcode
+    rw [this] at h_bus; clear this
+    obtain ⟨ h_pc, h_rs1, hm0, hm1, hm2, hm3, h_rd ⟩ := h_bus; clear h_rd
+
+    replace h_pc : state.regs.get? Register.PC = .some (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0))
+      := by
+        clear *- h_pc
+        simp [Sail.readReg, PreSail.readReg] at h_pc
+        cases h : (state.regs.get? Register.PC) <;> simp_all
+    rw [← rX_read_xreg_equiv
+          (rd := Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0))
+          (rd_idx := regidx.Regidx (BitVec.ofNat 5 (Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0))))
+          (h_rd := rfl)] at h_rs1
+
+    simp [
+      Sail.readReg,
+      PreSail.readReg,
+      writeReg_state_success,
+      LeanRV32D.Functions.execute,
+      *
+    ]
+
+    have h_r1_val := rX_bits_write_other_reg_state (val := (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0)) + 4#32) h_rs1 reg_of_fin_neq_nextPC
+    simp at h_rs1 h_r1_val
+
+    have h_mem_ptr := LoadB.mem_ptr_eq_imm_plus_rs1 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+    rw [add_comm] at h_mem_ptr; simp at h_mem_ptr
+
+    have next_gma := gma_invariant_under_pc_increment h_general_assumptions (val := (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0)) + 4#32)
+    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := next_gma
+    subst rd_ptr rs1_ptr imm rd rs1 imm
+
+    have ⟨ rd_div_4, rd_ub_128 ⟩ := LoadB.rd_rs2_ptr_div_4_under_128 air row h_is_valid h_bus_wellformedness h_opcode
+
+    simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
+    simp [LeanRV32D.Functions.vmem_read_addr, ExceptT.run, *, -BitVec.toNat_add]
+    rw [if_pos]
+    . simp [*, -BitVec.toNat_add]
+      rw [if_neg (by omega)]
+      rw [Nat.mod_eq_of_lt (by omega)]
+      simp [*]
+      simp [← BitVec.toNat_inj] at h_mem_ptr
+      rw [Nat.mod_eq_of_lt (by omega)] at h_mem_ptr
+      rw [← LoadB.imm_extend_12_to_16 air row h_bus_wellformedness h_is_valid h_opcode] at h_mem_ptr
+      by_cases h_rd_z : air.adapter.rd_rs2_ptr row 0 = 0
+      . specialize effect_z h_rd_z
+        simp [h_is_valid] at effect_z
+        simp [← h_mem_ptr, effect_z]
+        have eq_mem_ptr : air.adapter.mem_ptr row 0 = air.read_ptr row 0 + air.shift_amount row 0
+          := by simp [LoadB.read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness]
+        simp [eq_mem_ptr]; clear eq_mem_ptr
+        obtain ⟨ sh, lsh, rsh ⟩ := LoadB.shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+        rw [sh]; clear sh lsh rsh
+        split_ifs
+        . simp [write_reg_state, LeanRV32D.Functions.wX_bits, LeanRV32D.Functions.wX, *]
+        . rw [Fin.val_add, Nat.mod_eq_of_lt (by omega)]
+          simp [write_reg_state, LeanRV32D.Functions.wX_bits, LeanRV32D.Functions.wX, *]
+        . rw [Fin.val_add, Nat.mod_eq_of_lt (by omega)]
+          simp [write_reg_state, LeanRV32D.Functions.wX_bits, LeanRV32D.Functions.wX, *]
+        . rw [Fin.val_add, Nat.mod_eq_of_lt (by omega)]
+          simp [write_reg_state, LeanRV32D.Functions.wX_bits, LeanRV32D.Functions.wX, *]
+      . specialize effect_nz h_rd_z
+        simp [h_is_valid] at effect_nz
+        simp [← h_mem_ptr, effect_nz]
+        have eq_mem_ptr : air.adapter.mem_ptr row 0 = air.read_ptr row 0 + air.shift_amount row 0
+          := by simp [LoadB.read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness]
+        simp [eq_mem_ptr]; clear eq_mem_ptr
+        obtain ⟨ sh, lsh, rsh ⟩ := LoadB.shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+        rw [sh]; clear sh lsh rsh
+        split_ifs
+        . simp [write_reg_state, *]
+          rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_rd_z ⊢; omega⟩) (h_rd := by simp)]
+          simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+          rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+          congr; clear *- hm0; grind
+        . rw [Fin.val_add, Nat.mod_eq_of_lt (by omega)]
+          simp [write_reg_state, *]
+          rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_rd_z ⊢; omega⟩) (h_rd := by simp)]
+          simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+          rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+          congr; clear *- hm1; grind
+        . rw [Fin.val_add, Nat.mod_eq_of_lt (by omega)]
+          simp [write_reg_state, *]
+          rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_rd_z ⊢; omega⟩) (h_rd := by simp)]
+          simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+          rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+          congr; clear *- hm2; grind
+        . rw [Fin.val_add, Nat.mod_eq_of_lt (by omega)]
+          simp [write_reg_state, *]
+          rw [wX_write_xreg_non_zero_equiv (rd := ⟨ (Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0)).val, by simp [Transpiler.wrap_to_regidx] at h_rd_z ⊢; omega⟩) (h_rd := by simp)]
+          simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+          rw [ExtDHashMap.insert_comm (h_neq := by have := @reg_of_fin_neq_nextPC; clear *- this; grind)]
+          congr; clear *- hm3; grind
+    . rw [LoadB.imm_extend_12_to_16 air row h_bus_wellformedness h_is_valid h_opcode]
+      simp [← h_mem_ptr, -BitVec.toNat_add]; rw [BitVec.toNat_add]; simp
+      simp [LoadB.read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness] at h_ub_read_ptr assumption_alignment
+      obtain ⟨ sh, lsh, rsh ⟩ := LoadB.shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      rw [sh] at h_ub_read_ptr assumption_alignment; clear sh lsh rsh
+      clear *- h_ub_read_ptr assumption_alignment h_pma_size
+      split_ifs at h_ub_read_ptr <;> simp_all
+      . omega
+      . repeat rw [Int.emod_eq_of_lt (by grind) (by grind)]
+        rw [Nat.mod_eq_of_lt (by grind)]
+        rw [Fin.sub_val_of_le] at assumption_alignment
+        . rw [Fin.sub_val_of_le (by omega)] at h_ub_read_ptr
+          omega
+        . simp [Fin.sub_def] at h_ub_read_ptr
+          omega
+      . repeat rw [Int.emod_eq_of_lt (by grind) (by grind)]
+        rw [Nat.mod_eq_of_lt (by grind)]
+        rw [Fin.sub_val_of_le] at assumption_alignment
+        . rw [Fin.sub_val_of_le (by omega)] at h_ub_read_ptr
+          omega
+        . simp [Fin.sub_def] at h_ub_read_ptr
+          omega
+      . repeat rw [Int.emod_eq_of_lt (by grind) (by grind)]
+        rw [Nat.mod_eq_of_lt (by grind)]
+        rw [Fin.sub_val_of_le] at assumption_alignment
+        . rw [Fin.sub_val_of_le (by omega)] at h_ub_read_ptr
+          omega
+        . simp [Fin.sub_def] at h_ub_read_ptr
+          omega
+
+  end LoadSignExtend
 
 end RV32IM.Equivalence

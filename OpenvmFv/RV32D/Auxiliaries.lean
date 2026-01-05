@@ -19,7 +19,6 @@ namespace ExtDHashMap
   := by
     grind
 
-
 end ExtDHashMap
 
 /-
@@ -396,10 +395,8 @@ section RegisterManipulation
     aesop
 
   def write_xreg (reg : Finset.Icc 1 31) (val : BitVec 32) : SailM Unit :=
-    match reg.1 with
-      | _ =>
-        let result := Sail.writeReg (reg_of_fin ⟨ reg, by grind ⟩ )
-        (result (cast (by rw [register_type_reg_of_fin_equiv]) val))
+    let result := Sail.writeReg (reg_of_fin ⟨ reg.1, by grind ⟩ )
+    (result (cast (by rw [register_type_reg_of_fin_equiv]) val))
 
   lemma wX_write_xreg_zero_equiv :
     LeanRV32D.Functions.wX_bits (regidx.Regidx 0) data state =
