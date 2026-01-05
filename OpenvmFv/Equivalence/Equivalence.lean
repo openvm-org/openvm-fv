@@ -1476,9 +1476,8 @@ namespace RV32IM.Equivalence
 
     theorem equiv_LOADB
       (h_opcode : air.core.expected_opcode row 0 = 534)
-
       (h_general_assumptions : general_memory_assumptions state mstatus pmaRegion)
-      (assumption_alignment : (air.read_ptr row 0).val % 4 = 0)
+      (assumption_alignment_read_ptr : (air.read_ptr row 0).val % 4 = 0)
     :
       let rd_ptr := (_programBus_row air row)[0]!.xa
       let rs1_ptr := (_programBus_row air row)[0]!.xb
@@ -1599,29 +1598,29 @@ namespace RV32IM.Equivalence
           congr; clear *- hm3; grind
     . rw [LoadB.imm_extend_12_to_16 air row h_bus_wellformedness h_is_valid h_opcode]
       simp [← h_mem_ptr, -BitVec.toNat_add]; rw [BitVec.toNat_add]; simp
-      simp [LoadB.read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness] at h_ub_read_ptr assumption_alignment
+      simp [LoadB.read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness] at h_ub_read_ptr assumption_alignment_read_ptr
       obtain ⟨ sh, lsh, rsh ⟩ := LoadB.shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
-      rw [sh] at h_ub_read_ptr assumption_alignment; clear sh lsh rsh
-      clear *- h_ub_read_ptr assumption_alignment h_pma_size
+      rw [sh] at h_ub_read_ptr assumption_alignment_read_ptr; clear sh lsh rsh
+      clear *- h_ub_read_ptr assumption_alignment_read_ptr h_pma_size
       split_ifs at h_ub_read_ptr <;> simp_all
       . omega
       . repeat rw [Int.emod_eq_of_lt (by grind) (by grind)]
         rw [Nat.mod_eq_of_lt (by grind)]
-        rw [Fin.sub_val_of_le] at assumption_alignment
+        rw [Fin.sub_val_of_le] at assumption_alignment_read_ptr
         . rw [Fin.sub_val_of_le (by omega)] at h_ub_read_ptr
           omega
         . simp [Fin.sub_def] at h_ub_read_ptr
           omega
       . repeat rw [Int.emod_eq_of_lt (by grind) (by grind)]
         rw [Nat.mod_eq_of_lt (by grind)]
-        rw [Fin.sub_val_of_le] at assumption_alignment
+        rw [Fin.sub_val_of_le] at assumption_alignment_read_ptr
         . rw [Fin.sub_val_of_le (by omega)] at h_ub_read_ptr
           omega
         . simp [Fin.sub_def] at h_ub_read_ptr
           omega
       . repeat rw [Int.emod_eq_of_lt (by grind) (by grind)]
         rw [Nat.mod_eq_of_lt (by grind)]
-        rw [Fin.sub_val_of_le] at assumption_alignment
+        rw [Fin.sub_val_of_le] at assumption_alignment_read_ptr
         . rw [Fin.sub_val_of_le (by omega)] at h_ub_read_ptr
           omega
         . simp [Fin.sub_def] at h_ub_read_ptr
