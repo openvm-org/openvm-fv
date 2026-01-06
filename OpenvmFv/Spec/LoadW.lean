@@ -1,6 +1,7 @@
 import Mathlib
 
 import OpenvmFv.Constraints.VmAirWrapper_loadstore
+import OpenvmFv.RV32D.BusEffect
 
 namespace LoadW
 
@@ -1681,5 +1682,389 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
         rw [← this]
         rw [← h_eq]
         omega
+
+  section RISC_V_equivalence
+
+    @[local simp]
+    lemma bv_ofFin_ofNat
+      (x : Fin 256)
+    : @BitVec.ofFin 8 x = BitVec.ofNat 8 x.val
+      := by simp
+
+    @[local simp]
+    lemma bv_ofNat_clearMod
+      (x : ℕ)
+    : BitVec.ofNat 8 (x % 256) = BitVec.ofNat 8 x
+      := by simp [← BitVec.toNat_inj]
+
+    @[local simp]
+    lemma bv_natCast_bv8
+      (x : FBB)
+    :
+      @Nat.cast (BitVec 8) BitVec.instNatCast x = BitVec.ofNat 8 x.val
+    := by simp
+
+    namespace ExtHashMap
+
+      lemma insert_eq_self [BEq K] [LawfulBEq K] [Hashable K]
+        (m : Std.ExtHashMap K V)
+        (h : m[k]? = .some v)
+      :
+        m.insert k v = m
+      := by
+        grind
+
+    end ExtHashMap
+
+    open VmAirWrapper_loadstore.constraints
+
+    lemma rd_rs2_ptr_div_4_under_128 [Field ExtF]
+      (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_opcode: air.core.expected_opcode row 0 = 528)
+    :
+      (air.adapter.rd_rs2_ptr row 0).val % 4 = 0 ∧
+      (air.adapter.rd_rs2_ptr row 0).val < 128
+    := by
+      have h_program_bus := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        Interaction.ProgramBusEntry.operand_properties
+      ] at h_program_bus
+      obtain ⟨instruction, data, h_transpile, h_data⟩ := h_program_bus
+      have := Transpiler.transpiler_opcode_528 h_transpile
+      simp [h_data.2.1, h_opcode] at this
+      obtain rdnz | rdz := this
+      . obtain ⟨ hd7, imm, rs1, rd, instr, rdnz ⟩ := rdnz
+        subst instr; simp [Transpiler.transpile_op, -Vector.mk_eq] at h_transpile
+        simp [← h_transpile.2] at h_data
+        rw [← h_data.2.1]
+        simp [Transpiler.ind]
+        omega
+      . obtain ⟨ hd7, imm, rs1, instr ⟩ := rdz
+        subst instr; simp [Transpiler.transpile_op, -Vector.mk_eq] at h_transpile
+        simp [← h_transpile.2] at h_data
+        rw [← h_data.2.1]
+        simp [Transpiler.ind]
+        omega
+
+    lemma rd_rs2_ptr_not_zero_register [Field ExtF]
+      (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_opcode: air.core.expected_opcode row 0 = 528)
+      (h_rd : air.adapter.rd_rs2_ptr row 0 ≠ 0)
+    :
+        ¬ Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0) = 0
+    := by
+      have h_program_bus := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        h_is_valid,
+        Interaction.ProgramBusEntry.operand_properties
+      ] at h_program_bus
+      obtain ⟨instruction, data, h_transpile, h_data⟩ := h_program_bus
+      have := Transpiler.transpiler_opcode_528 h_transpile
+      simp [h_data.2.1, h_opcode] at this
+      obtain rdnz | rdz := this
+      . obtain ⟨ hd7, imm, rs1, rd, instr, rdnz ⟩ := rdnz
+        subst instr; simp [Transpiler.transpile_op, -Vector.mk_eq] at h_transpile
+        simp [← h_transpile.2] at h_data
+        rw [← h_data.2.1] at h_rd ⊢
+        clear *- h_rd
+        simp_all [Transpiler.ind, Transpiler.wrap_to_regidx, regidx_to_fin]
+        omega
+      . exfalso
+        obtain ⟨ hd7, imm, rs1, instr ⟩ := rdz
+        subst instr; simp [Transpiler.transpile_op, -Vector.mk_eq] at h_transpile
+        simp [← h_transpile.2] at h_data
+        rw [needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_rd
+        rw [h_rd] at h_data
+        replace h_data := h_data.2.2.2.2.2.1
+        rw [if_pos (by rfl)] at h_data
+        omega
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_hypotheses [Field ExtF]
+      (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_opcode: air.core.expected_opcode row 0 = 528)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1 =
+        (Sail.readReg Register.PC state = EStateM.Result.ok (BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0)) state ∧
+         read_xreg (Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0)) state =
+           EStateM.Result.ok (U32.toBV #v[air.adapter.rs1_data_0 row 0, air.adapter.rs1_data_1 row 0, air.adapter.rs1_data_2 row 0, air.adapter.rs1_data_3 row 0]) state ∧
+         state.mem[(air.read_ptr row 0).val]? = some (BitVec.ofNat 8 (air.core.read_data_0 row 0).val) ∧
+         state.mem[(air.read_ptr row 0).val + 1]? = some (BitVec.ofNat 8 (air.core.read_data_1 row 0).val) ∧
+         state.mem[(air.read_ptr row 0).val + 2]? = some (BitVec.ofNat 8 (air.core.read_data_2 row 0).val) ∧
+         state.mem[(air.read_ptr row 0).val + 3]? = some (BitVec.ofNat 8 (air.core.read_data_3 row 0).val) ∧
+         (¬ air.adapter.rd_rs2_ptr row 0 = 0 →
+           read_xreg (Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0)) state =
+             EStateM.Result.ok (U32.toBV #v[air.core.prev_data_0 row 0, air.core.prev_data_1 row 0, air.core.prev_data_2 row 0, air.core.prev_data_3 row 0]) state))
+    := by
+      have h_nw : air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1
+      := by
+        rw [allHold_simplified_of_allHold] at h_constraints
+        simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+        grind
+      simp [
+        _executionBus_row,
+        VmAirWrapper_loadstore.constraints.executionBus_row,
+        h_is_valid
+      ]
+      simp [
+        _memoryBus_row,
+        memoryBus_row,
+        write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide,
+        read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
+        mem_as_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode,
+        write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      ]
+      by_cases h_rs1 : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;>
+      obtain h_nw | h_nw := h_nw <;> simp [h_nw]
+      . simp [bus_effect, *, and_assoc]
+        intros h_pc h_rs1 hm0 hm1 hm2 hm3 h_rs2
+        rw [← needs_write_of_rd_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_nw
+        grind
+      . simp [bus_effect, *, and_assoc]
+        rw [← needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_nw
+        by_cases h_rd : Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0) = 0 <;> simp [h_rd]
+        . simp [read_xreg, h_nw]
+        . simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+          intros h_pc h_rs1 hm0 hm1 hm2 hm3
+          simp [read_xreg, h_rd, Sail.readReg, PreSail.readReg]
+          simp [
+            ExtHashMap.insert_eq_self (h := (hm0)),
+            ExtHashMap.insert_eq_self (h := (hm1)),
+            ExtHashMap.insert_eq_self (h := (hm2)),
+            ExtHashMap.insert_eq_self (h := (hm3)),
+            h_nw
+          ]
+      . unfold bus_effect
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, -List.foldl_cons]
+        rw [List.foldl_cons]; simp [-List.foldl_cons, *]
+        rw [List.foldl_cons]; simp [-List.foldl_cons, *]
+        dsimp; simp [and_assoc]
+        intros h_pc h_rs1 hm0 hm1 hm2 hm3 h_rs2
+        rw [← needs_write_of_rd_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_nw
+        grind
+      . unfold bus_effect
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, -List.foldl_cons]
+        dsimp; simp [h_rs1]
+        by_cases h_rd : Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0) = 0 <;> simp [h_rd, and_assoc, cast]
+        . intros h_pc h_rs1 hm0 hm1 hm2 hm3
+          rw [← needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_nw
+          simp [read_xreg, h_nw]
+        . intros h_pc h_rs1 hm0 hm1 hm2 hm3
+          rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[BitVec.ofNat 8 ↑(air.adapter.rs1_data_0 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_1 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_2 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_3 row 0)])]
+          rw [← needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_nw
+          simp [read_xreg, h_rd, Sail.readReg, PreSail.readReg]
+          simp [
+            ExtHashMap.insert_eq_self (h := (hm0)),
+            ExtHashMap.insert_eq_self (h := (hm1)),
+            ExtHashMap.insert_eq_self (h := (hm2)),
+            ExtHashMap.insert_eq_self (h := (hm3)),
+            h_nw
+          ]
+
+    lemma write_data_is_mem_ptr [Field ExtF]
+      (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+      (h_opcode: air.core.expected_opcode row 0 = 528)
+    :
+      BitVec.ofNat 8 (air.core.write_data_0 row 0).val = state.mem[↑(air.adapter.mem_ptr row 0)]!
+    := by
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness h_opcode
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rs1, hm0, hm1, hm2, hm3, h_rd ⟩ := h_bus; clear h_pc h_rs1 h_rd
+      simp [write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid]
+      have h_read_ptr_eq := read_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        and_assoc,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide
+      ] at h_bus_wellformedness
+      replace h_bus_wellformedness := h_bus_wellformedness.2.2.2.2.2.2.1
+      grind
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_effect_rdz [Field ExtF]
+      (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_opcode: air.core.expected_opcode row 0 = 528)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+      (h_rd_z : air.adapter.rd_rs2_ptr row 0 = 0)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2 =
+      EStateM.Result.ok
+        (ExecutionResult.Retire_Success ())
+        { state with regs := state.regs.insert Register.nextPC (BitVec.ofNat 32 ((_executionBus_row air row)[0]!.pc).val + 4#32) }
+    := by
+      simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification, and_assoc, h_is_valid] at h_axioms
+
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness h_opcode
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rs1, hm0, hm1, hm2, hm3, h_rd ⟩ := h_bus; clear h_rd
+
+      simp [
+        _executionBus_row,
+        VmAirWrapper_loadstore.constraints.executionBus_row,
+        h_is_valid
+      ]
+      simp [
+        _memoryBus_row,
+        memoryBus_row,
+        write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
+        h_is_valid,
+        h_rd_z,
+        show ((2013265920 : FBB) = -1) by decide,
+        read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
+        mem_as_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode,
+        write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      ]
+      rw [needs_write_of_rd_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_rd_z
+      by_cases h_rs1_z : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0 <;> simp [h_rd_z]
+      . simp [bus_effect, h_rs1_z, Sail.writeReg, PreSail.writeReg]
+        simp [
+          ExtHashMap.insert_eq_self (h := (hm0)),
+          ExtHashMap.insert_eq_self (h := (hm1)),
+          ExtHashMap.insert_eq_self (h := (hm2)),
+          ExtHashMap.insert_eq_self (h := (hm3)),
+          ← VmAirWrapper_loadstore.to_pc_def
+        ]
+        congr; simp; grind
+      . simp [bus_effect, h_rs1_z]
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+        rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[BitVec.ofNat 8 ↑(air.adapter.rs1_data_0 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_1 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_2 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_3 row 0)])]
+        simp [
+          ExtHashMap.insert_eq_self (h := (hm0)),
+          ExtHashMap.insert_eq_self (h := (hm1)),
+          ExtHashMap.insert_eq_self (h := (hm2)),
+          ExtHashMap.insert_eq_self (h := (hm3)),
+          ← VmAirWrapper_loadstore.to_pc_def
+        ]
+        congr; simp; grind
+
+    set_option maxHeartbeats 0 in
+    lemma chip_bus_effect_rdnz [Field ExtF]
+      (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_axioms : VmAirWrapper_loadstore.constraints.axiomsPerRow air row)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_opcode: air.core.expected_opcode row 0 = 528)
+      (h_bus : (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).1)
+      (h_rd_nz : air.adapter.rd_rs2_ptr row 0 ≠ 0)
+    :
+      (bus_effect (_executionBus_row air row) (_memoryBus_row air row) state).2 =
+      let val := state.mem[(air.adapter.mem_ptr row 0).val + 3]! ++ state.mem[(air.adapter.mem_ptr row 0).val + 2]! ++ state.mem[(air.adapter.mem_ptr row 0).val + 1]! ++ state.mem[(air.adapter.mem_ptr row 0).val]!
+      let reg_idx := Transpiler.wrap_to_regidx (air.adapter.rd_rs2_ptr row 0)
+      EStateM.Result.ok
+      (ExecutionResult.Retire_Success ())
+      { state with
+        regs := (state.regs.insert (reg_of_fin reg_idx) ((register_type_reg_of_fin_equiv reg_idx) ▸ val)
+              ).insert Register.nextPC (BitVec.ofNat 32 ((_executionBus_row air row)[0]!.pc).val + 4#32) }
+    := by
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        and_assoc,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide
+      ] at h_axioms
+
+      have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness h_opcode
+      rw [this] at h_bus; clear this
+      obtain ⟨ h_pc, h_rs1, hm0, hm1, hm2, hm3, h_rd ⟩ := h_bus; clear h_rd
+
+      have h_rd_nz' := rd_rs2_ptr_not_zero_register air row h_is_valid h_bus_wellformedness h_opcode h_rd_nz
+      have h_wd_0 := write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      have h_wd_1 := write_data_1_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      have h_wd_2 := write_data_2_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      have h_wd_3 := write_data_3_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      have h_read_ptr_eq := read_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      have h_shift_eq := shift_amount_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+
+      simp [
+        _executionBus_row,
+        VmAirWrapper_loadstore.constraints.executionBus_row,
+        h_is_valid
+      ]
+      simp [
+        _memoryBus_row,
+        memoryBus_row,
+        write_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide,
+        read_as_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
+        mem_as_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode,
+        write_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
+      ]
+      rw [needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_rd_nz
+
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        and_assoc,
+        h_is_valid,
+        show ((2013265920 : FBB) = -1) by decide
+      ] at h_bus_wellformedness
+
+      by_cases h_rs1_z : Transpiler.wrap_to_regidx (air.adapter.rs1_ptr row 0) = 0
+      . simp [bus_effect, h_rs1_z, h_rd_nz, h_rd_nz', Sail.writeReg, PreSail.writeReg]
+        simp [
+          ExtHashMap.insert_eq_self (h := (hm0)),
+          ExtHashMap.insert_eq_self (h := (hm1)),
+          ExtHashMap.insert_eq_self (h := (hm2)),
+          ExtHashMap.insert_eq_self (h := (hm3)),
+          ← VmAirWrapper_loadstore.to_pc_def,
+        ]
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast, *]
+        rw [← h_read_ptr_eq]; clear h_read_ptr_eq
+
+        congr 3 <;> [ skip; (simp; grind) ]
+        simp [U32.toBV, *]
+        simp [← BitVec.toNat_inj]; repeat rw [BitVec.toNat_append]
+        grind
+      . simp [bus_effect, h_rs1_z, h_rd_nz, h_rd_nz', Sail.writeReg, PreSail.writeReg]
+        simp [write_xreg, Sail.writeReg, PreSail.writeReg, cast]
+        rw [insert_reg_eq_self (by omega) h_rs1 (val := U32.toBV #v[BitVec.ofNat 8 ↑(air.adapter.rs1_data_0 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_1 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_2 row 0), BitVec.ofNat 8 ↑(air.adapter.rs1_data_3 row 0)])]
+        simp [
+          ExtHashMap.insert_eq_self (h := (hm0)),
+          ExtHashMap.insert_eq_self (h := (hm1)),
+          ExtHashMap.insert_eq_self (h := (hm2)),
+          ExtHashMap.insert_eq_self (h := (hm3)),
+          ← VmAirWrapper_loadstore.to_pc_def,
+        ]
+
+        rw [← h_read_ptr_eq]; clear h_read_ptr_eq
+
+        congr 3 <;> [ skip; (simp; grind) ]
+        simp [U32.toBV, *]
+        simp [← BitVec.toNat_inj]; repeat rw [BitVec.toNat_append]
+        grind
+
+  end RISC_V_equivalence
 
 end LoadW

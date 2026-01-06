@@ -6,6 +6,7 @@ import OpenvmFv.Equivalence.DivRem
 import OpenvmFv.Equivalence.JalLui
 import OpenvmFv.Equivalence.JalR
 import OpenvmFv.Equivalence.LoadSignExtend
+import OpenvmFv.Equivalence.LoadStore
 import OpenvmFv.Equivalence.Lt
 import OpenvmFv.Equivalence.Mul
 import OpenvmFv.Equivalence.Mulh
