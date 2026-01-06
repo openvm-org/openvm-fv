@@ -229,6 +229,40 @@ namespace LoadBU
       simp [←h_transpile]
     }
 
+  lemma imm_extend_12_to_16 [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_opcode: air.core.expected_opcode row 0 = 529)
+  :
+    BitVec.signExtend 32 (BitVec.ofNat 12 (air.adapter.imm row 0)) =
+    BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0))
+  := by
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
+    simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      h_is_valid,
+      Interaction.ProgramBusEntry.operand_properties
+    ] at h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    have := Transpiler.transpiler_opcode_529 h_transpile
+    simp [h_data.2.1, h_opcode] at this
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
+    obtain
+      ⟨h_needs_write, imm, rs1, rd, h_instruction, h_rd⟩ |
+      ⟨h_needs_write, imm, rs1, h_instruction⟩
+       := this
+    all_goals
+      subst instruction
+      simp [Transpiler.transpile_op, -Vector.mk_eq, and_assoc] at h_transpile
+      simp [← h_transpile.2.2] at h_data
+      rw [← h_data.2.2.2.1]
+      simp [Transpiler.utof, Transpiler.sign_extend_16]
+      rw [Nat.mod_eq_of_lt (by omega)]
+      grind
+
   lemma opcode_flag_0_boolean[Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
