@@ -27,11 +27,14 @@ instance : NoZeroDivisors FBB := Fin.noZeroDivisors_of_prime _ (hp := Fact_BBPri
 
 section inverses
 
+lemma inv_4 : (1509949441 : FBB) = 4⁻¹ := by native_decide
 lemma inv_255 : (465814468 : FBB) = 255⁻¹ := by native_decide
 lemma inv_256 : (2005401601 : FBB) = 256⁻¹ := by native_decide
 lemma inv_65536 : (2013235201 : FBB) = 65536⁻¹ := by native_decide
 lemma inv_2_24 : (2013265801 : FBB) = 16777216⁻¹ := by native_decide
 
+lemma inv_4_eq_one_lr : (1509949441 : FBB) * 4 = 1 := by rfl
+lemma inv_4_eq_one_rl : 4 * (1509949441 : FBB) = 1 := by rfl
 lemma inv_255_eq_one_lr : (465814468 : FBB) * 255 = 1 := by rfl
 lemma inv_255_eq_one_rl : 255 * (465814468 : FBB) = 1 := by rfl
 lemma inv_256_eq_one_lr : (2005401601 : FBB) * 256 = 1 := by rfl
@@ -41,6 +44,8 @@ lemma inv_65536_eq_one_rl : 65536 * (2013235201 : FBB) = 1 := by rfl
 lemma inv_2_24_eq_one_lr : (2013265801 : FBB) * 16777216 = 1 := by rfl
 lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
 
+@[simp] lemma inv_4_eq_4_lr : (1509949441 : FBB) * x = 1 ↔ x = 4 := by rw [inv_4, inv_mul_eq_one₀ (by simp), eq_comm]
+@[simp] lemma inv_4_eq_4_rl : x * (1509949441 : FBB) = 1 ↔ x = 4 := by rw [mul_comm, inv_4_eq_4_lr]
 @[simp] lemma inv_255_eq_255_lr : (465814468 : FBB) * x = 1 ↔ x = 255 := by rw [inv_255, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_255_eq_255_rl : x * (465814468 : FBB) = 1 ↔ x = 255 := by rw [mul_comm, inv_255_eq_255_lr]
 @[simp] lemma inv_256_eq_256_lr : (2005401601 : FBB) * x = 1 ↔ x = 256 := by rw [inv_256, inv_mul_eq_one₀ (by simp), eq_comm]
@@ -50,6 +55,7 @@ lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
 @[simp] lemma inv_2_24_eq_2_24_lr : (2013265801 : FBB) * x = 1 ↔ x = 16777216 := by rw [inv_2_24, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_2_24_eq_2_24_rl : x * (2013265801 : FBB) = 1 ↔ x = 16777216 := by rw [mul_comm, inv_2_24_eq_2_24_lr]
 
+lemma neg_inv_4 : (1509949441 : FBB) = -503316480 := by grind
 lemma neg_inv_2_256 : (2005401601 : FBB) = -7864320 := by grind
 lemma neg_inv_2_24 : (2013265801 : FBB) = -120 := by grind
 
@@ -330,6 +336,75 @@ lemma inv2_24_prod_diff_div_mod
   . simp [Fin.ext_iff] at h_mod_zero
     rw [Fin.sub_val_of_le a_le_b] at h_mod_zero
     grind
+
+lemma inv4_mono
+  (x y : Fin 4)
+  (lb_x : 0 < x)
+  (h_lt : x < y)
+:
+  (2013265801 : FBB) * (⟨ y.val, by omega⟩ : FBB) < (2013265801 : FBB) * (⟨ x.val, by omega⟩ : FBB)
+:= by
+  rw [neg_inv_2_24, neg_mul, neg_mul]
+  apply lt_neg
+  . rw [Fin.lt_def, Fin.val_mul]; simp; omega
+  . rw [Fin.lt_def, Fin.val_mul, Fin.val_mul]; simp; grind
+
+lemma inv4_prod_lt_4
+  (x : Fin 4)
+:
+  x = 0 ∨ (¬x = 0 ∧ 503316480 < (1509949441 : FBB) * (⟨ x.val, by omega⟩ : FBB) ∧ (1509949441 : FBB) * (⟨ x.val, by omega⟩ : FBB) ≤ 1509949441)
+:= by
+  fin_cases x <;> simp
+
+lemma inv4_prod_mod
+  (x : FBB)
+:
+  x % 4 = 0 ∨ (¬ x % 4 = 0 ∧ 503316480 < (1509949441 : FBB) * (x % 4) ∧ (1509949441 : FBB) * (x % 4) ≤ 1509949441)
+:= by
+  have := inv4_prod_lt_4 ⟨ (x % 4).val, by grind⟩
+  rcases this with hz | ⟨ h_nz, h_lt ⟩ <;> simp_all
+  . grind
+  . right; constructor
+    . grind
+    . simp_all [Fin.lt_def, Fin.mul_def]
+
+lemma inv4_prod_lt_4_mod_zero
+  {x : FBB}
+  (h_le : x * (1509949441 : FBB) ≤ 503316480)
+:
+  x % 4 = 0
+:= by
+  rw [mul_comm] at h_le
+  by_cases hnz : x = 0 <;> [ simp_all; skip ]
+  have h_div_mod : x = (x / 4) * 4 + x % 4
+  := by
+    simp [Fin.ext_iff, Fin.val_add, Fin.val_mul]
+    grind
+  rw [h_div_mod] at h_le ⊢; clear h_div_mod
+  simp [Fin.ext_iff, Fin.val_add, Fin.val_mul]
+  rw [Nat.mod_eq_of_lt (b := 2013265921) (by omega)]
+  simp [Nat.add_mod]
+  have := inv4_prod_mod x
+  rcases this with hz | ⟨ hnz, hmod ⟩
+  . simp [Fin.ext_iff] at hz; assumption
+  . rw [mul_add, mul_comm (b := 4), ← mul_assoc, inv_4_eq_one_lr] at h_le
+    simp at h_le
+    have ub_x_div : x / 4 ≤ 1509949441 := by simp [Fin.le_def]; omega
+    suffices : 503316480 < x / 4 + 1509949441 * (x % 4)
+    . omega
+    . obtain ⟨ lb_mod, ub_mod ⟩ := hmod
+      rw [Fin.lt_def] at lb_mod ⊢
+      rw [Fin.le_def] at ub_mod h_le ub_x_div
+      simp_all [Fin.val_add, Fin.val_mul]
+      rw [Nat.add_mod] at h_le ⊢
+      rw [Nat.mod_eq_of_lt (a := _ / _) (by omega)] at h_le ⊢
+      by_cases hmmm : x.val / 16777216 = 120
+      . have : x = 2013265920 := by omega
+        simp_all
+      . have ub_div : x.val / 16777216 < 120 := by omega
+        clear ub_x_div hmmm
+        rw [Nat.mod_eq_of_lt (by omega)]
+        omega
 
 lemma mod_4_zero_bits_zero
   (a : FBB)

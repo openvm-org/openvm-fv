@@ -1557,6 +1557,39 @@ lemma imm_extend_range_of_opcode_529 [Field ExtF]
 
     open VmAirWrapper_loadstore.constraints
 
+    lemma read_ptr_div_4 [Field ExtF]
+      (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row: ℕ)
+      (h_opcode: air.core.expected_opcode row 0 = 529)
+      (h_row: row ≤ air.last_row)
+      (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
+      (h_is_valid: air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+    :
+      (air.read_ptr row 0) % 4 = 0
+    := by
+      have hrp := read_ptr_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+      have hm0 := mem_ptr_limbs_0_range_of_opcode_529 air row h_bus_wellformedness h_is_valid
+      have hm1 := mem_ptr_limbs_1_range_of_opcode_529 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+      have eq_sh : air.core.load_shift_amount row 0 = air.shift_amount row 0
+      := by
+        have := shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+        have := load_shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
+        omega
+      clear h_constraints
+
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        show ((2013265920 : FBB) = -1) by decide,
+        *
+      ] at h_bus_wellformedness ⊢
+      replace h_bus_wellformedness := h_bus_wellformedness.2.1.2.2.1
+
+      have := BabyBear.inv4_prod_lt_4_mod_zero (x := air.adapter.mem_ptr_limbs_0 row 0 - air.shift_amount row 0) (by omega)
+      simp [Valid_Rv32LoadStoreAdapterAir.mem_ptr] at *
+      clear hrp h_bus_wellformedness
+      grind
+
     lemma rd_rs2_ptr_div_4_under_128 [Field ExtF]
       (air : Valid_VmAirWrapper_loadstore FBB ExtF)
       (row : ℕ)

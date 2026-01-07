@@ -907,72 +907,72 @@ end LoadStore.NonValidRows
 
 namespace LoadStore.ValidRows
 
-open VmAirWrapper_loadstore.constraints
+  open VmAirWrapper_loadstore.constraints
 
-variable (ExtF : Type) [Field ExtF]
-variable (air : Valid_VmAirWrapper_loadstore FBB ExtF)
-variable (row : ℕ)
-variable (row_in_range : row ≤ air.last_row)
-variable (constraints : VmAirWrapper_loadstore.constraints.allHold air row row_in_range)
-variable (axioms : axiomsPerRow air row)
-variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
+  variable (ExtF : Type) [Field ExtF]
+  variable (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+  variable (row : ℕ)
+  variable (row_in_range : row ≤ air.last_row)
+  variable (constraints : VmAirWrapper_loadstore.constraints.allHold air row row_in_range)
+  variable (axioms : axiomsPerRow air row)
+  variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
-variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
+  variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
 
-set_option maxHeartbeats 0 in
-include
-  row_valid
-  constraints
-  axioms
-  propertiesToAssume
-in
-/-- The properties that need to be proven actually hold -/
-lemma wf_propertiesToAssert
-:
-  wf_propertiesToAssertPerRow air row
-:= by
-  simp [executionBus_row] at row_valid
-  rw [allHold_simplified_of_allHold] at constraints
+  set_option maxHeartbeats 0 in
+  include
+    row_valid
+    constraints
+    axioms
+    propertiesToAssume
+  in
+  /-- The properties that need to be proven actually hold -/
+  lemma wf_propertiesToAssert
+  :
+    wf_propertiesToAssertPerRow air row
+  := by
+    simp [executionBus_row] at row_valid
+    rw [allHold_simplified_of_allHold] at constraints
 
-  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
-  simp [row_valid,
-        show ((2013265920 : FBB) = -1) by native_decide,
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification]
-    at pa_exec pa_mem pa_range pa_read constraints ⊢
-  simp_all
-  obtain h_nw | h_nw : (air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1) := by grind
-  . simp [h_nw]
-  . simp [h_nw]
-    simp [← LoadStoreCoreAir_4.expected_val_def,
-          ← LoadStoreCoreAir_4.expected_load_val_0_def,
-          ← LoadStoreCoreAir_4.expected_load_val_1_def,
-          ← LoadStoreCoreAir_4.expected_load_val_2_def,
-          ← LoadStoreCoreAir_4.expected_load_val_3_def,
-          ← LoadStoreCoreAir_4.expected_store_val_0_def,
-          ← LoadStoreCoreAir_4.expected_store_val_1_def,
-          ← LoadStoreCoreAir_4.expected_store_val_2_def,
-          ← LoadStoreCoreAir_4.expected_store_val_3_def,
-          Valid_LoadStoreCoreAir_4.opcode_when,
-          Valid_LoadStoreCoreAir_4.opcode_flags
-         ]
-    obtain ⟨ h00, h01, h02, h03, h04, h05, h06, h07, h08, h09,
-             h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20 ⟩ := constraints
-    have hfl0 : air.core.flags_0 row 0 ≤ 2 := by clear *- h01; grind
-    have hfl1 : air.core.flags_1 row 0 ≤ 2 := by clear *- h02; grind
-    have hfl2 : air.core.flags_2 row 0 ≤ 2 := by clear *- h03; grind
-    have hfl3 : air.core.flags_3 row 0 ≤ 2 := by clear *- h04; grind
-    simp [← LoadStoreCoreAir_4.sum] at h06
-    obtain h_flag_0 | h_flag_0 | h_flag_0 := h01
-    all_goals simp [h_flag_0] at h06 ⊢
-    all_goals obtain h_flag_1 | h_flag_1 | h_flag_1 := h02
-    all_goals simp [h_flag_1] at h06 ⊢
-    all_goals try (exfalso; clear *- h06 hfl0 hfl1 hfl2 hfl3; omega)
-    all_goals obtain h_flag_2 | h_flag_2 | h_flag_2 := h03
-    all_goals simp [h_flag_2] at h06 ⊢
-    all_goals try (exfalso; clear *- h06 hfl0 hfl1 hfl2 hfl3; omega)
-    all_goals obtain h_flag_3 | h_flag_3 | h_flag_3 := h04
-    all_goals simp [h_flag_3] at h06 ⊢
-    all_goals simp [← LoadStoreCoreAir_4.sum, Valid_LoadStoreCoreAir_4.inv_2, h_flag_0, h_flag_1, h_flag_2, h_flag_3]
-    all_goals grind
+    obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
+    simp [row_valid,
+          show ((2013265920 : FBB) = -1) by native_decide,
+          VmAirWrapper_loadstore_constraint_and_interaction_simplification]
+      at pa_exec pa_mem pa_range pa_read constraints ⊢
+    simp_all
+    obtain h_nw | h_nw : (air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1) := by grind
+    . simp [h_nw]
+    . simp [h_nw]
+      simp [← LoadStoreCoreAir_4.expected_val_def,
+            ← LoadStoreCoreAir_4.expected_load_val_0_def,
+            ← LoadStoreCoreAir_4.expected_load_val_1_def,
+            ← LoadStoreCoreAir_4.expected_load_val_2_def,
+            ← LoadStoreCoreAir_4.expected_load_val_3_def,
+            ← LoadStoreCoreAir_4.expected_store_val_0_def,
+            ← LoadStoreCoreAir_4.expected_store_val_1_def,
+            ← LoadStoreCoreAir_4.expected_store_val_2_def,
+            ← LoadStoreCoreAir_4.expected_store_val_3_def,
+            Valid_LoadStoreCoreAir_4.opcode_when,
+            Valid_LoadStoreCoreAir_4.opcode_flags
+          ]
+      obtain ⟨ h00, h01, h02, h03, h04, h05, h06, h07, h08, h09,
+              h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20 ⟩ := constraints
+      have hfl0 : air.core.flags_0 row 0 ≤ 2 := by clear *- h01; grind
+      have hfl1 : air.core.flags_1 row 0 ≤ 2 := by clear *- h02; grind
+      have hfl2 : air.core.flags_2 row 0 ≤ 2 := by clear *- h03; grind
+      have hfl3 : air.core.flags_3 row 0 ≤ 2 := by clear *- h04; grind
+      simp [← LoadStoreCoreAir_4.sum] at h06
+      obtain h_flag_0 | h_flag_0 | h_flag_0 := h01
+      all_goals simp [h_flag_0] at h06 ⊢
+      all_goals obtain h_flag_1 | h_flag_1 | h_flag_1 := h02
+      all_goals simp [h_flag_1] at h06 ⊢
+      all_goals try (exfalso; clear *- h06 hfl0 hfl1 hfl2 hfl3; omega)
+      all_goals obtain h_flag_2 | h_flag_2 | h_flag_2 := h03
+      all_goals simp [h_flag_2] at h06 ⊢
+      all_goals try (exfalso; clear *- h06 hfl0 hfl1 hfl2 hfl3; omega)
+      all_goals obtain h_flag_3 | h_flag_3 | h_flag_3 := h04
+      all_goals simp [h_flag_3] at h06 ⊢
+      all_goals simp [← LoadStoreCoreAir_4.sum, Valid_LoadStoreCoreAir_4.inv_2, h_flag_0, h_flag_1, h_flag_2, h_flag_3]
+      all_goals grind
 
 end LoadStore.ValidRows

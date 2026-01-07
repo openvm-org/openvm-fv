@@ -725,42 +725,6 @@ section Memory
   := by
     omega
 
-  def general_memory_assumptions
-    (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
-    (mstatus : RegisterType Register.mstatus)
-    (pmaRegion : PMA_Region)
-  : Prop :=
-    -- Assumption A2: no host-target interface
-    Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state ∧
-    -- Assumption A3: machine privilege
-    Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state ∧
-    -- Assumption A3: MPRV bit of the mstatus register not set
-    (Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state ∧ BitVec.extractLsb 17 17 mstatus = 0#1) ∧
-    -- A4.1 : Single PMA region
-    Sail.readReg Register.pma_regions state = EStateM.Result.ok [ pmaRegion ] state ∧
-    -- A4.2 : with base 0 and at least 2^29 bytes in size
-    pmaRegion.base = 0 ∧
-    OpenVM_address_space_size ≤ pmaRegion.size.toNat ∧
-    -- A4.3 : with all addresses readable and writable, and misaligned accesses treated as errors
-    pmaRegion.attributes.readable ∧
-    pmaRegion.attributes.writable ∧
-    pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault
-
-  lemma gma_invariant_under_pc_increment
-    (assumptions : general_memory_assumptions s mstatus pmaRegion)
-  :
-    general_memory_assumptions (write_reg_state s Register.nextPC val) mstatus pmaRegion
-  := by
-    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := assumptions
-    simp [general_memory_assumptions]
-    split_ands
-    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_htif (by trivial)]
-    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_priv (by trivial)]
-    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_mprv.1 (by trivial)]
-    . exact h_mprv.2
-    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_pma_regions (by trivial)]
-    all_goals assumption
-
 end Memory
 
 section ControlFlow
@@ -803,5 +767,48 @@ section Spec
       Sail.writeReg Register.nextPC (Sail.BitVec.addInt (← Sail.readReg Register.PC) 4)
       LeanRV32D.Functions.execute instr
     ) state
+
+  def RISC_V_assumptions
+    (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
+    (mstatus : RegisterType Register.mstatus)
+    (pmaRegion : PMA_Region)
+    (misa : RegisterType Register.misa)
+    (mseccfg : RegisterType Register.mseccfg)
+  : Prop :=
+    -- Assumption A1: machine privilege
+    Sail.readReg Register.cur_privilege state = EStateM.Result.ok Privilege.Machine state ∧
+    -- Assumption A2: MPRV bit of the mstatus register not set
+    (Sail.readReg Register.mstatus state = EStateM.Result.ok mstatus state ∧ BitVec.extractLsb 17 17 mstatus = 0#1) ∧
+    -- A3.1 : Single PMA region
+    Sail.readReg Register.pma_regions state = EStateM.Result.ok [ pmaRegion ] state ∧
+    -- A3.2 : with base 0 and at least 2^29 bytes in size
+    pmaRegion.base = 0 ∧
+    OpenVM_address_space_size ≤ pmaRegion.size.toNat ∧
+    -- A3.3 : with all addresses readable and writable, and misaligned accesses treated as errors
+    pmaRegion.attributes.readable ∧
+    pmaRegion.attributes.writable ∧
+    pmaRegion.attributes.misaligned_fault = misaligned_fault.AlignmentFault ∧
+    -- Assumption A4: no host-target interface
+    Sail.readReg Register.htif_tohost_base state = EStateM.Result.ok .none state ∧
+    -- Assumption A5: misa register exists
+    state.regs.get? Register.misa = .some misa ∧
+    -- Assumption A6: mseccfg register exists
+    Sail.readReg Register.mseccfg state = EStateM.Result.ok mseccfg state
+
+  lemma RISC_V_assumptions_invariant_under_pc_increment
+    (assumptions : RISC_V_assumptions s mstatus pmaRegion misa mseccfg)
+  :
+    RISC_V_assumptions (write_reg_state s Register.nextPC val) mstatus pmaRegion misa mseccfg
+  := by
+    obtain ⟨ h_priv, h_mprv, h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned, h_htif, h_misa, h_mseccfg ⟩ := assumptions
+    simp [RISC_V_assumptions]
+    split_ands <;> (try assumption)
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) (by assumption) (by trivial)]
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_mprv.1 (by trivial)]
+    . exact h_mprv.2
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_pma_regions (by trivial)]
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_htif (by trivial)]
+    . grind [write_reg_state]
+    . rw [readReg_of_write_other_reg_state (reg' := Register.nextPC) (val' := val) h_mseccfg (by trivial)]
 
 end Spec

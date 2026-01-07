@@ -1062,64 +1062,64 @@ end LoadSignExtend.NonValidRows
 
 namespace LoadSignExtend.ValidRows
 
-open VmAirWrapper_load_sign_extend.constraints
+  open VmAirWrapper_load_sign_extend.constraints
 
-variable (ExtF : Type) [Field ExtF]
-variable (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)
-variable (row : ℕ)
-variable (row_in_range : row ≤ air.last_row)
-variable (constraints : VmAirWrapper_load_sign_extend.constraints.allHold air row row_in_range)
-variable (axioms : axiomsPerRow air row)
-variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
+  variable (ExtF : Type) [Field ExtF]
+  variable (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)
+  variable (row : ℕ)
+  variable (row_in_range : row ≤ air.last_row)
+  variable (constraints : VmAirWrapper_load_sign_extend.constraints.allHold air row row_in_range)
+  variable (axioms : axiomsPerRow air row)
+  variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
-variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
+  variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
 
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 2_000_000 in
-include
-  row_valid
-  constraints
-  axioms
-  propertiesToAssume
-in
-/-- The properties that need to be proven actually hold -/
-lemma wf_propertiesToAssert
-:
-  wf_propertiesToAssertPerRow air row
-:= by
-  simp [executionBus_row] at row_valid
-  rw [allHold_simplified_of_allHold] at constraints
+  set_option maxHeartbeats 0 in
+  set_option maxRecDepth 2_000_000 in
+  include
+    row_valid
+    constraints
+    axioms
+    propertiesToAssume
+  in
+  /-- The properties that need to be proven actually hold -/
+  lemma wf_propertiesToAssert
+  :
+    wf_propertiesToAssertPerRow air row
+  := by
+    simp [executionBus_row] at row_valid
+    rw [allHold_simplified_of_allHold] at constraints
 
-  obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
-  simp [row_valid,
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
-    at pa_exec pa_mem pa_range pa_read constraints ⊢
-  simp_all [show ((2013265920 : FBB) = -1) by grind]
-  obtain h_nw | h_nw : (air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1) := by grind
-  . simp [h_nw]
-  . simp_all
-    simp [Valid_LoadSignExtendCoreAir_4.write_data,
-          ← LoadSignExtendCoreAir_4.limb_mask_def]
-    obtain ⟨ h00, h01, h02, h03, h04, h05, h06, h07, h08, h09,
-             h10, h11, h12 ⟩ := constraints
-    obtain h_lbf0 | h_lbf0 := h01
-    all_goals obtain h_lbf1 | h_lbf1 := h02
-    all_goals obtain h_lhf  | h_lhf  := h03
-    all_goals simp [h_lbf0, h_lbf1, h_lhf]
-    all_goals obtain h_msb : (air.core.data_most_sig_bit row 0 * 255).val < 256 := by grind
-    all_goals simp_all [← LoadSignExtendCoreAir_4.is_valid_def]
-    all_goals {
-      obtain ⟨ hrd0, hrd1, hrd2, hrd3 ⟩ :
-        (air.core.read_data row 0 0).val < 256 ∧
-        (air.core.read_data row 0 1).val < 256 ∧
-        (air.core.read_data row 0 2).val < 256 ∧
-        (air.core.read_data row 0 3).val < 256
-      := by grind
-      simp [← LoadSignExtendCoreAir_4.read_data_0_def] at hrd0
-      simp [← LoadSignExtendCoreAir_4.read_data_1_def] at hrd1
-      simp [← LoadSignExtendCoreAir_4.read_data_2_def] at hrd2
-      simp [← LoadSignExtendCoreAir_4.read_data_3_def] at hrd3
-      obtain h05 | h05 := h05 <;> simp_all
-    }
+    obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
+    simp [row_valid,
+          VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification]
+      at pa_exec pa_mem pa_range pa_read constraints ⊢
+    simp_all [show ((2013265920 : FBB) = -1) by grind]
+    obtain h_nw | h_nw : (air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1) := by grind
+    . simp [h_nw]
+    . simp_all
+      simp [Valid_LoadSignExtendCoreAir_4.write_data,
+            ← LoadSignExtendCoreAir_4.limb_mask_def]
+      obtain ⟨ h00, h01, h02, h03, h04, h05, h06, h07, h08, h09,
+              h10, h11, h12 ⟩ := constraints
+      obtain h_lbf0 | h_lbf0 := h01
+      all_goals obtain h_lbf1 | h_lbf1 := h02
+      all_goals obtain h_lhf  | h_lhf  := h03
+      all_goals simp [h_lbf0, h_lbf1, h_lhf]
+      all_goals obtain h_msb : (air.core.data_most_sig_bit row 0 * 255).val < 256 := by grind
+      all_goals simp_all [← LoadSignExtendCoreAir_4.is_valid_def]
+      all_goals {
+        obtain ⟨ hrd0, hrd1, hrd2, hrd3 ⟩ :
+          (air.core.read_data row 0 0).val < 256 ∧
+          (air.core.read_data row 0 1).val < 256 ∧
+          (air.core.read_data row 0 2).val < 256 ∧
+          (air.core.read_data row 0 3).val < 256
+        := by grind
+        simp [← LoadSignExtendCoreAir_4.read_data_0_def] at hrd0
+        simp [← LoadSignExtendCoreAir_4.read_data_1_def] at hrd1
+        simp [← LoadSignExtendCoreAir_4.read_data_2_def] at hrd2
+        simp [← LoadSignExtendCoreAir_4.read_data_3_def] at hrd3
+        obtain h05 | h05 := h05 <;> simp_all
+      }
 
 end LoadSignExtend.ValidRows

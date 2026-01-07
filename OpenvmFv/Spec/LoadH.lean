@@ -992,7 +992,7 @@ lemma imm_extend_range [Field ExtF]
       )
     ]
 
-  lemma executionBus_row [Field ExtF]
+  lemma executionBus_row_eq [Field ExtF]
     (air: Valid_VmAirWrapper_load_sign_extend FBB ExtF)
     (row: ℕ)
     (h_is_valid: air.core.is_valid row 0 = 1)
@@ -1219,6 +1219,60 @@ section RISC_V_equivalence
     end ExtHashMap
 
     open VmAirWrapper_load_sign_extend.constraints
+
+    lemma read_ptr_div_4 [Field ExtF]
+      (air: Valid_VmAirWrapper_load_sign_extend FBB ExtF)
+      (row: ℕ)
+      (h_opcode: air.core.expected_opcode row 0 = 535)
+      (h_row: row ≤ air.last_row)
+      (h_constraints: VmAirWrapper_load_sign_extend.constraints.allHold air row h_row)
+      (h_is_valid: air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : VmAirWrapper_load_sign_extend.constraints.wf_propertiesToAssumePerRow air row)
+    :
+      (air.read_ptr row 0) % 4 = 0
+    := by
+      have hrp := read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      have hm0 := mem_ptr_limbs_0_range air row h_bus_wellformedness h_is_valid
+      have hm1 := mem_ptr_limbs_1_range air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+      have eq_sh : air.core.load_shift_amount row 0 = air.shift_amount row 0
+      := by
+        have := shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+        omega
+      clear h_constraints
+
+      simp [
+        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        show ((2013265920 : FBB) = -1) by decide,
+        *
+      ] at h_bus_wellformedness ⊢
+      replace h_bus_wellformedness := h_bus_wellformedness.2.1.2.2.2.1
+
+      have := BabyBear.inv4_prod_lt_4_mod_zero (x := air.adapter.mem_ptr_limbs_0 row 0 - air.shift_amount row 0) (by omega)
+      simp [Valid_Rv32LoadStoreAdapterAir.mem_ptr] at *
+      clear hrp h_bus_wellformedness
+      grind
+
+    set_option synthInstance.maxHeartbeats 2_000_000 in
+    lemma mem_ptr_div_2 [Field ExtF]
+      (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)
+      (row : ℕ)
+      (h_row : row ≤ air.last_row)
+      (h_constraints : allHold air row h_row)
+      (h_is_valid : air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : wf_propertiesToAssumePerRow air row)
+      (h_opcode: air.core.expected_opcode row 0 = 535)
+    :
+      air.adapter.mem_ptr row 0 % 2 = 0
+    := by
+      have h_div_4 := read_ptr_div_4 air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
+      have h_mem := mem_ptr_range air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+      simp [
+        read_ptr_eq air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness,
+        (shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness).1
+      ] at h_div_4 h_mem
+      clear *- h_div_4 h_mem
+
+      split_ifs at h_div_4 with h_if <;> simp_all <;> grind
 
     lemma rd_rs2_ptr_div_4_under_128 [Field ExtF]
       (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF)

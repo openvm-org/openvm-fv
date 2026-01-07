@@ -59,7 +59,7 @@ namespace PureSpec
   set_option maxHeartbeats 0 in
   lemma execute_LOADHU_pure_equiv
     (input : LhuInput)
-    (h_general_assumptions : general_memory_assumptions state mstatus pmaRegion)
+    (risc_v_assumptions : RISC_V_assumptions state mstatus pmaRegion misa mseccfg)
     (h_opcode_assumptions : lhu_state_assumptions input state)
   :
     (
@@ -82,7 +82,7 @@ namespace PureSpec
       pure (ExecutionResult.Retire_Success ())
     ) state
   := by
-    have next_gma := gma_invariant_under_pc_increment h_general_assumptions (val := input.PC + 4#32)
+    have next_gma := RISC_V_assumptions_invariant_under_pc_increment risc_v_assumptions (val := input.PC + 4#32)
     unfold lhu_state_assumptions at h_opcode_assumptions
 
     simp [
@@ -95,7 +95,7 @@ namespace PureSpec
 
     have h_r1_val := rX_bits_write_other_reg_state (val := input.PC + 4#32) h_opcode_assumptions.2.1 reg_of_fin_neq_nextPC
 
-    obtain ⟨ h_htif, h_priv, h_mprv , h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned ⟩ := next_gma
+    obtain ⟨ h_priv, h_mprv, h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned, h_htif, h_misa, h_mseccfg ⟩ := next_gma
     have := arithmetic_helper (a := input.r1_val.toNat) (b := (BitVec.signExtend 32 input.imm).toNat) (by grind)
 
     simp [LeanRV32D.Functions.execute_LOAD, LeanRV32D.Functions.vmem_read, EStateM.map, *]
@@ -107,7 +107,7 @@ namespace PureSpec
 
     split_ifs with h_rd
     . simp [LeanRV32D.Functions.wX_bits, LeanRV32D.Functions.wX, *]
-    . let r  : Finset.Icc 1 31 := ⟨input.rd.toNat, range input.rd h_rd⟩
+    . let r : Finset.Icc 1 31 := ⟨input.rd.toNat, range input.rd h_rd⟩
       rewrite [ wX_write_xreg_non_zero_equiv _ _ _ r (by simp [r])]
       grind
 
