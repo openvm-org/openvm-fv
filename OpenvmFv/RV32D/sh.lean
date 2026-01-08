@@ -58,16 +58,11 @@ namespace PureSpec
     (i : ShInput)
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
   : Prop :=
-    -- Connecting the registers
     state.regs.get? Register.PC = .some i.PC ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r2) state = EStateM.Result.ok i.r2_val state ∧
-    -- Assumption : Memory address is not outside address space
-    -- Note : This is an assumption for this proof, but is not an assumption in general because there is
-    --        a static guarantee that all addresses on the memory bus must be less than 2 ^ 29
-    i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size ∧
-    -- Assumption A1 : Memory address alignment
-    (2 : ℤ) ∣ i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat
+    (i.r1_val + (BitVec.signExtend 32 i.imm)).toNat < OpenVM_address_space_size ∧
+    (2 : ℤ) ∣ (i.r1_val + (BitVec.signExtend 32 i.imm)).toNat
 
   set_option maxHeartbeats 0 in
   lemma execute_STOREH_pure_equiv
@@ -107,14 +102,23 @@ namespace PureSpec
     have h_r2_val := rX_bits_write_other_reg_state (val := input.PC + 4#32) h_opcode_assumptions.2.2.1 reg_of_fin_neq_nextPC
 
     obtain ⟨ h_priv, h_mprv, h_pma_regions, h_pma_base, h_pma_size, h_pma_readable, h_pma_writable, h_pma_misaligned, h_htif, h_misa, h_mseccfg ⟩ := next_gma
-    have := arithmetic_helper (a := input.r1_val.toNat) (b := (BitVec.signExtend 32 input.imm).toNat) (by grind)
 
+    simp at h_opcode_assumptions
     simp [LeanRV32D.Functions.execute_STORE, LeanRV32D.Functions.vmem_write, EStateM.map, *]
     simp [LeanRV32D.Functions.vmem_write_addr, ExceptT.run, *]
     rw [if_pos (by omega)]; simp [*]
-    rw [if_neg (by omega)]
+    rw [if_pos
+         (by
+          rw [Int.emod_eq_of_lt (b := 18446744073709551616) (by omega) (by omega)];
+          omega)]; simp [*]
+    rw [if_pos (by omega)]; simp [*]
+    rw [if_neg
+          (by
+           rw [Int.emod_eq_of_lt (b := 17179869184) (by omega) (by omega)]
+           omega)]
 
     simp [execute_STOREH_pure, EStateM.set, modify_memory_2, *]
+    rw [Nat.mod_eq_of_lt (b := 17179869184) (by omega)]
     congr 1 <;> [ congr 1; skip ] <;> simp [← BitVec.toNat_inj]
     omega
 

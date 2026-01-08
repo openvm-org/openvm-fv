@@ -43,13 +43,9 @@ namespace PureSpec
     (i : LbuInput)
     (state : PreSail.SequentialState RegisterType Sail.trivialChoiceSource)
   : Prop :=
-    -- Connecting the registers
     state.regs.get? Register.PC = .some i.PC ∧
     LeanRV32D.Functions.rX_bits (regidx.Regidx i.r1) state = EStateM.Result.ok i.r1_val state ∧
     state.mem[i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat]? = .some i.data0 ∧
-    -- Assumption : Memory address is not outside address space
-    -- Note : This is an assumption for this proof, but is not an assumption in general because there is
-    --        a static guarantee that all addresses on the memory bus must be less than 2 ^ 29
     i.r1_val.toNat + (BitVec.signExtend 32 i.imm).toNat < OpenVM_address_space_size
 
   set_option maxHeartbeats 0 in

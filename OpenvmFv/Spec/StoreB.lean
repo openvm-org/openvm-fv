@@ -105,6 +105,36 @@ namespace StoreB
     simp
     bv_decide
 
+  lemma imm_extend_12_to_16 [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_opcode: air.core.expected_opcode row 0 = 533)
+  :
+    BitVec.signExtend 32 (BitVec.ofNat 12 (air.adapter.imm row 0)) =
+    BitVec.signExtend 32 (BitVec.ofNat 16 (air.adapter.imm row 0))
+  := by
+    replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
+    simp [
+      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      h_is_valid,
+      Interaction.ProgramBusEntry.operand_properties
+    ] at h_bus_wellformedness
+    obtain ⟨instruction, data, h_transpile, h_data⟩ := h_bus_wellformedness
+    have := Transpiler.transpiler_opcode_533 h_transpile
+    simp [h_data.2.1, h_opcode] at this
+    have h_alignment := Transpiler.pc_aligned_of_some h_transpile
+    have h_bound := Transpiler.pc_bound_of_some h_transpile
+    obtain ⟨ imm, rs2, rs1, h_instruction ⟩ := this
+    subst instruction
+    simp [Transpiler.transpile_op, -Vector.mk_eq, and_assoc] at h_transpile
+    simp [← h_transpile.2.2] at h_data
+    rw [← h_data.2.2.2.1]
+    simp [Transpiler.utof, Transpiler.sign_extend_16]
+    rw [Nat.mod_eq_of_lt (by omega)]
+    grind
+
   lemma mem_as_of_opcode_533 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
     (row : ℕ)
@@ -1025,7 +1055,31 @@ namespace StoreB
     rewrite [Nat.mod_eq_of_lt (by omega)]
     omega
 
-lemma imm_extend_range_of_opcode_533 [Field ExtF]
+  lemma imm_eq_setWidth_of_opcode_533 [Field ExtF]
+    (air : Valid_VmAirWrapper_loadstore FBB ExtF)
+    (row : ℕ)
+    (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+    (h_is_valid: air.core.is_valid row 0 = 1)
+    (h_opcode: air.core.expected_opcode row 0 = 533)
+  :
+    (BitVec.setWidth 12
+      (U32.toBV
+        #v[BitVec.ofNat 8 (air.adapter.imm row 0), BitVec.ofNat 8 ((air.adapter.imm row 0) / 256),
+           BitVec.ofNat 8 (air.adapter.imm_extended_limb row 0), BitVec.ofNat 8 ((air.adapter.imm_extended_limb row 0) / 256)]))
+    = BitVec.signExtend 32 (BitVec.ofNat 12 (air.adapter.imm row 0))
+  := by
+    have imm_range := imm_range_of_opcode_533 air row h_opcode h_is_valid h_bus_wellformedness
+    simp [U32.toBV, BitVec.setWidth_eq_extractLsb']
+    repeat rw [BitVec.append_assoc]; simp
+    simp [BitVec.signExtend_eq_append_extractLsb']
+    iterate 2 rw [BitVec.extractLsb'_append_eq_of_add_le (by simp)]
+    conv => rhs; rw [BitVec.extractLsb'_append_eq_of_add_le (by simp)]
+    simp [← BitVec.toNat_inj]
+    rw [BitVec.toNat_append]; simp
+    rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)]
+    omega
+
+  lemma imm_extend_range_of_opcode_533 [Field ExtF]
     (air: Valid_VmAirWrapper_loadstore FBB ExtF)
     (row: ℕ)
     (h_row: row ≤ air.last_row)
@@ -1412,6 +1466,39 @@ lemma imm_extend_range_of_opcode_533 [Field ExtF]
     end ExtHashMap
 
     open VmAirWrapper_loadstore.constraints
+
+    lemma write_ptr_div_4 [Field ExtF]
+      (air: Valid_VmAirWrapper_loadstore FBB ExtF)
+      (row: ℕ)
+      (h_opcode: air.core.expected_opcode row 0 = 533)
+      (h_row: row ≤ air.last_row)
+      (h_constraints: VmAirWrapper_loadstore.constraints.allHold air row h_row)
+      (h_is_valid: air.core.is_valid row 0 = 1)
+      (h_bus_wellformedness : VmAirWrapper_loadstore.constraints.wf_propertiesToAssumePerRow air row)
+    :
+      (air.write_ptr row 0) % 4 = 0
+    := by
+      have hrp := write_ptr_of_opcode_533 air row h_opcode h_row h_constraints h_is_valid
+      have hm0 := mem_ptr_limbs_0_range_of_opcode_533 air row h_bus_wellformedness h_is_valid
+      have hm1 := mem_ptr_limbs_1_range_of_opcode_533 air row h_opcode h_row h_constraints h_bus_wellformedness h_is_valid
+      have eq_sh : air.core.store_shift_amount row 0 = air.shift_amount row 0
+      := by
+        have := shift_amount_of_opcode_533 air row h_opcode h_row h_constraints h_is_valid
+        have := store_shift_amount_of_opcode_533 air row h_opcode h_row h_constraints h_is_valid
+        omega
+      clear h_constraints
+
+      simp [
+        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        show ((2013265920 : FBB) = -1) by decide,
+        *
+      ] at h_bus_wellformedness ⊢
+      replace h_bus_wellformedness := h_bus_wellformedness.2.1.2.2.1
+
+      have := BabyBear.inv4_prod_lt_4_mod_zero (x := air.adapter.mem_ptr_limbs_0 row 0 - air.shift_amount row 0) (by omega)
+      simp [Valid_Rv32LoadStoreAdapterAir.mem_ptr] at *
+      clear hrp h_bus_wellformedness
+      grind
 
     lemma rd_rs2_ptr_div_4_under_128 [Field ExtF]
       (air : Valid_VmAirWrapper_loadstore FBB ExtF)
