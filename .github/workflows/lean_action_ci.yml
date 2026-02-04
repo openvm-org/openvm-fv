@@ -2,6 +2,8 @@ name: Lean Action CI
 
 on:
   push:
+    branches:
+      - "main"
   pull_request:
   workflow_dispatch:
 
@@ -13,7 +15,8 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on:
+      - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
 
     steps:
       - uses: actions/checkout@v4
