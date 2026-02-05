@@ -21,16 +21,6 @@ jobs:
   build:
     runs-on:
       - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
-
-  deploy-docs:
-    runs-on:
-      - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -40,3 +30,4 @@ jobs:
       - uses: leanprover/lean-action@v1
       - uses: leanprover-community/docgen-action@v1
         id: deployment
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
