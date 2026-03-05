@@ -21,6 +21,7 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
 
+    // SystemParams does not affect the DAG constraints
     let params = default_app_params(DEFAULT_APP_LOG_BLOWUP, DEFAULT_APP_L_SKIP, 1);
     let config = AppConfig::<SdkVmConfig>::standard(params);
 
