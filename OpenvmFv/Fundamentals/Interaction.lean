@@ -395,7 +395,7 @@ namespace Interaction
           axioms := fun _ => True
 
           -- The tuple range checker checks the appropriate ranges
-          wf_properties := fun ⟨_, x1, x2⟩ => x1.val < 256 ∧ x2.val < 2048
+          wf_properties := fun ⟨_, x1, x2⟩ => x1.val < 256 ∧ x2.val < 8192
 
           wf_assume_cond := fun entry => entry.1 = 1,
           wf_assert_cond := fun entry => entry.1 = -1,
