@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-openvm-stark-backend = { git = "https://github.com/openvm-org/stark-backend.git", branch = "feat/lean-extractor", features = ["lean"] }
-sdk-v2 = { git = "https://github.com/openvm-org/openvm.git", branch = "feat/INT-6541-lean-extractor" }
-openvm-sdk-config = { git = "https://github.com/openvm-org/openvm.git", branch = "feat/INT-6541-lean-extractor" }
+openvm-stark-backend = { git = "https://github.com/openvm-org/stark-backend.git", branch = "develop-v2", features = ["lean"] }
+sdk-v2 = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.1" }
+openvm-sdk-config = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.1" }
 
 clap = { version = "4", features = ["derive"] }
