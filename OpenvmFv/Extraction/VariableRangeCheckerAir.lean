@@ -51,7 +51,7 @@ namespace VariableRangeCheckerAir.extraction
 
   def constrain_interactions {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) :=
     Circuit.buses c = λ index =>
-      if index = 3 then (List.range (Circuit.last_row c + 1)).flatMap (λ row => [(-((Circuit.main c (id := 0) (column := 3) (row := row) (rotation := 0))), [(Circuit.main c (id := 0) (column := 0) (row := row) (rotation := 0)), (Circuit.main c (id := 0) (column := 1) (row := row) (rotation := 0))])])
+      if index = 4 then (List.range (Circuit.last_row c + 1)).flatMap (λ row => [(-((Circuit.main c (id := 0) (column := 3) (row := row) (rotation := 0))), [(Circuit.main c (id := 0) (column := 0) (row := row) (rotation := 0)), (Circuit.main c (id := 0) (column := 1) (row := row) (rotation := 0))])])
     else []
 
 end VariableRangeCheckerAir.extraction

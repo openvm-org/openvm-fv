@@ -135,14 +135,14 @@ namespace VariableRangeCheckerAir.constraints
     section interactions
 
       @[VariableRangeCheckerAir_constraint_and_interaction_simplification]
-      def bus_3Bus_row (air : Valid_VariableRangeCheckerAir F ExtF) (row : ℕ) : List (F × List F) :=
+      def bus_4Bus_row (air : Valid_VariableRangeCheckerAir F ExtF) (row : ℕ) : List (F × List F) :=
         [(-air.main_cols.mult row 0, [air.main_cols.value row 0, air.main_cols.max_bits row 0])]
 
-      lemma constrain_bus_3_interactions
+      lemma constrain_bus_4_interactions
         (air : Valid_VariableRangeCheckerAir F ExtF)
         (h : VariableRangeCheckerAir.extraction.constrain_interactions air)
       :
-        air.buses 3 = (List.range (air.last_row + 1)).flatMap (λ row => bus_3Bus_row air row)
+        air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => bus_4Bus_row air row)
       := by
         unfold VariableRangeCheckerAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -151,7 +151,7 @@ namespace VariableRangeCheckerAir.constraints
 
       def constrain_interactions (air : Valid_VariableRangeCheckerAir F ExtF) : Prop :=
         air.buses = fun index ↦
-        if index = 3 then (List.range (air.last_row + 1)).flatMap (bus_3Bus_row air)
+        if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (bus_4Bus_row air)
         else []
 
       @[VariableRangeCheckerAir_air_simplification]
@@ -684,6 +684,16 @@ namespace VariableRangeCheckerAir.constraints
         have h_tmb := tmb_eq_pow2 air h_all h_rot row h_row (fun r hr => h_mb_bound r (by omega))
         have h_bad : (v_ air row).val ≥ (tmb_ air row).val := by rw [h_tmb]; exact h_not_lt
         exact propagation air h_all h_rot h_lr h_mb_bound row h_row h_bad
+
+    omit [Field ExtF] in
+    theorem wf_properties_iff_bus_wf_properties
+        (air : Valid_VariableRangeCheckerAir FBB ExtF)
+        (row : ℕ)
+    : ((air.main_cols.max_bits row 0).val < 31 ∧
+        (air.main_cols.value row 0).val < 2 ^ (air.main_cols.max_bits row 0).val) ↔
+        Interaction.RangeCheckerBusEntryInstance.wf_properties
+          ⟨-air.main_cols.mult row 0, air.main_cols.value row 0, air.main_cols.max_bits row 0⟩ := by
+      rfl
 
   end properties
 
