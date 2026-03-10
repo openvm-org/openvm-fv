@@ -282,7 +282,7 @@ namespace BitwiseOperationLookupAir_8.constraints
     section interactions
 
       @[BitwiseOperationLookupAir_8_constraint_and_interaction_simplification]
-      def bus_6Bus_row (air : Valid_BitwiseOperationLookupAir_8 F ExtF) (row : ℕ) : List (F × List F) :=
+      def bus_9Bus_row (air : Valid_BitwiseOperationLookupAir_8 F ExtF) (row : ℕ) : List (F × List F) :=
         [(-air.main_cols.mult_range row 0,
             [air.main_cols.x_bits_0 row 0 + air.main_cols.x_bits_1 row 0 * 2 + air.main_cols.x_bits_2 row 0 * 4 +
                         air.main_cols.x_bits_3 row 0 * 8 +
@@ -335,11 +335,11 @@ namespace BitwiseOperationLookupAir_8.constraints
                 128,
               1])]
 
-      lemma constrain_bus_6_interactions
+      lemma constrain_bus_9_interactions
         (air : Valid_BitwiseOperationLookupAir_8 F ExtF)
         (h : BitwiseOperationLookupAir_8.extraction.constrain_interactions air)
       :
-        air.buses 6 = (List.range (air.last_row + 1)).flatMap (λ row => bus_6Bus_row air row)
+        air.buses BitwiseBus = (List.range (air.last_row + 1)).flatMap (λ row => bus_9Bus_row air row)
       := by
         unfold BitwiseOperationLookupAir_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
@@ -348,7 +348,7 @@ namespace BitwiseOperationLookupAir_8.constraints
 
       def constrain_interactions (air : Valid_BitwiseOperationLookupAir_8 F ExtF) : Prop :=
         air.buses = fun index ↦
-        if index = 6 then (List.range (air.last_row + 1)).flatMap (bus_6Bus_row air)
+        if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bus_9Bus_row air)
         else []
 
       @[BitwiseOperationLookupAir_8_air_simplification]
@@ -473,7 +473,7 @@ namespace BitwiseOperationLookupAir_8.constraints
     def all_constraints_hold (air : Valid_BitwiseOperationLookupAir_8 FBB ExtF) : Prop :=
       ∀ row (h_row : row ≤ air.last_row), allHold_simplified air row h_row
 
-    -- Abbreviations matching bus_6Bus_row data fields
+    -- Abbreviations matching bus_9Bus_row data fields
     open BabyBear in
     /-- Reconstructed x value from bit decomposition -/
     private abbrev x_ (air : Valid_BitwiseOperationLookupAir_8 FBB ExtF) (row : ℕ) : FBB :=
@@ -680,13 +680,13 @@ namespace BitwiseOperationLookupAir_8.constraints
 
     /-! ### Main theorems — match BitwiseBusEntryInstance.wf_properties exactly
 
-    BitwiseBusEntryInstance.wf_properties is:
+      BitwiseBusEntryInstance.wf_properties is:
       fun ⟨_, a, b, c, op⟩ =>
         a.val < 256 ∧ b.val < 256 ∧
         (op = 0 ∨ op = 1) ∧
         c.val = if op = 0 then 0 else a.val ^^^ b.val
 
-    bus_6Bus_row emits two entries per row:
+      bus_9Bus_row emits two entries per row:
       Entry 1: (mult, [x, y, 0, 0])     → a=x_, b=y_, c=0,    op=0
       Entry 2: (mult, [x, y, xor_, 1])  → a=x_, b=y_, c=xor_, op=1
     -/
@@ -723,6 +723,28 @@ namespace BitwiseOperationLookupAir_8.constraints
       simp only [show (1 : FBB) ≠ 0 from by decide, ↓reduceIte]
       exact binary_xor_sum_correct _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
         hx0 hx1 hx2 hx3 hx4 hx5 hx6 hx7 hy0 hy1 hy2 hy3 hy4 hy5 hy6 hy7
+
+    omit [Field ExtF] in
+    theorem wf_properties_range_iff_bus_wf_properties
+        (air : Valid_BitwiseOperationLookupAir_8 FBB ExtF)
+        (row : ℕ)
+    : ((x_ air row).val < 256 ∧ (y_ air row).val < 256 ∧
+        ((0 : FBB) = 0 ∨ (0 : FBB) = 1) ∧
+        (0 : FBB).val = if (0 : FBB) = 0 then 0 else (x_ air row).val ^^^ (y_ air row).val) ↔
+        Interaction.BitwiseBusEntryInstance.wf_properties
+          ⟨-air.main_cols.mult_range row 0, x_ air row, y_ air row, 0, 0⟩ := by
+      rfl
+
+    omit [Field ExtF] in
+    theorem wf_properties_xor_iff_bus_wf_properties
+        (air : Valid_BitwiseOperationLookupAir_8 FBB ExtF)
+        (row : ℕ)
+    : ((x_ air row).val < 256 ∧ (y_ air row).val < 256 ∧
+        ((1 : FBB) = 0 ∨ (1 : FBB) = 1) ∧
+        (xor_ air row).val = if (1 : FBB) = 0 then 0 else (x_ air row).val ^^^ (y_ air row).val) ↔
+        Interaction.BitwiseBusEntryInstance.wf_properties
+          ⟨-air.main_cols.mult_xor row 0, x_ air row, y_ air row, xor_ air row, 1⟩ := by
+      rfl
 
   end properties
 
