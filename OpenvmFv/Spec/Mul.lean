@@ -161,10 +161,10 @@ theorem spec_MUL
         BitVec.extend, ← BitVec.toNat_inj, U32.toNat]
   repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
 
-  have ub_cry0' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  have ub_cry1' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  have ub_cry2' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  have ub_cry3' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+  have ub_cry0' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  have ub_cry1' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  have ub_cry2' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  have ub_cry3' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
 
   rw [add_sub_assoc, ← add_sub_assoc (a := 2005401601 * _), ← add_assoc] at ub_cry1' ub_cry2' ub_cry3'
   repeat rw [← add_assoc] at ub_cry2'

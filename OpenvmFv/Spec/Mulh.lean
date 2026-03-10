@@ -211,15 +211,15 @@ theorem spec_MULH
     := by rw [h_msb_c]; clear *-; split_ifs <;> simp
   simp [msb_c_val]
 
-  have ub_cry4 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  have ub_cry5 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  have ub_cry6 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  have ub_cry7 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+  have ub_cry4 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  have ub_cry5 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  have ub_cry6 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  have ub_cry7 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
   clear ub_cry0 ub_cry1 ub_cry2 ub_cry3
-  have ub_cry0 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm0; simp]
-  have ub_cry1 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm1; simp]
-  have ub_cry2 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm2; simp]
-  have ub_cry3 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm3; simp]
+  have ub_cry0 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm0; simp]
+  have ub_cry1 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm1; simp]
+  have ub_cry2 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm2; simp]
+  have ub_cry3 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm3; simp]
 
   have ub_p00 : b0.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
@@ -427,15 +427,15 @@ theorem spec_MULHSU
     := by rw [h_msb_b]; clear *-; split_ifs <;> simp
   simp [msb_b_val]
 
-  have ub_cry4 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  have ub_cry5 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  have ub_cry6 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  have ub_cry7 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+  have ub_cry4 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  have ub_cry5 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  have ub_cry6 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  have ub_cry7 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
   clear ub_cry0 ub_cry1 ub_cry2 ub_cry3
-  have ub_cry0 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm0; simp]
-  have ub_cry1 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm1; simp]
-  have ub_cry2 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm2; simp]
-  have ub_cry3 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm3; simp]
+  have ub_cry0 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm0; simp]
+  have ub_cry1 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm1; simp]
+  have ub_cry2 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm2; simp]
+  have ub_cry3 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm3; simp]
 
   have ub_p00 : b0.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
@@ -624,15 +624,15 @@ theorem spec_MULHU
   set c0 := air.core.c_0 row 0; set c1 := air.core.c_1 row 0; set c2 := air.core.c_2 row 0; set c3 := air.core.c_3 row 0
   set a0 := air.core.a_mul_0 row 0; set a1 := air.core.a_mul_1 row 0; set a2 := air.core.a_mul_2 row 0; set a3 := air.core.a_mul_3 row
 
-  have ub_cry4 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  have ub_cry5 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  have ub_cry6 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  have ub_cry7 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+  have ub_cry4 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  have ub_cry5 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  have ub_cry6 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  have ub_cry7 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
   clear ub_cry0 ub_cry1 ub_cry2 ub_cry3
-  have ub_cry0 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm0; simp]
-  have ub_cry1 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm1; simp]
-  have ub_cry2 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm2; simp]
-  have ub_cry3 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cm3; simp]
+  have ub_cry0 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm0; simp]
+  have ub_cry1 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm1; simp]
+  have ub_cry2 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm2; simp]
+  have ub_cry3 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cm3; simp]
 
   have ub_p00 : b0.val * c0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 

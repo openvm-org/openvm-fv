@@ -199,14 +199,14 @@ lemma divrem_split
 (ub_ce : c_ext.val < 256)
 (ub_qe : q_ext.val < 256)
 (ub_re : r_ext.val < 256)
-(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 2048)
-(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 2048)
-(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 2048)
-(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 2048)
-(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4)).val < 2048)
-(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5)).val < 2048)
-(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6)).val < 2048)
-(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6) + (r_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b7)).val < 2048)
+(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 8192)
+(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 8192)
+(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 8192)
+(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 8192)
+(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4)).val < 8192)
+(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5)).val < 8192)
+(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6)).val < 8192)
+(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6) + (r_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b7)).val < 8192)
 :
   U64.toBV #v[BitVec.ofNat 8 b0, BitVec.ofNat 8 b1, BitVec.ofNat 8 b2, BitVec.ofNat 8 b3, BitVec.ofNat 8 b4, BitVec.ofNat 8 b5, BitVec.ofNat 8 b6, BitVec.ofNat 8 b7] =
   U64.toBV #v[BitVec.ofNat 8 c0, BitVec.ofNat 8 c1, BitVec.ofNat 8 c2, BitVec.ofNat 8 c3,
@@ -216,14 +216,14 @@ lemma divrem_split
   U64.toBV #v[BitVec.ofNat 8 r0, BitVec.ofNat 8 r1, BitVec.ofNat 8 r2, BitVec.ofNat 8 r3,
               BitVec.ofNat 8 r_ext, BitVec.ofNat 8 r_ext, BitVec.ofNat 8 r_ext, BitVec.ofNat 8 r_ext]
 := by
-  replace ub_cry0 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  replace ub_cry1 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  replace ub_cry2 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  replace ub_cry3 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
-  replace ub_cry4 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry4; simp]
-  replace ub_cry5 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry5; simp]
-  replace ub_cry6 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry6; simp]
-  replace ub_cry7 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry7; simp]
+  replace ub_cry0 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  replace ub_cry1 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  replace ub_cry2 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  replace ub_cry3 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
+  replace ub_cry4 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry4; simp]
+  replace ub_cry5 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry5; simp]
+  replace ub_cry6 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry6; simp]
+  replace ub_cry7 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry7; simp]
 
   have ub_p00 : c0.val * q0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
@@ -337,14 +337,14 @@ lemma divrem_quot_rem_sign
 (ub_be : b_ext.val < 256)
 (ub_ce : c_ext.val < 256)
 (ub_qe : q_ext.val < 256)
-(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 2048)
-(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 2048)
-(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 2048)
-(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 2048)
-(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext)).val < 2048)
-(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext)).val < 2048)
-(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext)).val < 2048)
-(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext) + (b_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b_ext)).val < 2048)
+(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 8192)
+(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 8192)
+(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 8192)
+(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 8192)
+(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext)).val < 8192)
+(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext)).val < 8192)
+(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext)).val < 8192)
+(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext) + (b_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b_ext)).val < 8192)
 (h_c_nz : ¬(U32.toInt #v[c0, c1, c2, c3] = 0))
 (h_r_nz : ¬(U32.toInt #v[r0, r1, r2, r3] = 0))
 (h_b_ext : b_ext = U32.ext #v[b0.val, b1.val, b2.val, b3.val] true)
