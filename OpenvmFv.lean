@@ -40,6 +40,7 @@ import OpenvmFv.Airs.ExecutionState
 import OpenvmFv.Airs.LessThanAuxCols
 import OpenvmFv.Airs.Memory
 import OpenvmFv.Airs.PhantomAir
+import OpenvmFv.Airs.RangeTupleCheckerAir
 import OpenvmFv.Airs.VariableRangeCheckerAir
 
 import OpenvmFv.Constraints.AccessAdapterAir_2
@@ -49,6 +50,7 @@ import OpenvmFv.Constraints.ExecutionDummyAir
 import OpenvmFv.Constraints.MemoryDummyAir_1
 import OpenvmFv.Constraints.PhantomAir
 import OpenvmFv.Constraints.ProgramDummyAir
+import OpenvmFv.Constraints.RangeTupleCheckerAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
 import OpenvmFv.Constraints.VmAirWrapper_auipc
@@ -87,6 +89,7 @@ import OpenvmFv.Extraction.ExecutionDummyAir
 import OpenvmFv.Extraction.MemoryDummyAir_1
 import OpenvmFv.Extraction.PhantomAir
 import OpenvmFv.Extraction.ProgramDummyAir
+import OpenvmFv.Extraction.RangeTupleCheckerAir
 import OpenvmFv.Extraction.VariableRangeCheckerAir
 import OpenvmFv.Extraction.VmAirWrapper_alu
 import OpenvmFv.Extraction.VmAirWrapper_auipc
