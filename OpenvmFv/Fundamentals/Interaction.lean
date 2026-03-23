@@ -411,6 +411,53 @@ namespace Interaction
 
     end RangeTupleCheckerBus
 
+    section KeccakfStateBus
+
+      /-- Keccak-f state bus entry.
+          Carries preimage/postimage state between KeccakfOpAir and KeccakfPermAir.
+          Data layout: [flag, timestamp, state_limb_0, ..., state_limb_99]
+          where flag ∈ {0,1} (0 = preimage, 1 = postimage) and each limb is a u16. -/
+      structure KeccakfStateBusEntry where
+        multiplicity : F
+        payload : Vector F 102
+
+      abbrev KeccakfStateBusEntry.flag (e : KeccakfStateBusEntry F) : F := e.payload[0]
+      abbrev KeccakfStateBusEntry.timestamp (e : KeccakfStateBusEntry F) : F := e.payload[1]
+      abbrev KeccakfStateBusEntry.state_limb (e : KeccakfStateBusEntry F) (i : Fin 100) : F :=
+        e.payload[i.val + 2]
+
+      @[simp, grind]
+      def KeccakfStateBusEntry.deserialise
+        (entry : F × Vector F 102)
+      : KeccakfStateBusEntry F :=
+        { multiplicity := entry.1, payload := entry.2 }
+
+      @[simp, grind]
+      instance KeccakfStateBusEntryInstance
+      : BusEntry FBB (KeccakfStateBusEntry FBB) :=
+      {
+          multiplicity := fun entry => entry.multiplicity,
+
+          data_length := 102,
+          data := fun entry => entry.payload,
+
+          axioms := fun _ => True
+
+          wf_properties := fun entry =>
+            (entry.payload[0] = 0 ∨ entry.payload[0] = 1) ∧
+            (∀ i : Fin 100, (entry.payload[i.val + 2]).val < 2 ^ 16)
+
+          wf_assume_cond := fun entry => entry.multiplicity = -1,
+          wf_assert_cond := fun entry => entry.multiplicity = 1,
+
+          deserialise := KeccakfStateBusEntry.deserialise FBB
+
+          inv_deser_ser := by simp [KeccakfStateBusEntry.deserialise]
+          inv_ser_deser := by simp [KeccakfStateBusEntry.deserialise]
+      }
+
+    end KeccakfStateBus
+
   end buses
 
 end Interaction
