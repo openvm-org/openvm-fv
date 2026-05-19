@@ -1,13 +1,10 @@
 use clap::Parser;
+use openvm_sdk::{config::AppConfig, keygen::AppProvingKey};
 use openvm_sdk_config::SdkVmConfig;
 use openvm_stark_backend::{
-    air_builders::symbolic::SymbolicConstraints,
-    keygen::lean::extract_constraints_to_lean,
+    air_builders::symbolic::SymbolicConstraints, lean::extract_constraints_to_lean,
 };
-use sdk_v2::{
-    config::{default_app_params, AppConfig, DEFAULT_APP_LOG_BLOWUP, DEFAULT_APP_L_SKIP},
-    keygen::AppProvingKey,
-};
+use openvm_stark_sdk::config::{app_params_with_100_bits_security, MAX_APP_LOG_STACKED_HEIGHT};
 
 #[derive(Parser)]
 #[command(name = "openvm-fv-extractor")]
@@ -22,12 +19,15 @@ fn main() {
     let cli = Cli::parse();
 
     // SystemParams does not affect the DAG constraints
-    let params = default_app_params(DEFAULT_APP_LOG_BLOWUP, DEFAULT_APP_L_SKIP, 1);
+    let params = app_params_with_100_bits_security(MAX_APP_LOG_STACKED_HEIGHT);
     let config = AppConfig::<SdkVmConfig>::standard(params);
 
     eprintln!("Running keygen...");
     let app_pk = AppProvingKey::<SdkVmConfig>::keygen(config).expect("keygen failed");
-    eprintln!("Keygen complete. Searching for AIR matching '{}'...", cli.air);
+    eprintln!(
+        "Keygen complete. Searching for AIR matching '{}'...",
+        cli.air
+    );
 
     let vm_pk = &app_pk.app_vm_pk.vm_pk;
     let mut found = false;
