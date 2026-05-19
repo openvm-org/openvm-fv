@@ -1,5 +1,4 @@
 import VmExtensions.Airs.XorinVmAir
-import Fundamentals.Bus
 import VmExtensions.Extraction.Sha2BlockHasherVmAir_sha256
 import VmExtensions.Airs.KeccakfOpAir
 import VmExtensions.Airs.KeccakfPermAir
