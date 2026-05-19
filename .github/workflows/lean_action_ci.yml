@@ -15,11 +15,73 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-openvm-fv:
+    name: Build OpenvmFv
     runs-on:
       - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
 
     steps:
       - uses: runs-on/action@v2
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
+
+      - name: Restore .lake cache
+        id: cache-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: .lake
+          key: lake-openvm-fv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-openvm-fv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-
+
+      - name: Build OpenvmFv
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          build-args: "OpenvmFv"
+          use-mathlib-cache: "true"
+          use-github-cache: "false"
+
+      - name: Save .lake cache
+        if: always() && steps.cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: .lake
+          key: lake-openvm-fv-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+
+  build-vm-extensions:
+    name: Build VmExtensions
+    runs-on:
+      - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
+
+    steps:
+      - uses: runs-on/action@v2
+      - uses: actions/checkout@v4
+
+      - name: Restore .lake cache
+        id: cache-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            .lake
+            VmExtensions/.lake
+          key: lake-vm-extensions-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'VmExtensions/lean-toolchain', 'VmExtensions/lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-vm-extensions-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'VmExtensions/lean-toolchain', 'VmExtensions/lake-manifest.json') }}-
+
+      - name: Build VmExtensions
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          build-args: "VmExtensions"
+          lake-package-directory: "VmExtensions"
+          use-mathlib-cache: "true"
+          use-github-cache: "false"
+
+      - name: Save .lake cache
+        if: always() && steps.cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            .lake
+            VmExtensions/.lake
+          key: lake-vm-extensions-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'VmExtensions/lean-toolchain', 'VmExtensions/lake-manifest.json') }}-${{ github.sha }}

@@ -26,11 +26,6 @@ name = "LeanRV"
 git = "https://github.com/NethermindEth/sail-riscv-lean"
 rev = "rv32d"
 
-[[require]]
-name = "swirl-rbr-fv"
-git = "git@github.com:axiom-crypto/swirl-rbr-fv.git"
-rev = "main"
-
 [[lean_lib]]
 name = "VmExtensions"
 srcDir = ".."
