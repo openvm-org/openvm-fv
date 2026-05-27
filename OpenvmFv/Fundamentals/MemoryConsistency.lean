@@ -232,7 +232,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_auipc_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -271,7 +271,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_auipc_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -321,7 +321,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_alu_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -370,7 +370,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_alu_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -433,7 +433,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_branch_eq_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -474,7 +474,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_branch_eq_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -530,7 +530,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_branch_lt_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -571,7 +571,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_branch_lt_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -627,7 +627,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_divrem_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -670,7 +670,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_divrem_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -734,7 +734,7 @@ namespace Consistency
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             have h_nw_eq := JalLui.ValidRows.needs_write_eq_is_valid ExtF air row (by omega) (h_constraints row (by omega)) (h_bus_wellformedness row (by omega))
             simp [
-              VmAirWrapper_jallui_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
             omega
@@ -772,7 +772,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_jallui_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -821,7 +821,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_jalr_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -863,7 +863,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_jalr_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification,
               h_nw_eq,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
@@ -920,7 +920,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -967,7 +967,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -1030,7 +1030,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -1077,7 +1077,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -1140,7 +1140,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_lt_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BaseAluAdapterAir_LessThanCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -1189,7 +1189,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_lt_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BaseAluAdapterAir_LessThanCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -1252,7 +1252,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_mul_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -1295,7 +1295,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_mul_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -1358,7 +1358,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_mulh_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -1401,7 +1401,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_mulh_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc
@@ -1464,7 +1464,7 @@ namespace Consistency
             specialize h_bus_axioms row (by omega)
             obtain ⟨ h_ex, h_mem, rest ⟩ := h_bus_axioms; clear rest
             simp [
-              VmAirWrapper_shift_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide
             ] at h_mem
@@ -1513,7 +1513,7 @@ namespace Consistency
             rw [allHold_simplified_of_allHold] at h_constraints
             obtain ⟨ ci, h_constraints ⟩ := h_constraints; clear ci
             simp [
-              VmAirWrapper_shift_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
               h_valid,
               show ((2013265920 : FBB) = -1) by decide,
               and_assoc

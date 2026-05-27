@@ -344,7 +344,7 @@ namespace RV32IM.Equivalence
         extract_lets rs1_ptr rs2_ptr imm r2 r1 imm instr
         subst rs1_ptr rs2_ptr imm r2 r1 imm instr
         -- Get the axioms
-        simp [h_is_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+        simp [h_is_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
         obtain ⟨ ub_pc, al_pc, ub_ts, ub_tpc, al_tpc, ub_nts ⟩ := h_bus_axioms
         replace al_tpc : (BitVec.ofNat 32 (air.to_pc row 0)).toNat % 4 = 0
           := by simp; grind
@@ -477,7 +477,7 @@ namespace RV32IM.Equivalence
         extract_lets rs1_ptr rs2_ptr imm r1 r2 imm instr
         subst rs1_ptr rs2_ptr imm r1 r2 imm instr
         -- Get the axioms
-        simp [h_is_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+        simp [h_is_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
         obtain ⟨ ub_pc, al_pc, ub_ts, ub_tpc, al_tpc, ub_nts ⟩ := h_bus_axioms
         replace al_tpc : (BitVec.ofNat 32 (air.to_pc row 0)).toNat % 4 = 0
           := by simp; clear *- al_tpc; grind
@@ -799,7 +799,7 @@ namespace RV32IM.Equivalence
       subst rd_ptr rs1_ptr imm rd rs1 imm instr
       simp at h_rs1 h_rd h_spec_rd h_spec_npc
       -- Get the axioms
-      simp [h_is_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+      simp [h_is_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
       obtain ⟨ ub_pc, al_pc, ub_ts, ub_tpc, al_tpc, ub_nts ⟩ := h_bus_axioms
       replace al_tpc : (BitVec.ofNat 32 (air.core.to_pc row 0)).toNat % 4 = 0
         := by simp; grind
@@ -915,7 +915,7 @@ namespace RV32IM.Equivalence
       subst rd_ptr imm rd imm instr
       simp at h_rd h_spec_rd h_spec_pc
       -- Get the axioms
-      simp [h_is_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+      simp [h_is_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
       obtain ⟨ ub_pc, al_pc, ub_ts, ub_tpc, al_tpc, ub_nts ⟩ := h_bus_axioms
       replace al_tpc : (BitVec.ofNat 32 (air.to_pc row 0)).toNat % 4 = 0
         := by simp; grind
@@ -972,7 +972,7 @@ namespace RV32IM.Equivalence
       subst rd_ptr imm rd imm instr
       simp at h_rd h_spec_rd h_spec_pc
       -- Get the axioms
-      simp [h_is_valid, VmAirWrapper_branch_eq_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+      simp [h_is_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
       obtain ⟨ ub_pc, al_pc, ub_ts, ub_tpc, al_tpc, ub_nts ⟩ := h_bus_axioms
       replace al_tpc : (BitVec.ofNat 32 (air.to_pc row 0)).toNat % 4 = 0
         := by simp; grind
@@ -1034,7 +1034,7 @@ namespace RV32IM.Equivalence
 
     have h_ub_read_ptr := h_bus_wellformedness
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show ((2013265920 : FBB) = -1) by decide,
     ] at h_ub_read_ptr
@@ -1189,7 +1189,7 @@ namespace RV32IM.Equivalence
 
     have h_ub_read_ptr := h_bus_wellformedness
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show ((2013265920 : FBB) = -1) by decide,
     ] at h_ub_read_ptr
@@ -1864,7 +1864,7 @@ namespace RV32IM.Equivalence
 
     have h_ub_read_ptr := h_bus_wellformedness
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show ((2013265920 : FBB) = -1) by decide,
     ] at h_ub_read_ptr
@@ -1982,7 +1982,7 @@ namespace RV32IM.Equivalence
 
     have h_ub_read_ptr := h_bus_wellformedness
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show ((2013265920 : FBB) = -1) by decide,
     ] at h_ub_read_ptr
@@ -2138,7 +2138,7 @@ namespace RV32IM.Equivalence
 
     have h_ub_read_ptr := h_bus_wellformedness
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show ((2013265920 : FBB) = -1) by decide,
     ] at h_ub_read_ptr

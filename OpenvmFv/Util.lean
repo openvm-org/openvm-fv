@@ -22,10 +22,10 @@ lemma eq_constant_256 {T: Type} (x: T) [inst: OfNat T 256]:
 section BusIndices
   abbrev ExecutionBus : ℕ := 0
   abbrev MemoryBus : ℕ := 1
-  abbrev RangeCheckerBus : ℕ := 4
-  abbrev ProgramBus : ℕ := 8
-  abbrev BitwiseBus : ℕ := 9
-  abbrev RangeTupleCheckerBus : ℕ := 11
+  abbrev ProgramBus : ℕ := 2
+  abbrev RangeCheckerBus : ℕ := 3
+  abbrev BitwiseBus : ℕ := 6
+  abbrev RangeTupleCheckerBus : ℕ := 10
 
   @[openvm_encapsulation]
   lemma execution_bus_simplification:
@@ -41,25 +41,25 @@ section BusIndices
 
   @[openvm_encapsulation]
   lemma range_checker_bus_simplification:
-    (if index = 4 then a else b) =
+    (if index = 3 then a else b) =
     if index = RangeCheckerBus then a else b
   := rfl
 
   @[openvm_encapsulation]
   lemma read_instruction_bus_simplification:
-    (if index = 8 then a else b) =
+    (if index = 2 then a else b) =
     if index = ProgramBus then a else b
   := rfl
 
   @[openvm_encapsulation]
   lemma bitwise_bus_simplification:
-    (if index = 9 then a else b) =
+    (if index = 6 then a else b) =
     if index = BitwiseBus then a else b
   := rfl
 
   @[openvm_encapsulation]
   lemma range_tuple_checker_bus_simplification:
-    (if index = 11 then a else b) =
+    (if index = 10 then a else b) =
     if index = RangeTupleCheckerBus then a else b
   := rfl
 end BusIndices

@@ -361,8 +361,8 @@ namespace Equivalence.BaseALU
     λ index =>
       if index = ExecutionBus then            rows.flatMap ALU_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap ALU_instruction_fields.memory
-      else if index = RangeCheckerBus then    rows.flatMap ALU_instruction_fields.range_checks
       else if index = ProgramBus then rows.flatMap ALU_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then    rows.flatMap ALU_instruction_fields.range_checks
       else if index = BitwiseBus then         rows.flatMap ALU_instruction_fields.bitwise
       else []
 
@@ -2240,7 +2240,7 @@ namespace Equivalence.BaseALU
       have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
       := by
         rw [allHold_simplified_of_allHold] at h_constraints
-        simp [VmAirWrapper_alu_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification, h_is_valid] at h_constraints
         grind
 
       have h_opcode := opcode_bounds air row h_row h_constraints h_is_valid
@@ -2336,7 +2336,7 @@ namespace Equivalence.BaseALU
       have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
       := by
         rw [allHold_simplified_of_allHold] at h_constraints
-        simp [VmAirWrapper_alu_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification, h_is_valid] at h_constraints
         grind
 
       simp [
@@ -2397,7 +2397,7 @@ namespace Equivalence.BaseALU
       have h_rs2_as : air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
       := by
         rw [allHold_simplified_of_allHold] at h_constraints
-        simp [VmAirWrapper_alu_constraint_and_interaction_simplification, h_is_valid] at h_constraints
+        simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification, h_is_valid] at h_constraints
         grind
 
       clear h_constraints

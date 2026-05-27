@@ -39,7 +39,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
      ++ programBus_row air row
     → entry.1 = 0
 := by
-  simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification]
 
 end Mulh.NonValidRows
 
@@ -67,7 +67,7 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -77,11 +77,11 @@ lemma wf_propertiesToAssert
   clear pa_range pa_bit
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_mulh, b_mulhsu, rest ⟩ := constraints
   clear constrain_interactions
-  simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
   clear *- b_mulh b_mulhsu
@@ -110,7 +110,7 @@ lemma essentials
   clear constraints
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -118,7 +118,7 @@ lemma essentials
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   clear pa_bit pa_read
 
-  simp_all [VmAirWrapper_mulh_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
@@ -158,7 +158,7 @@ theorem spec_MULH
   have ⟨ op0, op1, op2 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -168,7 +168,7 @@ theorem spec_MULH
   clear pa_exec pa_range
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification] at constraints
 
   obtain ⟨ hint, b_mulh, b_mulhsu, b_mulhu, b_is_valid, b_b_sign, b_c_sign, mulh_b_sign, mulu_c_sign, rest ⟩ := constraints
   clear hint rest
@@ -380,7 +380,7 @@ theorem spec_MULHSU
   have ⟨ op0, op1, op2 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -390,7 +390,7 @@ theorem spec_MULHSU
   clear pa_exec pa_range
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification] at constraints
 
   obtain ⟨ hint, b_mulh, b_mulhsu, b_mulhu, b_is_valid, b_b_sign, b_c_sign, mulh_b_sign, mulu_c_sign, rest ⟩ := constraints
   clear hint rest
@@ -590,7 +590,7 @@ theorem spec_MULHU
   have ⟨ op0, op1, op2 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mulh_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -600,7 +600,7 @@ theorem spec_MULHU
   clear pa_exec pa_range pa_bit
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mulh_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_MulHCoreAir_4_8_constraint_and_interaction_simplification] at constraints
 
   obtain ⟨ hint, b_mulh, b_mulhsu, b_mulhu, b_is_valid, b_b_sign, b_c_sign, mulh_b_sign, mulu_c_sign, rest ⟩ := constraints
   clear hint rest

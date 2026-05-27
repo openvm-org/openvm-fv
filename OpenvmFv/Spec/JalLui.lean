@@ -38,7 +38,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
     → entry.1 = 0
 := by
   rw [allHold_simplified_of_allHold] at constraints
-  simp_all [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
 
 end JalLui.NonValidRows
 
@@ -75,7 +75,7 @@ lemma wf_propertiesToAssert
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   clear pa_range pa_read
   simp [row_valid,
-        VmAirWrapper_jallui_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification,
         and_assoc,
         Interaction.ProgramBusEntry.operand_properties]
     at axioms pa_exec pa_mem pa_bit constraints ⊢
@@ -104,11 +104,11 @@ theorem spec_lui
   BitVec.ofNat 32 (air.to_pc row 0) =
     BitVec.ofNat 32 ↑(air.adapter.inner.from_state.pc row 0) + 4#32
 := by
-  simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at row_valid
+  simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at row_valid
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
   clear pa_mem pa_range
-  simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
+  simp [row_valid, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     at pa_exec pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
   obtain ⟨ instruction, data, h_transpile,
@@ -170,11 +170,11 @@ theorem spec_jal
     BitVec.ofNat 32 ↑(air.adapter.inner.from_state.pc row 0) +
     BitVec.signExtend 32 (BitVec.ofInt 21 (BabyBear.toInt (air.core.imm row 0)))
 := by
-  simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at row_valid
+  simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at row_valid
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
   clear pa_mem pa_range
-  simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
+  simp [row_valid, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     at pa_exec pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
   obtain ⟨ instruction, data, h_transpile,
@@ -281,12 +281,12 @@ lemma needs_write_eq_is_valid
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at constraints
   obtain ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 ⟩ := constraints
   obtain row_valid | row_valid := c3
   . simp_all
   . clear pa_mem pa_range
-    simp [row_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification]
+    simp [row_valid, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       at pa_exec pa_read pa_bit
     simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
     obtain ⟨ instruction, data, h_transpile,

@@ -21,333 +21,333 @@ namespace VmAirWrapper_jallui.constraints
     section row_constraints
 
       -- constraints and constraints_of_extraction
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_0 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_lui row 0 = 0 ∨ air.core.is_lui row 0 = 1
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_0_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_0 air row ↔ constraint_0 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_1 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_jal row 0 = 0 ∨ air.core.is_jal row 0 = 1
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_1_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_1 air row ↔ constraint_1 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_1 air row ↔ constraint_1 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_2 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_2_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_2 air row ↔ constraint_2 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_2 air row ↔ constraint_2 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_3 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_lui row 0 = 0 ∨ air.core.rd_data_0 row 0 = 0
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_3_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_3 air row ↔ constraint_3 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_3 air row ↔ constraint_3 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_4 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_lui row 0 = 0 ∨ air.core.intermed_val row 0 = air.core.imm row 0 * 16
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_4_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_4 air row ↔ constraint_4 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_4 air row ↔ constraint_4 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_5 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_jal row 0 = 0 ∨ air.core.intermed_val' row 0 = air.adapter.inner.from_state.pc row 0 + 4
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_5_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_5 air row ↔ constraint_5 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_5 air row ↔ constraint_5 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_6 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_6_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_6 air row ↔ constraint_6 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_6 air row ↔ constraint_6 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_7 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 1 ∨ air.adapter.needs_write row 0 = 0
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_7_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_7 air row ↔ constraint_7 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_7 air row ↔ constraint_7 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         simp [eq_constant_1] at h
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         simp [eq_constant_1]
         exact h
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def constraint_8 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
         air.adapter.needs_write row 0 = 0 ∨
     air.adapter.inner.from_state.timestamp row 0 - air.adapter.inner.rd_aux_cols.base.prev_timestamp row 0 - 1 =
       air.adapter.inner.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0 +
         air.adapter.inner.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constraint_8_of_extraction
           (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      : VmAirWrapper_jallui.extraction.constraint_8 air row ↔ constraint_8 air row := by
+      : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_8 air row ↔ constraint_8 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
         exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_9 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_9_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_9 air row ↔ constraint_9 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_9 air row ↔ constraint_9 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_10 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_10_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_10 air row ↔ constraint_10 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_10 air row ↔ constraint_10 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_11 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_11_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_11 air row ↔ constraint_11 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_11 air row ↔ constraint_11 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_12 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_12_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_12 air row ↔ constraint_12 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_12 air row ↔ constraint_12 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_13 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_13_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_13 air row ↔ constraint_13 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_13 air row ↔ constraint_13 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_14 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_14_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_14 air row ↔ constraint_14 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_14 air row ↔ constraint_14 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_15 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_15_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_15 air row ↔ constraint_15 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_15 air row ↔ constraint_15 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_16 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_16_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_16 air row ↔ constraint_16 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_16 air row ↔ constraint_16 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
-      -- @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       -- def constraint_17 (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : Prop :=
       --   sorry
       --
-      -- @[VmAirWrapper_jallui_air_simplification]
+      -- @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       -- lemma constraint_17_of_extraction
       --     (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ)
-      -- : VmAirWrapper_jallui.extraction.constraint_17 air row ↔ constraint_17 air row := by
+      -- : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_17 air row ↔ constraint_17 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_jallui_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h
       --   exact h
 
     end row_constraints
@@ -358,7 +358,7 @@ namespace VmAirWrapper_jallui.constraints
       --       the lemmas below to get the expression in the infoview
 
       --busRows, constrain_interactions, and constrain_interactions_of_extraction
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def executionBus_row (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : List (F × List F) :=
         [(-air.core.is_valid row 0,
           [air.adapter.inner.from_state.pc row 0, air.adapter.inner.from_state.timestamp row 0]),
@@ -366,17 +366,17 @@ namespace VmAirWrapper_jallui.constraints
 
       lemma constrain_execution_interactions
         (air : Valid_VmAirWrapper_jallui F ExtF)
-        (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air)
       :
         air.buses ExecutionBus = (List.range (air.last_row + 1)).flatMap (λ row => executionBus_row air row)
       := by
-        unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def memoryBus_row (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : List (F × List F) :=
         [(2013265920 * air.adapter.needs_write row 0,
           [1, air.adapter.inner.rd_ptr row 0, air.adapter.inner.rd_aux_cols.prev_data_0 row 0,
@@ -388,17 +388,17 @@ namespace VmAirWrapper_jallui.constraints
 
       lemma constrain_memory_interactions
         (air : Valid_VmAirWrapper_jallui F ExtF)
-        (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air)
       :
         air.buses MemoryBus = (List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row air row)
       := by
-        unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.adapter.needs_write row 0, [air.adapter.inner.rd_aux_cols.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
         (air.adapter.needs_write row 0,
@@ -406,17 +406,17 @@ namespace VmAirWrapper_jallui.constraints
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_jallui F ExtF)
-        (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air)
       :
         air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
-        unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def programBus_row (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
           [air.adapter.inner.from_state.pc row 0, air.core.expected_opcode row 0, air.adapter.inner.rd_ptr row 0, 0,
@@ -424,17 +424,17 @@ namespace VmAirWrapper_jallui.constraints
 
       lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_jallui F ExtF)
-        (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air)
       :
         air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
-        unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
       def bitwiseBus_row (air : Valid_VmAirWrapper_jallui F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0, [air.core.rd_data_0 row 0, air.core.rd_data_1 row 0, 0, 0]),
         (air.core.is_valid row 0, [air.core.rd_data_2 row 0, air.core.rd_data_3 row 0, 0, 0]),
@@ -442,11 +442,11 @@ namespace VmAirWrapper_jallui.constraints
 
       lemma constrain_bitwise_interactions
         (air : Valid_VmAirWrapper_jallui F ExtF)
-        (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air)
       :
         air.buses BitwiseBus = (List.range (air.last_row + 1)).flatMap (λ row => bitwiseBus_row air row)
       := by
-        unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
@@ -456,17 +456,17 @@ namespace VmAirWrapper_jallui.constraints
       air.buses = fun index ↦
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-      else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
       else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
+      else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
       else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
       else []
 
-      @[VmAirWrapper_jallui_air_simplification]
+      @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
       lemma constrain_interactions_of_extraction
         (air : Valid_VmAirWrapper_jallui F ExtF)
-        (h : VmAirWrapper_jallui.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air)
       : constrain_interactions air := by
-        unfold VmAirWrapper_jallui.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         exact h
 
@@ -484,24 +484,24 @@ namespace VmAirWrapper_jallui.constraints
       (row : ℕ)
     : List Prop :=
       [
-        VmAirWrapper_jallui.extraction.constraint_0 air row,
-        VmAirWrapper_jallui.extraction.constraint_1 air row,
-        VmAirWrapper_jallui.extraction.constraint_2 air row,
-        VmAirWrapper_jallui.extraction.constraint_3 air row,
-        VmAirWrapper_jallui.extraction.constraint_4 air row,
-        VmAirWrapper_jallui.extraction.constraint_5 air row,
-        VmAirWrapper_jallui.extraction.constraint_6 air row,
-        VmAirWrapper_jallui.extraction.constraint_7 air row,
-        VmAirWrapper_jallui.extraction.constraint_8 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_9 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_10 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_11 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_12 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_13 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_14 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_15 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_16 air row,
-    --     VmAirWrapper_jallui.extraction.constraint_17 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_0 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_1 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_2 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_3 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_4 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_5 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_6 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_7 air row,
+        VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_8 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_9 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_10 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_11 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_12 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_13 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_14 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_15 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_16 air row,
+    --     VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constraint_17 air row,
       ]
 
     @[simp]
@@ -511,7 +511,7 @@ namespace VmAirWrapper_jallui.constraints
       (row : ℕ)
       (_ : row ≤ air.last_row)
     : Prop :=
-      VmAirWrapper_jallui.extraction.constrain_interactions air ∧
+      VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions air ∧
       List.Forall (·) (extracted_row_constraint_list air row)
 
     @[simp]
@@ -559,12 +559,12 @@ namespace VmAirWrapper_jallui.constraints
     : allHold air row h_row ↔ allHold_simplified air row h_row := by
       unfold allHold allHold_simplified
       apply Iff.and
-      . unfold VmAirWrapper_jallui.extraction.constrain_interactions
+      . unfold VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir.extraction.constrain_interactions
         simp [openvm_encapsulation]
         rfl
       . simp only [extracted_row_constraint_list,
                   row_constraint_list,
-                  VmAirWrapper_jallui_air_simplification]
+                  VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_air_simplification]
 
   end allHold
 
@@ -585,7 +585,7 @@ namespace VmAirWrapper_jallui.constraints
       unfold executionBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     def _executionBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_jallui FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
@@ -605,7 +605,7 @@ namespace VmAirWrapper_jallui.constraints
       unfold memoryBus_row at *; simp_all
       grind (ematch := 8)
 
-    @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     def _memoryBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_jallui FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
@@ -625,7 +625,7 @@ namespace VmAirWrapper_jallui.constraints
       unfold rangeCheckerBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     def _rangeCheckerBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_jallui FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
@@ -644,7 +644,7 @@ namespace VmAirWrapper_jallui.constraints
     := by
       unfold programBus_row at *; simp_all
 
-    @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     def _programBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_jallui FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
@@ -664,7 +664,7 @@ namespace VmAirWrapper_jallui.constraints
       unfold bitwiseBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_jallui_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
     def _bitwiseBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_jallui FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.BitwiseBusEntryInstance.data_length) := by

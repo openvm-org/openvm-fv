@@ -41,13 +41,13 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
   have : air.adapter.rs2_as row 0 = 0 := by
     obtain ⟨ hint, constraints ⟩ := constraints
     clear hint; unfold extracted_row_constraint_list at constraints
-    simp only [VmAirWrapper_alu_air_simplification,
-               VmAirWrapper_alu_constraint_and_interaction_simplification] at constraints
+    simp only [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification,
+               VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at constraints
     simp at constraints
     simp [executionBus_row] at row_not_valid
     grind
   clear constraints
-  simp_all [VmAirWrapper_alu_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
 end ALU.NonValidRows
 
@@ -76,11 +76,11 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
@@ -90,7 +90,7 @@ lemma wf_propertiesToAssert
 
   have ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at *
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at *
   obtain ⟨ constrain_interactions,
           b_add, b_sub, b_xor, b_or, b_and, b_is_valid,
           add_0, sub_0, add_1, sub_1, add_2, sub_2, add_3, sub_3,
@@ -173,18 +173,18 @@ lemma essentials
   have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid axioms propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   simp [row_valid, and_assoc,
-        VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_mem
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_mem
   obtain ⟨ x0, ub_b0, ub_b1, ub_b2, ub_b3, x1, ub_c_imm, x2, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := pa_mem
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3, op4 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
@@ -197,7 +197,7 @@ lemma essentials
            add_0, sub_0, add_1, sub_1, add_2, sub_2, add_3, sub_3,
            b_rs2_as, rs2_as_imm, imm_sign, imm_sign_extend, rest ⟩ := constraints
   clear constrain_interactions rest
-  simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at *
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at *
 
   obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3 ⟩ :
      (air.core.c_0 row 0).val < 256 ∧
@@ -252,19 +252,19 @@ theorem spec_base_ALU
   have assertedProperties := wf_propertiesToAssert _ air row row_in_range constraints row_valid axioms propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   simp [row_valid, and_assoc,
-        VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_mem
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_mem
   obtain ⟨ x0, ub_b0, ub_b1, ub_b2, ub_b3, x1, ub_c_imm, x2, ub_a0, ub_a1, ub_a2, ub_a3 ⟩ := pa_mem
   clear pa_exec x0 x1 x2 rest
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1, sop2, sop3, sop4 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3, op4 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
@@ -279,7 +279,7 @@ theorem spec_base_ALU
            add_0, sub_0, add_1, sub_1, add_2, sub_2, add_3, sub_3,
            b_rs2_as, rs2_as_imm, imm_sign, imm_sign_extend, rest ⟩ := constraints
   clear constrain_interactions rest
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at *
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at *
 
   obtain ⟨ ub_c0, ub_c1, ub_c2, ub_c3 ⟩ :
      (air.core.c_0 row 0).val < 256 ∧
@@ -431,11 +431,11 @@ theorem spec_base_ALU_imm
   have propertiesToAssume' := propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume'
   clear pa_exec pa_mem pa_range pa_bit
-  simp [row_valid, VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_read
 

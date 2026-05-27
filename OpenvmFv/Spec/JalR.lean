@@ -38,7 +38,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
     → entry.1 = 0
 := by
   rw [allHold_simplified_of_allHold] at constraints
-  simp_all [VmAirWrapper_jalr_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]
 
 end JalR.NonValidRows
 
@@ -73,7 +73,7 @@ lemma wf_propertiesToAssert
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   simp [row_valid,
-        VmAirWrapper_jalr_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification,
         and_assoc,
         show (2013265920 : FBB) = -1 by decide,
         Interaction.ProgramBusEntry.operand_properties,
@@ -95,12 +95,12 @@ lemma needs_write_eq_is_valid
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_jalr_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification] at constraints
   obtain ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 ⟩ := constraints
   obtain row_valid | row_valid := c1
   . simp_all
   . clear pa_mem pa_range
-    simp [row_valid, VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    simp [row_valid, VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]
       at pa_exec pa_read pa_bit
     simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
     obtain ⟨ instruction, data, h_transpile,
@@ -141,7 +141,7 @@ theorem spec_jalr
                    (air.core.rs1_data_3 row 0).val] +
        BitVec.signExtend 32 (BitVec.ofNat 12 (air.core.imm row 0)))
 := by
-  simp [VmAirWrapper_jalr_constraint_and_interaction_simplification] at row_valid
+  simp [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification] at row_valid
   have needs_write_eq_is_valid := needs_write_eq_is_valid _ air row row_in_range constraints propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
@@ -149,7 +149,7 @@ theorem spec_jalr
         row_valid,
         show (2013265920 : FBB) = -1 by decide,
         needs_write_eq_is_valid,
-        VmAirWrapper_jalr_constraint_and_interaction_simplification]
+        VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]
     at pa_exec pa_mem pa_range pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
   obtain ⟨ instruction, data, h_transpile,

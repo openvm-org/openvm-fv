@@ -556,6 +556,7 @@ namespace Sha2MainAir_Sha512Config.extraction
 --def Circuit._ (c: Circuit F ExtF) (row: N) := c.main (id := 0) (column := 539) (row := row) (rotation := 0)
 
 -----Extracted constraints----------
+  @[simp]
   def inter_0 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t488 := ((Circuit.main c (id := 0) (column := 272) (row := row) (rotation := 0)) * 256)
     let t489 := ((Circuit.main c (id := 0) (column := 271) (row := row) (rotation := 0)) + t488)
@@ -563,11 +564,13 @@ namespace Sha2MainAir_Sha512Config.extraction
     let t491 := (t489 + t490)
     t491
 
+  @[simp]
   def inter_1 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t506 := ((Circuit.main c (id := 0) (column := 274) (row := row) (rotation := 0)) * 16777216)
     let t507 := (inter_0 c row + t506)
     t507
 
+  @[simp]
   def inter_2 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t998 := ((Circuit.main c (id := 0) (column := 268) (row := row) (rotation := 0)) * 256)
     let t999 := ((Circuit.main c (id := 0) (column := 267) (row := row) (rotation := 0)) + t998)
@@ -575,11 +578,13 @@ namespace Sha2MainAir_Sha512Config.extraction
     let t1001 := (t999 + t1000)
     t1001
 
+  @[simp]
   def inter_3 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t1016 := ((Circuit.main c (id := 0) (column := 270) (row := row) (rotation := 0)) * 16777216)
     let t1017 := (inter_2 c row + t1016)
     t1017
 
+  @[simp]
   def inter_4 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t1252 := ((Circuit.main c (id := 0) (column := 264) (row := row) (rotation := 0)) * 256)
     let t1253 := ((Circuit.main c (id := 0) (column := 263) (row := row) (rotation := 0)) + t1252)
@@ -587,6 +592,7 @@ namespace Sha2MainAir_Sha512Config.extraction
     let t1255 := (t1253 + t1254)
     t1255
 
+  @[simp]
   def inter_5 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t1270 := ((Circuit.main c (id := 0) (column := 266) (row := row) (rotation := 0)) * 16777216)
     let t1271 := (inter_4 c row + t1270)

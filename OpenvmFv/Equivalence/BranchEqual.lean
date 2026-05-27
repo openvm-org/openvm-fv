@@ -102,8 +102,8 @@ namespace Equivalence.BranchEqual
     λ index =>
       if index = ExecutionBus then            rows.flatMap BranchEqual_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap BranchEqual_instruction_fields.memory
-      else if index = RangeCheckerBus then    rows.flatMap BranchEqual_instruction_fields.range_checks
       else if index = ProgramBus then rows.flatMap BranchEqual_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then    rows.flatMap BranchEqual_instruction_fields.range_checks
       else []
 
   def allHold_allRows [Field ExtF] (air : Valid_VmAirWrapper_branch_eq FBB ExtF) : Prop :=
@@ -156,7 +156,7 @@ namespace Equivalence.BranchEqual
       unfold bus_from_instruction_fields BranchEqual_instruction_fields.execution BranchEqual_instruction_fields.memory BranchEqual_instruction_fields.range_checks BranchEqual_instruction_fields.read_instruction
       simp [
         get_instruction_fields,
-        VmAirWrapper_branch_eq_constraint_and_interaction_simplification
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification
       ]
       unfold VmAirWrapper_branch_eq.constraints.executionBus_row
       unfold VmAirWrapper_branch_eq.constraints.memoryBus_row

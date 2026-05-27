@@ -41,7 +41,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
      ++ programBus_row air row
     → entry.1 = 0
 := by
-  simp_all [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification]
 
 end BranchLessThan.NonValidRows
 
@@ -69,11 +69,11 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
@@ -83,7 +83,7 @@ lemma wf_propertiesToAssert
 
   have ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp_all [VmAirWrapper_branch_lt_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification]
   grind
 
 include
@@ -112,11 +112,11 @@ lemma essentials
   have assertions := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read pa_bit
+  simp [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_read pa_bit
 
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
@@ -128,7 +128,7 @@ lemma essentials
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at axioms assertions constraints
+  simp [row_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at axioms assertions constraints
   obtain ⟨ constrain_interactions,
            b_blt, b_bltu, b_bge, b_bgeu,
            b_cmp_result, h_cmp_lt, h_a_diff, h_b_diff,
@@ -203,14 +203,14 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
       else air.adapter.from_state.pc row 0 + 4)
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
@@ -220,7 +220,7 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc_FBB
 
   -- Prepare constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at *
+  simp [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at *
   obtain ⟨ constrain_interactions, rest ⟩ := constraints
   clear constrain_interactions
 
@@ -375,14 +375,14 @@ theorem spec_BLT_BLTU_BGE_BGEU_pc
   clear rest
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   -- Get all opcode properties
   obtain ⟨ sop0, sop1, sop2, sop3 ⟩ := single_op air row row_in_range constraints
   obtain ⟨ op0, op1, op2, op3 ⟩ := op_from_opcode air row row_in_range constraints row_valid
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_branch_lt_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read

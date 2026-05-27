@@ -70,8 +70,8 @@ namespace Equivalence.JalR
     λ index =>
       if index = ExecutionBus then         rows.flatMap JalR_instruction_fields.execution
       else if index = MemoryBus then       rows.flatMap JalR_instruction_fields.memory
-      else if index = RangeCheckerBus then rows.flatMap JalR_instruction_fields.range_checks
       else if index = ProgramBus then      rows.flatMap JalR_instruction_fields.program
+      else if index = RangeCheckerBus then rows.flatMap JalR_instruction_fields.range_checks
       else if index = BitwiseBus then      rows.flatMap JalR_instruction_fields.bitwise
       else []
 
@@ -173,7 +173,7 @@ namespace Equivalence.JalR
     unfold bus_from_instruction_fields JalR_instruction_fields.execution JalR_instruction_fields.memory JalR_instruction_fields.range_checks JalR_instruction_fields.program
     simp [
       get_instruction_fields,
-      VmAirWrapper_jalr_constraint_and_interaction_simplification
+      VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification
     ]
 
     unfold VmAirWrapper_jalr.constraints.executionBus_row
@@ -272,7 +272,7 @@ namespace Equivalence.JalR
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     rw [VmAirWrapper_jalr.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_jalr_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 ⟩ := h_constraints
     simp_all
     obtain ⟨ imm, rd, rs1, h_instruction, h_rd ⟩ := Transpiler.transpiler_opcode_565 h_transpile.1 h_transpile.2.2.2.1
@@ -344,7 +344,7 @@ namespace Equivalence.JalR
           h_constraints
           h_bus_axioms
           h_bus_wellformedness
-          (by simp [VmAirWrapper_jalr_constraint_and_interaction_simplification]; assumption)
+          (by simp [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]; assumption)
 
       obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := jalr_rd_properties air row (by omega) h_is_valid h_constraints h_bus_wellformedness
       simp [get_instruction_fields_row] at h_rd_nz eq_rd'
@@ -352,9 +352,9 @@ namespace Equivalence.JalR
 
       have h_nw := @JalR.ValidRows.needs_write_eq_is_valid _ _ air row (by omega) h_constraints h_bus_wellformedness
 
-      simp [h_is_valid, VmAirWrapper_jalr_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+      simp [h_is_valid, VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
       obtain ⟨ ub_pc, al_pc, ub_ts, ub_npc, al_npc, ub_nts ⟩ := h_bus_axioms
-      simp [h_is_valid, VmAirWrapper_jalr_constraint_and_interaction_simplification] at h_bus_wellformedness
+      simp [h_is_valid, VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification] at h_bus_wellformedness
       obtain ⟨ h_mem, h_range, h_prog, h_bit ⟩ := h_bus_wellformedness
       simp [*] at h_mem h_range h_bit
 
