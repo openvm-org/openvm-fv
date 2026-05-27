@@ -10,3 +10,4 @@ openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", branch = "devel
 openvm-sdk-config = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.1" }
 
 clap = { version = "4", features = ["derive"] }
+gag = "1"
