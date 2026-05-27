@@ -35,7 +35,6 @@ import OpenvmFv.Airs.LoadStore.Rv32LoadStoreAdapterAir
 import OpenvmFv.Airs.LoadStore.VmAirWrapper_load_sign_extend
 import OpenvmFv.Airs.LoadStore.VmAirWrapper_loadstore
 
-import OpenvmFv.Airs.AccessAdapterAir
 import OpenvmFv.Airs.ExecutionState
 import OpenvmFv.Airs.LessThanAuxCols
 import OpenvmFv.Airs.Memory
@@ -43,13 +42,8 @@ import OpenvmFv.Airs.PhantomAir
 import OpenvmFv.Airs.RangeTupleCheckerAir
 import OpenvmFv.Airs.VariableRangeCheckerAir
 
-import OpenvmFv.Constraints.AccessAdapterAir_2
-import OpenvmFv.Constraints.AccessAdapterAir_4
 import OpenvmFv.Constraints.BitwiseOperationLookupAir_8
-import OpenvmFv.Constraints.ExecutionDummyAir
-import OpenvmFv.Constraints.MemoryDummyAir_1
 import OpenvmFv.Constraints.PhantomAir
-import OpenvmFv.Constraints.ProgramDummyAir
 import OpenvmFv.Constraints.RangeTupleCheckerAir
 import OpenvmFv.Constraints.VariableRangeCheckerAir
 import OpenvmFv.Constraints.VmAirWrapper_alu
@@ -65,7 +59,6 @@ import OpenvmFv.Constraints.VmAirWrapper_lt
 import OpenvmFv.Constraints.VmAirWrapper_mul
 import OpenvmFv.Constraints.VmAirWrapper_mulh
 import OpenvmFv.Constraints.VmAirWrapper_shift
-import OpenvmFv.Constraints.VolatileBoundaryAir
 
 import OpenvmFv.Equivalence.Auipc
 import OpenvmFv.Equivalence.BaseALU
@@ -82,13 +75,8 @@ import OpenvmFv.Equivalence.Mul
 import OpenvmFv.Equivalence.Mulh
 import OpenvmFv.Equivalence.Shift
 
-import OpenvmFv.Extraction.AccessAdapterAir_2
-import OpenvmFv.Extraction.AccessAdapterAir_4
 import OpenvmFv.Extraction.BitwiseOperationLookupAir_8
-import OpenvmFv.Extraction.ExecutionDummyAir
-import OpenvmFv.Extraction.MemoryDummyAir_1
 import OpenvmFv.Extraction.PhantomAir
-import OpenvmFv.Extraction.ProgramDummyAir
 import OpenvmFv.Extraction.RangeTupleCheckerAir
 import OpenvmFv.Extraction.VariableRangeCheckerAir
 import OpenvmFv.Extraction.VmAirWrapper_alu
@@ -104,7 +92,6 @@ import OpenvmFv.Extraction.VmAirWrapper_lt
 import OpenvmFv.Extraction.VmAirWrapper_mul
 import OpenvmFv.Extraction.VmAirWrapper_mulh
 import OpenvmFv.Extraction.VmAirWrapper_shift
-import OpenvmFv.Extraction.VolatileBoundaryAir
 
 import OpenvmFv.Fundamentals.BabyBear
 import OpenvmFv.Fundamentals.Core
