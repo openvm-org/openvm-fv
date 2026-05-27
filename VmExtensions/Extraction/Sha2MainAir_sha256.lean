@@ -300,6 +300,7 @@ namespace Sha2MainAir_Sha256Config.extraction
 --def Circuit._ (c: Circuit F ExtF) (row: N) := c.main (id := 0) (column := 283) (row := row) (rotation := 0)
 
 -----Extracted constraints----------
+  @[simp]
   def inter_0 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t264 := ((Circuit.main c (id := 0) (column := 144) (row := row) (rotation := 0)) * 256)
     let t265 := ((Circuit.main c (id := 0) (column := 143) (row := row) (rotation := 0)) + t264)
@@ -307,11 +308,13 @@ namespace Sha2MainAir_Sha256Config.extraction
     let t267 := (t265 + t266)
     t267
 
+  @[simp]
   def inter_1 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t282 := ((Circuit.main c (id := 0) (column := 146) (row := row) (rotation := 0)) * 16777216)
     let t283 := (inter_0 c row + t282)
     t283
 
+  @[simp]
   def inter_2 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t518 := ((Circuit.main c (id := 0) (column := 140) (row := row) (rotation := 0)) * 256)
     let t519 := ((Circuit.main c (id := 0) (column := 139) (row := row) (rotation := 0)) + t518)
@@ -319,11 +322,13 @@ namespace Sha2MainAir_Sha256Config.extraction
     let t521 := (t519 + t520)
     t521
 
+  @[simp]
   def inter_3 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t536 := ((Circuit.main c (id := 0) (column := 142) (row := row) (rotation := 0)) * 16777216)
     let t537 := (inter_2 c row + t536)
     t537
 
+  @[simp]
   def inter_4 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t644 := ((Circuit.main c (id := 0) (column := 136) (row := row) (rotation := 0)) * 256)
     let t645 := ((Circuit.main c (id := 0) (column := 135) (row := row) (rotation := 0)) + t644)
@@ -331,6 +336,7 @@ namespace Sha2MainAir_Sha256Config.extraction
     let t647 := (t645 + t646)
     t647
 
+  @[simp]
   def inter_5 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t662 := ((Circuit.main c (id := 0) (column := 138) (row := row) (rotation := 0)) * 16777216)
     let t663 := (inter_4 c row + t662)

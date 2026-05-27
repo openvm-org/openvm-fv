@@ -197,10 +197,10 @@ namespace Equivalence.LoadStore
         rows.flatMap LoadStore_instruction_fields.execution
       else if index = MemoryBus then
         rows.flatMap LoadStore_instruction_fields.memory
-      else if index = RangeCheckerBus then
-        rows.flatMap LoadStore_instruction_fields.range_checks
       else if index = ProgramBus then
         rows.flatMap LoadStore_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then
+        rows.flatMap LoadStore_instruction_fields.range_checks
       else []
 
   def allHold_allRows [Field ExtF] (air : Valid_VmAirWrapper_loadstore FBB ExtF) : Prop :=
@@ -377,7 +377,7 @@ namespace Equivalence.LoadStore
     rewrite [
       VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold
     ] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -514,7 +514,7 @@ namespace Equivalence.LoadStore
   := by
     have h_transpile := h_bus_wellformedness.2.2.2
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_transpile
@@ -607,28 +607,28 @@ namespace Equivalence.LoadStore
       convert this
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.1
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.2.1
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.2.2.1
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -640,7 +640,7 @@ namespace Equivalence.LoadStore
       ]
       have h_execution := h_bus_axioms.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid
       ] at h_execution
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -887,7 +887,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -905,7 +905,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -934,7 +934,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -965,7 +965,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -1093,7 +1093,7 @@ namespace Equivalence.LoadStore
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1325,7 +1325,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_needs_write := StoreH.needs_write_of_opcode_532 air row h_bus_wellformedness h_is_valid h_opcode
     have h_bus_wellformedness' := h_bus_wellformedness
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
           h_is_valid,
           h_needs_write,
           show (((-1) : FBB) = 2013265920) by native_decide,
@@ -1335,7 +1335,7 @@ set_option maxHeartbeats 0 in
              hwf21, hwf22, hwf23, hwf24, hwf25, hwf26 ⟩ := h_bus_wellformedness'
     have h_constraints' := h_constraints
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints'
     simp [h_is_valid, h_needs_write] at h_constraints'
     obtain ⟨
       h_interactions,
@@ -1404,7 +1404,7 @@ set_option maxHeartbeats 0 in
       ]
       have h_execution := h_bus_axioms.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid
       ] at h_execution
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -1596,7 +1596,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1828,7 +1828,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_needs_write := StoreB.needs_write_of_opcode_533 air row h_bus_wellformedness h_is_valid h_opcode
     have h_bus_wellformedness' := h_bus_wellformedness
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
           h_is_valid,
           h_needs_write,
           show (((-1) : FBB) = 2013265920) by native_decide,
@@ -1838,7 +1838,7 @@ set_option maxHeartbeats 0 in
              hwf21, hwf22, hwf23, hwf24, hwf25, hwf26 ⟩ := h_bus_wellformedness'
     have h_constraints' := h_constraints
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints'
     simp [h_is_valid, h_needs_write] at h_constraints'
     obtain ⟨
       h_interactions,
@@ -1907,7 +1907,7 @@ set_option maxHeartbeats 0 in
       ]
       have h_execution := h_bus_axioms.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid
       ] at h_execution
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -2128,7 +2128,7 @@ set_option maxHeartbeats 0 in
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -2144,7 +2144,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2160,7 +2160,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2176,7 +2176,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2197,7 +2197,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2226,7 +2226,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2256,7 +2256,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -2406,7 +2406,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -2659,7 +2659,7 @@ set_option maxHeartbeats 0 in
     . apply lw_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -2864,7 +2864,7 @@ set_option maxHeartbeats 0 in
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -2880,7 +2880,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2896,7 +2896,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2912,7 +2912,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2933,7 +2933,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2962,7 +2962,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2988,7 +2988,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -3147,7 +3147,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -3400,7 +3400,7 @@ set_option maxHeartbeats 0 in
     . apply lhu_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -3444,7 +3444,7 @@ set_option maxHeartbeats 0 in
             simp [this]
             have := LoadHU.write_data_0_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
             simp [this, LoadHU.shift_amount_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid]
-            simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
+            simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_bus_wellformedness
             split_ifs
             . clear *-; symm
               simp [← BitVec.toNat_inj]
@@ -3621,7 +3621,7 @@ set_option maxHeartbeats 0 in
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -3637,7 +3637,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -3653,7 +3653,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -3669,7 +3669,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -3690,7 +3690,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -3719,7 +3719,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -3745,7 +3745,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -3903,7 +3903,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -4156,7 +4156,7 @@ set_option maxHeartbeats 0 in
     . apply lbu_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -4200,7 +4200,7 @@ set_option maxHeartbeats 0 in
             simp [this]
             have := LoadBU.write_data_0_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
             simp [this, LoadBU.shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid]
-            simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
+            simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_bus_wellformedness
             clear *-
             split_ifs
             all_goals {

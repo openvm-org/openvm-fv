@@ -130,8 +130,8 @@ namespace Equivalence.Mul
     λ index =>
       if index = ExecutionBus then              rows.flatMap MUL_instruction_fields.execution
       else if index = MemoryBus then            rows.flatMap MUL_instruction_fields.memory
-      else if index = RangeCheckerBus then      rows.flatMap MUL_instruction_fields.range_checks
       else if index = ProgramBus then   rows.flatMap MUL_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then      rows.flatMap MUL_instruction_fields.range_checks
       else if index = RangeTupleCheckerBus then rows.flatMap MUL_instruction_fields.range_check_tuples
       else []
 

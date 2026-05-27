@@ -150,8 +150,8 @@ namespace Equivalence.BranchLessThan
     λ index =>
       if index = ExecutionBus then            rows.flatMap BranchLessThan_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap BranchLessThan_instruction_fields.memory
-      else if index = RangeCheckerBus then    rows.flatMap BranchLessThan_instruction_fields.range_checks
       else if index = ProgramBus then rows.flatMap BranchLessThan_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then    rows.flatMap BranchLessThan_instruction_fields.range_checks
       else if index = BitwiseBus then         rows.flatMap BranchLessThan_instruction_fields.bitwise
       else []
 
@@ -213,7 +213,7 @@ namespace Equivalence.BranchLessThan
       unfold bus_from_instruction_fields BranchLessThan_instruction_fields.execution BranchLessThan_instruction_fields.memory BranchLessThan_instruction_fields.range_checks BranchLessThan_instruction_fields.read_instruction
       simp [
         get_instruction_fields,
-        VmAirWrapper_branch_lt_constraint_and_interaction_simplification
+        VmAirWrapper_Rv32BranchAdapterAir_BranchLessThanCoreAir_4_8_constraint_and_interaction_simplification
       ]
       unfold VmAirWrapper_branch_lt.constraints.executionBus_row
       unfold VmAirWrapper_branch_lt.constraints.memoryBus_row

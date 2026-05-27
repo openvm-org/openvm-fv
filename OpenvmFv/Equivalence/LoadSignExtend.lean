@@ -190,10 +190,10 @@ namespace Equivalence.LoadSignExtend
         rows.flatMap LoadSignExtend_instruction_fields.execution
       else if index = MemoryBus then
         rows.flatMap LoadSignExtend_instruction_fields.memory
-      else if index = RangeCheckerBus then
-        rows.flatMap LoadSignExtend_instruction_fields.range_checks
       else if index = ProgramBus then
         rows.flatMap LoadSignExtend_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then
+        rows.flatMap LoadSignExtend_instruction_fields.range_checks
       else []
 
   def allHold_allRows [Field ExtF] (air : Valid_VmAirWrapper_load_sign_extend FBB ExtF) : Prop :=
@@ -369,7 +369,7 @@ namespace Equivalence.LoadSignExtend
     rewrite [
       VmAirWrapper_load_sign_extend.constraints.allHold_simplified_of_allHold
     ] at h_constraints
-    simp [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification] at h_constraints
     simp [Valid_LoadSignExtendCoreAir_4.is_valid] at h_is_valid
     grind
 
@@ -576,7 +576,7 @@ namespace Equivalence.LoadSignExtend
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -592,7 +592,7 @@ namespace Equivalence.LoadSignExtend
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -608,7 +608,7 @@ namespace Equivalence.LoadSignExtend
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -624,7 +624,7 @@ namespace Equivalence.LoadSignExtend
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -645,7 +645,7 @@ namespace Equivalence.LoadSignExtend
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -674,7 +674,7 @@ namespace Equivalence.LoadSignExtend
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -703,7 +703,7 @@ namespace Equivalence.LoadSignExtend
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -864,7 +864,7 @@ namespace Equivalence.LoadSignExtend
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1118,7 +1118,7 @@ namespace Equivalence.LoadSignExtend
     . apply lh_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1158,7 +1158,7 @@ namespace Equivalence.LoadSignExtend
             obtain ⟨ sd0, sd1 ⟩ := LoadH.shifted_read_data air row h_opcode h_row h_constraints h_is_valid
             obtain ⟨ sh, lsh, rsh ⟩ := LoadH.shift_eqs air row h_opcode h_row h_constraints h_is_valid h_bus_wellformedness
             simp [w0, w1, w2, w3, sd0, sd1, sh]
-            simp [VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification] at h_bus_wellformedness
+            simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification] at h_bus_wellformedness
             split_ifs
             . simp [← BitVec.toInt_inj,
                     BitVec.toInt_signExtend_of_le]
@@ -1345,7 +1345,7 @@ namespace Equivalence.LoadSignExtend
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -1361,7 +1361,7 @@ namespace Equivalence.LoadSignExtend
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -1377,7 +1377,7 @@ namespace Equivalence.LoadSignExtend
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -1393,7 +1393,7 @@ namespace Equivalence.LoadSignExtend
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -1414,7 +1414,7 @@ namespace Equivalence.LoadSignExtend
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -1443,7 +1443,7 @@ namespace Equivalence.LoadSignExtend
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -1474,7 +1474,7 @@ namespace Equivalence.LoadSignExtend
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -1634,7 +1634,7 @@ namespace Equivalence.LoadSignExtend
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1888,7 +1888,7 @@ namespace Equivalence.LoadSignExtend
     . apply lb_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1928,7 +1928,7 @@ namespace Equivalence.LoadSignExtend
             have shift_msb_is_bool := LoadB.shift_msb_is_bool air row h_opcode h_row h_constraints h_is_valid
             simp [w0, w1, w2, w3, sh]
             simp [
-              VmAirWrapper_load_sign_extend_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32LoadStoreAdapterAir_LoadSignExtendCoreAir_4_8_constraint_and_interaction_simplification,
               h_is_valid,
               show (2013265920 : FBB) = (-1 : FBB) by decide
             ] at h_bus_wellformedness

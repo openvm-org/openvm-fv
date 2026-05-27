@@ -60,8 +60,8 @@ namespace Equivalence.JalLui
     λ index =>
       if index = ExecutionBus then         rows.flatMap JalLui_instruction_fields.execution
       else if index = MemoryBus then       rows.flatMap JalLui_instruction_fields.memory
-      else if index = RangeCheckerBus then rows.flatMap JalLui_instruction_fields.range_checks
       else if index = ProgramBus then      rows.flatMap JalLui_instruction_fields.program
+      else if index = RangeCheckerBus then rows.flatMap JalLui_instruction_fields.range_checks
       else if index = BitwiseBus then      rows.flatMap JalLui_instruction_fields.bitwise
       else []
 
@@ -153,7 +153,7 @@ namespace Equivalence.JalLui
     unfold bus_from_instruction_fields JalLui_instruction_fields.execution JalLui_instruction_fields.memory JalLui_instruction_fields.range_checks JalLui_instruction_fields.program
     simp [
       get_instruction_fields,
-      VmAirWrapper_jallui_constraint_and_interaction_simplification
+      VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification
     ]
 
     unfold VmAirWrapper_jallui.constraints.executionBus_row
@@ -199,7 +199,7 @@ namespace Equivalence.JalLui
       specialize h_constraints ⟨ row, ub_row ⟩
       specialize h_bus_wellformedness row (by omega)
       rw [VmAirWrapper_jallui.constraints.allHold_simplified_of_allHold] at h_constraints
-      simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h_constraints
+      simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h_constraints
       simp [← Rv32JalLuiCoreAir_4.is_valid_def,
             ← Rv32JalLuiCoreAir_4.expected_opcode_def] at *
       grind
@@ -291,7 +291,7 @@ namespace Equivalence.JalLui
     have h_pc_aligned := Transpiler.pc_aligned_of_some h_transpile.1
     have h_pc_bound := Transpiler.pc_bound_of_some h_transpile.1
     rw [VmAirWrapper_jallui.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 ⟩ := h_constraints
     simp [← Rv32JalLuiCoreAir_4.expected_opcode_def] at h_transpile
     obtain is_lui | is_lui := c1
@@ -370,7 +370,7 @@ namespace Equivalence.JalLui
       split_ands
       . rw [VmAirWrapper_jallui.constraints.allHold_simplified_of_allHold] at h_constraints
         simp [get_instruction_fields_row,
-              VmAirWrapper_jallui_constraint_and_interaction_simplification,
+              VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification,
               ← Rv32JalLuiCoreAir_4.expected_opcode_def] at h_constraints ⊢
         grind
       . intro h_is_lui
@@ -391,7 +391,7 @@ namespace Equivalence.JalLui
         obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := jallui_rd_properties air row (by omega) h_is_valid h_constraints h_bus_wellformedness
         rw [VmAirWrapper_jallui.constraints.allHold_simplified_of_allHold] at h_constraints
         simp_all [get_instruction_fields_row,
-                  VmAirWrapper_jallui_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]
         obtain ⟨ spec, _ ⟩ := spec
         split_ands
         . assumption
@@ -416,7 +416,7 @@ namespace Equivalence.JalLui
             h_constraints
             h_bus_axioms
             h_bus_wellformedness
-            (by simp [VmAirWrapper_jallui_constraint_and_interaction_simplification]; assumption)
+            (by simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification]; assumption)
             h_is_jal
 
         obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := jallui_rd_properties air row (by omega) h_is_valid h_constraints h_bus_wellformedness
@@ -425,9 +425,9 @@ namespace Equivalence.JalLui
 
         have h_nw := @JalLui.ValidRows.needs_write_eq_is_valid _ _ air row (by omega) h_constraints h_bus_wellformedness
 
-        simp [h_is_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
+        simp [h_is_valid, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification, and_assoc] at h_bus_axioms
         obtain ⟨ ub_pc, al_pc, ub_ts, ub_npc, al_npc, ub_nts ⟩ := h_bus_axioms
-        simp [h_is_valid, VmAirWrapper_jallui_constraint_and_interaction_simplification] at h_bus_wellformedness
+        simp [h_is_valid, VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h_bus_wellformedness
         obtain ⟨ h_mem, h_range, h_prog, h_bit ⟩ := h_bus_wellformedness
         simp [*] at h_mem h_range h_bit
 
@@ -477,7 +477,7 @@ namespace Equivalence.JalLui
       := by
         simp [Valid_Rv32JalLuiCoreAir_4.expected_opcode]
         rw [allHold_simplified_of_allHold] at h_constraints
-        simp [VmAirWrapper_jallui_constraint_and_interaction_simplification] at h_constraints
+        simp [VmAirWrapper_Rv32CondRdWriteAdapterAir_Rv32JalLuiCoreAir_constraint_and_interaction_simplification] at h_constraints
         omega
 
       obtain h_op | h_op := h_opcode

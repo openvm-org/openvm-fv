@@ -44,7 +44,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
@@ -103,7 +103,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
@@ -161,7 +161,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
@@ -206,7 +206,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
@@ -238,7 +238,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
@@ -270,7 +270,7 @@ namespace LoadW
     air.core.opcode_flags row 0 0 = 1
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -292,7 +292,7 @@ namespace LoadW
     air.core.opcode_flags row 0 1 = 1
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -315,7 +315,7 @@ namespace LoadW
     air.core.opcode_flags row 0 2 = 1
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -339,7 +339,7 @@ namespace LoadW
     air.core.opcode_flags row 0 3 = 1
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -364,7 +364,7 @@ namespace LoadW
     air.core.opcode_flags row 0 4 = 4
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -390,7 +390,7 @@ namespace LoadW
     air.core.opcode_when row 0 [opcode] = if opcode = 0 then 1 else 0
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       h_interactions,
       h_is_valid_boolean,
@@ -559,7 +559,7 @@ namespace LoadW
   : air.core.flags_0 row 0 = 2
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       h_interactions,
       h_is_valid_boolean,
@@ -617,7 +617,7 @@ namespace LoadW
   : air.core.flags_1 row 0 = 0
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       h_interactions,
       h_is_valid_boolean,
@@ -675,7 +675,7 @@ namespace LoadW
   : air.core.flags_2 row 0 = 0
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       h_interactions,
       h_is_valid_boolean,
@@ -733,7 +733,7 @@ namespace LoadW
   : air.core.flags_3 row 0 = 0
   := by
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       h_interactions,
       h_is_valid_boolean,
@@ -790,7 +790,7 @@ namespace LoadW
   : VmAirWrapper_loadstore.constraints.constraint_5 air row ↔
     air.core.sum row 0 = 2
   := by
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification]
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification]
     simp [Valid_LoadStoreCoreAir_4.sum]
     rewrite [
       flags_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid,
@@ -1150,7 +1150,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       shift_amount_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     ] at h_bus_wellformedness
@@ -1184,7 +1184,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       shift_amount_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
     ] at h_bus_wellformedness
@@ -1200,7 +1200,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920: FBB) = -1 by decide
     ] at h_bus_wellformedness
@@ -1218,7 +1218,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920: FBB) = -1 by decide
     ] at h_bus_wellformedness
@@ -1236,7 +1236,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920: FBB) = -1 by decide
     ] at h_bus_wellformedness
@@ -1254,7 +1254,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920: FBB) = -1 by decide
     ] at h_bus_wellformedness
@@ -1285,7 +1285,7 @@ namespace LoadW
   := by
     replace h_bus_wellformedness := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness
@@ -1584,7 +1584,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
   := by
     have h_bus_wellformedness' := h_bus_wellformedness.2.2.2
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_bus_wellformedness'
@@ -1614,7 +1614,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
 
     have h_bus_wellformedness' := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920: FBB) = -1 by decide
     ] at h_bus_wellformedness'
@@ -1770,7 +1770,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       clear h_constraints
 
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         show ((2013265920 : FBB) = -1) by decide,
         *
       ] at h_bus_wellformedness ⊢
@@ -1793,7 +1793,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     := by
       have h_program_bus := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_program_bus
@@ -1826,7 +1826,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
     := by
       have h_program_bus := h_bus_wellformedness.2.2.2 -- get programBus properties specifically
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_program_bus
@@ -1876,7 +1876,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       have h_nw : air.adapter.needs_write row 0 = 0 ∨ air.adapter.needs_write row 0 = 1
       := by
         rw [allHold_simplified_of_allHold] at h_constraints
-        simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+        simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
         grind
       simp [
         _executionBus_row,
@@ -1958,7 +1958,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       simp [write_data_0_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid]
       have h_read_ptr_eq := read_ptr_of_opcode_528 air row h_opcode h_row h_constraints h_is_valid
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         and_assoc,
         h_is_valid,
         show ((2013265920 : FBB) = -1) by decide
@@ -1984,7 +1984,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
         (ExecutionResult.Retire_Success ())
         { state with regs := state.regs.insert Register.nextPC (BitVec.ofNat 32 ((_executionBus_row air row)[0]!.pc).val + 4#32) }
     := by
-      simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification, and_assoc, h_is_valid] at h_axioms
+      simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification, and_assoc, h_is_valid] at h_axioms
 
       have := chip_bus_hypotheses (state := state) air row h_row h_constraints h_is_valid h_bus_wellformedness h_opcode
       rw [this] at h_bus; clear this
@@ -2052,7 +2052,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
               ).insert Register.nextPC (BitVec.ofNat 32 ((_executionBus_row air row)[0]!.pc).val + 4#32) }
     := by
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         and_assoc,
         h_is_valid,
         show ((2013265920 : FBB) = -1) by decide
@@ -2088,7 +2088,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       rw [needs_write_of_rd_neq_0 air row h_bus_wellformedness h_is_valid h_opcode] at h_rd_nz
 
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         and_assoc,
         h_is_valid,
         show ((2013265920 : FBB) = -1) by decide

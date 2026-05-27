@@ -575,6 +575,7 @@ namespace KeccakfOpAir.extraction
 --def Circuit._ (c: Circuit F ExtF) (row: N) := c.main (id := 0) (column := 560) (row := row) (rotation := 0)
 
 -----Extracted constraints----------
+  @[simp]
   def inter_0 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t363 := ((Circuit.main c (id := 0) (column := 5) (row := row) (rotation := 0)) * 256)
     let t364 := ((Circuit.main c (id := 0) (column := 4) (row := row) (rotation := 0)) + t363)
@@ -582,6 +583,7 @@ namespace KeccakfOpAir.extraction
     let t366 := (t364 + t365)
     t366
 
+  @[simp]
   def inter_1 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C] (c : C F ExtF) (row: ℕ) :=
     let t381 := ((Circuit.main c (id := 0) (column := 7) (row := row) (rotation := 0)) * 16777216)
     let t382 := (inter_0 c row + t381)

@@ -86,8 +86,8 @@ namespace Equivalence.Auipc
     λ index =>
       if index = ExecutionBus then            rows.flatMap Auipc_instruction_fields.execution
       else if index = MemoryBus then          rows.flatMap Auipc_instruction_fields.memory
-      else if index = RangeCheckerBus then    rows.flatMap Auipc_instruction_fields.range_checks
       else if index = ProgramBus then rows.flatMap Auipc_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then    rows.flatMap Auipc_instruction_fields.range_checks
       else if index = BitwiseBus then         rows.flatMap Auipc_instruction_fields.bitwise
       else []
 
@@ -222,7 +222,7 @@ namespace Equivalence.Auipc
       unfold bus_from_instruction_fields Auipc_instruction_fields.execution Auipc_instruction_fields.memory Auipc_instruction_fields.range_checks Auipc_instruction_fields.read_instruction
       simp [
         get_instruction_fields,
-        VmAirWrapper_auipc_constraint_and_interaction_simplification
+        VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification
       ]
       unfold VmAirWrapper_auipc.constraints.executionBus_row
       unfold VmAirWrapper_auipc.constraints.memoryBus_row
@@ -274,7 +274,7 @@ namespace Equivalence.Auipc
       obtain ⟨ h_rd_nz, ⟨ rd', eq_rd' ⟩⟩ := auipc_rd_properties air row h_is_valid h_bus_wellformedness
       rw [VmAirWrapper_auipc.constraints.allHold_simplified_of_allHold] at h_constraints
       simp_all [get_instruction_fields_row,
-                VmAirWrapper_auipc_constraint_and_interaction_simplification]
+                VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification]
       split_ands
       . assumption
       . simp [Transpiler.wrap_to_regidx, Transpiler.ind, regidx_to_fin]

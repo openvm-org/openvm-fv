@@ -41,12 +41,12 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
 := by
   obtain ⟨ hint, constraints ⟩ := constraints
   clear hint; unfold extracted_row_constraint_list at constraints
-  simp only [VmAirWrapper_shift_air_simplification,
-             VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
+  simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_air_simplification,
+             VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   simp at constraints
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at row_not_valid
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at row_not_valid
   have : air.adapter.rs2_as row 0 = 0 := by grind
-  simp_all [VmAirWrapper_shift_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
 
 end Shift.NonValidRows
 
@@ -75,11 +75,11 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
@@ -89,11 +89,11 @@ lemma wf_propertiesToAssert
 
   have ⟨ sop0, sop1, sop2 ⟩ := single_op air row row_in_range constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            rest ⟩ := constraints
   clear constrain_interactions
-  simp_all [VmAirWrapper_shift_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
   by_cases h_rs2_0 : air.adapter.rs2_as row 0 = 0 <;> simp_all
@@ -137,16 +137,16 @@ lemma essentials
   obtain ⟨ pa_exec, pa_mem, rest ⟩ := assertedProperties
   clear pa_exec rest
   simp [row_valid,
-        VmAirWrapper_shift_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
         propertiesToAssert,
         and_assoc] at pa_mem
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_bit
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem pa_range pa_read pa_bit
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
@@ -162,7 +162,7 @@ lemma essentials
 
   -- Get relevant constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions, rest ⟩ := constraints
   clear constrain_interactions
 
@@ -185,7 +185,7 @@ lemma essentials
   constructor
   . intro h_rs2_as; simp_all
     grind
-  . simp [VmAirWrapper_shift_constraint_and_interaction_simplification,
+  . simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
           ← Valid_ShiftCoreAir_4_8.is_valid_def,
           ← Valid_ShiftCoreAir_4_8.right_shift_def,
           ← Valid_ShiftCoreAir_4_8.bit_marker_sum_def_1,
@@ -315,16 +315,16 @@ theorem spec_base_SLL
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   clear pa_exec pa_mem pa_read pa_bit
-  simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_range
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_range
   obtain ⟨ ra0, ⟨ h0, ub_bsc0 ⟩, ⟨ h1, ub_bsc1 ⟩, ⟨ h2, ub_bsc2 ⟩, ⟨ h3, ub_bsc3 ⟩, ra4, rest ⟩ := pa_range
   clear h0 h1 h2 h3 ra4 rest
 
   -- Prepare constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions, rest ⟩ := constraints; clear constrain_interactions
 
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification,
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
         ← Valid_ShiftCoreAir_4_8.is_valid_def,
         ← Valid_ShiftCoreAir_4_8.right_shift_def,
         ← Valid_ShiftCoreAir_4_8.limb_shift_2_def,
@@ -552,7 +552,7 @@ theorem spec_base_SRL
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   clear pa_exec pa_mem pa_read pa_bit
-  simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_range
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_range
   obtain ⟨ ra0, ⟨ h0, ub_bsc0 ⟩, ⟨ h1, ub_bsc1 ⟩, ⟨ h2, ub_bsc2 ⟩, ⟨ h3, ub_bsc3 ⟩, ra4, rest ⟩ := pa_range
   clear h0 h1 h2 h3 ra4 rest
 
@@ -560,10 +560,10 @@ theorem spec_base_SRL
 
   -- Prepare constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions, rest ⟩ := constraints; clear constrain_interactions
 
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification,
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
         ← Valid_ShiftCoreAir_4_8.is_valid_def,
         ← Valid_ShiftCoreAir_4_8.right_shift_def,
         ← Valid_ShiftCoreAir_4_8.limb_shift_2_def,
@@ -938,13 +938,13 @@ section auxiliaries
     have h_b_b_sign : (air.core.b_sign row 0 = 0 ∨ air.core.b_sign row 0 = 1)
     := by
       rw [@allHold_simplified_of_allHold] at constraints
-      simp_all [VmAirWrapper_shift_constraint_and_interaction_simplification]
+      simp_all [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
     constructor
     . assumption
     . intro h_sra
       obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
       clear pa_exec pa_mem pa_read pa_range
-      simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_bit
+      simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_bit
       obtain ⟨ h_b_sign', rest ⟩ := pa_bit; clear rest
       simp [h_sra] at *
       obtain ⟨ ub_b3, h_b_sign ⟩ := h_b_sign'
@@ -1009,7 +1009,7 @@ theorem spec_base_SRA
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   clear pa_exec pa_mem pa_read
-  simp [row_valid, VmAirWrapper_shift_constraint_and_interaction_simplification, propertiesToAssume] at pa_range pa_bit
+  simp [row_valid, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_range pa_bit
   obtain ⟨ ra0, ⟨ h0, ub_bsc0 ⟩, ⟨ h1, ub_bsc1 ⟩, ⟨ h2, ub_bsc2 ⟩, ⟨ h3, ub_bsc3 ⟩, ra4, rest ⟩ := pa_range
   clear h0 h1 h2 h3 ra4 rest
 
@@ -1017,10 +1017,10 @@ theorem spec_base_SRA
 
   -- Prepare constraints
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions, rest ⟩ := constraints; clear constrain_interactions
 
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification,
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
         ← Valid_ShiftCoreAir_4_8.is_valid_def,
         ← Valid_ShiftCoreAir_4_8.right_shift_def,
         ← Valid_ShiftCoreAir_4_8.limb_shift_2_def,
@@ -1603,12 +1603,12 @@ theorem spec_base_Shift_imm
 
 
   simp [row_valid,
-        VmAirWrapper_shift_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification,
         VmAirWrapper_shift.constraints.propertiesToAssume] at pa_read
 
   have opcodes := opcode_bounds air row row_in_range constraints row_valid
   replace pa_read := programBus_properties_of_opcode_bounds _ opcodes pa_read
-  simp [VmAirWrapper_shift_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_read
 

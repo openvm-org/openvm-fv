@@ -21,208 +21,208 @@ namespace VmAirWrapper_branch_eq.constraints
     section row_constraints
 
       -- constraints and constraints_of_extraction
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_0 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_beq_flag row 0 = 0 ∨ air.core.opcode_beq_flag row 0 = 1
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_0_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_0 air row ↔ constraint_0 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_1 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_bne_flag row 0 = 0 ∨ air.core.opcode_bne_flag row 0 = 1
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_1_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_1 air row ↔ constraint_1 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_1 air row ↔ constraint_1 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_2 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_2_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_2 air row ↔ constraint_2 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_2 air row ↔ constraint_2 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_3 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.cmp_result row 0 = 0 ∨ air.core.cmp_result row 0 = 1
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_3_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_3 air row ↔ constraint_3 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_3 air row ↔ constraint_3 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_4 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.cmp_eq row 0 = 0 ∨ air.core.a_0 row 0 = air.core.b_0 row 0
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_4_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_4 air row ↔ constraint_4 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_4 air row ↔ constraint_4 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_5 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.cmp_eq row 0 = 0 ∨ air.core.a_1 row 0 = air.core.b_1 row 0
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_5_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_5 air row ↔ constraint_5 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_5 air row ↔ constraint_5 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_6 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.cmp_eq row 0 = 0 ∨ air.core.a_2 row 0 = air.core.b_2 row 0
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_6_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_6 air row ↔ constraint_6 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_6 air row ↔ constraint_6 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_7 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.cmp_eq row 0 = 0 ∨ air.core.a_3 row 0 = air.core.b_3 row 0
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_7_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_7 air row ↔ constraint_7 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_7 air row ↔ constraint_7 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_8 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨ air.core.sum row 0 = 1
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_8_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_8 air row ↔ constraint_8 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_8 air row ↔ constraint_8 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_9 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
   air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 =
     air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 +
       air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_9_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_9 air row ↔ constraint_9 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_9 air row ↔ constraint_9 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def constraint_10 (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
     air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 =
       air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 +
         air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constraint_10_of_extraction
           (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ)
-      : VmAirWrapper_branch_eq.extraction.constraint_10 air row ↔ constraint_10 air row := by
+      : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_10 air row ↔ constraint_10 air row := by
       apply Iff.intro
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
         exact h
       . intro h
-        simp [openvm_encapsulation, VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
-        simp only [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h
+        simp [openvm_encapsulation, VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
+        simp only [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h
         exact h
 
     end row_constraints
@@ -233,24 +233,24 @@ namespace VmAirWrapper_branch_eq.constraints
       --       the lemmas below to get the expression in the infoview
 
       --busRows, constrain_interactions, and constrain_interactions_of_extraction
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def executionBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
         [(-air.core.is_valid row 0, [air.adapter.from_state.pc row 0, air.adapter.from_state.timestamp row 0]),
         (air.core.is_valid row 0, [air.to_pc row 0, air.adapter.from_state.timestamp row 0 + 2])]
 
       lemma constrain_execution_interactions
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
-        (h : VmAirWrapper_branch_eq.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions air)
       :
         air.buses ExecutionBus = (List.range (air.last_row + 1)).flatMap (λ row => executionBus_row air row)
       := by
-        unfold VmAirWrapper_branch_eq.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def memoryBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
         [(2013265920 * air.core.is_valid row 0,
           [1, air.adapter.rs1_ptr row 0, air.core.a_0 row 0, air.core.a_1 row 0, air.core.a_2 row 0, air.core.a_3 row 0,
@@ -267,17 +267,17 @@ namespace VmAirWrapper_branch_eq.constraints
 
       lemma constrain_memory_interactions
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
-        (h : VmAirWrapper_branch_eq.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions air)
       :
         air.buses MemoryBus = (List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row air row)
       := by
-        unfold VmAirWrapper_branch_eq.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def rangeCheckerBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0, 17]),
         (air.core.is_valid row 0, [air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0, 12]),
@@ -286,17 +286,17 @@ namespace VmAirWrapper_branch_eq.constraints
 
       lemma constrain_rangeChecker_interactions
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
-        (h : VmAirWrapper_branch_eq.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions air)
       :
         air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
-        unfold VmAirWrapper_branch_eq.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
 
 
-      @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
       def programBus_row (air : Valid_VmAirWrapper_branch_eq F ExtF) (row : ℕ) : List (F × List F) :=
         [(air.core.is_valid row 0,
           [air.adapter.from_state.pc row 0, air.core.expected_opcode row 0, air.adapter.rs1_ptr row 0,
@@ -304,11 +304,11 @@ namespace VmAirWrapper_branch_eq.constraints
 
       lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
-        (h : VmAirWrapper_branch_eq.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions air)
       :
         air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
-        unfold VmAirWrapper_branch_eq.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]; clear h
         rfl
@@ -318,16 +318,16 @@ namespace VmAirWrapper_branch_eq.constraints
       air.buses = fun index ↦
       if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
       else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-      else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
       else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
+      else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
       else []
 
-      @[VmAirWrapper_branch_eq_air_simplification]
+      @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
       lemma constrain_interactions_of_extraction
         (air : Valid_VmAirWrapper_branch_eq F ExtF)
-        (h : VmAirWrapper_branch_eq.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions air)
       : constrain_interactions air := by
-        unfold VmAirWrapper_branch_eq.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         exact h
 
@@ -346,17 +346,17 @@ namespace VmAirWrapper_branch_eq.constraints
       (row : ℕ)
     : List Prop :=
       [
-        VmAirWrapper_branch_eq.extraction.constraint_0 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_1 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_2 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_3 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_4 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_5 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_6 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_7 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_8 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_9 air row,
-        VmAirWrapper_branch_eq.extraction.constraint_10 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_0 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_1 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_2 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_3 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_4 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_5 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_6 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_7 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_8 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_9 air row,
+        VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constraint_10 air row,
       ]
 
     @[simp]
@@ -366,7 +366,7 @@ namespace VmAirWrapper_branch_eq.constraints
       (row : ℕ)
       (_ : row ≤ air.last_row)
     : Prop :=
-      VmAirWrapper_branch_eq.extraction.constrain_interactions air ∧
+      VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions air ∧
       List.Forall (·) (extracted_row_constraint_list air row)
 
     @[simp]
@@ -407,12 +407,12 @@ namespace VmAirWrapper_branch_eq.constraints
     : allHold air row h_row ↔ allHold_simplified air row h_row := by
       unfold allHold allHold_simplified
       apply Iff.and
-      . unfold VmAirWrapper_branch_eq.extraction.constrain_interactions
+      . unfold VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4.extraction.constrain_interactions
         simp [openvm_encapsulation]
         rfl
       . simp only [extracted_row_constraint_list,
                   row_constraint_list,
-                  VmAirWrapper_branch_eq_air_simplification]
+                  VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_air_simplification]
 
   end allHold
 
@@ -434,7 +434,7 @@ namespace VmAirWrapper_branch_eq.constraints
       rw [allHold_simplified_of_allHold air row valid_row] at cstrs
       obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
       clear hint rest
-      simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at h0 h1 h2
+      simp [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at h0 h1 h2
       rw [Valid_BranchEqualCoreAir_4.is_valid] at h2
       grind
 
@@ -453,7 +453,7 @@ namespace VmAirWrapper_branch_eq.constraints
       rw [allHold_simplified_of_allHold air row valid_row] at cstrs
       obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
       clear hint rest
-      simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at *
+      simp [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at *
       rw [Valid_BranchEqualCoreAir_4.is_valid] at is_valid h2
       rw [← BranchEqualCoreAir_4.expected_opcode_def]
       grind
@@ -474,7 +474,7 @@ namespace VmAirWrapper_branch_eq.constraints
       rw [allHold_simplified_of_allHold air row valid_row] at cstrs
       obtain ⟨ hint, h0, h1, h2, rest ⟩ := cstrs
       clear hint rest
-      simp [VmAirWrapper_branch_eq_constraint_and_interaction_simplification] at *
+      simp [VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification] at *
       grind
 
   end properties
@@ -490,7 +490,7 @@ namespace VmAirWrapper_branch_eq.constraints
       unfold executionBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
     def _executionBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
@@ -510,7 +510,7 @@ namespace VmAirWrapper_branch_eq.constraints
       unfold memoryBus_row at *; simp_all
       grind (ematch := 8)
 
-    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
     def _memoryBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
@@ -530,7 +530,7 @@ namespace VmAirWrapper_branch_eq.constraints
       unfold rangeCheckerBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
     def _rangeCheckerBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
@@ -541,7 +541,7 @@ namespace VmAirWrapper_branch_eq.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
     def programBus_properties (entry : Interaction.ProgramBusEntry FBB) : Prop :=
       let imm := entry.xc
       -- imm is a 13-bit signed integer represented as a field element
@@ -618,7 +618,7 @@ namespace VmAirWrapper_branch_eq.constraints
     := by
       unfold programBus_row at *; simp_all
 
-    @[VmAirWrapper_branch_eq_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BranchAdapterAir_BranchEqualCoreAir_4_constraint_and_interaction_simplification]
     def _programBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_branch_eq FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
