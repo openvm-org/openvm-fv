@@ -18,7 +18,7 @@ jobs:
   build-openvm-fv:
     name: Build OpenvmFv
     runs-on:
-      - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
+      - runs-on=${{ github.run_id }}/volume=80gb/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
 
     steps:
       - uses: runs-on/action@v2
@@ -51,7 +51,7 @@ jobs:
   build-vm-extensions:
     name: Build VmExtensions
     runs-on:
-      - runs-on=${{ github.run_id }}/disk=large/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
+      - runs-on=${{ github.run_id }}/volume=80gb/runner=64cpu-linux-x64/image=ubuntu24-full-x64/extras=s3-cache
 
     steps:
       - uses: runs-on/action@v2
