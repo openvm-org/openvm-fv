@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 openvm-stark-backend = { git = "https://github.com/openvm-org/stark-backend.git", branch = "develop-v2", features = ["lean"] }
 openvm-stark-sdk = { git = "https://github.com/openvm-org/stark-backend.git", branch = "develop-v2" }
-openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.1" }
-openvm-sdk-config = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.1" }
+openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.2" }
+openvm-sdk-config = { git = "https://github.com/openvm-org/openvm.git", branch = "develop-v2.0.0-rc.2" }
 
 clap = { version = "4", features = ["derive"] }
 gag = "1"
