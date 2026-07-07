@@ -56,6 +56,81 @@ variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
 
+private lemma nat_lt_64_of_lt_256_land_192_eq_zero {n : ℕ}
+  (hn : n < 256)
+  (hand : n &&& 192 = 0)
+:
+  n < 64
+:= by
+  have h6 : n.testBit 6 = false := by
+    by_cases hb : n.testBit 6 = true
+    · exfalso
+      have htb := congrArg (fun m => m.testBit 6) hand
+      change (n &&& 192).testBit 6 = (0:Nat).testBit 6 at htb
+      rw [Nat.testBit_land] at htb
+      simp [hb] at htb
+      have h192 : Nat.testBit 192 6 = true := by
+        simp [Nat.testBit, Nat.shiftRight_eq_div_pow]
+      rw [h192] at htb
+      contradiction
+    · exact Bool.eq_false_iff.2 hb
+  have h7 : n.testBit 7 = false := by
+    by_cases hb : n.testBit 7 = true
+    · exfalso
+      have htb := congrArg (fun m => m.testBit 7) hand
+      change (n &&& 192).testBit 7 = (0:Nat).testBit 7 at htb
+      rw [Nat.testBit_land] at htb
+      simp [hb] at htb
+      have h192 : Nat.testBit 192 7 = true := by
+        simp [Nat.testBit, Nat.shiftRight_eq_div_pow]
+      rw [h192] at htb
+      contradiction
+    · exact Bool.eq_false_iff.2 hb
+  refine Nat.lt_of_testBit 6 h6 ?_ ?_
+  · rw [show (64:Nat) = 2 ^ 6 by norm_num, Nat.testBit_two_pow]
+    simp
+  · intro j hj
+    by_cases hj7 : j = 7
+    · subst j
+      rw [h7]
+      exact (Nat.testBit_lt_two_pow (by norm_num : (64:Nat) < 2 ^ 7)).symm
+    · have hj8 : 8 ≤ j := by omega
+      have hpow : 2 ^ 8 ≤ 2 ^ j := Nat.pow_le_pow_right (by norm_num) hj8
+      have hn8 : n < 2 ^ 8 := by
+        norm_num
+        exact hn
+      have hn_j : n < 2 ^ j := lt_of_lt_of_le hn8 hpow
+      rw [Nat.testBit_lt_two_pow hn_j]
+      have h64 : (64:Nat) < 2 ^ j := by
+        have : (64:Nat) < 2 ^ 8 := by norm_num
+        exact lt_of_lt_of_le this hpow
+      rw [Nat.testBit_lt_two_pow h64]
+
+private lemma bitvec_lt_64_of_add_eq_xor_192
+  (x : BitVec 9)
+  (h_rd : x + 192#9 = x ^^^ 192#9)
+  (ub_rd3 : x < 256#9)
+:
+  x < 64#9
+:= by
+  rw [BitVec.lt_def] at ub_rd3 ⊢
+  rw [show (256#9).toNat = 256 by rfl] at ub_rd3
+  rw [show (64#9).toNat = 64 by rfl]
+  have hx_add : (x + 192#9).toNat = x.toNat + 192 := by
+    rw [BitVec.toNat_add]
+    rw [show (192#9).toNat = 192 by rfl]
+    exact Nat.mod_eq_of_lt (by omega)
+  have hx_xor : (x ^^^ 192#9).toNat = x.toNat ^^^ 192 := by
+    rw [BitVec.toNat_xor]
+    rfl
+  have hxor : x.toNat + 192 = x.toNat ^^^ 192 := by
+    have h := congrArg BitVec.toNat h_rd
+    rw [hx_add, hx_xor] at h
+    exact h
+  have hident := BitVec.xor_as_and ub_rd3 (by norm_num : 192 < 256)
+  have hand : x.toNat &&& 192 = 0 := by omega
+  exact nat_lt_64_of_lt_256_land_192_eq_zero ub_rd3 hand
+
 set_option maxHeartbeats 0 in
 set_option maxRecDepth 2_000_000 in
 include
@@ -230,7 +305,7 @@ theorem spec_jal
         rw [← BitVec.lt_def] at ub_rd3
         rw [show 64 = (64#9).toNat by simp]
         rw [← BitVec.lt_def]
-        bv_decide
+        exact bitvec_lt_64_of_add_eq_xor_192 x h_rd ub_rd3
   . have ⟨ lb_imm, ub_imm ⟩ : - 2^20 ≤ BabyBear.toInt (air.core.imm row 0) ∧ BabyBear.toInt (air.core.imm row 0) < 2^20
     := by
       clear *- hd4; symm at hd4

@@ -5,6 +5,26 @@ import OpenvmFv.RV32D.BusEffect
 
 namespace LoadW
 
+  private lemma signExtend_32_ofNat16_eq_msb_append (n : ℕ) :
+    BitVec.signExtend 32 (BitVec.ofNat 16 n) =
+      BitVec.ofNat 16 ((BitVec.ofNat 16 n).msb.toNat * 65535) ++ BitVec.ofNat 16 n
+  := by
+    ext i hi
+    rw [BitVec.getElem_signExtend hi]
+    rw [BitVec.getElem_append hi]
+    by_cases h_i : i < 16
+    · simp [h_i]
+    · simp [h_i]
+      by_cases h_msb : (BitVec.ofNat 16 n).msb
+      · simp [h_msb]
+        have hi16 : i - 16 < 16 := by omega
+        rw [BitVec.getElem_eq_testBit_toNat]
+        rw [show (65535#16).toNat = 65535 by rfl]
+        rw [show 65535 = 2 ^ 16 - 1 by norm_num]
+        rw [Nat.testBit_two_pow_sub_one]
+        simp [hi16]
+      · simp [h_msb]
+
   lemma inv_2
     (core: Valid_LoadStoreCoreAir_4 FBB)
   :
@@ -189,7 +209,8 @@ namespace LoadW
         Transpiler.sign_extend_16
       ]
       rewrite [Nat.mod_eq_of_lt]
-      . have : imm.msb = (BitVec.signExtend 16 imm).msb := by bv_decide
+      . have : imm.msb = (BitVec.signExtend 16 imm).msb := by
+          simp [BitVec.msb_signExtend]
         simp [this]
       . omega
     }
@@ -1343,12 +1364,8 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
       Fin.val_mul
     ]
     rewrite [Nat.mod_eq_of_lt]
-    . simp [BitVec.ofNat_mul]
-      by_cases h_msb: (BitVec.ofNat 16 ↑(air.adapter.imm row 0)).msb
-      all_goals {
-        simp [h_msb]
-        bv_decide
-      }
+    . simpa [BitVec.ofNat_mul] using
+        signExtend_32_ofNat16_eq_msb_append ↑(air.adapter.imm row 0)
     . cases (BitVec.ofNat 16 ↑(air.adapter.imm row 0)).msb <;> simp
 
   set_option maxHeartbeats 1_000_000_000 in
@@ -1644,7 +1661,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
              #v[(air.adapter.rs1_data_0 row 0).val, (air.adapter.rs1_data_1 row 0).val, (air.adapter.rs1_data_2 row 0).val, (air.adapter.rs1_data_3 row 0).val],
              #v[(air.core.read_data_0 row 0).val, (air.core.read_data_1 row 0).val, (air.core.read_data_2 row 0).val, (air.core.read_data_3 row 0).val],
              #v[(air.core.prev_data_0 row 0).val, (air.core.prev_data_1 row 0).val, (air.core.prev_data_2 row 0).val, (air.core.prev_data_3 row 0).val]
-      simp [show (2013265920 :FBB) = -1 by native_decide,
+      simp [BabyBear.eq_neg_one,
             *]
       repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
       simp
@@ -1692,7 +1709,7 @@ lemma imm_extend_range_of_opcode_528 [Field ExtF]
           := by apply BitVec.toNat_lt_twoPow_of_le; simp
         simp [Fin.ext_iff, Fin.val_mul]
         omega
-      simp [show (2013265920 :FBB) = -1 by native_decide,
+      simp [BabyBear.eq_neg_one,
             *]
       repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
       simp
