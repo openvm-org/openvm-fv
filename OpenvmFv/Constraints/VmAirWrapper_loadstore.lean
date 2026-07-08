@@ -936,7 +936,7 @@ namespace LoadStore.ValidRows
 
     obtain ⟨ pa_exec, pa_mem, pa_range, pa_read ⟩ := propertiesToAssume
     simp [row_valid,
-          show ((2013265920 : FBB) = -1) by native_decide,
+          BabyBear.eq_neg_one,
           VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification]
       at pa_exec pa_mem pa_range pa_read constraints ⊢
     simp_all

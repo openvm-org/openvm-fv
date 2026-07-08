@@ -486,7 +486,7 @@ namespace VariableRangeCheckerAir.constraints
         have ht_lt : (tmb_ air row).val < BB_prime := (tmb_ air row).isLt
         omega
       have hdiv_lt_two : (((v_ air row).val + (tmb_ air row).val) / BB_prime) < 2 := by
-        have hp : 0 < BB_prime := by native_decide
+        have hp : 0 < BB_prime := by norm_num
         exact (Nat.div_lt_iff_lt_mul hp).2 (by simpa [two_mul] using hsum_lt_2p)
       have hdiv_cases : (((v_ air row).val + (tmb_ air row).val) / BB_prime) = 0 ∨
           (((v_ air row).val + (tmb_ air row).val) / BB_prime) = 1 := by

@@ -595,7 +595,7 @@ namespace BitwiseOperationLookupAir_8.constraints
     private lemma bit_xor_val (a b : FBB)
         (ha : a = 0 ∨ a = 1) (hb : b = 0 ∨ b = 1)
     : (a + b - 2 * a * b).val = a.val ^^^ b.val := by
-      rcases ha with ( rfl | rfl ) <;> rcases hb with ( rfl | rfl ) <;> native_decide
+      rcases ha with ( rfl | rfl ) <;> rcases hb with ( rfl | rfl ) <;> decide
 
     open BabyBear in
     /-- For boolean a, b in BabyBear, a + b - 2*a*b is boolean. -/
@@ -623,7 +623,144 @@ namespace BitwiseOperationLookupAir_8.constraints
       (b0.val + b1.val * 2 + b2.val * 4 + b3.val * 8 + b4.val * 16 + b5.val * 32 + b6.val * 64 + b7.val * 128) =
       (a0.val ^^^ b0.val) + (a1.val ^^^ b1.val) * 2 + (a2.val ^^^ b2.val) * 4 + (a3.val ^^^ b3.val) * 8 +
       (a4.val ^^^ b4.val) * 16 + (a5.val ^^^ b5.val) * 32 + (a6.val ^^^ b6.val) * 64 + (a7.val ^^^ b7.val) * 128 := by
-      revert a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7; native_decide
+      have bit_eta (x : Fin 2) (n : ℕ) :
+          x.val + 2 * n = Nat.bit (decide (x.val = 1)) n := by
+        fin_cases x <;> simp [Nat.bit, Nat.add_comm]
+      have bit_xor_eta (x y : Fin 2) (n : ℕ) :
+          (x.val ^^^ y.val) + 2 * n =
+            Nat.bit (bne (decide (x.val = 1)) (decide (y.val = 1))) n := by
+        fin_cases x <;> fin_cases y <;> simp [Nat.bit, Nat.add_comm]
+      have hA0 :
+          a0.val + a1.val * 2 + a2.val * 4 + a3.val * 8 + a4.val * 16 + a5.val * 32 + a6.val * 64 + a7.val * 128 =
+            Nat.bit (decide (a0.val = 1))
+              (a1.val + a2.val * 2 + a3.val * 4 + a4.val * 8 + a5.val * 16 + a6.val * 32 + a7.val * 64) := by
+        rw [← bit_eta a0]
+        omega
+      have hB0 :
+          b0.val + b1.val * 2 + b2.val * 4 + b3.val * 8 + b4.val * 16 + b5.val * 32 + b6.val * 64 + b7.val * 128 =
+            Nat.bit (decide (b0.val = 1))
+              (b1.val + b2.val * 2 + b3.val * 4 + b4.val * 8 + b5.val * 16 + b6.val * 32 + b7.val * 64) := by
+        rw [← bit_eta b0]
+        omega
+      have hR0 :
+          (a0.val ^^^ b0.val) + (a1.val ^^^ b1.val) * 2 + (a2.val ^^^ b2.val) * 4 + (a3.val ^^^ b3.val) * 8 +
+          (a4.val ^^^ b4.val) * 16 + (a5.val ^^^ b5.val) * 32 + (a6.val ^^^ b6.val) * 64 + (a7.val ^^^ b7.val) * 128 =
+            Nat.bit (bne (decide (a0.val = 1)) (decide (b0.val = 1)))
+              ((a1.val ^^^ b1.val) + (a2.val ^^^ b2.val) * 2 + (a3.val ^^^ b3.val) * 4 +
+               (a4.val ^^^ b4.val) * 8 + (a5.val ^^^ b5.val) * 16 + (a6.val ^^^ b6.val) * 32 + (a7.val ^^^ b7.val) * 64) := by
+        rw [← bit_xor_eta a0 b0]
+        omega
+      have hA1 :
+          a1.val + a2.val * 2 + a3.val * 4 + a4.val * 8 + a5.val * 16 + a6.val * 32 + a7.val * 64 =
+            Nat.bit (decide (a1.val = 1))
+              (a2.val + a3.val * 2 + a4.val * 4 + a5.val * 8 + a6.val * 16 + a7.val * 32) := by
+        rw [← bit_eta a1]
+        omega
+      have hB1 :
+          b1.val + b2.val * 2 + b3.val * 4 + b4.val * 8 + b5.val * 16 + b6.val * 32 + b7.val * 64 =
+            Nat.bit (decide (b1.val = 1))
+              (b2.val + b3.val * 2 + b4.val * 4 + b5.val * 8 + b6.val * 16 + b7.val * 32) := by
+        rw [← bit_eta b1]
+        omega
+      have hR1 :
+          (a1.val ^^^ b1.val) + (a2.val ^^^ b2.val) * 2 + (a3.val ^^^ b3.val) * 4 +
+          (a4.val ^^^ b4.val) * 8 + (a5.val ^^^ b5.val) * 16 + (a6.val ^^^ b6.val) * 32 + (a7.val ^^^ b7.val) * 64 =
+            Nat.bit (bne (decide (a1.val = 1)) (decide (b1.val = 1)))
+              ((a2.val ^^^ b2.val) + (a3.val ^^^ b3.val) * 2 + (a4.val ^^^ b4.val) * 4 +
+               (a5.val ^^^ b5.val) * 8 + (a6.val ^^^ b6.val) * 16 + (a7.val ^^^ b7.val) * 32) := by
+        rw [← bit_xor_eta a1 b1]
+        omega
+      have hA2 :
+          a2.val + a3.val * 2 + a4.val * 4 + a5.val * 8 + a6.val * 16 + a7.val * 32 =
+            Nat.bit (decide (a2.val = 1))
+              (a3.val + a4.val * 2 + a5.val * 4 + a6.val * 8 + a7.val * 16) := by
+        rw [← bit_eta a2]
+        omega
+      have hB2 :
+          b2.val + b3.val * 2 + b4.val * 4 + b5.val * 8 + b6.val * 16 + b7.val * 32 =
+            Nat.bit (decide (b2.val = 1))
+              (b3.val + b4.val * 2 + b5.val * 4 + b6.val * 8 + b7.val * 16) := by
+        rw [← bit_eta b2]
+        omega
+      have hR2 :
+          (a2.val ^^^ b2.val) + (a3.val ^^^ b3.val) * 2 + (a4.val ^^^ b4.val) * 4 +
+          (a5.val ^^^ b5.val) * 8 + (a6.val ^^^ b6.val) * 16 + (a7.val ^^^ b7.val) * 32 =
+            Nat.bit (bne (decide (a2.val = 1)) (decide (b2.val = 1)))
+              ((a3.val ^^^ b3.val) + (a4.val ^^^ b4.val) * 2 +
+               (a5.val ^^^ b5.val) * 4 + (a6.val ^^^ b6.val) * 8 + (a7.val ^^^ b7.val) * 16) := by
+        rw [← bit_xor_eta a2 b2]
+        omega
+      have hA3 :
+          a3.val + a4.val * 2 + a5.val * 4 + a6.val * 8 + a7.val * 16 =
+            Nat.bit (decide (a3.val = 1))
+              (a4.val + a5.val * 2 + a6.val * 4 + a7.val * 8) := by
+        rw [← bit_eta a3]
+        omega
+      have hB3 :
+          b3.val + b4.val * 2 + b5.val * 4 + b6.val * 8 + b7.val * 16 =
+            Nat.bit (decide (b3.val = 1))
+              (b4.val + b5.val * 2 + b6.val * 4 + b7.val * 8) := by
+        rw [← bit_eta b3]
+        omega
+      have hR3 :
+          (a3.val ^^^ b3.val) + (a4.val ^^^ b4.val) * 2 +
+          (a5.val ^^^ b5.val) * 4 + (a6.val ^^^ b6.val) * 8 + (a7.val ^^^ b7.val) * 16 =
+            Nat.bit (bne (decide (a3.val = 1)) (decide (b3.val = 1)))
+              ((a4.val ^^^ b4.val) + (a5.val ^^^ b5.val) * 2 + (a6.val ^^^ b6.val) * 4 + (a7.val ^^^ b7.val) * 8) := by
+        rw [← bit_xor_eta a3 b3]
+        omega
+      have hA4 :
+          a4.val + a5.val * 2 + a6.val * 4 + a7.val * 8 =
+            Nat.bit (decide (a4.val = 1)) (a5.val + a6.val * 2 + a7.val * 4) := by
+        rw [← bit_eta a4]
+        omega
+      have hB4 :
+          b4.val + b5.val * 2 + b6.val * 4 + b7.val * 8 =
+            Nat.bit (decide (b4.val = 1)) (b5.val + b6.val * 2 + b7.val * 4) := by
+        rw [← bit_eta b4]
+        omega
+      have hR4 :
+          (a4.val ^^^ b4.val) + (a5.val ^^^ b5.val) * 2 + (a6.val ^^^ b6.val) * 4 + (a7.val ^^^ b7.val) * 8 =
+            Nat.bit (bne (decide (a4.val = 1)) (decide (b4.val = 1)))
+              ((a5.val ^^^ b5.val) + (a6.val ^^^ b6.val) * 2 + (a7.val ^^^ b7.val) * 4) := by
+        rw [← bit_xor_eta a4 b4]
+        omega
+      have hA5 :
+          a5.val + a6.val * 2 + a7.val * 4 =
+            Nat.bit (decide (a5.val = 1)) (a6.val + a7.val * 2) := by
+        rw [← bit_eta a5]
+        omega
+      have hB5 :
+          b5.val + b6.val * 2 + b7.val * 4 =
+            Nat.bit (decide (b5.val = 1)) (b6.val + b7.val * 2) := by
+        rw [← bit_eta b5]
+        omega
+      have hR5 :
+          (a5.val ^^^ b5.val) + (a6.val ^^^ b6.val) * 2 + (a7.val ^^^ b7.val) * 4 =
+            Nat.bit (bne (decide (a5.val = 1)) (decide (b5.val = 1)))
+              ((a6.val ^^^ b6.val) + (a7.val ^^^ b7.val) * 2) := by
+        rw [← bit_xor_eta a5 b5]
+        omega
+      have hA6 :
+          a6.val + a7.val * 2 = Nat.bit (decide (a6.val = 1)) a7.val := by
+        rw [← bit_eta a6]
+        omega
+      have hB6 :
+          b6.val + b7.val * 2 = Nat.bit (decide (b6.val = 1)) b7.val := by
+        rw [← bit_eta b6]
+        omega
+      have hR6 :
+          (a6.val ^^^ b6.val) + (a7.val ^^^ b7.val) * 2 =
+            Nat.bit (bne (decide (a6.val = 1)) (decide (b6.val = 1))) (a7.val ^^^ b7.val) := by
+        rw [← bit_xor_eta a6 b6]
+        omega
+      rw [hA0, hB0, hR0, Nat.xor_bit]
+      rw [hA1, hB1, hR1, Nat.xor_bit]
+      rw [hA2, hB2, hR2, Nat.xor_bit]
+      rw [hA3, hB3, hR3, Nat.xor_bit]
+      rw [hA4, hB4, hR4, Nat.xor_bit]
+      rw [hA5, hB5, hR5, Nat.xor_bit]
+      rw [hA6, hB6, hR6, Nat.xor_bit]
 
     open BabyBear in
     /-- 8-bit XOR decomposition: the weighted sum of per-bit XOR formulas

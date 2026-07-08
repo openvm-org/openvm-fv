@@ -153,6 +153,34 @@ lemma sshiftright_eq {n : ℕ} {bv : BitVec n} {shift : ℕ} :
       (BitVec.extractLsb ((n - 1) + shift) shift (BitVec.signExtend (n + shift) bv))
     := by grind
 
+private lemma nat_add_eq_xor_add_two_mul_and (a b : ℕ) :
+    a + b = (a ^^^ b) + 2 * (a &&& b) := by
+  revert b
+  induction a using Nat.binaryRec with
+  | zero => intro b; simp
+  | bit ba a ih =>
+      intro b
+      induction b using Nat.binaryRec with
+      | zero => cases ba <;> simp [Nat.bit]
+      | bit bb b _ =>
+          rw [Nat.xor_bit ba a bb b, Nat.land_bit ba a bb b]
+          specialize ih b
+          cases ba <;> cases bb <;> simp [Nat.bit] <;> omega
+
+private lemma nat_or_eq_xor_add_and (a b : ℕ) :
+    a ||| b = (a ^^^ b) + (a &&& b) := by
+  revert b
+  induction a using Nat.binaryRec with
+  | zero => intro b; simp
+  | bit ba a ih =>
+      intro b
+      induction b using Nat.binaryRec with
+      | zero => cases ba <;> simp [Nat.bit]
+      | bit bb b _ =>
+          rw [Nat.xor_bit ba a bb b, Nat.land_bit ba a bb b, Nat.lor_bit ba a bb b]
+          specialize ih b
+          cases ba <;> cases bb <;> simp [Nat.bit] <;> omega
+
 lemma xor_as_and
   {a b : ℕ}
   (ub_a : a < 256)
@@ -160,15 +188,10 @@ lemma xor_as_and
 :
   a ^^^ b = (a + b) - 2 * (a &&& b)
 := by
-  have lt_b_and_c := @Nat.and_le_left a b
-  have bv_xor_as_and : forall (a b : BitVec 9), a ^^^ b = (a + b) - 2 * (a &&& b) := by bv_decide
-  specialize bv_xor_as_and { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
-  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_and
-  rw [Nat.mod_eq_of_lt (a := 2 * (a &&& b)) (by omega)] at bv_xor_as_and
-  have : (512 - 2 * (a &&& b) + (a + b)) % 512 < 256 := by rw [← bv_xor_as_and]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
-  have : (512 - 2 * (a &&& b) + (a + b)) % 512 = (a + b) - 2 * (a &&& b) := by omega
-  rw [this] at bv_xor_as_and
-  exact bv_xor_as_and
+  have _ : a < 256 := ub_a
+  have _ : b < 256 := ub_b
+  have h := nat_add_eq_xor_add_two_mul_and a b
+  omega
 
 lemma xor_as_or
   {a b : ℕ}
@@ -177,25 +200,24 @@ lemma xor_as_or
 :
   a ^^^ b = 2 * (a ||| b) - (a + b)
 := by
-  have := @Nat.left_le_or a b
-  have := @Nat.or_lt_two_pow a b 8 ub_a ub_b
-  have bv_xor_as_or : forall (a b : BitVec 9), a ^^^ b = 2 * (a ||| b) - (a + b) := by bv_decide
-  specialize bv_xor_as_or { toFin := ⟨ a, by omega⟩ } { toFin := ⟨ b, by omega⟩ }
-  simp [← BitVec.toNat_inj, Fin.add_def] at bv_xor_as_or
-  rw [Nat.mod_eq_of_lt (a := a + b) (by omega)] at bv_xor_as_or
-  have : (512 - (a + b) + 2 * (a ||| b)) % 512 < 256 := by rw [← bv_xor_as_or]; exact Nat.xor_lt_two_pow (n := 8) ub_a ub_b
-  have : (512 - (a + b) + 2 * (a ||| b)) % 512 = 2 * (a ||| b) - (a + b) := by omega
-  rw [this] at bv_xor_as_or
-  exact bv_xor_as_or
+  have _ : a < 256 := ub_a
+  have _ : b < 256 := ub_b
+  have hsum := nat_add_eq_xor_add_two_mul_and a b
+  have hor := nat_or_eq_xor_add_and a b
+  omega
 
 lemma toInt_mod_eq_zero_of_bitvec_mod_eq_zero (bv: BitVec 13) (h: bv % 4 = 0):
   bv.toInt % 4 = 0
 := by
-  simp at h ⊢
-  have : (4: Int) = (4#13).toInt := rfl
-  rewrite [this]
-  apply BitVec.toInt_dvd_toInt_iff.mpr
-  bv_decide
+  have hNat : bv.toNat % 4 = 0 := by
+    have h' := congrArg BitVec.toNat h
+    simpa [BitVec.toNat_umod] using h'
+  rw [BitVec.toInt_eq_msb_cond]
+  by_cases hb : bv.msb
+  · simp [hb]
+    omega
+  · simp [hb]
+    omega
 
 end BitVec
 

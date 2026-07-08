@@ -724,7 +724,14 @@ namespace VmAirWrapper_alu.constraints
           simp [Transpiler.sign_extend_24, Transpiler.utof]
           rewrite [
             Nat.mod_eq_of_lt (by omega), BitVec.ofNat_toNat, BitVec.ofNat_toNat,
-            BitVec.setWidth_eq, (show BitVec.setWidth 12 (BitVec.signExtend 24 imm) = imm by bv_decide)
+            BitVec.setWidth_eq,
+            (show BitVec.setWidth 12 (BitVec.signExtend 24 imm) = imm by
+              apply BitVec.eq_of_toNat_eq
+              simp [BitVec.toNat_setWidth, BitVec.toNat_signExtend]
+              by_cases h_msb : imm.msb <;> simp [h_msb]
+              · have hlt := imm.isLt
+                omega
+              · omega)
           ]
           split_ands
           . omega
