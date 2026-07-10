@@ -38,7 +38,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
      ++ programBus_row air row
     → entry.1 = 0
 := by
-  simp_all [VmAirWrapper_auipc_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification]
 
 end Auipc.NonValidRows
 
@@ -65,17 +65,17 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
+  simp [row_valid, VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification] at pa_exec pa_mem pa_range pa_read pa_bit
 
   replace pa_read := programBus_properties_of_opcode_bounds _ (by simp) pa_read
-  simp [VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification] at pa_read
 
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_bit
   obtain ⟨ ub_rd, ub_prev_0, ub_prev_1, ub_prev_2, ub_prev_3 ⟩ := pa_mem
   clear pa_range
 
-  simp_all [VmAirWrapper_auipc_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification]
 
 include
   row_valid
@@ -100,7 +100,7 @@ theorem spec_auipc
   -- imm_limbs are limbs of imm except the least significant limb
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
-  simp [row_valid, VmAirWrapper_auipc_constraint_and_interaction_simplification]
+  simp [row_valid, VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification]
     at pa_exec pa_mem pa_range pa_read pa_bit axioms constraints
 
   replace pa_read := programBus_properties_of_opcode_bounds _ (by simp) pa_read
@@ -112,7 +112,7 @@ theorem spec_auipc
   obtain ⟨ ub_rd0, ub_rd1, ub_rd2, ub_rd3, ub_imm0, ub_imm1, ub_imm2, ub_pc0, ub_pc1, ub_pc_msl ⟩ := pa_bit
   obtain ⟨ constrain_instructions, h_cry1, h_cry2, h_cry3, rest ⟩ := constraints; clear constrain_instructions rest
 
-  simp [VmAirWrapper_auipc_constraint_and_interaction_simplification] at pa_read
+  simp [VmAirWrapper_Rv32RdWriteAdapterAir_Rv32AuipcCoreAir_constraint_and_interaction_simplification] at pa_read
   obtain ⟨ ub_imm, imm_mod ⟩ := pa_read
 
   trans BitVec.ofNat 32 ↑(air.adapter.from_state.pc row 0) + ((BitVec.ofNat 24 (air.core.imm row 0).val) ++ 0#8); rotate_left

@@ -12,7 +12,7 @@ namespace BabyBear
 notation "FBB" => Fin BB_prime
 @[simp] lemma F_eq : FBB = Fin BB_prime := rfl
 
-lemma prime_BabyBearPrime : Nat.Prime BB_prime := by native_decide
+lemma prime_BabyBearPrime : Nat.Prime BB_prime := by norm_num
 
 instance Fact_BBPrime : Fact (Nat.Prime BB_prime) := ⟨prime_BabyBearPrime⟩
 instance : NeZero BB_prime := by constructor; decide
@@ -27,12 +27,6 @@ instance : NoZeroDivisors FBB := Fin.noZeroDivisors_of_prime _ (hp := Fact_BBPri
 
 section inverses
 
-lemma inv_4 : (1509949441 : FBB) = 4⁻¹ := by native_decide
-lemma inv_255 : (465814468 : FBB) = 255⁻¹ := by native_decide
-lemma inv_256 : (2005401601 : FBB) = 256⁻¹ := by native_decide
-lemma inv_65536 : (2013235201 : FBB) = 65536⁻¹ := by native_decide
-lemma inv_2_24 : (2013265801 : FBB) = 16777216⁻¹ := by native_decide
-
 lemma inv_4_eq_one_lr : (1509949441 : FBB) * 4 = 1 := by rfl
 lemma inv_4_eq_one_rl : 4 * (1509949441 : FBB) = 1 := by rfl
 lemma inv_255_eq_one_lr : (465814468 : FBB) * 255 = 1 := by rfl
@@ -43,6 +37,18 @@ lemma inv_65536_eq_one_lr : (2013235201 : FBB) * 65536 = 1 := by rfl
 lemma inv_65536_eq_one_rl : 65536 * (2013235201 : FBB) = 1 := by rfl
 lemma inv_2_24_eq_one_lr : (2013265801 : FBB) * 16777216 = 1 := by rfl
 lemma inv_2_24_eq_one_rl : 16777216 * (2013265801 : FBB) = 1 := by rfl
+
+lemma inv_4 : (1509949441 : FBB) = 4⁻¹ := by exact (inv_eq_of_mul_eq_one_left inv_4_eq_one_lr).symm
+lemma inv_255 : (465814468 : FBB) = 255⁻¹ := by exact (inv_eq_of_mul_eq_one_left inv_255_eq_one_lr).symm
+lemma inv_256 : (2005401601 : FBB) = 256⁻¹ := by exact (inv_eq_of_mul_eq_one_left inv_256_eq_one_lr).symm
+lemma inv_65536 : (2013235201 : FBB) = 65536⁻¹ := by exact (inv_eq_of_mul_eq_one_left inv_65536_eq_one_lr).symm
+lemma inv_2_24 : (2013265801 : FBB) = 16777216⁻¹ := by exact (inv_eq_of_mul_eq_one_left inv_2_24_eq_one_lr).symm
+
+lemma neg_one_eq : (-1 : FBB) = 2013265920 := by
+  rfl
+
+lemma eq_neg_one : (2013265920 : FBB) = -1 := by
+  rw [← neg_one_eq]
 
 @[simp] lemma inv_4_eq_4_lr : (1509949441 : FBB) * x = 1 ↔ x = 4 := by rw [inv_4, inv_mul_eq_one₀ (by simp), eq_comm]
 @[simp] lemma inv_4_eq_4_rl : x * (1509949441 : FBB) = 1 ↔ x = 4 := by rw [mul_comm, inv_4_eq_4_lr]

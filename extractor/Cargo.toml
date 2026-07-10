@@ -1,0 +1,13 @@
+[package]
+name = "openvm-fv-extractor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+openvm-stark-backend = { git = "https://github.com/openvm-org/stark-backend.git", tag = "v2.0.0", features = ["lean"] }
+openvm-stark-sdk = { git = "https://github.com/openvm-org/stark-backend.git", tag = "v2.0.0" }
+openvm-sdk = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0" }
+openvm-sdk-config = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0" }
+
+clap = { version = "4", features = ["derive"] }
+gag = "1"

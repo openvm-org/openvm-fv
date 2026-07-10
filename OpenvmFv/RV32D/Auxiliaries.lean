@@ -336,43 +336,21 @@ section RegisterManipulation
   lemma regidx_non_zero (h_non_zero: ¬rd = 0):
     regidx_to_fin (regidx.Regidx rd) ∈ Finset.Icc 1 31
   := by
-    obtain ⟨ rd', eq_rd' ⟩ : exists rd' : BitVec 5, rd' = rd := by simp
-    subst rd
-    by_cases rd' = 0; simp_all
-    by_cases h: rd' = 1; rewrite [h]; decide
-    by_cases h: rd' = 2; rewrite [h]; decide
-    by_cases h: rd' = 3; rewrite [h]; decide
-    by_cases h: rd' = 4; rewrite [h]; decide
-    by_cases h: rd' = 5; rewrite [h]; decide
-    by_cases h: rd' = 6; rewrite [h]; decide
-    by_cases h: rd' = 7; rewrite [h]; decide
-    by_cases h: rd' = 8; rewrite [h]; decide
-    by_cases h: rd' = 9; rewrite [h]; decide
-    by_cases h: rd' = 10; rewrite [h]; decide
-    by_cases h: rd' = 11; rewrite [h]; decide
-    by_cases h: rd' = 12; rewrite [h]; decide
-    by_cases h: rd' = 13; rewrite [h]; decide
-    by_cases h: rd' = 14; rewrite [h]; decide
-    by_cases h: rd' = 15; rewrite [h]; decide
-    by_cases h: rd' = 16; rewrite [h]; decide
-    by_cases h: rd' = 17; rewrite [h]; decide
-    by_cases h: rd' = 18; rewrite [h]; decide
-    by_cases h: rd' = 19; rewrite [h]; decide
-    by_cases h: rd' = 20; rewrite [h]; decide
-    by_cases h: rd' = 21; rewrite [h]; decide
-    by_cases h: rd' = 22; rewrite [h]; decide
-    by_cases h: rd' = 23; rewrite [h]; decide
-    by_cases h: rd' = 24; rewrite [h]; decide
-    by_cases h: rd' = 25; rewrite [h]; decide
-    by_cases h: rd' = 26; rewrite [h]; decide
-    by_cases h: rd' = 27; rewrite [h]; decide
-    by_cases h: rd' = 28; rewrite [h]; decide
-    by_cases h: rd' = 29; rewrite [h]; decide
-    by_cases h: rd' = 30; rewrite [h]; decide
-    by_cases h: rd' = 31; rewrite [h]; decide
-    exfalso
-    have : rd' < 32 := by bv_decide
-    grind
+    unfold regidx_to_fin
+    simp [Finset.mem_Icc]
+    constructor
+    · rw [Fin.le_iff_val_le_val]
+      simp
+      have hnat_ne : rd.toNat ≠ 0 := by
+        intro hzero
+        apply h_non_zero
+        apply BitVec.eq_of_toNat_eq
+        simp [hzero]
+      omega
+    · rw [Fin.le_iff_val_le_val]
+      simp
+      have hlt : rd.toNat < 32 := by exact rd.isLt
+      omega
 
   /-- Successful read -/
   @[simp]

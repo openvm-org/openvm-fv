@@ -19,253 +19,253 @@ namespace VmAirWrapper_alu.constraints
 
     section row_constraints
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_0 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_add_flag row 0 = 0 ∨ air.core.opcode_add_flag row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_0_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_0 air row ↔ constraint_0 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_0 air row ↔ constraint_0 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_1 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_sub_flag row 0 = 0 ∨ air.core.opcode_sub_flag row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_1_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_1 air row ↔ constraint_1 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_1 air row ↔ constraint_1 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_2 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_xor_flag row 0 = 0 ∨ air.core.opcode_xor_flag row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_2_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_2 air row ↔ constraint_2 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_2 air row ↔ constraint_2 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_3 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_or_flag row 0 = 0 ∨ air.core.opcode_or_flag row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_3_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_3 air row ↔ constraint_3 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_3 air row ↔ constraint_3 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_4 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_and_flag row 0 = 0 ∨ air.core.opcode_and_flag row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_4_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_4 air row ↔ constraint_4 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_4 air row ↔ constraint_4 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_5 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_5_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_5 air row ↔ constraint_5 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_5 air row ↔ constraint_5 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_6 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_add_flag row 0 = 0 ∨ air.core.carry_add_0 row 0 = 0 ∨ air.core.carry_add_0 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_6_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_6 air row ↔ constraint_6 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_6 air row ↔ constraint_6 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_7 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_sub_flag row 0 = 0 ∨ air.core.carry_sub_0 row 0 = 0 ∨ air.core.carry_sub_0 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_7_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_7 air row ↔ constraint_7 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_7 air row ↔ constraint_7 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_8 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_add_flag row 0 = 0 ∨ air.core.carry_add_1 row 0 = 0 ∨ air.core.carry_add_1 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_8_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_8 air row ↔ constraint_8 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_8 air row ↔ constraint_8 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_9 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_sub_flag row 0 = 0 ∨ air.core.carry_sub_1 row 0 = 0 ∨ air.core.carry_sub_1 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_9_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_9 air row ↔ constraint_9 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_9 air row ↔ constraint_9 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_10 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_add_flag row 0 = 0 ∨ air.core.carry_add_2 row 0 = 0 ∨ air.core.carry_add_2 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_10_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_10 air row ↔ constraint_10 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_10 air row ↔ constraint_10 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_11 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_sub_flag row 0 = 0 ∨ air.core.carry_sub_2 row 0 = 0 ∨ air.core.carry_sub_2 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_11_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_11 air row ↔ constraint_11 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_11 air row ↔ constraint_11 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_12 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_add_flag row 0 = 0 ∨ air.core.carry_add_3 row 0 = 0 ∨ air.core.carry_add_3 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_12_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_12 air row ↔ constraint_12 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_12 air row ↔ constraint_12 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_13 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.opcode_sub_flag row 0 = 0 ∨ air.core.carry_sub_3 row 0 = 0 ∨ air.core.carry_sub_3 row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_13_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_13 air row ↔ constraint_13 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_13 air row ↔ constraint_13 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_14 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.adapter.rs2_as row 0 = 0 ∨ air.adapter.rs2_as row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_14_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_14 air row ↔ constraint_14 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_14 air row ↔ constraint_14 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_15 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.adapter.rs2_as row 0 = 1 ∨ air.adapter.rs2 row 0 = air.rs2_imm row 0
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_15_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_15 air row ↔ constraint_15 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_15 air row ↔ constraint_15 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
         grind
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_16 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.adapter.rs2_as row 0 = 1 ∨ air.rs2_sign row 0 = air.rs2_limbs row 0 3
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_16_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_16 air row ↔ constraint_16 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_16 air row ↔ constraint_16 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
         grind
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_17 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         (air.adapter.rs2_as row 0 = 1 ∨ air.core.c_2 row 0 = 0 ∨ air.core.c_2 row 0 = 255)
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_17_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_17 air row ↔ constraint_17 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_17 air row ↔ constraint_17 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
         grind
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_18 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
         air.adapter.from_state.timestamp row 0 - air.adapter.reads_aux_0.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_0.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_18_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_18 air row ↔ constraint_18 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_18 air row ↔ constraint_18 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_19 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.adapter.rs2_as row 0 = 0 ∨ air.core.is_valid row 0 = 1
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_19_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_19 air row ↔ constraint_19 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_19 air row ↔ constraint_19 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_20 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.adapter.rs2_as row 0 = 0 ∨
         air.adapter.from_state.timestamp row 0 + 1 - air.adapter.reads_aux_1.base.prev_timestamp row 0 - 1 = air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.reads_aux_1.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_20_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_20 air row ↔ constraint_20 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_20 air row ↔ constraint_20 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constraint_21 (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ) : Prop :=
         air.core.is_valid row 0 = 0 ∨
         air.adapter.from_state.timestamp row 0 + 2 - air.adapter.writes_aux.base.prev_timestamp row 0 - 1 = air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_0 row 0 + air.adapter.writes_aux.base.timestamp_lt_aux.lower_decomp_1 row 0 * 131072
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constraint_21_of_extraction
         (air : Valid_VmAirWrapper_alu F ExtF) (row : ℕ)
-      : VmAirWrapper_alu.extraction.constraint_21 air row ↔ constraint_21 air row := by
+      : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_21 air row ↔ constraint_21 air row := by
         simp_all [openvm_encapsulation,
-                  VmAirWrapper_alu_constraint_and_interaction_simplification]
+                  VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
 
     end row_constraints
 
@@ -274,7 +274,7 @@ namespace VmAirWrapper_alu.constraints
       -- Note: use `congr; funext row` after `simp [h]; clear h` in
       --       the lemmas below to get the expression in the infoview
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def executionBus_row [Field ExtF]
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
@@ -286,16 +286,16 @@ namespace VmAirWrapper_alu.constraints
 
       lemma constrain_execution_interactions
         (air : Valid_VmAirWrapper_alu FBB ExtF)
-        (h : VmAirWrapper_alu.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air)
       :
         air.buses ExecutionBus = (List.range (air.last_row + 1)).flatMap (λ row => executionBus_row air row)
       := by
-        unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]
         rfl
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def memoryBus_row [Field ExtF]
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
@@ -311,16 +311,16 @@ namespace VmAirWrapper_alu.constraints
 
       lemma constrain_memory_interactions
         (air : Valid_VmAirWrapper_alu FBB ExtF)
-        (h : VmAirWrapper_alu.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air)
       :
         air.buses MemoryBus = (List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row air row)
       := by
-        unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]
         rfl
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def rangeCheckerBus_row [Field ExtF]
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
@@ -336,16 +336,16 @@ namespace VmAirWrapper_alu.constraints
 
       lemma constrain_range_interactions
         (air : Valid_VmAirWrapper_alu FBB ExtF)
-        (h : VmAirWrapper_alu.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air)
       :
         air.buses RangeCheckerBus = (List.range (air.last_row + 1)).flatMap (λ row => rangeCheckerBus_row air row)
       := by
-        unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]
         rfl
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def programBus_row [Field ExtF]
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
@@ -365,16 +365,16 @@ namespace VmAirWrapper_alu.constraints
 
       lemma constrain_program_interactions
         (air : Valid_VmAirWrapper_alu FBB ExtF)
-        (h : VmAirWrapper_alu.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air)
       :
         air.buses ProgramBus = (List.range (air.last_row + 1)).flatMap (λ row => programBus_row air row)
       := by
-        unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]
         rfl
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def bitwiseBus_row [Field ExtF]
         (air : Valid_VmAirWrapper_alu FBB ExtF)
         (row : ℕ)
@@ -389,32 +389,32 @@ namespace VmAirWrapper_alu.constraints
 
       lemma constrain_bitwise_interactions
         (air : Valid_VmAirWrapper_alu FBB ExtF)
-        (h : VmAirWrapper_alu.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air)
       :
         air.buses BitwiseBus = (List.range (air.last_row + 1)).flatMap (λ row => bitwiseBus_row air row)
       := by
-        unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]
         rfl
 
-      @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
       def constrain_interactions (air : Valid_VmAirWrapper_alu FBB ExtF) : Prop :=
         air.buses = fun index ↦
         if index = ExecutionBus then (List.range (air.last_row + 1)).flatMap (executionBus_row air)
         else if index = MemoryBus then (List.range (air.last_row + 1)).flatMap (memoryBus_row air)
-        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
         else if index = ProgramBus then (List.range (air.last_row + 1)).flatMap (programBus_row air)
+        else if index = RangeCheckerBus then (List.range (air.last_row + 1)).flatMap (rangeCheckerBus_row air)
         else if index = BitwiseBus then (List.range (air.last_row + 1)).flatMap (bitwiseBus_row air)
         else []
 
-      @[VmAirWrapper_alu_air_simplification]
+      @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
       lemma constrain_interactions_of_extraction
         (air : Valid_VmAirWrapper_alu FBB ExtF)
-        (h : VmAirWrapper_alu.extraction.constrain_interactions air)
+        (h : VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air)
       : constrain_interactions air := by
         unfold constrain_interactions
-        unfold VmAirWrapper_alu.extraction.constrain_interactions at h
+        unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions at h
         simp [openvm_encapsulation] at h
         simp [h]
         rfl
@@ -435,28 +435,28 @@ namespace VmAirWrapper_alu.constraints
       (row : ℕ)
     : List Prop :=
       [
-        VmAirWrapper_alu.extraction.constraint_0 air row,
-        VmAirWrapper_alu.extraction.constraint_1 air row,
-        VmAirWrapper_alu.extraction.constraint_2 air row,
-        VmAirWrapper_alu.extraction.constraint_3 air row,
-        VmAirWrapper_alu.extraction.constraint_4 air row,
-        VmAirWrapper_alu.extraction.constraint_5 air row,
-        VmAirWrapper_alu.extraction.constraint_6 air row,
-        VmAirWrapper_alu.extraction.constraint_7 air row,
-        VmAirWrapper_alu.extraction.constraint_8 air row,
-        VmAirWrapper_alu.extraction.constraint_9 air row,
-        VmAirWrapper_alu.extraction.constraint_10 air row,
-        VmAirWrapper_alu.extraction.constraint_11 air row,
-        VmAirWrapper_alu.extraction.constraint_12 air row,
-        VmAirWrapper_alu.extraction.constraint_13 air row,
-        VmAirWrapper_alu.extraction.constraint_14 air row,
-        VmAirWrapper_alu.extraction.constraint_15 air row,
-        VmAirWrapper_alu.extraction.constraint_16 air row,
-        VmAirWrapper_alu.extraction.constraint_17 air row,
-        VmAirWrapper_alu.extraction.constraint_18 air row,
-        VmAirWrapper_alu.extraction.constraint_19 air row,
-        VmAirWrapper_alu.extraction.constraint_20 air row,
-        VmAirWrapper_alu.extraction.constraint_21 air row
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_0 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_1 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_2 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_3 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_4 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_5 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_6 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_7 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_8 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_9 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_10 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_11 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_12 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_13 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_14 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_15 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_16 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_17 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_18 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_19 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_20 air row,
+        VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constraint_21 air row
       ]
 
     -- TODO have extractor generate this and put in extraction file
@@ -467,7 +467,7 @@ namespace VmAirWrapper_alu.constraints
       (row : ℕ)
       (_ : row ≤ air.last_row)
     : Prop :=
-      VmAirWrapper_alu.extraction.constrain_interactions air ∧
+      VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions air ∧
       List.Forall (·) (extracted_row_constraint_list air row)
 
     @[simp]
@@ -517,13 +517,13 @@ namespace VmAirWrapper_alu.constraints
     : allHold air row h_row ↔ allHold_simplified air row h_row := by
       unfold allHold allHold_simplified
       apply Iff.and
-      . unfold VmAirWrapper_alu.extraction.constrain_interactions
+      . unfold VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8.extraction.constrain_interactions
         simp [openvm_encapsulation,
-              VmAirWrapper_alu_constraint_and_interaction_simplification]
+              VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
         rfl
       . simp only [extracted_row_constraint_list,
                    row_constraint_list,
-                   VmAirWrapper_alu_air_simplification]
+                   VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_air_simplification]
 
   end allHold
 
@@ -551,7 +551,7 @@ namespace VmAirWrapper_alu.constraints
       rw [allHold_simplified_of_allHold air row valid_row] at cstrs
       obtain ⟨ hint, h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
       clear hint rest
-      simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at h0 h1 h2 h3 h4 h5
+      simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at h0 h1 h2 h3 h4 h5
       rw [Valid_BaseAluCoreAir.is_valid] at h5
       grind (splits := 23)
 
@@ -576,7 +576,7 @@ namespace VmAirWrapper_alu.constraints
       rw [allHold_simplified_of_allHold air row valid_row] at cstrs
       obtain ⟨ hint, h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
       clear hint rest
-      simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at *
+      simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at *
       rw [Valid_BaseAluCoreAir.is_valid] at h5
       rw [← BaseAluCoreAir.is_valid_def] at is_valid
       rw [← BaseAluCoreAir.ctx.instruction.opcode_def]
@@ -601,7 +601,7 @@ namespace VmAirWrapper_alu.constraints
       rw [allHold_simplified_of_allHold air row valid_row] at cstrs
       obtain ⟨ hint, h0, h1, h2, h3, h4, h5, rest ⟩ := cstrs
       clear hint rest
-      simp [VmAirWrapper_alu_constraint_and_interaction_simplification] at *
+      simp [VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification] at *
       grind
 
   end properties
@@ -617,7 +617,7 @@ namespace VmAirWrapper_alu.constraints
       unfold executionBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
     def _executionBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.ExecutionBusEntryInstance.data_length) := by
@@ -637,7 +637,7 @@ namespace VmAirWrapper_alu.constraints
       unfold memoryBus_row at *; simp_all
       grind (ematch := 8)
 
-    @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
     def _memoryBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.MemoryBusEntryInstance.data_length) := by
@@ -657,7 +657,7 @@ namespace VmAirWrapper_alu.constraints
       unfold rangeCheckerBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
     def _rangeCheckerBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.RangeCheckerBusEntryInstance.data_length) := by
@@ -668,7 +668,7 @@ namespace VmAirWrapper_alu.constraints
           (rangeCheckerBus_row air row).attach
       List.map Interaction.RangeCheckerBusEntryInstance.deserialise vectorised_row
 
-    @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
     def programBus_properties (entry : Interaction.ProgramBusEntry FBB) : Prop :=
       let rs2 := entry.xc
       let rs2_as := entry.xe
@@ -724,7 +724,14 @@ namespace VmAirWrapper_alu.constraints
           simp [Transpiler.sign_extend_24, Transpiler.utof]
           rewrite [
             Nat.mod_eq_of_lt (by omega), BitVec.ofNat_toNat, BitVec.ofNat_toNat,
-            BitVec.setWidth_eq, (show BitVec.setWidth 12 (BitVec.signExtend 24 imm) = imm by bv_decide)
+            BitVec.setWidth_eq,
+            (show BitVec.setWidth 12 (BitVec.signExtend 24 imm) = imm by
+              apply BitVec.eq_of_toNat_eq
+              simp [BitVec.toNat_setWidth, BitVec.toNat_signExtend]
+              by_cases h_msb : imm.msb <;> simp [h_msb]
+              · have hlt := imm.isLt
+                omega
+              · omega)
           ]
           split_ands
           . omega
@@ -741,7 +748,7 @@ namespace VmAirWrapper_alu.constraints
     := by
       unfold programBus_row at *; simp_all
 
-    @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
     def _programBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.ProgramBusEntryInstance.data_length) := by
@@ -761,7 +768,7 @@ namespace VmAirWrapper_alu.constraints
       unfold bitwiseBus_row at *; simp_all
       grind
 
-    @[VmAirWrapper_alu_constraint_and_interaction_simplification]
+    @[VmAirWrapper_Rv32BaseAluAdapterAir_BaseAluCoreAir_4_8_constraint_and_interaction_simplification]
     def _bitwiseBus_row [Field ExtF]
       (air : Valid_VmAirWrapper_alu FBB ExtF) (row : ℕ) :=
       let vectorised_row : List (FBB × Vector FBB Interaction.BitwiseBusEntryInstance.data_length) := by

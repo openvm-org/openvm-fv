@@ -1,0 +1,31 @@
+name = "vm-extensions"
+version = "0.1.0"
+moreLeanArgs = ["--tstack=2000000"]
+
+[leanOptions]
+pp.unicode.fun = true
+maxHeartbeats = 1000000000
+maxRecDepth = 1000000
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.26.0"
+
+[[require]]
+name = "LeanZKCircuit"
+git = "https://github.com/NethermindEth/leanzkcircuit.git"
+rev = "v4.26.0"
+
+[[require]]
+name = "openvm-fv"
+path = ".."
+
+[[require]]
+name = "LeanRV"
+git = "https://github.com/NethermindEth/sail-riscv-lean"
+rev = "rv32d"
+
+[[lean_lib]]
+name = "VmExtensions"
+srcDir = ".."

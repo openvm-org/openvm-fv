@@ -14,6 +14,134 @@ import OpenvmFv.Spec.StoreB
 
 namespace Equivalence.LoadStore
 
+  private lemma concat_ofNat8_div_mod (a : ℕ) :
+    256#16 * BitVec.setWidth 16 (BitVec.ofNat 8 (a / 256)) +
+    BitVec.ofNat 8 (a % 256) =
+    BitVec.ofNat 8 (a / 256) ++ BitVec.ofNat 8 (a % 256)
+  := by
+    apply BitVec.eq_of_toNat_eq
+    rw [BitVec.toNat_add, BitVec.toNat_mul, BitVec.toNat_setWidth, BitVec.toNat_append]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)]
+    simp only [BitVec.toNat_ofNat, Nat.reducePow, Nat.shiftLeft_eq, BitVec.toNat_setWidth]
+    omega
+
+  private lemma concat8_eq_mul_add (bv1 bv2 : BitVec 8) :
+    256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
+    bv1 ++ bv2
+  := by
+    apply BitVec.eq_of_toNat_eq
+    rw [
+      BitVec.toNat_add,
+      BitVec.toNat_mul,
+      BitVec.toNat_setWidth,
+      BitVec.toNat_setWidth,
+      BitVec.toNat_append
+    ]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)]
+    simp only [BitVec.toNat_ofNat, Nat.reducePow, Nat.shiftLeft_eq]
+    omega
+
+  private lemma concat16_eq_shift_add (x y : ℕ) :
+    (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
+    (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
+    (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
+  := by
+    apply BitVec.eq_of_toNat_eq
+    rw [
+      BitVec.toNat_add,
+      BitVec.toNat_shiftLeft,
+      BitVec.toNat_setWidth,
+      BitVec.toNat_setWidth,
+      BitVec.toNat_append
+    ]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt (by omega)]
+    simp only [BitVec.toNat_ofNat, Nat.reducePow, Nat.shiftLeft_eq]
+    omega
+
+  private lemma setWidth12_append_four_eq_tail (bv1 bv2 bv3 bv4 : BitVec 8) :
+    BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
+    BitVec.setWidth 12 (bv3 ++ bv4)
+  := by
+    ext i hi
+    simp only [BitVec.getElem_setWidth]
+    repeat rw [BitVec.getLsbD_append]
+    by_cases h : i < 8
+    · simp [h]
+    · simp [h]
+      omega
+
+  private lemma append_zero_20_12 (imm : BitVec 12) :
+    0#20 ++ imm = 0#16 ++ (0#4 ++ imm)
+  := by
+    ext i hi
+    rw [← BitVec.getLsbD_eq_getElem hi]
+    rw [← BitVec.getLsbD_eq_getElem hi]
+    repeat rw [BitVec.getLsbD_append]
+    by_cases h12 : i < 12
+    · simp [h12]
+      omega
+    · by_cases h16 : i < 16
+      · simp [h12, h16]
+      · simp [h12, h16]
+
+  private lemma append_allOnes_20_12 (imm : BitVec 12) :
+    BitVec.allOnes 20 ++ imm =
+    BitVec.allOnes 16 ++ (BitVec.allOnes 4 ++ imm)
+  := by
+    ext i hi
+    rw [← BitVec.getLsbD_eq_getElem hi]
+    rw [← BitVec.getLsbD_eq_getElem hi]
+    repeat rw [BitVec.getLsbD_append]
+    by_cases h12 : i < 12
+    · simp [h12]
+      omega
+    · by_cases h16 : i < 16
+      · simp [h12, h16]
+        rw [BitVec.getLsbD_ofNat, BitVec.getLsbD_ofNat]
+        rw [show 1048575 = 2 ^ 20 - 1 by norm_num]
+        rw [show 15 = 2 ^ 4 - 1 by norm_num]
+        rw [Nat.testBit_two_pow_sub_one, Nat.testBit_two_pow_sub_one]
+        simp
+        omega
+      · simp [h12, h16]
+        rw [BitVec.getLsbD_ofNat, BitVec.getLsbD_ofNat]
+        rw [show 1048575 = 2 ^ 20 - 1 by norm_num]
+        rw [show 65535 = 2 ^ 16 - 1 by norm_num]
+        rw [Nat.testBit_two_pow_sub_one, Nat.testBit_two_pow_sub_one]
+        simp
+        omega
+
+  private lemma signExtend32_signExtend16_eq (imm : BitVec 12) :
+    BitVec.signExtend 32 imm =
+    BitVec.signExtend 32 (BitVec.signExtend 16 imm)
+  := by
+    cases h : imm.msb
+    · rw [BitVec.signExtend_eq_append_of_le (by omega : 12 ≤ 16)]
+      rw [BitVec.signExtend_eq_append_of_le (by omega : 12 ≤ 32)]
+      rw [BitVec.signExtend_eq_append_of_le (by omega : 16 ≤ 32)]
+      simp only [h, Bool.false_eq_true, ↓reduceIte, BitVec.cast_eq]
+      rw [BitVec.msb_append]
+      simp only [h]
+      exact append_zero_20_12 imm
+    · rw [BitVec.signExtend_eq_append_of_le (by omega : 12 ≤ 16)]
+      rw [BitVec.signExtend_eq_append_of_le (by omega : 12 ≤ 32)]
+      rw [BitVec.signExtend_eq_append_of_le (by omega : 16 ≤ 32)]
+      simp only [h, ↓reduceIte, BitVec.cast_eq]
+      rw [BitVec.msb_append]
+      simp only [BitVec.msb_allOnes (by omega : 0 < 4)]
+      exact append_allOnes_20_12 imm
+
+  private lemma signExtend32_setWidth12_signExtend16_eq (imm : BitVec 12) :
+    BitVec.signExtend 32 (BitVec.setWidth 12 (BitVec.signExtend 16 imm)) =
+    BitVec.signExtend 32 (BitVec.signExtend 16 imm)
+  := by
+    have h_setWidth : BitVec.setWidth 12 (BitVec.signExtend 16 imm) = imm := by
+      rw [BitVec.signExtend_eq_append_of_le (by omega : 12 ≤ 16)]
+      rw [BitVec.setWidth_cast]
+      rw [BitVec.setWidth_append_eq_right]
+    rw [h_setWidth]
+    exact signExtend32_signExtend16_eq imm
+
   @[ext]
   structure LoadStore_instruction_fields where
     is_valid : FBB
@@ -197,10 +325,10 @@ namespace Equivalence.LoadStore
         rows.flatMap LoadStore_instruction_fields.execution
       else if index = MemoryBus then
         rows.flatMap LoadStore_instruction_fields.memory
-      else if index = RangeCheckerBus then
-        rows.flatMap LoadStore_instruction_fields.range_checks
       else if index = ProgramBus then
         rows.flatMap LoadStore_instruction_fields.read_instruction
+      else if index = RangeCheckerBus then
+        rows.flatMap LoadStore_instruction_fields.range_checks
       else []
 
   def allHold_allRows [Field ExtF] (air : Valid_VmAirWrapper_loadstore FBB ExtF) : Prop :=
@@ -377,7 +505,7 @@ namespace Equivalence.LoadStore
     rewrite [
       VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold
     ] at h_constraints
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints
     obtain ⟨
       _,
       _,
@@ -452,7 +580,7 @@ namespace Equivalence.LoadStore
       256#16 * BitVec.setWidth 16 (BitVec.ofNat 8 (a / 256)) +
       BitVec.ofNat 8 (a % 256) =
       BitVec.ofNat 8 (a / 256) ++ BitVec.ofNat 8 (a % 256)
-    := by bv_decide
+    := by exact concat_ofNat8_div_mod a
     rewrite [←this]; clear this
     congr
     . unfold BitVec.setWidth BitVec.setWidth'
@@ -514,7 +642,7 @@ namespace Equivalence.LoadStore
   := by
     have h_transpile := h_bus_wellformedness.2.2.2
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       Interaction.ProgramBusEntry.operand_properties
     ] at h_transpile
@@ -535,7 +663,7 @@ namespace Equivalence.LoadStore
     dsimp at h_instruction
     simp [-Vector.mk_eq] at h_instruction
     simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-    bv_decide
+    exact signExtend32_setWidth12_signExtend16_eq imm
 
   lemma imm_extended_limb_upper_mod_of_opcode_531 [Field ExtF]
     (air : Valid_VmAirWrapper_loadstore FBB ExtF)
@@ -607,28 +735,28 @@ namespace Equivalence.LoadStore
       convert this
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.1
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.2.1
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
       exact h_memory.2.1.2.2.2.2.1
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -640,7 +768,7 @@ namespace Equivalence.LoadStore
       ]
       have h_execution := h_bus_axioms.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid
       ] at h_execution
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -676,7 +804,7 @@ namespace Equivalence.LoadStore
         (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
         (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
         (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
-      := by bv_decide
+      := by exact concat16_eq_shift_add x y
       rewrite [←this]; clear this
       rewrite [BitVec.toNat_add]
       simp
@@ -714,7 +842,7 @@ namespace Equivalence.LoadStore
         BitVec.setWidth 12 (a ++ b ++ c ++ d) =
         BitVec.setWidth 12 (c ++ d)
       := by
-        bv_decide
+        exact setWidth12_append_four_eq_tail a b c d
       rewrite [this]; clear this
       have
         (h1 : (air.adapter.imm row 0).val / 256 % 256 < 256)
@@ -733,7 +861,7 @@ namespace Equivalence.LoadStore
           BitVec.setWidth 16 b =
           a ++ b
         := by
-          bv_decide
+          exact concat8_eq_mul_add a b
         rewrite [←this]; clear this
         congr
         . rewrite [←BitVec.toNat_inj]
@@ -754,7 +882,7 @@ namespace Equivalence.LoadStore
       have (bv1 bv2 bv3 bv4: BitVec 8) :
         BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
         BitVec.setWidth 12 (bv3 ++ bv4)
-      := by bv_decide
+      := by exact setWidth12_append_four_eq_tail bv1 bv2 bv3 bv4
       rewrite [this]; clear this
       -- combine the two halves of imm into BitVec.ofNat 16 imm
       have h_imm_range := StoreW.imm_range_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
@@ -811,7 +939,7 @@ namespace Equivalence.LoadStore
         have (bv1 bv2: BitVec 8) :
           256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
           bv1 ++ bv2
-        := by bv_decide
+        := by exact concat8_eq_mul_add bv1 bv2
         rewrite [←this]
         congr
         . simp [
@@ -842,7 +970,7 @@ namespace Equivalence.LoadStore
         have (bv1 bv2: BitVec 8) :
           256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
           bv1 ++ bv2
-        := by bv_decide
+        := by exact concat8_eq_mul_add bv1 bv2
         rewrite [←this]
         congr <;> {
           unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
@@ -854,17 +982,22 @@ namespace Equivalence.LoadStore
     . have := StoreW.imm_sign_of_opcode_531 air row h_bus_wellformedness h_is_valid h_opcode
       rewrite [this]; clear this
       simp [U32.toBV]
-      have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+      have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by
+        repeat rw [BitVec.msb_append]
+        simp
       simp [this]
       have := imm_extended_limb_upper_mod_of_opcode_531 air row h_row h_constraints h_is_valid
       simp [this]
       have h_sign_extend := StoreW.imm_sign_extend_of_opcode_531 air row h_opcode h_is_valid h_bus_wellformedness
       have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
       apply this at h_sign_extend
-      have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+      have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by
+        simp [BitVec.msb_signExtend]
       rewrite [this] at h_sign_extend
       rewrite [h_sign_extend]
-      have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+      have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by
+        rw [BitVec.msb_append]
+        simp
       rewrite [this]
       have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
       rewrite [this]
@@ -887,7 +1020,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -905,7 +1038,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -934,7 +1067,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -965,7 +1098,7 @@ namespace Equivalence.LoadStore
       simp [U32.toNat]
       have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -1074,7 +1207,7 @@ namespace Equivalence.LoadStore
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
       BitVec.setWidth 12 (bv3 ++ bv4)
-    := by bv_decide
+    := by exact setWidth12_append_four_eq_tail bv1 bv2 bv3 bv4
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
     have h_imm_range := StoreH.imm_range_of_opcode_532 air row h_opcode h_is_valid h_bus_wellformedness
@@ -1093,7 +1226,7 @@ namespace Equivalence.LoadStore
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1108,7 +1241,7 @@ namespace Equivalence.LoadStore
       have h_alignment := Transpiler.pc_aligned_of_some h_instruction
       have h_bound := Transpiler.pc_bound_of_some h_instruction
       obtain
-        ⟨_, imm, rs1, h_instruction_load⟩
+        ⟨offset, imm, rs1, h_instruction_load⟩
       := this
       all_goals {
         rewrite [h_instruction_load] at h_instruction
@@ -1117,7 +1250,7 @@ namespace Equivalence.LoadStore
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-        bv_decide
+        exact signExtend32_setWidth12_signExtend16_eq offset
       }
     convert this using 1
     . simp [BitVec.ofNat, Nat.cast]
@@ -1186,7 +1319,7 @@ lemma sh_spec_sign_extend_eq_imm [Field ExtF]
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr
       . simp [
@@ -1217,7 +1350,7 @@ lemma sh_spec_sign_extend_eq_imm [Field ExtF]
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr <;> {
         unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
@@ -1255,7 +1388,9 @@ lemma sh_spec_imm_sign [Field ExtF]
     have := StoreH.imm_sign_of_opcode_532 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
-    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by
+      repeat rw [BitVec.msb_append]
+      simp
     simp [this]
     have := StoreH.imm_extend_range_of_opcode_532 air row h_row h_constraints h_is_valid
     have :
@@ -1267,10 +1402,13 @@ lemma sh_spec_imm_sign [Field ExtF]
     have h_sign_extend := StoreH.imm_sign_extend_of_opcode_532 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
-    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by
+      simp [BitVec.msb_signExtend]
     rewrite [this] at h_sign_extend
     rewrite [h_sign_extend]
-    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by
+      rw [BitVec.msb_append]
+      simp
     rewrite [this]
     have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
     rewrite [this]
@@ -1325,17 +1463,17 @@ set_option maxHeartbeats 0 in
     ]
     have h_needs_write := StoreH.needs_write_of_opcode_532 air row h_bus_wellformedness h_is_valid h_opcode
     have h_bus_wellformedness' := h_bus_wellformedness
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
           h_is_valid,
           h_needs_write,
-          show (((-1) : FBB) = 2013265920) by native_decide,
+          BabyBear.neg_one_eq,
           and_assoc] at h_bus_wellformedness'
     obtain ⟨ hwf01, hwf02, hwf03, hwf04, hwf05, hwf06, hwf07, hwf08, hwf09, hwf10,
              hwf11, hwf12, hwf13, hwf14, hwf15, hwf16, hwf17, hwf18, hwf19, hwf20,
              hwf21, hwf22, hwf23, hwf24, hwf25, hwf26 ⟩ := h_bus_wellformedness'
     have h_constraints' := h_constraints
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints'
     simp [h_is_valid, h_needs_write] at h_constraints'
     obtain ⟨
       h_interactions,
@@ -1404,7 +1542,7 @@ set_option maxHeartbeats 0 in
       ]
       have h_execution := h_bus_axioms.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid
       ] at h_execution
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -1447,7 +1585,7 @@ set_option maxHeartbeats 0 in
         (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
         (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
         (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
-      := by bv_decide
+      := by exact concat16_eq_shift_add x y
       rewrite [←this]; clear this
       rewrite [BitVec.toNat_add]
       simp
@@ -1577,7 +1715,7 @@ set_option maxHeartbeats 0 in
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
       BitVec.setWidth 12 (bv3 ++ bv4)
-    := by bv_decide
+    := by exact setWidth12_append_four_eq_tail bv1 bv2 bv3 bv4
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
     have h_imm_range := StoreB.imm_range_of_opcode_533 air row h_opcode h_is_valid h_bus_wellformedness
@@ -1596,7 +1734,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -1611,7 +1749,7 @@ set_option maxHeartbeats 0 in
       have h_alignment := Transpiler.pc_aligned_of_some h_instruction
       have h_bound := Transpiler.pc_bound_of_some h_instruction
       obtain
-        ⟨_, imm, rs1, h_instruction_load⟩
+        ⟨offset, imm, rs1, h_instruction_load⟩
       := this
       all_goals {
         rewrite [h_instruction_load] at h_instruction
@@ -1620,7 +1758,7 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-        bv_decide
+        exact signExtend32_setWidth12_signExtend16_eq offset
       }
     convert this using 1
     . simp [BitVec.ofNat, Nat.cast]
@@ -1689,7 +1827,7 @@ lemma sb_spec_sign_extend_eq_imm [Field ExtF]
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr
       . simp [
@@ -1720,7 +1858,7 @@ lemma sb_spec_sign_extend_eq_imm [Field ExtF]
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr <;> {
         unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
@@ -1758,7 +1896,9 @@ lemma sb_spec_imm_sign [Field ExtF]
     have := StoreB.imm_sign_of_opcode_533 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
-    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by
+      repeat rw [BitVec.msb_append]
+      simp
     simp [this]
     have := StoreB.imm_extend_range_of_opcode_533 air row h_row h_constraints h_is_valid
     have :
@@ -1770,10 +1910,13 @@ lemma sb_spec_imm_sign [Field ExtF]
     have h_sign_extend := StoreB.imm_sign_extend_of_opcode_533 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
-    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by
+      simp [BitVec.msb_signExtend]
     rewrite [this] at h_sign_extend
     rewrite [h_sign_extend]
-    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by
+      rw [BitVec.msb_append]
+      simp
     rewrite [this]
     have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
     rewrite [this]
@@ -1828,17 +1971,17 @@ set_option maxHeartbeats 0 in
     ]
     have h_needs_write := StoreB.needs_write_of_opcode_533 air row h_bus_wellformedness h_is_valid h_opcode
     have h_bus_wellformedness' := h_bus_wellformedness
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
           h_is_valid,
           h_needs_write,
-          show (((-1) : FBB) = 2013265920) by native_decide,
+          BabyBear.neg_one_eq,
           and_assoc] at h_bus_wellformedness'
     obtain ⟨ hwf01, hwf02, hwf03, hwf04, hwf05, hwf06, hwf07, hwf08, hwf09, hwf10,
              hwf11, hwf12, hwf13, hwf14, hwf15, hwf16, hwf17, hwf18, hwf19, hwf20,
              hwf21, hwf22, hwf23, hwf24, hwf25, hwf26 ⟩ := h_bus_wellformedness'
     have h_constraints' := h_constraints
     rewrite [VmAirWrapper_loadstore.constraints.allHold_simplified_of_allHold] at h_constraints'
-    simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_constraints'
+    simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_constraints'
     simp [h_is_valid, h_needs_write] at h_constraints'
     obtain ⟨
       h_interactions,
@@ -1907,7 +2050,7 @@ set_option maxHeartbeats 0 in
       ]
       have h_execution := h_bus_axioms.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid
       ] at h_execution
       rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -1950,7 +2093,7 @@ set_option maxHeartbeats 0 in
         (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
         (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
         (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
-      := by bv_decide
+      := by exact concat16_eq_shift_add x y
       rewrite [←this]; clear this
       rewrite [BitVec.toNat_add]
       simp
@@ -2128,7 +2271,7 @@ set_option maxHeartbeats 0 in
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -2144,7 +2287,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2160,7 +2303,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2176,7 +2319,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2197,7 +2340,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2226,7 +2369,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2256,7 +2399,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -2326,7 +2469,7 @@ set_option maxHeartbeats 0 in
       (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
       (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
       (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
-    := by bv_decide
+    := by exact concat16_eq_shift_add x y
     rewrite [←this]; clear this
     rewrite [BitVec.toNat_add]
     simp
@@ -2387,7 +2530,7 @@ set_option maxHeartbeats 0 in
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
       BitVec.setWidth 12 (bv3 ++ bv4)
-    := by bv_decide
+    := by exact setWidth12_append_four_eq_tail bv1 bv2 bv3 bv4
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
     have h_imm_range := LoadW.imm_range_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
@@ -2406,7 +2549,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -2431,7 +2574,7 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-        bv_decide
+        exact signExtend32_setWidth12_signExtend16_eq imm
       }
     convert this using 1
     . simp [BitVec.ofNat, Nat.cast]
@@ -2500,7 +2643,7 @@ set_option maxHeartbeats 0 in
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr
       . simp [
@@ -2531,7 +2674,7 @@ set_option maxHeartbeats 0 in
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr <;> {
         unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
@@ -2569,7 +2712,9 @@ set_option maxHeartbeats 0 in
     have := LoadW.imm_sign_of_opcode_528 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
-    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by
+      repeat rw [BitVec.msb_append]
+      simp
     simp [this]
     have := LoadW.imm_extend_range_of_opcode_528 air row h_row h_constraints h_is_valid
     have :
@@ -2581,10 +2726,13 @@ set_option maxHeartbeats 0 in
     have h_sign_extend := LoadW.imm_sign_extend_of_opcode_528 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
-    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by
+      simp [BitVec.msb_signExtend]
     rewrite [this] at h_sign_extend
     rewrite [h_sign_extend]
-    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by
+      rw [BitVec.msb_append]
+      simp
     rewrite [this]
     have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
     rewrite [this]
@@ -2659,7 +2807,7 @@ set_option maxHeartbeats 0 in
     . apply lw_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -2864,7 +3012,7 @@ set_option maxHeartbeats 0 in
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -2880,7 +3028,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2896,7 +3044,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2912,7 +3060,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -2933,7 +3081,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2962,7 +3110,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -2988,7 +3136,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -3067,7 +3215,7 @@ set_option maxHeartbeats 0 in
       (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
       (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
       (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
-    := by bv_decide
+    := by exact concat16_eq_shift_add x y
     rewrite [←this]; clear this
     rewrite [BitVec.toNat_add]
     simp
@@ -3128,7 +3276,7 @@ set_option maxHeartbeats 0 in
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
       BitVec.setWidth 12 (bv3 ++ bv4)
-    := by bv_decide
+    := by exact setWidth12_append_four_eq_tail bv1 bv2 bv3 bv4
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
     have h_imm_range := LoadHU.imm_range_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
@@ -3147,7 +3295,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -3172,7 +3320,7 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-        bv_decide
+        exact signExtend32_setWidth12_signExtend16_eq imm
       }
     convert this using 1
     . simp [BitVec.ofNat, Nat.cast]
@@ -3241,7 +3389,7 @@ set_option maxHeartbeats 0 in
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr
       . simp [
@@ -3272,7 +3420,7 @@ set_option maxHeartbeats 0 in
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr <;> {
         unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
@@ -3310,7 +3458,9 @@ set_option maxHeartbeats 0 in
     have := LoadHU.imm_sign_of_opcode_530 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
-    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by
+      repeat rw [BitVec.msb_append]
+      simp
     simp [this]
     have := LoadHU.imm_extend_range_of_opcode_530 air row h_row h_constraints h_is_valid
     have :
@@ -3322,10 +3472,13 @@ set_option maxHeartbeats 0 in
     have h_sign_extend := LoadHU.imm_sign_extend_of_opcode_530 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
-    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by
+      simp [BitVec.msb_signExtend]
     rewrite [this] at h_sign_extend
     rewrite [h_sign_extend]
-    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by
+      rw [BitVec.msb_append]
+      simp
     rewrite [this]
     have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
     rewrite [this]
@@ -3400,7 +3553,7 @@ set_option maxHeartbeats 0 in
     . apply lhu_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -3444,7 +3597,7 @@ set_option maxHeartbeats 0 in
             simp [this]
             have := LoadHU.write_data_0_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid
             simp [this, LoadHU.shift_amount_of_opcode_530 air row h_opcode h_row h_constraints h_is_valid]
-            simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
+            simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_bus_wellformedness
             split_ifs
             . clear *-; symm
               simp [← BitVec.toNat_inj]
@@ -3621,7 +3774,7 @@ set_option maxHeartbeats 0 in
   := by
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide
     ] at h_memory
@@ -3637,7 +3790,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -3653,7 +3806,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -3669,7 +3822,7 @@ set_option maxHeartbeats 0 in
   := by
     . have h_memory := h_bus_wellformedness.2.1
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         show (2013265920 : FBB) = (-1 : FBB) by decide
       ] at h_memory
@@ -3690,7 +3843,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -3719,7 +3872,7 @@ set_option maxHeartbeats 0 in
     intro h_needs_write
     have h_memory := h_bus_wellformedness.2.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid,
       show (2013265920 : FBB) = (-1 : FBB) by decide,
       h_needs_write
@@ -3745,7 +3898,7 @@ set_option maxHeartbeats 0 in
     ]
     have h_execution := h_bus_axioms.1
     simp [
-      VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+      VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
       h_is_valid
     ] at h_execution
     rewrite [Fin.val_add, Nat.mod_eq_of_lt, BitVec.ofNat_add]
@@ -3823,7 +3976,7 @@ set_option maxHeartbeats 0 in
       (BitVec.setWidth 32 (BitVec.ofNat 16 x)) <<< 16 +
       (BitVec.setWidth 32 (BitVec.ofNat 16 y)) =
       (BitVec.ofNat 16 x) ++ (BitVec.ofNat 16 y)
-    := by bv_decide
+    := by exact concat16_eq_shift_add x y
     rewrite [←this]; clear this
     rewrite [BitVec.toNat_add]
     simp
@@ -3884,7 +4037,7 @@ set_option maxHeartbeats 0 in
     have (bv1 bv2 bv3 bv4: BitVec 8) :
       BitVec.setWidth 12 (bv1 ++ bv2 ++ bv3 ++ bv4) =
       BitVec.setWidth 12 (bv3 ++ bv4)
-    := by bv_decide
+    := by exact setWidth12_append_four_eq_tail bv1 bv2 bv3 bv4
     rewrite [this]; clear this
     -- combine the two halves of imm into BitVec.ofNat 16 imm
     have h_imm_range := LoadBU.imm_range_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
@@ -3903,7 +4056,7 @@ set_option maxHeartbeats 0 in
     := by
       have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -3928,7 +4081,7 @@ set_option maxHeartbeats 0 in
         dsimp at h_instruction
         simp [-Vector.mk_eq] at h_instruction
         simp (disch := omega) [←h_instruction, Transpiler.utof, Transpiler.sign_extend_16, Nat.mod_eq_of_lt]
-        bv_decide
+        exact signExtend32_setWidth12_signExtend16_eq imm
       }
     convert this using 1
     . simp [BitVec.ofNat, Nat.cast]
@@ -3997,7 +4150,7 @@ set_option maxHeartbeats 0 in
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr
       . simp [
@@ -4028,7 +4181,7 @@ set_option maxHeartbeats 0 in
       have (bv1 bv2: BitVec 8) :
         256#16 * BitVec.setWidth 16 bv1 + BitVec.setWidth 16 bv2 =
         bv1 ++ bv2
-      := by bv_decide
+      := by exact concat8_eq_mul_add bv1 bv2
       rewrite [←this]
       congr <;> {
         unfold BitVec.setWidth BitVec.setWidth' BitVec.toNat
@@ -4066,7 +4219,9 @@ set_option maxHeartbeats 0 in
     have := LoadBU.imm_sign_of_opcode_529 air row h_bus_wellformedness h_is_valid h_opcode
     rewrite [this]; clear this
     simp [U32.toBV]
-    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by bv_decide
+    have (bv1 bv2 bv3 bv4: BitVec 8) : (bv1 ++ bv2 ++ bv3 ++ bv4).msb = bv1.msb := by
+      repeat rw [BitVec.msb_append]
+      simp
     simp [this]
     have := LoadBU.imm_extend_range_of_opcode_529 air row h_row h_constraints h_is_valid
     have :
@@ -4078,10 +4233,13 @@ set_option maxHeartbeats 0 in
     have h_sign_extend := LoadBU.imm_sign_extend_of_opcode_529 air row h_opcode h_is_valid h_bus_wellformedness
     have (bv1 bv2: BitVec 32): bv1 = bv2 → bv1.msb = bv2.msb := by intro h; grind
     apply this at h_sign_extend
-    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by bv_decide
+    have (bv: BitVec 16) : (bv.signExtend 32).msb = bv.msb := by
+      simp [BitVec.msb_signExtend]
     rewrite [this] at h_sign_extend
     rewrite [h_sign_extend]
-    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by bv_decide
+    have (bv1 bv2: BitVec 16): (bv1 ++ bv2).msb = bv1.msb := by
+      rw [BitVec.msb_append]
+      simp
     rewrite [this]
     have (a b : Bool) : (a.toNat: FBB) = (b.toNat: FBB) ↔ a = b := by cases a <;> cases b <;> decide
     rewrite [this]
@@ -4156,7 +4314,7 @@ set_option maxHeartbeats 0 in
     . apply lbu_spec_of_get_instruction_fields_part_19 air row h_row h_is_valid h_opcode h_constraints h_bus_axioms h_bus_wellformedness
     . have h_transpile := h_bus_wellformedness.2.2.2
       simp [
-        VmAirWrapper_loadstore_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification,
         h_is_valid,
         Interaction.ProgramBusEntry.operand_properties
       ] at h_transpile
@@ -4200,7 +4358,7 @@ set_option maxHeartbeats 0 in
             simp [this]
             have := LoadBU.write_data_0_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid
             simp [this, LoadBU.shift_amount_of_opcode_529 air row h_opcode h_row h_constraints h_is_valid]
-            simp [VmAirWrapper_loadstore_constraint_and_interaction_simplification] at h_bus_wellformedness
+            simp [VmAirWrapper_Rv32LoadStoreAdapterAir_LoadStoreCoreAir_4_constraint_and_interaction_simplification] at h_bus_wellformedness
             clear *-
             split_ifs
             all_goals {

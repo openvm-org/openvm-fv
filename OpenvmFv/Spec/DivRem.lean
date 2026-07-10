@@ -39,7 +39,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
      ++ programBus_row air row
     → entry.1 = 0
 := by
-  simp_all [VmAirWrapper_divrem_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification]
 
 end DivRem.NonValidRows
 
@@ -71,7 +71,7 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -81,7 +81,7 @@ lemma wf_propertiesToAssert
   clear pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -101,7 +101,7 @@ lemma wf_propertiesToAssert
            h_sum_sc_ltm,
            rest ⟩ := constraints
   clear constrain_interactions rest
-  simp_all [VmAirWrapper_divrem_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
   repeat rw [← and_assoc]
@@ -150,7 +150,7 @@ lemma essentials
   clear constraints
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -158,7 +158,7 @@ lemma essentials
            ub_r0, ub_cr0, ub_r1, ub_cr1, ub_r2, ub_cr2, ub_r3, ub_cr3 ⟩ := pa_rtc
   clear pa_bit pa_read
 
-  simp_all [VmAirWrapper_divrem_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
@@ -199,14 +199,14 @@ lemma divrem_split
 (ub_ce : c_ext.val < 256)
 (ub_qe : q_ext.val < 256)
 (ub_re : r_ext.val < 256)
-(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 2048)
-(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 2048)
-(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 2048)
-(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 2048)
-(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4)).val < 2048)
-(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5)).val < 2048)
-(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6)).val < 2048)
-(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6) + (r_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b7)).val < 2048)
+(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 8192)
+(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 8192)
+(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 8192)
+(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 8192)
+(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4)).val < 8192)
+(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5)).val < 8192)
+(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6)).val < 8192)
+(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (r_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b4) + (r_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b5) + (r_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b6) + (r_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b7)).val < 8192)
 :
   U64.toBV #v[BitVec.ofNat 8 b0, BitVec.ofNat 8 b1, BitVec.ofNat 8 b2, BitVec.ofNat 8 b3, BitVec.ofNat 8 b4, BitVec.ofNat 8 b5, BitVec.ofNat 8 b6, BitVec.ofNat 8 b7] =
   U64.toBV #v[BitVec.ofNat 8 c0, BitVec.ofNat 8 c1, BitVec.ofNat 8 c2, BitVec.ofNat 8 c3,
@@ -216,14 +216,14 @@ lemma divrem_split
   U64.toBV #v[BitVec.ofNat 8 r0, BitVec.ofNat 8 r1, BitVec.ofNat 8 r2, BitVec.ofNat 8 r3,
               BitVec.ofNat 8 r_ext, BitVec.ofNat 8 r_ext, BitVec.ofNat 8 r_ext, BitVec.ofNat 8 r_ext]
 := by
-  replace ub_cry0 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  replace ub_cry1 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  replace ub_cry2 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  replace ub_cry3 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
-  replace ub_cry4 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry4; simp]
-  replace ub_cry5 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry5; simp]
-  replace ub_cry6 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry6; simp]
-  replace ub_cry7 : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry7; simp]
+  replace ub_cry0 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  replace ub_cry1 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  replace ub_cry2 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  replace ub_cry3 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
+  replace ub_cry4 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry4; simp]
+  replace ub_cry5 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry5; simp]
+  replace ub_cry6 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry6; simp]
+  replace ub_cry7 : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry7; simp]
 
   have ub_p00 : c0.val * q0.val ≤ 255 * 255 := by apply mul_le_mul <;> omega
 
@@ -337,14 +337,14 @@ lemma divrem_quot_rem_sign
 (ub_be : b_ext.val < 256)
 (ub_ce : c_ext.val < 256)
 (ub_qe : q_ext.val < 256)
-(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 2048)
-(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 2048)
-(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 2048)
-(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 2048)
-(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext)).val < 2048)
-(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext)).val < 2048)
-(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext)).val < 2048)
-(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext) + (b_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b_ext)).val < 2048)
+(ub_cry0 : (2005401601 * ((r0 + c0 * q0) - b0)).val < 8192)
+(ub_cry1 : (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1)).val < 8192)
+(ub_cry2 : (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2)).val < 8192)
+(ub_cry3 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3)).val < 8192)
+(ub_cry4 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext)).val < 8192)
+(ub_cry5 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext)).val < 8192)
+(ub_cry6 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext)).val < 8192)
+(ub_cry7 : (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * (2005401601 * ((r0 + c0 * q0) - b0) + (r1 + c0 * q1 + c1 * q0) - b1) + (r2 + c0 * q2 + c1 * q1 + c2 * q0) - b2) + (r3 + c0 * q3 + c1 * q2 + c2 * q1 + c3 * q0) - b3) + (b_ext + c1 * q3 + c2 * q2 + c3 * q1 + c0 * q_ext + q0 * c_ext) - b_ext) + (b_ext + c2 * q3 + c3 * q2 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext) - b_ext) + (b_ext + c3 * q3 + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext) - b_ext) + (b_ext + c0 * q_ext + q0 * c_ext + c1 * q_ext + q1 * c_ext + c2 * q_ext + q2 * c_ext + c3 * q_ext + q3 * c_ext) - b_ext)).val < 8192)
 (h_c_nz : ¬(U32.toInt #v[c0, c1, c2, c3] = 0))
 (h_r_nz : ¬(U32.toInt #v[r0, r1, r2, r3] = 0))
 (h_b_ext : b_ext = U32.ext #v[b0.val, b1.val, b2.val, b3.val] true)
@@ -795,7 +795,7 @@ theorem spec_DIVREM_czero
   clear h_divrem sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -805,7 +805,7 @@ theorem spec_DIVREM_czero
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -952,7 +952,7 @@ theorem spec_DIVREM_nczero_sc
   clear h_divrem sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -962,7 +962,7 @@ theorem spec_DIVREM_nczero_sc
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -1208,7 +1208,7 @@ theorem spec_DIVREM_nczero_nsc_rzero
   clear h_divrem sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -1218,7 +1218,7 @@ theorem spec_DIVREM_nczero_nsc_rzero
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -1706,7 +1706,7 @@ theorem spec_DIVREM_nczero_nsc_nrzero
   clear h_divrem sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -1716,7 +1716,7 @@ theorem spec_DIVREM_nczero_nsc_nrzero
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -2723,7 +2723,7 @@ theorem spec_DIVREM
   . apply spec_DIVREM_czero <;> assumption
   . have : air.core.zero_divisor row 0 = 0 := by
       rw [allHold_simplified_of_allHold] at constraints
-      simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+      simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
       obtain ⟨ constrain_interactions,
               b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
               b_zd, rest ⟩ := constraints
@@ -2741,7 +2741,7 @@ theorem spec_DIVREM
       . apply spec_DIVREM_nczero_nsc_rzero <;> assumption
       . apply spec_DIVREM_nczero_nsc_nrzero <;> try assumption
         rw [allHold_simplified_of_allHold] at constraints
-        simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+        simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
         obtain ⟨ constrain_interactions,
                 b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
                 b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -2808,7 +2808,7 @@ theorem spec_DIVUREMU_czero
   clear h_divuremu sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -2818,7 +2818,7 @@ theorem spec_DIVUREMU_czero
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -2949,7 +2949,7 @@ theorem spec_DIVUREMU_nczero_rzero
   clear h_divuremu sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -2959,7 +2959,7 @@ theorem spec_DIVUREMU_nczero_rzero
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -3112,7 +3112,7 @@ theorem spec_DIVUREMU_nczero_nrzero
   clear h_divuremu sop0 sop1 sop2 sop3 op0 op1 op2 op3
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc, pa_bit ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_divrem_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc pa_bit
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc pa_bit
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -3122,7 +3122,7 @@ theorem spec_DIVUREMU_nczero_nrzero
   clear pa_range pa_read
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
            b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,
@@ -3297,7 +3297,7 @@ theorem spec_DIVUREMU
   . apply spec_DIVUREMU_czero <;> assumption
   . have : air.core.zero_divisor row 0 = 0 := by
       rw [allHold_simplified_of_allHold] at constraints
-      simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+      simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
       obtain ⟨ constrain_interactions,
               b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
               b_zd, rest ⟩ := constraints
@@ -3307,7 +3307,7 @@ theorem spec_DIVUREMU
       . apply spec_DIVUREMU_nczero_rzero <;> assumption
       . apply spec_DIVUREMU_nczero_nrzero <;> try assumption
         rw [allHold_simplified_of_allHold] at constraints
-        simp [VmAirWrapper_divrem_constraint_and_interaction_simplification] at constraints
+        simp [VmAirWrapper_Rv32MultAdapterAir_DivRemCoreAir_4_8_constraint_and_interaction_simplification] at constraints
         obtain ⟨ constrain_interactions,
                 b_div, b_divu, b_rem, b_remu, b_valid, b_sc,
                 b_zd, h_zd_c0, h_zd_q0, h_zd_c1, h_zd_q1, h_zd_c2, h_zd_q2, h_zd_c3, h_zd_q3,

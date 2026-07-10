@@ -32,12 +32,12 @@ namespace PhantomAir.constraints
       -- : PhantomAir.extraction.constraint_0 air row ↔ constraint_0 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
       --   exact h
 
       -- @[PhantomAir_constraint_and_interaction_simplification]
@@ -50,12 +50,12 @@ namespace PhantomAir.constraints
       -- : PhantomAir.extraction.constraint_0 air row ↔ constraint_0 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
       --   exact h
 
       -- @[PhantomAir_constraint_and_interaction_simplification]
@@ -68,12 +68,12 @@ namespace PhantomAir.constraints
       -- : PhantomAir.extraction.constraint_0 air row ↔ constraint_0 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
       --   exact h
 
       -- @[PhantomAir_constraint_and_interaction_simplification]
@@ -86,12 +86,12 @@ namespace PhantomAir.constraints
       -- : PhantomAir.extraction.constraint_0 air row ↔ constraint_0 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
       --   exact h
 
       -- @[PhantomAir_constraint_and_interaction_simplification]
@@ -104,12 +104,12 @@ namespace PhantomAir.constraints
       -- : PhantomAir.extraction.constraint_0 air row ↔ constraint_0 air row := by
       -- apply Iff.intro
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification] at h
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification]
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
       --   exact h
       -- . intro h
-      --   simp [openvm_encapsulation, VmAirWrapper_shift_constraint_and_interaction_simplification]
-      --   simp only [VmAirWrapper_shift_constraint_and_interaction_simplification] at h
+      --   simp [openvm_encapsulation, VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification]
+      --   simp only [VmAirWrapper_Rv32BaseAluAdapterAir_ShiftCoreAir_4_8_constraint_and_interaction_simplification] at h
       --   exact h
 
     end row_constraints

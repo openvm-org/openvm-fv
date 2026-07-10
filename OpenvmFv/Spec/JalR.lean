@@ -38,7 +38,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
     → entry.1 = 0
 := by
   rw [allHold_simplified_of_allHold] at constraints
-  simp_all [VmAirWrapper_jalr_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]
 
 end JalR.NonValidRows
 
@@ -55,6 +55,90 @@ variable (axioms : axiomsPerRow air row)
 variable (propertiesToAssume : wf_propertiesToAssumePerRow air row)
 
 variable (row_valid : (executionBus_row air row)[0]!.1 = -1)
+
+private lemma signExtend16_truncate_to_width12 (imm : BitVec 12) :
+  BitVec.ofNat 12 (BitVec.signExtend 16 imm).toNat = imm
+:= by
+  apply BitVec.eq_of_toNat_eq
+  simp [BitVec.toNat_signExtend]
+  by_cases h_msb : imm.msb <;> simp [h_msb]
+  · have hlt := imm.isLt
+    omega
+  · omega
+
+private lemma nat_land_ones_eq_self_of_lt {w n : ℕ} (h : n < 2 ^ w) :
+  (2 ^ w - 1 &&& n) = n
+:= by
+  apply Nat.eq_of_testBit_eq
+  intro i
+  rw [Nat.testBit_land, Nat.testBit_two_pow_sub_one]
+  by_cases hi : i < w
+  · simp [hi]
+  · have hwi : w ≤ i := Nat.le_of_not_gt hi
+    have hpow : 2 ^ w ≤ 2 ^ i := Nat.pow_le_pow_right (by norm_num) hwi
+    have hn : n < 2 ^ i := lt_of_lt_of_le h hpow
+    simp [hi, Nat.testBit_lt_two_pow hn]
+
+private lemma nat_land_clear_lsb_of_lt {n : ℕ} (h : n < 2 ^ 32) :
+  (4294967294 &&& n) = n - n % 2
+:= by
+  have hdiv : n.div2 < 2 ^ 31 := by
+    rw [Nat.div2_val]
+    norm_num at h ⊢
+    omega
+  have hmask : 4294967294 = Nat.bit false (2 ^ 31 - 1) := by
+    norm_num [Nat.bit_val]
+  calc
+    4294967294 &&& n
+        = Nat.bit false (2 ^ 31 - 1) &&& Nat.bit n.bodd n.div2 := by
+            rw [hmask, Nat.bit_bodd_div2]
+    _ = Nat.bit false ((2 ^ 31 - 1) &&& n.div2) := by
+            rw [Nat.land_bit]
+            cases n.bodd <;> rfl
+    _ = Nat.bit false n.div2 := by
+            rw [nat_land_ones_eq_self_of_lt hdiv]
+    _ = n - n % 2 := by
+            simp [Nat.bit_val, Nat.div2_val]
+            have hdecomp := Nat.bit_bodd_div2 n
+            rw [Nat.bit_val, Nat.div2_val] at hdecomp
+            have hmod : n % 2 < 2 := Nat.mod_lt n (by norm_num)
+            omega
+
+private lemma bitvec_getElem_zero_toNat (b : BitVec 32) :
+  b[0].toNat = b.toNat % 2
+:= by
+  rw [BitVec.getElem_eq_testBit_toNat]
+  rw [Nat.testBit_zero]
+  by_cases h : b.toNat % 2 = 1
+  · simp [h]
+  · simp [h]
+    have hmod : b.toNat % 2 < 2 := Nat.mod_lt _ (by norm_num)
+    omega
+
+private lemma bitvec_and_clear_lsb (b : BitVec 32) :
+  4294967294#32 &&& b = b - b[0].toNat
+:= by
+  apply BitVec.eq_of_toNat_eq
+  rw [BitVec.toNat_and, BitVec.toNat_sub]
+  rw [show (4294967294#32).toNat = 4294967294 by rfl]
+  rw [nat_land_clear_lsb_of_lt b.isLt]
+  rw [bitvec_getElem_zero_toNat]
+  by_cases h0 : b.toNat % 2 = 0
+  · rw [h0]
+    simp
+    rw [Nat.mod_eq_of_lt b.isLt]
+  · have h1 : b.toNat % 2 = 1 := by
+      have hmod : b.toNat % 2 < 2 := Nat.mod_lt _ (by norm_num)
+      omega
+    rw [h1]
+    simp
+    change b.toNat - 1 = (2 ^ 32 - 1 + b.toNat) % 2 ^ 32
+    rw [Nat.mod_eq_sub_mod (show 2 ^ 32 - 1 + b.toNat ≥ 2 ^ 32 by omega)]
+    have hsub : 2 ^ 32 - 1 + b.toNat - 2 ^ 32 = b.toNat - 1 := by
+      norm_num
+      omega
+    rw [hsub]
+    rw [Nat.mod_eq_of_lt (by have hb := b.isLt; omega)]
 
 set_option maxHeartbeats 0 in
 set_option maxRecDepth 2_000_000 in
@@ -73,7 +157,7 @@ lemma wf_propertiesToAssert
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   simp [row_valid,
-        VmAirWrapper_jalr_constraint_and_interaction_simplification,
+        VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification,
         and_assoc,
         show (2013265920 : FBB) = -1 by decide,
         Interaction.ProgramBusEntry.operand_properties,
@@ -95,12 +179,12 @@ lemma needs_write_eq_is_valid
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_jalr_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification] at constraints
   obtain ⟨ c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 ⟩ := constraints
   obtain row_valid | row_valid := c1
   . simp_all
   . clear pa_mem pa_range
-    simp [row_valid, VmAirWrapper_jalr_constraint_and_interaction_simplification]
+    simp [row_valid, VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]
       at pa_exec pa_read pa_bit
     simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
     obtain ⟨ instruction, data, h_transpile,
@@ -141,7 +225,7 @@ theorem spec_jalr
                    (air.core.rs1_data_3 row 0).val] +
        BitVec.signExtend 32 (BitVec.ofNat 12 (air.core.imm row 0)))
 := by
-  simp [VmAirWrapper_jalr_constraint_and_interaction_simplification] at row_valid
+  simp [VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification] at row_valid
   have needs_write_eq_is_valid := needs_write_eq_is_valid _ air row row_in_range constraints propertiesToAssume
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_bit ⟩ := propertiesToAssume
   rw [allHold_simplified_of_allHold] at constraints
@@ -149,7 +233,7 @@ theorem spec_jalr
         row_valid,
         show (2013265920 : FBB) = -1 by decide,
         needs_write_eq_is_valid,
-        VmAirWrapper_jalr_constraint_and_interaction_simplification]
+        VmAirWrapper_Rv32JalrAdapterAir_Rv32JalrCoreAir_constraint_and_interaction_simplification]
     at pa_exec pa_mem pa_range pa_read pa_bit axioms constraints
   simp [Interaction.ProgramBusEntry.operand_properties] at pa_read
   obtain ⟨ instruction, data, h_transpile,
@@ -243,13 +327,13 @@ theorem spec_jalr
           rw [Int.emod_eq_of_lt (b := 65536) (by omega) (by omega)]
           ring_nf
           omega
-      . congr; simp; bv_decide
+      . rw [signExtend16_truncate_to_width12 imm]
     rw [← h_recast]; clear h_recast
     have h_eq_and :
       ∀ (b : BitVec 32), 4294967294#32 &&& b = b - b[0].toNat
     := by
       clear *-; intro b
-      by_cases b[0] <;> simp_all <;> bv_decide
+      exact bitvec_and_clear_lsb b
     have eq_carry :
       (air.core.carry row 0) =
         ((air.core.rs1_data_0 row 0 + air.core.rs1_data_1 row 0 * 256) +

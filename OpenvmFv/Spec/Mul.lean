@@ -39,7 +39,7 @@ lemma non_valid_row_exec_mem_program_multiplicities_zero
      ++ programBus_row air row
     → entry.1 = 0
 := by
-  simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification]
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification]
 
 end Mul.NonValidRows
 
@@ -67,7 +67,7 @@ lemma wf_propertiesToAssert
   wf_propertiesToAssertPerRow air row
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mul_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -76,11 +76,11 @@ lemma wf_propertiesToAssert
   clear pa_range
 
   rw [allHold_simplified_of_allHold] at constraints
-  simp [VmAirWrapper_mul_constraint_and_interaction_simplification] at constraints
+  simp [VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification] at constraints
   obtain ⟨ constrain_interactions,
            rest ⟩ := constraints
   clear constrain_interactions
-  simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
@@ -103,13 +103,13 @@ lemma essentials
   have props_asrt := wf_propertiesToAssert ExtF air row row_in_range constraints row_valid propertiesToAssume
 
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mul_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
   clear pa_rtc pa_read
 
-  simp_all [VmAirWrapper_mul_constraint_and_interaction_simplification,
+  simp_all [VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification,
             wf_propertiesToAssertPerRow,
             propertiesToAssert]
 
@@ -142,7 +142,7 @@ theorem spec_MUL
     (rop_of_Mul_opcode (air.core.ctx row 0).instruction.opcode)
 := by
   obtain ⟨ pa_exec, pa_mem, pa_range, pa_read, pa_rtc ⟩ := propertiesToAssume
-  simp [row_valid, VmAirWrapper_mul_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
+  simp [row_valid, VmAirWrapper_Rv32MultAdapterAir_MultiplicationCoreAir_4_8_constraint_and_interaction_simplification, propertiesToAssume] at pa_exec pa_mem pa_range pa_read pa_rtc
   repeat rw [Fin.ext_iff] at pa_mem
   simp [and_assoc] at pa_mem pa_range pa_read pa_rtc
   obtain ⟨ ub_rs1, ub_b0, ub_b1, ub_b2, ub_b3, ub_rs2, ub_c0, ub_c1, ub_c2, ub_c3, ub_rd, rm00, rm01, rm02, rm03 ⟩ := pa_mem
@@ -161,10 +161,10 @@ theorem spec_MUL
         BitVec.extend, ← BitVec.toNat_inj, U32.toNat]
   repeat rw [Nat.mod_eq_of_lt (b := 256) (by omega)]
 
-  have ub_cry0' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry0; simp]
-  have ub_cry1' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry1; simp]
-  have ub_cry2' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry2; simp]
-  have ub_cry3' : ?_ < 7864320 := by trans 2048 <;> [exact ub_cry3; simp]
+  have ub_cry0' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry0; simp]
+  have ub_cry1' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry1; simp]
+  have ub_cry2' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry2; simp]
+  have ub_cry3' : ?_ < 7864320 := by trans 8192 <;> [exact ub_cry3; simp]
 
   rw [add_sub_assoc, ← add_sub_assoc (a := 2005401601 * _), ← add_assoc] at ub_cry1' ub_cry2' ub_cry3'
   repeat rw [← add_assoc] at ub_cry2'
