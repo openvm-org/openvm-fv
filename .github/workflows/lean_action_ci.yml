@@ -15,6 +15,14 @@ permissions:
   contents: read
 
 jobs:
+  hygiene:
+    name: Hygiene scan (no native_decide / bv_decide / sorry)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zero-tolerance forbidden-tactic / proof-hole scan
+        run: python3 scripts/check_hygiene.py
+
   build-openvm-fv:
     name: Build OpenvmFv
     runs-on:

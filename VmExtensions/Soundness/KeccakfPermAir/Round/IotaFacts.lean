@@ -298,30 +298,30 @@ private theorem flag_sum_63
 /-! ## RC bit zero helpers
 
 For "plain" bit positions (where no round constant has that bit set),
-roundConstants[r].bit(n) = false.  These are proved by native_decide
+roundConstants[r].bit(n) = false.  These are proved by decide
 over the finite domain Fin 24 × Fin 16. -/
 
 -- Bits 32–47 of all round constants are 0.
 private theorem rc_bits_32_47 :
     ∀ (r : Fin 24) (j : Fin 16),
     (roundConstants[r.val]'(by simpa [roundConstants] using r.isLt)).toBitVec.getLsbD (32 + j.val) = false := by
-  native_decide
+  decide
 
 -- For limb 0: the "plain" bit positions (j ∈ {2,4,5,6,8,9,10,11,12,13,14}) have RC bit = 0.
 -- We don't need a single helper; the per-bit case in the main proof handles this
--- via native_decide on the specific (round, bit) pair.
+-- via decide on the specific (round, bit) pair.
 
 -- Bits 16–30 of all round constants are 0 (limb 1 plain bits).
 private theorem rc_bits_16_30 :
     ∀ (r : Fin 24) (j : Fin 16), j.val < 15 →
     (roundConstants[r.val]'(by simpa [roundConstants] using r.isLt)).toBitVec.getLsbD (16 + j.val) = false := by
-  native_decide
+  decide
 
 -- Bits 48–62 of all round constants are 0 (limb 3 plain bits).
 private theorem rc_bits_48_62 :
     ∀ (r : Fin 24) (j : Fin 16), j.val < 15 →
     (roundConstants[r.val]'(by simpa [roundConstants] using r.isLt)).toBitVec.getLsbD (48 + j.val) = false := by
-  native_decide
+  decide
 
 -- fieldXor a 0 = a (may already exist; restate locally if needed)
 private theorem fieldXor_zero_right' {F : Type} [Field F] (a : F) : fieldXor a 0 = a := by
@@ -436,7 +436,7 @@ theorem iota_lane_zero
         intro n hn
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hn
         rcases hn with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-          (simp only [rcBitFBB]; fin_cases round <;> native_decide)
+          (simp only [rcBitFBB]; fin_cases round <;> decide)
       rw [hrc 2 (by simp), hrc 4 (by simp), hrc 5 (by simp), hrc 6 (by simp),
           hrc 8 (by simp), hrc 9 (by simp), hrc 10 (by simp), hrc 11 (by simp),
           hrc 12 (by simp), hrc 13 (by simp), hrc 14 (by simp)]

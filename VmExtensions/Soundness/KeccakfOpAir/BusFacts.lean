@@ -118,7 +118,7 @@ theorem bitwise_assume
   }
   · have hmul : (buffer_ptr_limb_3 air row * 8).val < 256 := pa_bit.1
     have h_limb_byte : (buffer_ptr_limb_3 air row).val < 256 := pa_mem.1.2.2.2.2
-    have h8 : (8 : FBB).val = 8 := by native_decide
+    have h8 : (8 : FBB).val = 8 := by decide
     have hmul_val :
         (buffer_ptr_limb_3 air row * 8).val =
           (buffer_ptr_limb_3 air row).val * 8 := by
@@ -180,7 +180,7 @@ theorem memory_read_assume
   · exact pa_mem.1.2.2.2.2
   · intro k hk
     have hkth := forall_flatMap_range50_pair_even pa_mem.2 k hk
-    have hpow : 2 ^ 29 = 536870912 := by native_decide
+    have hpow : 2 ^ 29 = 536870912 := by decide
     simpa [hpow] using hkth.1
   · intro k hk
     let j : ℕ := k / 4
@@ -475,7 +475,7 @@ lemma wf_assert_enabled (air : Valid_KeccakfOpAir FBB ExtF) (row : ℕ)
         intro hc; exact absurd hc fbb_neg_one_ne_one
       · -- rd write: mult = is_valid = 1, need wf_properties
         change is_valid air row = 1 → _; intro _
-        exact ⟨by native_decide, h_mem.rd_ptr_bound, h_mem.buf_limb_0_byte,
+        exact ⟨by decide, h_mem.rd_ptr_bound, h_mem.buf_limb_0_byte,
                h_mem.buf_limb_1_byte, h_mem.buf_limb_2_byte, h_mem.buf_limb_3_byte⟩
     · -- buf pairs
       rw [List.mem_flatMap] at h; obtain ⟨k, hk_mem, hk⟩ := h
@@ -487,7 +487,7 @@ lemma wf_assert_enabled (air : Valid_KeccakfOpAir FBB ExtF) (row : ℕ)
         intro hc; exact absurd hc fbb_neg_one_ne_one
       · -- buf write: mult = is_valid = 1, need wf_properties
         change is_valid air row = 1 → _; intro _
-        exact ⟨by native_decide, h_mem.buf_ptr_k_bound k hk_mem,
+        exact ⟨by decide, h_mem.buf_ptr_k_bound k hk_mem,
                fbb_val_lt_of_exists (h_bw.postimage_byte_bound (4*k) (by omega)) (by omega),
                fbb_val_lt_of_exists (h_bw.postimage_byte_bound (4*k+1) (by omega)) (by omega),
                fbb_val_lt_of_exists (h_bw.postimage_byte_bound (4*k+2) (by omega)) (by omega),

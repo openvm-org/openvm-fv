@@ -46,7 +46,7 @@ theorem fbbToBool_chi {a b d : FBB}
 (0–99), bit position `j` (0–15), and chi input `inp` (0=a, 1=b, 2=d).
 The formula encodes the ρπ permutation baked into the AIR's column wiring. -/
 
--- Rotation values as a match-based function (reduces cleanly via native_decide).
+-- Rotation values as a match-based function (reduces cleanly via decide).
 @[reducible] def rotNat : Nat → Nat
   | 0 => 0 | 1 => 63 | 2 => 2 | 3 => 36 | 4 => 37
   | 5 => 28 | 6 => 20 | 7 => 58 | 8 => 9 | 9 => 44
@@ -94,7 +94,7 @@ abbrev chiCanonicalK
 theorem chiIdx_eq_chiAPrimeIdx :
     ∀ n : Fin 100, ∀ j : Fin 16, ∀ inp : Fin 3,
     chiIdx n.val j.val inp.val = chiAPrimeIdx n.val j.val inp.val := by
-  native_decide
+  decide
 
 /-! ## Chi output state -/
 
@@ -244,7 +244,7 @@ theorem a_prime_bit_chiAPrimeIdx_eq_rho_pi
 -- corresponding rho_pi_bits(aPrimeStateBits) value, for the limb case where
 -- n = 4*lane + limb and j is the bit within the limb.
 -- This combines chiIdx_eq_chiAPrimeIdx + definitional unfolding.
--- The proof rewrites chiIdx to chiAPrimeIdx (via native_decide), then
+-- The proof rewrites chiIdx to chiAPrimeIdx (via decide), then
 -- both sides are definitionally equal.
 theorem chi_col_eq_rho_pi_bit
     {ExtF : Type} [Field ExtF]
@@ -267,7 +267,7 @@ theorem chiAPrimeIdx_eq_aPrimeStateBits_idx
 
 -- rotNat (match-based) agrees with rotOffset (UInt64 array-based).
 theorem rotNat_eq_rotOffset : ∀ flat : Fin 25,
-    rotNat flat.val = rotOffset flat := by native_decide
+    rotNat flat.val = rotOffset flat := by decide
 
 -- The full per-bit column matching: fbbToBool(a_prime_bit[chiIdx(4*lane+limb, j, inp)])
 -- equals rho_pi_bits(aPrimeStateBits)(x_in, y_out, 16*limb+j), where
@@ -293,7 +293,7 @@ theorem fbbToBool_a_prime_bit_chiIdx_eq_rho_pi_bits
   simp only [show (4 * lane + limb.val) / 4 = lane from by omega,
              show (4 * lane + limb.val) % 4 = limb.val from by omega]
   -- Now both sides match except rotNat vs rotationValues[...].toNat
-  -- Convert rotNat to rotOffset via native_decide
+  -- Convert rotNat to rotOffset via decide
   have hflat : 5 * ((lane % 5 + inp.val) % 5) +
     ((lane % 5 + inp.val) % 5 + 3 * (lane / 5)) % 5 < 25 := by
     have : (lane % 5 + inp.val) % 5 < 5 := Nat.mod_lt _ (by omega)

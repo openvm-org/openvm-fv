@@ -76,7 +76,7 @@ private theorem intermed8_gate_lookup_fin :
         ∃ sel : Fin 12,
           encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
             (n3.val : FBB) (n4.val : FBB) = ((sel.val + 2 : ℕ) : FBB)) := by
-  native_decide
+  decide
 
 private theorem intermed12_gate_lookup_fin :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -87,7 +87,7 @@ private theorem intermed12_gate_lookup_fin :
         ∃ sel : Fin 12,
           encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
             (n3.val : FBB) (n4.val : FBB) = ((sel.val + 3 : ℕ) : FBB)) := by
-  native_decide
+  decide
 
 theorem intermed8CarryGateNext_eq_one (air : C FBB ExtF) (row : ℕ)
     (hrow : row ≤ Circuit.last_row air)

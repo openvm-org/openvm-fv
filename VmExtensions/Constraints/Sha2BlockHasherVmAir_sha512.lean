@@ -763,88 +763,88 @@ attribute [Sha2BlockHasherVmAir_Sha512Config_constraint_and_interaction_simplifi
 @[Sha2BlockHasherVmAir_Sha512Config_air_simplification]
 lemma constraint_0_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_0 c row ↔ constraint_0 c row := by
-  sorry
+  rfl
 lemma constraint_1_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_1 c row ↔ constraint_1 c row := by
-  sorry
+  rfl
 lemma constraint_2_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_2 c row ↔ constraint_2 c row := by
-  sorry
+  rfl
 lemma constraint_3_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_3 c row ↔ constraint_3 c row := by
-  sorry
+  rfl
 lemma constraint_4_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_4 c row ↔ constraint_4 c row := by
-  sorry
+  rfl
 lemma constraint_5_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_5 c row ↔ constraint_5 c row := by
-  sorry
+  rfl
 lemma constraint_6_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_6 c row ↔ constraint_6 c row := by
-  sorry
+  rfl
 lemma constraint_7_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_7 c row ↔ constraint_7 c row := by
-  sorry
+  rfl
 lemma constraint_8_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_8 c row ↔ constraint_8 c row := by
-  sorry
+  rfl
 lemma constraint_9_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_9 c row ↔ constraint_9 c row := by
-  sorry
+  rfl
 lemma constraint_10_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_10 c row ↔ constraint_10 c row := by
-  sorry
+  rfl
 lemma constraint_11_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_11 c row ↔ constraint_11 c row := by
-  sorry
+  rfl
 lemma constraint_12_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_12 c row ↔ constraint_12 c row := by
-  sorry
+  rfl
 lemma constraint_13_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_13 c row ↔ constraint_13 c row := by
-  sorry
+  rfl
 lemma constraint_14_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_14 c row ↔ constraint_14 c row := by
-  sorry
+  rfl
 lemma constraint_15_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_15 c row ↔ constraint_15 c row := by
-  sorry
+  rfl
 lemma constraint_16_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_16 c row ↔ constraint_16 c row := by
-  sorry
+  rfl
 lemma constraint_529_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_529 c row ↔ constraint_529 c row := by
-  sorry
+  rfl
 lemma constraint_530_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_530 c row ↔ constraint_530 c row := by
-  sorry
+  rfl
 lemma constraint_531_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_531 c row ↔ constraint_531 c row := by
-  sorry
+  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
 lemma constraint_532_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_532 c row ↔ constraint_532 c row := by
-  sorry
+  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
 lemma constraint_533_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_533 c row ↔ constraint_533 c row := by
-  sorry
+  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
 lemma constraint_534_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_534 c row ↔ constraint_534 c row := by
-  sorry
+  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
 lemma constraint_535_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_535 c row ↔ constraint_535 c row := by
-  sorry
+  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
 lemma constraint_536_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_536 c row ↔ constraint_536 c row := by
-  sorry
+  sorry -- FIXME(hygiene): wrapper misaligned with extraction. extraction.constraint_536 = isFirstRow*(col10-1); this def = isLastRow*(padding_flag-1). Correct match is human constraint_535. Needs realignment.
 lemma constraint_537_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_537 c row ↔ constraint_537 c row := by
-  sorry
+  rfl
 lemma constraint_538_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_538 c row ↔ constraint_538 c row := by
-  sorry
+  rfl
 lemma constraint_539_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_539 c row ↔ constraint_539 c row := by
-  sorry
+  rfl
 
 @[Sha2BlockHasherVmAir_Sha512Config_constraint_and_interaction_simplification]
 def constraint_17 (c : C F ExtF) (row : ℕ) : Prop :=
@@ -852,7 +852,7 @@ def constraint_17 (c : C F ExtF) (row : ℕ) : Prop :=
 
 lemma constraint_17_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_17 c row ↔ constraint_17 c row := by
-  sorry
+  rfl
 
 @[Sha2BlockHasherVmAir_Sha512Config_constraint_and_interaction_simplification]
 def constraint_18 (c : C F ExtF) (row : ℕ) : Prop :=

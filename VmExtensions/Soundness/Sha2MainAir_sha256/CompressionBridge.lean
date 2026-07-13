@@ -364,7 +364,7 @@ private theorem padding_choose2_is_bit_lookup :
       ((2 - ((n0.val + n1.val + n2.val + n3.val + n4.val : ℕ) : FBB)) *
         (1 - ((n0.val + n1.val + n2.val + n3.val + n4.val : ℕ) : FBB)) *
         wrapperBus_choose2_coeff : FBB) = 1 := by
-  native_decide
+  decide
 
 theorem wrapperBus_padding_choose2_is_bit
     (air : CBlock FBB ExtF) (row : ℕ)
@@ -412,7 +412,7 @@ theorem wrapperBus_choose2_encoder4_is_bit
     simp [wrapperBus_choose2, h1]
   · right
     have hcoeff : ((2 : FBB) * ((2 : FBB) - 1) * wrapperBus_choose2_coeff : FBB) = 1 := by
-      native_decide
+      decide
     simpa [wrapperBus_choose2, h2] using hcoeff
 
 private theorem padding_choose2_one_implies_selector_zero_lookup :
@@ -423,7 +423,7 @@ private theorem padding_choose2_one_implies_selector_zero_lookup :
         wrapperBus_choose2_coeff : FBB) = 1 →
       encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
         (n3.val : FBB) (n4.val : FBB) = 0 := by
-  native_decide
+  decide
 
 private theorem selector_two_implies_choose2_one_lookup :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -431,7 +431,7 @@ private theorem selector_two_implies_choose2_one_lookup :
       encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
         (n3.val : FBB) (n4.val : FBB) = 2 →
       ((n4.val : FBB) * ((n4.val : FBB) - 1) * wrapperBus_choose2_coeff : FBB) = 1 := by
-  native_decide
+  decide
 
 theorem blockWrapperMsg1_active_implies_selector_zero
     (air : CBlock FBB ExtF) (row : ℕ)

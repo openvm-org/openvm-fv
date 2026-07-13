@@ -69,7 +69,7 @@ lemma fbb_lt_of_sub_decomp {a b d : FBB}
   have h1 : a = d + b + 1 := by linear_combination h_eq
   have h2 : (d + b).val = d.val + b.val :=
     fbb_val_add (by omega)
-  have h3 : (1 : FBB).val = 1 := by native_decide
+  have h3 : (1 : FBB).val = 1 := by decide
   have h4 : (d + b + 1 : FBB).val = d.val + b.val + 1 := by
     rw [show d + b + 1 = (d + b) + 1 from by ring]
     rw [fbb_val_add (by rw [h2, h3]; omega)]
@@ -77,7 +77,7 @@ lemma fbb_lt_of_sub_decomp {a b d : FBB}
   rw [h1, h4]; omega
 
 -- Literal FBB value
-private lemma fbb_val_131072 : (131072 : FBB).val = 131072 := by native_decide
+private lemma fbb_val_131072 : (131072 : FBB).val = 131072 := by decide
 
 -- Decomposition value bound: lo + hi * 131072 has .val < 2^30 when range-checked
 lemma decomp_val_bound {lo hi : FBB}
@@ -104,10 +104,10 @@ lemma decomp_sum_lt_p {b lo hi : FBB}
   omega
 
 -- FBB inequality helpers (used for vacuous bus assert conditions)
-lemma fbb_zero_ne_one : ¬ (0 : FBB) = 1 := by native_decide
-lemma fbb_zero_ne_neg_one : ¬ (0 : FBB) = -1 := by native_decide
-lemma fbb_neg_one_ne_one : ¬ (-1 : FBB) = 1 := by native_decide
-lemma fbb_one_ne_neg_one : ¬ (1 : FBB) = -1 := by native_decide
+lemma fbb_zero_ne_one : ¬ (0 : FBB) = 1 := by decide
+lemma fbb_zero_ne_neg_one : ¬ (0 : FBB) = -1 := by decide
+lemma fbb_neg_one_ne_one : ¬ (-1 : FBB) = 1 := by decide
+lemma fbb_one_ne_neg_one : ¬ (1 : FBB) = -1 := by decide
 
 -- Convert from ∃ n, x = ↑n ∧ n < k to x.val < k
 lemma fbb_val_lt_of_exists {x : FBB} {k : ℕ} (h : ∃ n : ℕ, x = ↑n ∧ n < k)
@@ -117,13 +117,13 @@ lemma fbb_val_lt_of_exists {x : FBB} {k : ℕ} (h : ∃ n : ℕ, x = ↑n ∧ n 
   exact hn
 
 -- FBB constant values
-private lemma fbb_val_one_eq : (1 : FBB).val = 1 := by native_decide
-private lemma fbb_val_two_eq : (2 : FBB).val = 2 := by native_decide
+private lemma fbb_val_one_eq : (1 : FBB).val = 1 := by decide
+private lemma fbb_val_two_eq : (2 : FBB).val = 2 := by decide
 
 -- u16 limb bound: if a, b are bytes then a + b * 256 < 2^16
 lemma u16_limb_bound {a b : FBB} (ha : a.val < 256) (hb : b.val < 256) :
     (a + b * 256).val < 2^16 := by
-  have h256 : (256 : FBB).val = 256 := by native_decide
+  have h256 : (256 : FBB).val = 256 := by decide
   have hmul : (b * 256).val = b.val * 256 := by
     rw [Fin.val_mul, h256, Nat.mod_eq_of_lt (by omega)]
   have hadd : (a + b * 256).val = a.val + b.val * 256 := by

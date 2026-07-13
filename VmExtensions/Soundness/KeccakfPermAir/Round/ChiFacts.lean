@@ -22,8 +22,8 @@
   The AIR encodes this as column offset
   `a_prime_bit[320*sy + 64*sx + (16*limb + j + rot) % 64]`,
   which is exactly `chiAPrimeIdx` / `chiIdx` in `ChiHelpers.lean`.
-  The match is verified by `chiIdx_eq_chiAPrimeIdx` (native_decide)
-  and `rotNat_eq_rotOffset` (native_decide).
+  The match is verified by `chiIdx_eq_chiAPrimeIdx` (decide)
+  and `rotNat_eq_rotOffset` (decide).
 
   **Constraints 2996 and 3000** are chi constraints whose ρπ rotation
   causes the 16-bit limb to wrap around the 64-bit lane boundary.

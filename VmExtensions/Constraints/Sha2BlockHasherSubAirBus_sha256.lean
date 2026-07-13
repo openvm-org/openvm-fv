@@ -106,6 +106,15 @@ section bitwise_bus_trace
 
 variable {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
 
+private theorem range_loop_two : List.range.loop 2 [] = [0, 1] := by
+  decide
+
+private theorem range_loop_four : List.range.loop 4 [] = [0, 1, 2, 3] := by
+  decide
+
+private theorem range_loop_eight : List.range.loop 8 [] = [0, 1, 2, 3, 4, 5, 6, 7] := by
+  decide
+
 /-- The flattened extracted bitwise-bus trace: all per-row bitwise entries on
     the standard `BitwiseBus`. -/
 @[Sha2BlockHasherVmAir_Sha256Config_constraint_and_interaction_simplification]
@@ -119,7 +128,11 @@ lemma bitwiseBus_trace_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha256Config.extraction.constrain_interactions c) :
     Circuit.buses c BitwiseBus = bitwiseBus_trace c := by
-  sorry
+  unfold Sha2BlockHasherVmAir_Sha256Config.extraction.constrain_interactions at h
+  have hbus := congrArg (fun buses => buses BitwiseBus) h
+  simpa [BitwiseBus, bitwiseBus_trace, bitwiseBus_row, bitwiseBus_carry_entry,
+    bitwiseBus_digest_entry, List.range, range_loop_two, range_loop_four,
+    range_loop_eight] using hbus
 end bitwise_bus_trace
 
 /-! ## Bus 2: Private Bus (block chaining via PermutationCheckBus)
@@ -196,12 +209,6 @@ section private_bus_trace
 
 variable {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
 
-private theorem range_loop_two : List.range.loop 2 [] = [0, 1] := by
-  decide
-
-private theorem range_loop_eight : List.range.loop 8 [] = [0, 1, 2, 3, 4, 5, 6, 7] := by
-  decide
-
 /-- The flattened extracted private-bus trace: all per-row private-bus entries on
     `Sha2PrivateBus`. -/
 @[Sha2BlockHasherVmAir_Sha256Config_constraint_and_interaction_simplification]
@@ -215,6 +222,12 @@ lemma privateBus_trace_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha256Config.extraction.constrain_interactions c) :
     Circuit.buses c Sha2PrivateBus = privateBus_trace c := by
+  -- BLOCKED: the raw extraction `Sha2BlockHasherVmAir_Sha256Config.extraction.constrain_interactions`
+  -- only pins `Circuit.buses c` at indices {6, 8, 9} (bitwise, wrapper, private respectively;
+  -- verified by unfolding `h` and matching payload shapes), forcing `Circuit.buses c index = []`
+  -- for every other index — including `Sha2PrivateBus = 29`. As stated (with `Sha2PrivateBus := 29`
+  -- rather than the raw extraction's `9`), this goal reduces to `[] = privateBus_trace c`, which is
+  -- false in general. See message to team-lead for the reindexing mismatch.
   sorry
 end private_bus_trace
 
@@ -322,6 +335,10 @@ lemma wrapperBus_trace_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha256Config.extraction.constrain_interactions c) :
     Circuit.buses c Sha2WrapperBus = wrapperBus_trace c := by
+  -- BLOCKED: same root cause as `privateBus_trace_of_extraction` above. Unfolding `h` shows the
+  -- raw extraction places the wrapper-bus payload at index `8`, not `Sha2WrapperBus = 28`; at
+  -- index 28 the extraction forces `Circuit.buses c 28 = []`, so this goal is false as stated
+  -- unless `wrapperBus_trace c = []`. See message to team-lead for the reindexing mismatch.
   sorry
 
 /-- A SHA-side interaction map aligned with the standard OpenVM bus numbering:
@@ -341,6 +358,9 @@ lemma constrain_interactions_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha256Config.extraction.constrain_interactions c) :
     constrain_interactions c := by
+  -- BLOCKED: depends on `wrapperBus_trace_of_extraction` / `privateBus_trace_of_extraction`
+  -- above, which are themselves blocked by the raw-extraction/reindexed bus-number mismatch
+  -- (8/9 vs. `Sha2WrapperBus`/`Sha2PrivateBus` = 28/29). See message to team-lead.
   sorry
 
 /-- The bitwise-bus projection of `constrain_interactions`. -/

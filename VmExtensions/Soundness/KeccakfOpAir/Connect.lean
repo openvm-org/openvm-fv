@@ -36,7 +36,7 @@ lemma buffer_ptr_of_columns_bound
   have h1 : (buffer_ptr_limb_1 air row).val < 256 := h_mem.buf_limb_1_byte
   have h2 : (buffer_ptr_limb_2 air row).val < 256 := h_mem.buf_limb_2_byte
   have h3 : (buffer_ptr_limb_3 air row).val < 32 := by
-    exact fbb_val_lt_of_exists h_ptr3 (by native_decide)
+    exact fbb_val_lt_of_exists h_ptr3 (by decide)
   unfold bufferPtrOfColumns memoryPtrBound
   omega
 
