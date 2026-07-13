@@ -71,7 +71,7 @@ private theorem workingVarsToVector_add (x y : WorkingVars) :
 
 private theorem sha256K_vector_eq_coreK :
     Vector.ofFn (fun i : Fin 64 => sha256K[i.1]!) = CryptoHash.SHA256.K := by
-  native_decide
+  rfl
 
 private theorem sha256K_eq_coreK (i : Fin 64) :
     sha256K[i.1]! = CryptoHash.SHA256.K[i] := by
