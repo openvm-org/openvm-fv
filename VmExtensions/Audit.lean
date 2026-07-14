@@ -24,6 +24,7 @@ import VmExtensions.Soundness.Sha2MainAir_sha256.Soundness
 import VmExtensions.Soundness.Sha2BlockHasherVmAir_sha256.Block.Soundness
 import VmExtensions.Soundness.XorinVmAir.Soundness
 import VmExtensions.Soundness.Keccakf.Soundness
+import VmExtensions.Soundness.Keccakf.Main
 
 open Lean Elab Command
 
@@ -79,10 +80,12 @@ axioms. -/
 -- Xorin (Keccak sponge XOR-in): per-row essentials bundle.
 #audit_axioms XorinVmAir.Soundness.ValidRows.essentials
 
--- Keccak-f permutation: the state-bus payload-trace equivalences (the wired-in
--- soundness surface; the full `keccakf_matches_spec` permutation theorem lives
--- in the not-yet-wired Round tree).
+-- Keccak-f permutation: the full opcode-row soundness theorem — every enabled
+-- KeccakfOp row's decoded postimage equals Keccak-f[1600] of its decoded
+-- preimage (with next_pc = pc + 4 and end_timestamp = start_timestamp + 51) —
+-- together with the underlying state-bus payload-trace equivalences.
 #audit_axioms
+  Keccakf.Soundness.keccakf_matches_spec,
   Keccakf.Soundness.Concrete.opStateBusTrace_sends_eq_payloadTrace,
   Keccakf.Soundness.Concrete.permStateBusTrace_recvs_eq_payloadTrace
 
