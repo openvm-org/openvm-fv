@@ -2,3 +2,5 @@
 .DS_Store
 /extractor/target
 /VmExtensions/.lake
+/.orchestrator
+/reports
