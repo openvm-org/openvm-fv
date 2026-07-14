@@ -101,9 +101,27 @@ theorem recompose16_eq_value {F ExtF : Type} [Field F] [Field ExtF]
     b 0 + 2 * b 1 + 4 * b 2 + 8 * b 3 + 16 * b 4 + 32 * b 5 + 64 * b 6 + 128 * b 7 +
     256 * b 8 + 512 * b 9 + 1024 * b 10 + 2048 * b 11 + 4096 * b 12 + 8192 * b 13 +
     16384 * b 14 + 32768 * b 15 := by
-  -- After unfolding, h : (sum - out) = 0. Then sub_eq_zero.mp gives sum = out.
+  -- `recompose16_eq` dispatches specific (bit_base, output_col) tuples to the raw
+  -- extraction constraints `constraint_3074..3080` (which encode the same 16-bit
+  -- recomposition in Horner form via the `inter_*` chain) and falls back to the
+  -- explicit semantic polynomial otherwise. In every branch the constraint is
+  -- `<recomposition> - out = 0`, so `linear_combination` closes `out = <recomp>`
+  -- (the `inter_*`/constraint defs are `@[simp]`, so `simp` unfolds the Horner
+  -- chain; `ring` inside `linear_combination` reconciles Horner vs. expanded form).
   simp only [KeccakfPermAir.extraction.recompose16_eq] at h
-  exact (sub_eq_zero.mp h).symm
+  dsimp only
+  split_ifs at h with h1 h2 h3 h4 h5
+  · obtain ⟨rfl, rfl⟩ := h1; simp [KeccakfPermAir.extraction.constraint_3074] at h
+    linear_combination -h
+  · obtain ⟨rfl, rfl⟩ := h2; simp [KeccakfPermAir.extraction.constraint_3075] at h
+    linear_combination -h
+  · obtain ⟨rfl, rfl⟩ := h3; simp [KeccakfPermAir.extraction.constraint_3076] at h
+    linear_combination -h
+  · obtain ⟨rfl, rfl⟩ := h4; simp [KeccakfPermAir.extraction.constraint_3077] at h
+    linear_combination -h
+  · obtain ⟨rfl, rfl⟩ := h5; simp [KeccakfPermAir.extraction.constraint_3080] at h
+    linear_combination -h
+  · linear_combination -h
 
 /-! ## `recompose16_eq` → `fieldToU16` bridge
 
