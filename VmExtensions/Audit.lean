@@ -22,6 +22,8 @@
 import Lean
 import VmExtensions.Soundness.Sha2MainAir_sha256.Soundness
 import VmExtensions.Soundness.Sha2BlockHasherVmAir_sha256.Block.Soundness
+import VmExtensions.Soundness.Sha2MainAir_sha512.Soundness
+import VmExtensions.Soundness.Sha2BlockHasherVmAir_sha512.Block.Soundness
 import VmExtensions.Soundness.XorinVmAir.Soundness
 import VmExtensions.Soundness.Keccakf.Soundness
 import VmExtensions.Soundness.Keccakf.Main
@@ -76,6 +78,12 @@ axioms. -/
 #audit_axioms
   VmExtensions.Sha2CompressOpcode.equiv_SHA256_COMPRESS,
   Sha2BlockHasherVmAir_sha256.BlockSpec.sha2_block_soundness
+
+-- SHA-512: opcode-level equivalence to the reference compression function, and
+-- the underlying block-hasher soundness.
+#audit_axioms
+  VmExtensions.Sha2CompressOpcode.equiv_SHA512_COMPRESS,
+  Sha2BlockHasherVmAir_sha512.BlockSpec.sha2_block_soundness
 
 -- Xorin (Keccak sponge XOR-in): per-row essentials bundle.
 #audit_axioms XorinVmAir.Soundness.ValidRows.essentials

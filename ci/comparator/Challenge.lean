@@ -15,9 +15,15 @@
   `sorry` is not flagged by `scripts/check_hygiene.py`.
 -/
 import VmExtensions.Soundness.Sha2BlockHasherVmAir_sha256.Block.Soundness
+import VmExtensions.Soundness.Sha2BlockHasherVmAir_sha512.Block.Soundness
 import VmExtensions.Soundness.Keccakf.Main
 
 open BabyBear
+
+-- The SHA-256 and SHA-512 bridges share the `VmExtensions.Sha2CompressOpcode`
+-- namespace and reuse predicate names (`blockCompressionSpec`, `rotation_consistent`,
+-- …), so each variant's `open`s are section-scoped to avoid ambiguity.
+section Sha256
 open Sha2BlockHasherVmAir_sha256.constraints
 open Sha2BlockHasherVmAir_sha256.BlockSpec
 
@@ -39,6 +45,31 @@ theorem sha2_block_soundness
     blockCompressionSpec air start := sorry
 
 end ComparatorGate
+end Sha256
+
+section Sha512
+open Sha2BlockHasherVmAir_sha512.constraints
+open Sha2BlockHasherVmAir_sha512.BlockSpec
+
+namespace ComparatorGate
+
+/-- Frozen statement of `Sha2BlockHasherVmAir_sha512.BlockSpec.sha2_block_soundness`. -/
+theorem sha512_block_soundness
+    {C : Type → Type → Type} {ExtF : Type} [Field ExtF] [Circuit FBB ExtF C]
+    (air : C FBB ExtF) (start : ℕ)
+    (hstart : start ≤ Circuit.last_row air)
+    (hsel : encoder_selector_idx air start = 0)
+    (hrot : rotation_consistent air)
+    (hc : blockHasherConstraints air)
+    (h_raw_perm : privateBusRawPermutationSemantics air)
+    (htrace_fit : traceLengthFitsField air)
+    (h_bus_wf : ∀ mult a b c op,
+      (mult, [a, b, c, op]) ∈ Circuit.buses air Sha2BitwiseBus →
+      mult = 1 → a.val < 256 ∧ b.val < 256) :
+    blockCompressionSpec air start := sorry
+
+end ComparatorGate
+end Sha512
 
 section Keccakf
 

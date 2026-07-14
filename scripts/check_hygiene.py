@@ -50,9 +50,14 @@ EXCLUDED_DIRS = {".lake", ".git"}
 # NOT gated yet. Files whose path contains any of these markers are reported as
 # "excluded (shelved WIP)" and do NOT count as violations. Keep this list short
 # and documented — everything here is a deliberate, visible exception, never a
-# silent skip. Currently: the SHA-512 tree (Extraction/Constraints/Soundness),
-# which is an incomplete port not imported by the VmExtensions root aggregate.
-SHELVED_WIP_MARKERS = ("_sha512",)
+# silent skip.
+#
+# Currently empty: the SHA-512 tree (Extraction/Constraints/Soundness) was
+# un-shelved once it was wired into the VmExtensions root aggregate and its
+# top-level soundness theorems (`equiv_SHA512_COMPRESS`,
+# `Sha2BlockHasherVmAir_sha512.BlockSpec.sha2_block_soundness`) were certified
+# axiom-clean by the audit gate — it is now policed like every other subtree.
+SHELVED_WIP_MARKERS: tuple[str, ...] = ()
 
 # \b treats '_' as a word char, so e.g. `my_native_decide` / `sorryAx` do NOT match.
 TOKEN_RE = re.compile(r"\b(" + "|".join(map(re.escape, FORBIDDEN)) + r")\b")

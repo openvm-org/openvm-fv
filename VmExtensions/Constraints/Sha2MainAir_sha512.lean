@@ -168,37 +168,45 @@ abbrev timestamp_delta_expr (current prev lo hi : F) : F :=
 def constraint_0 (c : C F ExtF) (row : ℕ) : Prop :=
   ((Circuit.isFirstRow c row) * ((is_enabled c row) * (request_id c row))) = 0
 
-@[Sha2MainAir_Sha512Config_air_simplification]
-lemma constraint_0_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2MainAir_Sha512Config.extraction.constraint_0 c row ↔ constraint_0 c row := by
-  rfl
-
 @[Sha2MainAir_Sha512Config_constraint_and_interaction_simplification]
 def constraint_1 (c : C F ExtF) (row : ℕ) : Prop :=
   ((Circuit.isTransitionRow c row) *
     ((next_is_enabled c row) * ((next_request_id c row) - ((request_id c row) + 1)))) = 0
 
-@[Sha2MainAir_Sha512Config_air_simplification]
-lemma constraint_1_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2MainAir_Sha512Config.extraction.constraint_1 c row ↔ constraint_1 c row := by
-  rfl
-
 @[Sha2MainAir_Sha512Config_constraint_and_interaction_simplification]
 def constraint_2 (c : C F ExtF) (row : ℕ) : Prop :=
   (is_enabled c row) * ((is_enabled c row) - 1) = 0
-
-@[Sha2MainAir_Sha512Config_air_simplification]
-lemma constraint_2_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2MainAir_Sha512Config.extraction.constraint_2 c row ↔ constraint_2 c row := by
-  rfl
 
 @[Sha2MainAir_Sha512Config_constraint_and_interaction_simplification]
 def constraint_3 (c : C F ExtF) (row : ℕ) : Prop :=
   ((Circuit.isTransitionRow c row) * (((is_enabled c row) - 1) * (next_is_enabled c row))) = 0
 
+/- NB: the openvm v2.0.0 extractor emits the first four main-air row constraints
+   in a different order than the readable `constraint_0..3` wrappers (which keep
+   the SHA-256 ordering). The true correspondence is the swap
+   `ext.0 ≡ human.2`, `ext.1 ≡ human.3`, `ext.2 ≡ human.0`, `ext.3 ≡ human.1`;
+   each bridge below pairs `extraction.constraint_n` with the wrapper it actually
+   equals (still `rfl`). `constraint_4` onward are already aligned. The
+   `Bus.lean` accessors feed the matching extraction conjunct to each bridge.
+   (Bridges live after all four defs so the swapped references resolve.) -/
+@[Sha2MainAir_Sha512Config_air_simplification]
+lemma constraint_0_of_extraction (c : C F ExtF) (row : ℕ) :
+    Sha2MainAir_Sha512Config.extraction.constraint_0 c row ↔ constraint_2 c row := by
+  rfl
+
+@[Sha2MainAir_Sha512Config_air_simplification]
+lemma constraint_1_of_extraction (c : C F ExtF) (row : ℕ) :
+    Sha2MainAir_Sha512Config.extraction.constraint_1 c row ↔ constraint_3 c row := by
+  rfl
+
+@[Sha2MainAir_Sha512Config_air_simplification]
+lemma constraint_2_of_extraction (c : C F ExtF) (row : ℕ) :
+    Sha2MainAir_Sha512Config.extraction.constraint_2 c row ↔ constraint_0 c row := by
+  rfl
+
 @[Sha2MainAir_Sha512Config_air_simplification]
 lemma constraint_3_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2MainAir_Sha512Config.extraction.constraint_3 c row ↔ constraint_3 c row := by
+    Sha2MainAir_Sha512Config.extraction.constraint_3 c row ↔ constraint_1 c row := by
   rfl
 
 @[Sha2MainAir_Sha512Config_constraint_and_interaction_simplification]

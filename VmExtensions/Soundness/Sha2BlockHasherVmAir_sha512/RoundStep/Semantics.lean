@@ -239,7 +239,7 @@ private theorem roundConstant_lookup_fin
           (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) (n5.val : FBB) =
           if h : row_idx.val < 20 then k_limb_at row_idx.val slot limb else 0 := by
-  interval_cases slot <;> interval_cases limb <;> native_decide
+  interval_cases slot <;> interval_cases limb <;> decide
 
 theorem roundConstantPolyAtNext_eq_airPolyAtNext
     (air : C FBB ExtF) (row slot limb : ℕ)
@@ -368,7 +368,7 @@ theorem k_word_eq_limbs
           (k_limb_at row_idx slot 1).val * 2 ^ 16 +
           (k_limb_at row_idx slot 2).val * 2 ^ 32 +
           (k_limb_at row_idx slot 3).val * 2 ^ 48).toUInt64 := by
-  interval_cases row_idx <;> interval_cases slot <;> native_decide
+  interval_cases row_idx <;> interval_cases slot <;> decide
 
 end MatrixProjection
 

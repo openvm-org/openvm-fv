@@ -113,25 +113,29 @@ theorem constraint_0
     {air : C FBB ExtF}
     (hc : mainTraceConstraints air) (row : ℕ) :
     Sha2MainAir_sha512.constraints.constraint_0 air row := by
-  exact (Sha2MainAir_sha512.constraints.constraint_0_of_extraction air row).mp (hc row).1
+  -- human.0 ≡ ext.2 (extractor reorders 0..3); feed the ext.2 conjunct.
+  exact (Sha2MainAir_sha512.constraints.constraint_2_of_extraction air row).mp (hc row).2.2.1
 
 theorem constraint_1
     {air : C FBB ExtF}
     (hc : mainTraceConstraints air) (row : ℕ) :
     Sha2MainAir_sha512.constraints.constraint_1 air row := by
-  exact (Sha2MainAir_sha512.constraints.constraint_1_of_extraction air row).mp (hc row).2.1
+  -- human.1 ≡ ext.3; feed the ext.3 conjunct.
+  exact (Sha2MainAir_sha512.constraints.constraint_3_of_extraction air row).mp (hc row).2.2.2.1
 
 theorem constraint_2
     {air : C FBB ExtF}
     (hc : mainTraceConstraints air) (row : ℕ) :
     Sha2MainAir_sha512.constraints.constraint_2 air row := by
-  exact (Sha2MainAir_sha512.constraints.constraint_2_of_extraction air row).mp (hc row).2.2.1
+  -- human.2 ≡ ext.0; feed the ext.0 conjunct.
+  exact (Sha2MainAir_sha512.constraints.constraint_0_of_extraction air row).mp (hc row).1
 
 theorem constraint_3
     {air : C FBB ExtF}
     (hc : mainTraceConstraints air) (row : ℕ) :
     Sha2MainAir_sha512.constraints.constraint_3 air row := by
-  exact (Sha2MainAir_sha512.constraints.constraint_3_of_extraction air row).mp (hc row).2.2.2.1
+  -- human.3 ≡ ext.1; feed the ext.1 conjunct.
+  exact (Sha2MainAir_sha512.constraints.constraint_1_of_extraction air row).mp (hc row).2.1
 
 /-- The extracted boolean gate implies `is_enabled ∈ {0,1}`. -/
 theorem enabled_boolean

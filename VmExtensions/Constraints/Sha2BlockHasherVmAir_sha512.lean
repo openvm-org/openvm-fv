@@ -818,24 +818,92 @@ lemma constraint_529_of_extraction (c : C F ExtF) (row : ℕ) :
 lemma constraint_530_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_530 c row ↔ constraint_530 c row := by
   rfl
+/- The openvm v2.0.0 extractor emits trace-shape constraints `531..536` cyclically
+   rotated by one relative to the readable `constraint_531..536` wrappers (which
+   keep the SHA-256 ordering). The true correspondence is
+   `ext.531 ≡ human.536`, `ext.532 ≡ human.531`, `ext.533 ≡ human.532`,
+   `ext.534 ≡ human.533`, `ext.535 ≡ human.534`, `ext.536 ≡ human.535`.
+   Four of the six close by `rfl`. The remaining two (`ext.534 ≡ human.533` and
+   `ext.535 ≡ human.534`) hold only up to `ring`: their bodies are the row-selector
+   polynomial, which the extractor emits as a flat left-associated fold over the
+   `inter_*` helpers while the readable side keeps `selector_value_from`'s grouping.
+   Same polynomial, different `+`/`*` association — equal by `ring`, not defeq. The
+   proofs unfold the transitively-referenced `inter_*` to bare column atoms so the
+   two sides normalise to the same polynomial. These per-constraint bridges are
+   reference-only; the load-bearing `trace_shape_constraints_of_extraction` proves
+   the whole bundle directly from the raw extraction conjunction. -/
 lemma constraint_531_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_531 c row ↔ constraint_531 c row := by
-  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
+    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_531 c row ↔ constraint_536 c row := by
+  rfl
 lemma constraint_532_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_532 c row ↔ constraint_532 c row := by
-  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
+    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_532 c row ↔ constraint_531 c row := by
+  rfl
 lemma constraint_533_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_533 c row ↔ constraint_533 c row := by
-  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
+    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_533 c row ↔ constraint_532 c row := by
+  rfl
 lemma constraint_534_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_534 c row ↔ constraint_534 c row := by
-  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
+    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_534 c row ↔ constraint_533 c row := by
+  -- Reordered selector polynomial: unfold the `inter_*` fold to column atoms, then `ring`.
+  simp only [Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_534,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_1,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_2,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_3,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_4,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_5,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_6,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_7,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_9,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_10,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_11,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_13,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_14,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_15,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_16,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_17,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_18,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_20,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_21,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_23,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_24,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_25,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_26,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_27,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_28,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_29,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_30,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_31,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_32,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_33,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_34,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_35, constraint_533]
+  constructor <;> intro h <;> linear_combination h
 lemma constraint_535_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_535 c row ↔ constraint_535 c row := by
-  sorry -- FIXME(hygiene): wrapper misaligned with extraction (rotated by one); see constraint_536
+    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_535 c row ↔ constraint_534 c row := by
+  -- Reordered selector polynomial (same as 534, current-row selector only): unfold + `ring`.
+  simp only [Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_535,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_1,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_2,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_3,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_4,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_5,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_6,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_7,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_9,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_10,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_11,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_13,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_14,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_15,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_16,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_17,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_18,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_20,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_21,
+    Sha2BlockHasherVmAir_Sha512Config.extraction.inter_24, constraint_534]
+  constructor <;> intro h <;> linear_combination h
 lemma constraint_536_of_extraction (c : C F ExtF) (row : ℕ) :
-    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_536 c row ↔ constraint_536 c row := by
-  sorry -- FIXME(hygiene): wrapper misaligned with extraction. extraction.constraint_536 = isFirstRow*(col10-1); this def = isLastRow*(padding_flag-1). Correct match is human constraint_535. Needs realignment.
+    Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_536 c row ↔ constraint_535 c row := by
+  rfl
 lemma constraint_537_of_extraction (c : C F ExtF) (row : ℕ) :
     Sha2BlockHasherVmAir_Sha512Config.extraction.constraint_537 c row ↔ constraint_537 c row := by
   rfl

@@ -61,6 +61,8 @@ import VmExtensions.Soundness.Sha2MainAir_sha256.ColumnBridge
 import VmExtensions.Soundness.Sha2MainAir_sha256.WordBridge
 import VmExtensions.Soundness.Sha2MainAir_sha256.CoreBridge
 import VmExtensions.Soundness.Sha2MainAir_sha256.Soundness
+import VmExtensions.Soundness.Sha2BlockHasherVmAir_sha512.Block.Soundness
+import VmExtensions.Soundness.Sha2MainAir_sha512.Soundness
 import VmExtensions.Soundness.XorinVmAir.FieldLemmas
 import VmExtensions.Soundness.XorinVmAir.RowProperties
 import VmExtensions.Soundness.XorinVmAir.BusFacts
