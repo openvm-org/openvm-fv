@@ -1,0 +1,23 @@
+# Isolated lake package for the `leanprover/comparator` axiom-footprint gate.
+#
+# It is intentionally SEPARATE from the main `vm-extensions` package so that the
+# Challenge module (which contains a deliberate `sorry` for the frozen statement)
+# is NOT scanned by `scripts/check_hygiene.py` (which only polices the OpenvmFv /
+# VmExtensions first-party roots).
+#
+# The comparator tool builds `Challenge` and `Solution` sandboxed, exports both
+# via lean4export, and certifies that each `Solution` theorem proves the same
+# statement as `Challenge` using only the axioms in `config.json`'s
+# `permitted_axioms`. See README.md for the external binaries required.
+name = "comparator-gate"
+defaultTargets = ["Challenge", "Solution"]
+
+[[require]]
+name = "vm-extensions"
+path = "../../VmExtensions"
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"

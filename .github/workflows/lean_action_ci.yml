@@ -85,6 +85,16 @@ jobs:
           use-mathlib-cache: "true"
           use-github-cache: "false"
 
+      - name: Axiom-footprint audit (kernel collectAxioms allowlist)
+        # Compiles VmExtensions/Audit.lean, which kernel-collects the transitive
+        # axiom footprint of the top-level soundness theorems and fails the build
+        # if any depends on an axiom outside {propext, Classical.choice,
+        # Quot.sound} — notably sorryAx (open holes) or Lean.ofReduceBool /
+        # Lean.trustCompiler (native_decide). This is the in-build counterpart of
+        # the leanprover/comparator gate (see ci/comparator/).
+        working-directory: VmExtensions
+        run: lake build VmExtensions.Audit
+
       - name: Save .lake cache
         if: always() && steps.cache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
