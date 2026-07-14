@@ -32,10 +32,18 @@ GitHub-hosted runner or locally.
 - `config.json` — comparator configuration (modules, theorem names, permitted
   axioms).
 
-Currently gated: `ComparatorGate.sha2_block_soundness` (mirrors
-`Sha2BlockHasherVmAir_sha256.BlockSpec.sha2_block_soundness`). Add more by
-copying its statement into both `Challenge.lean` and `Solution.lean` (verbatim)
-and appending the name to `theorem_names`.
+Currently gated:
+
+- `ComparatorGate.sha2_block_soundness` — mirrors `Sha2BlockHasherVmAir_sha256.BlockSpec.sha2_block_soundness`
+- `ComparatorGate.sha512_block_soundness` — mirrors `Sha2BlockHasherVmAir_sha512.BlockSpec.sha2_block_soundness`
+- `ComparatorGate.keccakf_matches_spec` — mirrors `Keccakf.Soundness.keccakf_matches_spec`
+
+Add more by copying a theorem's statement into both `Challenge.lean` and
+`Solution.lean` (verbatim) and appending the name to `theorem_names`. When the
+source theorems live in namespaces that reuse predicate names — as the SHA-256
+and SHA-512 block-hasher bridges do (`blockCompressionSpec`, `rotation_consistent`,
+…) — put each variant in its own `section` with section-scoped `open`s so the
+frozen statements stay unambiguous.
 
 ## Required toolchain
 
