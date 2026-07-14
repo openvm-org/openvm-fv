@@ -5,6 +5,8 @@ This repository contains an infrastructure for formal verification of OpenVM RIS
 - all 10 opcodes related to handling of control flow: `AUIPC`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU`, `JAL`, `JALR`, and `LUI`; and
 - all 8 opcodes related to memory manipulation: `LW`, `LH`, `LHU`, `LB`, `LBU`, `SW`, `SH`, and `SB`.
 
+All of the OpenVM circuits verified here — both the RV32IM opcodes above and the precompile chips below — are extracted from **OpenVM `v2.0.0`**: [`openvm-org/openvm`](https://github.com/openvm-org/openvm) at tag [`v2.0.0`](https://github.com/openvm-org/openvm/tree/v2.0.0), i.e. commit [`15a7ab6baed03d75050dbef2bbad4b4e98fb8dba`](https://github.com/openvm-org/openvm/commit/15a7ab6baed03d75050dbef2bbad4b4e98fb8dba) (together with the STARK backend [`openvm-org/stark-backend`](https://github.com/openvm-org/stark-backend) at `v2.0.0`, commit `16d60de724c21dcadfde7d8315a1db507e5832d7`). The extraction toolchain is pinned to this release in [`extractor/Cargo.toml`](extractor/Cargo.toml).
+
 ## Precompile ("extension") chips
 
 In addition to the RV32IM base, the [`VmExtensions`](VmExtensions) folder contains Lean proofs of soundness for several OpenVM precompile chips, each relating a chip's extracted AIR constraints to a reference specification of the primitive it implements:
