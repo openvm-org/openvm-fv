@@ -71,7 +71,7 @@ private theorem workingVarsToVector_add (x y : WorkingVars) :
 
 private theorem sha256K_vector_eq_coreK :
     Vector.ofFn (fun i : Fin 64 => sha256K[i.1]!) = CryptoHash.SHA256.K := by
-  native_decide
+  rfl
 
 private theorem sha256K_eq_coreK (i : Fin 64) :
     sha256K[i.1]! = CryptoHash.SHA256.K[i] := by
@@ -583,13 +583,33 @@ private theorem coreScheduleExtendLoop_eq_prefix (msg : Fin 16 → Word) :
       symm
       simpa using scheduleVectorPrefix_eq_fold msg 48 (by omega)
 
+/-- The kernel cannot reduce `Std.Rco.toList` (it is defined by well-founded
+recursion over an iterator), so `decide`/`rfl` fail and only `native_decide`
+used to close these. This general characterisation replaces the range's
+iterator `toList` with the fully-computable `List.range'`, proven by a clean
+induction that peels one element at a time — no `ofReduceBool`. -/
+private theorem rco_toList_range' (n s : Nat) :
+    (s...(s + n)).toList = List.range' s n 1 := by
+  induction n generalizing s with
+  | zero => simp [Std.Rco.toList_eq_nil_iff]
+  | succ k ih =>
+    rw [Std.Rco.toList_eq_if_roo]
+    have hlt : (s...(s + (k + 1))).lower < (s...(s + (k + 1))).upper := by simp
+    rw [if_pos hlt]
+    show s :: (s<...(s + (k + 1))).toList = List.range' s (k + 1) 1
+    have hshift : (s<...(s + (k + 1))).toList = ((s + 1)...(s + (k + 1))).toList := rfl
+    rw [hshift]
+    have heq : s + (k + 1) = (s + 1) + k := by omega
+    rw [heq, ih (s + 1)]
+    simp [List.range'_succ]
+
 private theorem rcoToList_0_16 :
     (((0 : Nat)...16).toList) = List.range' 0 16 1 := by
-  native_decide
+  have := rco_toList_range' 16 0; simpa using this
 
 private theorem rcoToList_16_64 :
     (((16 : Nat)...64).toList) = List.range' 16 48 1 := by
-  native_decide
+  have := rco_toList_range' 48 16; norm_num at this; exact this
 
 private theorem expandMessageSchedule_eq_scheduleVectorPrefix (msg : Fin 16 → Word) :
     CryptoHash.SHA256.expandMessageSchedule (Vector.ofFn msg) = scheduleVectorPrefix msg 48 := by

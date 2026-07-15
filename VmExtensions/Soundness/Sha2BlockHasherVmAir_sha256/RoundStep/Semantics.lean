@@ -246,7 +246,7 @@ private theorem roundConstant_lookup_fin_00 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 0 0 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 0 0 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_01 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -257,7 +257,7 @@ private theorem roundConstant_lookup_fin_01 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 0 1 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 0 1 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_10 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -268,7 +268,7 @@ private theorem roundConstant_lookup_fin_10 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 1 0 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 1 0 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_11 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -279,7 +279,7 @@ private theorem roundConstant_lookup_fin_11 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 1 1 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 1 1 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_20 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -290,7 +290,7 @@ private theorem roundConstant_lookup_fin_20 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 2 0 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 2 0 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_21 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -301,7 +301,7 @@ private theorem roundConstant_lookup_fin_21 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 2 1 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 2 1 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_30 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -312,7 +312,7 @@ private theorem roundConstant_lookup_fin_30 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 3 0 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 3 0 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin_31 :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -323,7 +323,7 @@ private theorem roundConstant_lookup_fin_31 :
           (n3.val : FBB) (n4.val : FBB) = (row_idx.val : FBB) →
         roundConstantPolyAtDigits 3 1 (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = k_limb_at row_idx.val 3 1 := by
-  native_decide
+  decide +kernel
 
 private theorem roundConstant_lookup_fin
     (slot limb : ℕ) (hslot : slot < 4) (hlimb : limb < 2) :
@@ -419,7 +419,7 @@ theorem k_limb_at_lt
     (hslot : slot < 4)
     (hlimb : limb < 2) :
     (k_limb_at row_idx slot limb).val < 2 ^ 16 := by
-  interval_cases row_idx <;> interval_cases slot <;> interval_cases limb <;> native_decide
+  interval_cases row_idx <;> interval_cases slot <;> interval_cases limb <;> decide +kernel
 
 theorem k_word_eq_limbs
     (row_idx slot : ℕ)
@@ -427,7 +427,7 @@ theorem k_word_eq_limbs
     (hslot : slot < 4) :
     sha256K[row_idx * 4 + slot]! =
       ((k_limb_at row_idx slot 0).val + (k_limb_at row_idx slot 1).val * 2 ^ 16).toUInt32 := by
-  interval_cases row_idx <;> interval_cases slot <;> native_decide
+  interval_cases row_idx <;> interval_cases slot <;> decide +kernel
 
 /-! ## Field lemmas (formerly RoundStepFieldLemmas) -/
 

@@ -356,12 +356,32 @@ theorem assumeEntrySerializationInjective :
 @[simp]
 theorem wf_msgToAssertEntry (msg : KeccakStateMsg) :
     Interaction.BusEntry.assert FBB (msgToAssertEntry msg) := by
-  sorry
+  intro _
+  simp only [msgToAssertEntry]
+  refine ⟨?_, ?_⟩
+  · rw [msgPayload_flag]
+    cases msg.isPost <;> simp [flagField]
+  · intro i
+    change (msgPayload msg)[i.val + 2] < (2:FBB)^16
+    rw [msgPayload_state_limb,
+      show ((2:FBB)^16) = (((65536 : ℕ) : FBB)) by norm_num, Fin.lt_def,
+      fbb_val_natCast (u16_toNat_lt_BBPrime _), fbb_val_natCast (by norm_num)]
+    exact (msg.state.get i).toNat_lt
 
 @[simp]
 theorem wf_msgToAssumeEntry (msg : KeccakStateMsg) :
     Interaction.BusEntry.assume FBB (msgToAssumeEntry msg) := by
-  sorry
+  intro _
+  simp only [msgToAssumeEntry]
+  refine ⟨?_, ?_⟩
+  · rw [msgPayload_flag]
+    cases msg.isPost <;> simp [flagField]
+  · intro i
+    change (msgPayload msg)[i.val + 2] < (2:FBB)^16
+    rw [msgPayload_state_limb,
+      show ((2:FBB)^16) = (((65536 : ℕ) : FBB)) by norm_num, Fin.lt_def,
+      fbb_val_natCast (u16_toNat_lt_BBPrime _), fbb_val_natCast (by norm_num)]
+    exact (msg.state.get i).toNat_lt
 
 /-! ## Typed Keccak State-Bus Rows / Blocks -/
 

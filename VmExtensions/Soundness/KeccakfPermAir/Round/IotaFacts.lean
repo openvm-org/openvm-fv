@@ -52,6 +52,134 @@ open KeccakfPermAir.constraints
 open KeccakfPermAir.StepLimbs
 open Keccak
 
+/-! ## Iota Horner-peeling lemmas
+
+The openvm v2.0.0 extraction emits `constraint_3078/3079/3081` as nested Horner
+`inter_*` accumulator chains rather than a form definitionally equal to the
+`fieldXor`/`a_pp_00_bit` recomposition.  Each `peel_iota_<cnum>` keeps the
+accumulators opaque and telescopes the recursion one bit at a time (mixed plain
+and RC-xor bits), abstracting the columns to an opaque `mc` so the `ring` steps
+never unfold the concrete `Circuit` instance dictionary. -/
+
+private theorem peel_iota_3078 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
+    (c : C F ExtF) {row : ℕ} (mc : ℕ → F)
+    (hmc : ∀ col, Circuit.main c (id := 0) (column := col) (row := row) (rotation := 0) = mc col)
+    (hx : KeccakfPermAir.extraction.constraint_3078 c row) :
+    mc 2629 = fieldXor (mc 2565) (mc 0 + mc 4 + mc 5 + mc 6 + mc 7 + mc 10 + mc 12 + mc 13 + mc 14 + mc 15 + mc 20 + mc 22) + 2 * fieldXor (mc 2566) (mc 1 + mc 2 + mc 4 + mc 8 + mc 11 + mc 12 + mc 13 + mc 15 + mc 16 + mc 18 + mc 19) + 4 * mc 2567 + 8 * fieldXor (mc 2568) (mc 2 + mc 4 + mc 7 + mc 8 + mc 9 + mc 10 + mc 11 + mc 12 + mc 13 + mc 14 + mc 18 + mc 19 + mc 23) + 16 * mc 2569 + 32 * mc 2570 + 64 * mc 2571 + 128 * fieldXor (mc 2572) (mc 1 + mc 2 + mc 4 + mc 6 + mc 8 + mc 9 + mc 12 + mc 13 + mc 14 + mc 17 + mc 20 + mc 21) + 256 * mc 2573 + 512 * mc 2574 + 1024 * mc 2575 + 2048 * mc 2576 + 4096 * mc 2577 + 8192 * mc 2578 + 16384 * mc 2579 + 32768 * fieldXor (mc 2580) (mc 1 + mc 2 + mc 3 + mc 4 + mc 6 + mc 7 + mc 10 + mc 12 + mc 14 + mc 15 + mc 16 + mc 18 + mc 20 + mc 21 + mc 23) := by
+  simp only [KeccakfPermAir.extraction.constraint_3078, KeccakfPermAir.extraction.inter_6916, fieldXor, hmc] at hx
+  have e1 : KeccakfPermAir.extraction.inter_6915 c row = (mc 2566 + (mc 1 + mc 2 + mc 4 + mc 8 + mc 11 + mc 12 + mc 13 + mc 15 + mc 16 + mc 18 + mc 19) - 2*(mc 2566)*(mc 1 + mc 2 + mc 4 + mc 8 + mc 11 + mc 12 + mc 13 + mc 15 + mc 16 + mc 18 + mc 19)) + 2 * KeccakfPermAir.extraction.inter_6913 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6915, KeccakfPermAir.extraction.inter_6905, KeccakfPermAir.extraction.inter_6914, fieldXor, hmc]; ring
+  have e2 : KeccakfPermAir.extraction.inter_6913 c row = mc 2567 + 2 * KeccakfPermAir.extraction.inter_6912 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6913, fieldXor, hmc]; ring
+  have e3 : KeccakfPermAir.extraction.inter_6912 c row = (mc 2568 + (mc 2 + mc 4 + mc 7 + mc 8 + mc 9 + mc 10 + mc 11 + mc 12 + mc 13 + mc 14 + mc 18 + mc 19 + mc 23) - 2*(mc 2568)*(mc 2 + mc 4 + mc 7 + mc 8 + mc 9 + mc 10 + mc 11 + mc 12 + mc 13 + mc 14 + mc 18 + mc 19 + mc 23)) + 2 * KeccakfPermAir.extraction.inter_6910 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6912, KeccakfPermAir.extraction.inter_6911, fieldXor, hmc]; ring
+  have e4 : KeccakfPermAir.extraction.inter_6910 c row = mc 2569 + 2 * KeccakfPermAir.extraction.inter_6909 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6910, fieldXor, hmc]; ring
+  have e5 : KeccakfPermAir.extraction.inter_6909 c row = mc 2570 + 2 * KeccakfPermAir.extraction.inter_6908 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6909, fieldXor, hmc]; ring
+  have e6 : KeccakfPermAir.extraction.inter_6908 c row = mc 2571 + 2 * KeccakfPermAir.extraction.inter_6907 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6908, fieldXor, hmc]; ring
+  have e7 : KeccakfPermAir.extraction.inter_6907 c row = (mc 2572 + (mc 1 + mc 2 + mc 4 + mc 6 + mc 8 + mc 9 + mc 12 + mc 13 + mc 14 + mc 17 + mc 20 + mc 21) - 2*(mc 2572)*(mc 1 + mc 2 + mc 4 + mc 6 + mc 8 + mc 9 + mc 12 + mc 13 + mc 14 + mc 17 + mc 20 + mc 21)) + 2 * KeccakfPermAir.extraction.inter_6904 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6907, KeccakfPermAir.extraction.inter_6905, KeccakfPermAir.extraction.inter_6906, fieldXor, hmc]; ring
+  have e8 : KeccakfPermAir.extraction.inter_6904 c row = mc 2573 + 2 * KeccakfPermAir.extraction.inter_6903 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6904, fieldXor, hmc]; ring
+  have e9 : KeccakfPermAir.extraction.inter_6903 c row = mc 2574 + 2 * KeccakfPermAir.extraction.inter_6902 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6903, fieldXor, hmc]; ring
+  have e10 : KeccakfPermAir.extraction.inter_6902 c row = mc 2575 + 2 * KeccakfPermAir.extraction.inter_6901 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6902, fieldXor, hmc]; ring
+  have e11 : KeccakfPermAir.extraction.inter_6901 c row = mc 2576 + 2 * KeccakfPermAir.extraction.inter_6900 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6901, fieldXor, hmc]; ring
+  have e12 : KeccakfPermAir.extraction.inter_6900 c row = mc 2577 + 2 * KeccakfPermAir.extraction.inter_6899 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6900, fieldXor, hmc]; ring
+  have e13 : KeccakfPermAir.extraction.inter_6899 c row = mc 2578 + 2 * KeccakfPermAir.extraction.inter_6898 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6899, fieldXor, hmc]; ring
+  have e14 : KeccakfPermAir.extraction.inter_6898 c row = mc 2579 + 2 * KeccakfPermAir.extraction.inter_6897 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6898, fieldXor, hmc]; ring
+  have e15 : KeccakfPermAir.extraction.inter_6897 c row = (mc 2580 + (mc 1 + mc 2 + mc 3 + mc 4 + mc 6 + mc 7 + mc 10 + mc 12 + mc 14 + mc 15 + mc 16 + mc 18 + mc 20 + mc 21 + mc 23) - 2*(mc 2580)*(mc 1 + mc 2 + mc 3 + mc 4 + mc 6 + mc 7 + mc 10 + mc 12 + mc 14 + mc 15 + mc 16 + mc 18 + mc 20 + mc 21 + mc 23)) := by
+    simp only [KeccakfPermAir.extraction.inter_6897, KeccakfPermAir.extraction.inter_6896, fieldXor, hmc]; ring
+  simp only [fieldXor]
+  linear_combination -hx + (2 : F) * e1 + (4 : F) * e2 + (8 : F) * e3 + (16 : F) * e4 + (32 : F) * e5 + (64 : F) * e6 + (128 : F) * e7 + (256 : F) * e8 + (512 : F) * e9 + (1024 : F) * e10 + (2048 : F) * e11 + (4096 : F) * e12 + (8192 : F) * e13 + (16384 : F) * e14 + (32768 : F) * e15
+
+private theorem peel_iota_3079 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
+    (c : C F ExtF) {row : ℕ} (mc : ℕ → F)
+    (hmc : ∀ col, Circuit.main c (id := 0) (column := col) (row := row) (rotation := 0) = mc col)
+    (hx : KeccakfPermAir.extraction.constraint_3079 c row) :
+    mc 2630 = mc 2581 + 2 * mc 2582 + 4 * mc 2583 + 8 * mc 2584 + 16 * mc 2585 + 32 * mc 2586 + 64 * mc 2587 + 128 * mc 2588 + 256 * mc 2589 + 512 * mc 2590 + 1024 * mc 2591 + 2048 * mc 2592 + 4096 * mc 2593 + 8192 * mc 2594 + 16384 * mc 2595 + 32768 * fieldXor (mc 2596) (mc 3 + mc 5 + mc 6 + mc 10 + mc 11 + mc 12 + mc 19 + mc 20 + mc 22 + mc 23) := by
+  simp only [KeccakfPermAir.extraction.constraint_3079, fieldXor, hmc] at hx
+  have e1 : KeccakfPermAir.extraction.inter_6932 c row = mc 2582 + 2 * KeccakfPermAir.extraction.inter_6931 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6932, fieldXor, hmc]; ring
+  have e2 : KeccakfPermAir.extraction.inter_6931 c row = mc 2583 + 2 * KeccakfPermAir.extraction.inter_6930 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6931, fieldXor, hmc]; ring
+  have e3 : KeccakfPermAir.extraction.inter_6930 c row = mc 2584 + 2 * KeccakfPermAir.extraction.inter_6929 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6930, fieldXor, hmc]; ring
+  have e4 : KeccakfPermAir.extraction.inter_6929 c row = mc 2585 + 2 * KeccakfPermAir.extraction.inter_6928 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6929, fieldXor, hmc]; ring
+  have e5 : KeccakfPermAir.extraction.inter_6928 c row = mc 2586 + 2 * KeccakfPermAir.extraction.inter_6927 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6928, fieldXor, hmc]; ring
+  have e6 : KeccakfPermAir.extraction.inter_6927 c row = mc 2587 + 2 * KeccakfPermAir.extraction.inter_6926 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6927, fieldXor, hmc]; ring
+  have e7 : KeccakfPermAir.extraction.inter_6926 c row = mc 2588 + 2 * KeccakfPermAir.extraction.inter_6925 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6926, fieldXor, hmc]; ring
+  have e8 : KeccakfPermAir.extraction.inter_6925 c row = mc 2589 + 2 * KeccakfPermAir.extraction.inter_6924 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6925, fieldXor, hmc]; ring
+  have e9 : KeccakfPermAir.extraction.inter_6924 c row = mc 2590 + 2 * KeccakfPermAir.extraction.inter_6923 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6924, fieldXor, hmc]; ring
+  have e10 : KeccakfPermAir.extraction.inter_6923 c row = mc 2591 + 2 * KeccakfPermAir.extraction.inter_6922 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6923, fieldXor, hmc]; ring
+  have e11 : KeccakfPermAir.extraction.inter_6922 c row = mc 2592 + 2 * KeccakfPermAir.extraction.inter_6921 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6922, fieldXor, hmc]; ring
+  have e12 : KeccakfPermAir.extraction.inter_6921 c row = mc 2593 + 2 * KeccakfPermAir.extraction.inter_6920 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6921, fieldXor, hmc]; ring
+  have e13 : KeccakfPermAir.extraction.inter_6920 c row = mc 2594 + 2 * KeccakfPermAir.extraction.inter_6919 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6920, fieldXor, hmc]; ring
+  have e14 : KeccakfPermAir.extraction.inter_6919 c row = mc 2595 + 2 * KeccakfPermAir.extraction.inter_6918 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6919, fieldXor, hmc]; ring
+  have e15 : KeccakfPermAir.extraction.inter_6918 c row = (mc 2596 + (mc 3 + mc 5 + mc 6 + mc 10 + mc 11 + mc 12 + mc 19 + mc 20 + mc 22 + mc 23) - 2*(mc 2596)*(mc 3 + mc 5 + mc 6 + mc 10 + mc 11 + mc 12 + mc 19 + mc 20 + mc 22 + mc 23)) := by
+    simp only [KeccakfPermAir.extraction.inter_6918, KeccakfPermAir.extraction.inter_6917, fieldXor, hmc]; ring
+  simp only [fieldXor]
+  linear_combination -hx + (2 : F) * e1 + (4 : F) * e2 + (8 : F) * e3 + (16 : F) * e4 + (32 : F) * e5 + (64 : F) * e6 + (128 : F) * e7 + (256 : F) * e8 + (512 : F) * e9 + (1024 : F) * e10 + (2048 : F) * e11 + (4096 : F) * e12 + (8192 : F) * e13 + (16384 : F) * e14 + (32768 : F) * e15
+
+private theorem peel_iota_3081 {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
+    (c : C F ExtF) {row : ℕ} (mc : ℕ → F)
+    (hmc : ∀ col, Circuit.main c (id := 0) (column := col) (row := row) (rotation := 0) = mc col)
+    (hx : KeccakfPermAir.extraction.constraint_3081 c row) :
+    mc 2632 = mc 2613 + 2 * mc 2614 + 4 * mc 2615 + 8 * mc 2616 + 16 * mc 2617 + 32 * mc 2618 + 64 * mc 2619 + 128 * mc 2620 + 256 * mc 2621 + 512 * mc 2622 + 1024 * mc 2623 + 2048 * mc 2624 + 4096 * mc 2625 + 8192 * mc 2626 + 16384 * mc 2627 + 32768 * fieldXor (mc 2628) (mc 2 + mc 3 + mc 6 + mc 7 + mc 13 + mc 14 + mc 15 + mc 16 + mc 17 + mc 19 + mc 20 + mc 21 + mc 23) := by
+  simp only [KeccakfPermAir.extraction.constraint_3081, fieldXor, hmc] at hx
+  have e1 : KeccakfPermAir.extraction.inter_6962 c row = mc 2614 + 2 * KeccakfPermAir.extraction.inter_6961 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6962, fieldXor, hmc]; ring
+  have e2 : KeccakfPermAir.extraction.inter_6961 c row = mc 2615 + 2 * KeccakfPermAir.extraction.inter_6960 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6961, fieldXor, hmc]; ring
+  have e3 : KeccakfPermAir.extraction.inter_6960 c row = mc 2616 + 2 * KeccakfPermAir.extraction.inter_6959 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6960, fieldXor, hmc]; ring
+  have e4 : KeccakfPermAir.extraction.inter_6959 c row = mc 2617 + 2 * KeccakfPermAir.extraction.inter_6958 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6959, fieldXor, hmc]; ring
+  have e5 : KeccakfPermAir.extraction.inter_6958 c row = mc 2618 + 2 * KeccakfPermAir.extraction.inter_6957 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6958, fieldXor, hmc]; ring
+  have e6 : KeccakfPermAir.extraction.inter_6957 c row = mc 2619 + 2 * KeccakfPermAir.extraction.inter_6956 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6957, fieldXor, hmc]; ring
+  have e7 : KeccakfPermAir.extraction.inter_6956 c row = mc 2620 + 2 * KeccakfPermAir.extraction.inter_6955 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6956, fieldXor, hmc]; ring
+  have e8 : KeccakfPermAir.extraction.inter_6955 c row = mc 2621 + 2 * KeccakfPermAir.extraction.inter_6954 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6955, fieldXor, hmc]; ring
+  have e9 : KeccakfPermAir.extraction.inter_6954 c row = mc 2622 + 2 * KeccakfPermAir.extraction.inter_6953 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6954, fieldXor, hmc]; ring
+  have e10 : KeccakfPermAir.extraction.inter_6953 c row = mc 2623 + 2 * KeccakfPermAir.extraction.inter_6952 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6953, fieldXor, hmc]; ring
+  have e11 : KeccakfPermAir.extraction.inter_6952 c row = mc 2624 + 2 * KeccakfPermAir.extraction.inter_6951 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6952, fieldXor, hmc]; ring
+  have e12 : KeccakfPermAir.extraction.inter_6951 c row = mc 2625 + 2 * KeccakfPermAir.extraction.inter_6950 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6951, fieldXor, hmc]; ring
+  have e13 : KeccakfPermAir.extraction.inter_6950 c row = mc 2626 + 2 * KeccakfPermAir.extraction.inter_6949 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6950, fieldXor, hmc]; ring
+  have e14 : KeccakfPermAir.extraction.inter_6949 c row = mc 2627 + 2 * KeccakfPermAir.extraction.inter_6948 c row := by
+    simp only [KeccakfPermAir.extraction.inter_6949, fieldXor, hmc]; ring
+  have e15 : KeccakfPermAir.extraction.inter_6948 c row = (mc 2628 + (mc 2 + mc 3 + mc 6 + mc 7 + mc 13 + mc 14 + mc 15 + mc 16 + mc 17 + mc 19 + mc 20 + mc 21 + mc 23) - 2*(mc 2628)*(mc 2 + mc 3 + mc 6 + mc 7 + mc 13 + mc 14 + mc 15 + mc 16 + mc 17 + mc 19 + mc 20 + mc 21 + mc 23)) := by
+    simp only [KeccakfPermAir.extraction.inter_6948, KeccakfPermAir.extraction.inter_6947, fieldXor, hmc]; ring
+  simp only [fieldXor]
+  linear_combination -hx + (2 : F) * e1 + (4 : F) * e2 + (8 : F) * e3 + (16 : F) * e4 + (32 : F) * e5 + (64 : F) * e6 + (128 : F) * e7 + (256 : F) * e8 + (512 : F) * e9 + (1024 : F) * e10 + (2048 : F) * e11 + (4096 : F) * e12 + (8192 : F) * e13 + (16384 : F) * e14 + (32768 : F) * e15
+
+
+
 /-! ## ι spec helpers -/
 
 -- `ι` only modifies lane [0][0], so `(ι st r h)[0] = st[0] ^^^ rc[r]`.
@@ -141,7 +269,12 @@ private theorem constraint_3078_value
        step_flag air 10 row + step_flag air 12 row + step_flag air 14 row +
        step_flag air 15 row + step_flag air 16 row + step_flag air 18 row +
        step_flag air 20 row + step_flag air 21 row + step_flag air 23 row) := by
-  exact (sub_eq_zero.mp h).symm
+  -- The extraction gives `h` as the Horner-form iota constraint; `peel_iota_3078`
+  -- telescopes it into the explicit `fieldXor` recomposition.  Unfold the output/
+  -- bit/flag column abbreviations to raw `Circuit.main`, then discharge by
+  -- definitional equality against the peeling lemma.
+  dsimp only [a_ppp_00_limb, a_pp_00_bit, step_flag]
+  exact peel_iota_3078 air (fun col => Circuit.main air (id := 0) (column := col) (row := row) (rotation := 0)) (fun _ => rfl) h
 
 -- constraint_3079: a_ppp_00_limb[1] with 1 XOR bit (RC bit 31).
 set_option maxHeartbeats 400000 in
@@ -163,7 +296,12 @@ private theorem constraint_3079_value
        step_flag air 10 row + step_flag air 11 row + step_flag air 12 row +
        step_flag air 19 row + step_flag air 20 row + step_flag air 22 row +
        step_flag air 23 row) := by
-  exact (sub_eq_zero.mp h).symm
+  -- The extraction gives `h` as the Horner-form iota constraint; `peel_iota_3079`
+  -- telescopes it into the explicit `fieldXor` recomposition.  Unfold the output/
+  -- bit/flag column abbreviations to raw `Circuit.main`, then discharge by
+  -- definitional equality against the peeling lemma.
+  dsimp only [a_ppp_00_limb, a_pp_00_bit, step_flag]
+  exact peel_iota_3079 air (fun col => Circuit.main air (id := 0) (column := col) (row := row) (rotation := 0)) (fun _ => rfl) h
 
 -- constraint_3081: a_ppp_00_limb[3] with 1 XOR bit (RC bit 63).
 set_option maxHeartbeats 400000 in
@@ -186,7 +324,12 @@ private theorem constraint_3081_value
        step_flag air 15 row + step_flag air 16 row + step_flag air 17 row +
        step_flag air 19 row + step_flag air 20 row + step_flag air 21 row +
        step_flag air 23 row) := by
-  exact (sub_eq_zero.mp h).symm
+  -- The extraction gives `h` as the Horner-form iota constraint; `peel_iota_3081`
+  -- telescopes it into the explicit `fieldXor` recomposition.  Unfold the output/
+  -- bit/flag column abbreviations to raw `Circuit.main`, then discharge by
+  -- definitional equality against the peeling lemma.
+  dsimp only [a_ppp_00_limb, a_pp_00_bit, step_flag]
+  exact peel_iota_3081 air (fun col => Circuit.main air (id := 0) (column := col) (row := row) (rotation := 0)) (fun _ => rfl) h
 
 /-! ## Flag sum collapse under h_step
 
@@ -298,30 +441,30 @@ private theorem flag_sum_63
 /-! ## RC bit zero helpers
 
 For "plain" bit positions (where no round constant has that bit set),
-roundConstants[r].bit(n) = false.  These are proved by native_decide
+roundConstants[r].bit(n) = false.  These are proved by decide
 over the finite domain Fin 24 × Fin 16. -/
 
 -- Bits 32–47 of all round constants are 0.
 private theorem rc_bits_32_47 :
     ∀ (r : Fin 24) (j : Fin 16),
     (roundConstants[r.val]'(by simpa [roundConstants] using r.isLt)).toBitVec.getLsbD (32 + j.val) = false := by
-  native_decide
+  decide
 
 -- For limb 0: the "plain" bit positions (j ∈ {2,4,5,6,8,9,10,11,12,13,14}) have RC bit = 0.
 -- We don't need a single helper; the per-bit case in the main proof handles this
--- via native_decide on the specific (round, bit) pair.
+-- via decide on the specific (round, bit) pair.
 
 -- Bits 16–30 of all round constants are 0 (limb 1 plain bits).
 private theorem rc_bits_16_30 :
     ∀ (r : Fin 24) (j : Fin 16), j.val < 15 →
     (roundConstants[r.val]'(by simpa [roundConstants] using r.isLt)).toBitVec.getLsbD (16 + j.val) = false := by
-  native_decide
+  decide
 
 -- Bits 48–62 of all round constants are 0 (limb 3 plain bits).
 private theorem rc_bits_48_62 :
     ∀ (r : Fin 24) (j : Fin 16), j.val < 15 →
     (roundConstants[r.val]'(by simpa [roundConstants] using r.isLt)).toBitVec.getLsbD (48 + j.val) = false := by
-  native_decide
+  decide
 
 -- fieldXor a 0 = a (may already exist; restate locally if needed)
 private theorem fieldXor_zero_right' {F : Type} [Field F] (a : F) : fieldXor a 0 = a := by
@@ -436,7 +579,7 @@ theorem iota_lane_zero
         intro n hn
         simp only [List.mem_cons, List.mem_nil_iff, or_false] at hn
         rcases hn with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-          (simp only [rcBitFBB]; fin_cases round <;> native_decide)
+          (simp only [rcBitFBB]; fin_cases round <;> decide)
       rw [hrc 2 (by simp), hrc 4 (by simp), hrc 5 (by simp), hrc 6 (by simp),
           hrc 8 (by simp), hrc 9 (by simp), hrc 10 (by simp), hrc 11 (by simp),
           hrc 12 (by simp), hrc 13 (by simp), hrc 14 (by simp)]

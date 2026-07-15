@@ -88,7 +88,7 @@ private theorem selector_lookup_fin :
       ∃ sel : Fin 18,
         encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = (sel.val : FBB) := by
-  native_decide
+  decide
 
 theorem first4_indicator_lookup_fin :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -99,7 +99,7 @@ theorem first4_indicator_lookup_fin :
         ∃ sel : Fin 4,
           encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
             (n3.val : FBB) (n4.val : FBB) = (sel.val : FBB)) := by
-  native_decide
+  decide
 
 theorem round_indicator_lookup_fin :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -110,7 +110,7 @@ theorem round_indicator_lookup_fin :
         ∃ sel : Fin 16,
           encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
             (n3.val : FBB) (n4.val : FBB) = (sel.val : FBB)) := by
-  native_decide
+  decide
 
 theorem digest_indicator_lookup_fin :
     ∀ n0 n1 n2 n3 n4 : Fin 3,
@@ -118,7 +118,7 @@ theorem digest_indicator_lookup_fin :
       (((n0.val : FBB) * (n4.val : FBB) = 1) ↔
         encoderSelectorPoly (n0.val : FBB) (n1.val : FBB) (n2.val : FBB)
           (n3.val : FBB) (n4.val : FBB) = 16) := by
-  native_decide
+  decide
 
 /-- Combined: 18 valid encodings → selector ∈ 0..17. Case split on digit sum. -/
 theorem encoder_selector_of_ternary_digits (d0 d1 d2 d3 d4 : FBB)

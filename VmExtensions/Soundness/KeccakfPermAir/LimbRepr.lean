@@ -34,7 +34,9 @@ theorem encodeLimb_low (lo hi : UInt8) : (encodeLimb lo hi).toUInt8 = lo := by
   cases hi with | ofBitVec bhi => ?_
   show UInt8.ofBitVec ((blo.zeroExtend 16 ||| bhi.zeroExtend 16 <<< 8).truncate 8)
     = UInt8.ofBitVec blo
-  congr 1; bv_decide
+  congr 1
+  ext i hi
+  simp_all
 
 /-- High byte of encodeLimb. -/
 theorem encodeLimb_high (lo hi : UInt8) : ((encodeLimb lo hi) >>> 8).toUInt8 = hi := by
@@ -42,7 +44,12 @@ theorem encodeLimb_high (lo hi : UInt8) : ((encodeLimb lo hi) >>> 8).toUInt8 = h
   cases hi with | ofBitVec bhi => ?_
   show UInt8.ofBitVec (((blo.zeroExtend 16 ||| bhi.zeroExtend 16 <<< 8) >>> 8).truncate 8)
     = UInt8.ofBitVec bhi
-  congr 1; bv_decide
+  congr 1
+  ext i
+  have e2 : decide (8 + i < 16) = true := decide_eq_true_eq.mpr (by omega)
+  have e3 : decide (8 + i < 8) = false := decide_eq_false_iff_not.mpr (by omega)
+  have e4 : decide (i < 16) = true := decide_eq_true_eq.mpr (by omega)
+  simp_all
 
 /-- Any u16 can be reconstructed from its low and high bytes. -/
 theorem u16_from_bytes (x : UInt16) :
@@ -50,7 +57,16 @@ theorem u16_from_bytes (x : UInt16) :
   cases x with | ofBitVec bx => ?_
   show UInt16.ofBitVec ((bx.truncate 8).zeroExtend 16 |||
     ((bx >>> 8).truncate 8).zeroExtend 16 <<< 8) = UInt16.ofBitVec bx
-  congr 1; bv_decide
+  congr 1
+  ext i hi
+  by_cases h8 : i < 8
+  · simp_all
+  · simp
+    rw [show 8 + (i - 8) = i from by omega]
+    have e1 : decide (i < 8) = false := decide_eq_false_iff_not.mpr (by omega)
+    have e2 : decide (i - 8 < 8) = true := decide_eq_true_eq.mpr (by omega)
+    simp_all
+    cases decide (i < 8) <;> simp
 
 /-! ## State-level roundtrip theorems -/
 

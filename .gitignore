@@ -2,3 +2,7 @@
 .DS_Store
 /extractor/target
 /VmExtensions/.lake
+/ci/comparator/.lake
+/.comparator-toolchain
+/.orchestrator
+/reports

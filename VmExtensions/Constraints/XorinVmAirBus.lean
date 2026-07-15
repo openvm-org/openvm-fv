@@ -779,20 +779,32 @@ lemma constrain_execution_interactions
     simp [openvm_encapsulation] at h
     simpa using congrFun h 0
 
+-- The memory bus is the unique XorinVmAir bus whose `-1` (receive) multiplicities
+-- are emitted by the extraction as the *field literal* `2013265920` rather than a
+-- syntactic negation `-(…)` (contrast the execution bus at index 0, which uses
+-- `-(is_enabled …)` and matches generically). `2013265920 = -1` holds only in
+-- BabyBear characteristic, so these three lemmas are stated over `FBB` (the field
+-- the extraction is actually generated for) and bridged with `BabyBear.eq_neg_one`.
 set_option maxRecDepth 262144 in
 set_option maxHeartbeats 100000000 in
 lemma constrain_memory_interactions_literal
-    {F ExtF : Type} [Field F] [Field ExtF]
-    (air : Valid_XorinVmAir F ExtF)
+    {ExtF : Type} [Field ExtF]
+    (air : Valid_XorinVmAir FBB ExtF)
     (h : XorinVmAir.extraction.constrain_interactions air)
   :
     air.buses 1 = (List.range (air.last_row + 1)).flatMap (memoryBus_row_literal air)
   := by
-    sorry
+    -- eta-expand the RHS so `simp [memoryBus_row_literal]` can unfold the per-row
+    -- body (a partial application `memoryBus_row_literal air` does not reduce).
+    show air.buses 1 =
+      (List.range (air.last_row + 1)).flatMap (fun row => memoryBus_row_literal air row)
+    unfold XorinVmAir.extraction.constrain_interactions at h
+    simp [openvm_encapsulation] at h
+    simpa [memoryBus_row_literal, BabyBear.eq_neg_one] using congrFun h 1
 
 lemma constrain_memory_interactions_extracted
-    {F ExtF : Type} [Field F] [Field ExtF]
-    (air : Valid_XorinVmAir F ExtF)
+    {ExtF : Type} [Field ExtF]
+    (air : Valid_XorinVmAir FBB ExtF)
     (h : XorinVmAir.extraction.constrain_interactions air)
   :
     air.buses 1 = (List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row_extracted air row)
@@ -803,8 +815,8 @@ lemma constrain_memory_interactions_extracted
     exact h_lit
 
 lemma constrain_memory_interactions
-    {F ExtF : Type} [Field F] [Field ExtF]
-    (air : Valid_XorinVmAir F ExtF)
+    {ExtF : Type} [Field ExtF]
+    (air : Valid_XorinVmAir FBB ExtF)
     (h : XorinVmAir.extraction.constrain_interactions air)
   :
     air.buses 1 = (List.range (air.last_row + 1)).flatMap (λ row => memoryBus_row air row)

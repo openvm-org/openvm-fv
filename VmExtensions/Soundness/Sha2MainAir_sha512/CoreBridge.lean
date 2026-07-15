@@ -27,7 +27,11 @@ private theorem getElem!_push_size {α : Type} [Inhabited α]
   rw [Array.getElem!_eq_getD]
   simp
 
-def workingVarsToVector (state : WorkingVars) : Vector Word 8 :=
+-- `private`: file-local helper. Its sha256 twin lives in the shared
+-- `VmExtensions.Sha2CompressOpcode` namespace with the same name; keeping the
+-- sha512 copy private avoids a public-name clash when the audit gate imports
+-- both bridges. (All uses are within this file.)
+private def workingVarsToVector (state : WorkingVars) : Vector Word 8 :=
   Vector.ofFn fun i =>
     match i.1 with
     | 0 => state.a
@@ -39,7 +43,7 @@ def workingVarsToVector (state : WorkingVars) : Vector Word 8 :=
     | 6 => state.g
     | _ => state.h
 
-def vectorToWorkingVars (v : Vector Word 8) : WorkingVars where
+private def vectorToWorkingVars (v : Vector Word 8) : WorkingVars where
   a := v[0]
   b := v[1]
   c := v[2]
@@ -71,7 +75,7 @@ private theorem workingVarsToVector_add (x y : WorkingVars) :
 
 private theorem sha512K_vector_eq_coreK :
     Vector.ofFn (fun i : Fin 80 => sha512K[i.1]!) = CryptoHash.SHA512.K := by
-  native_decide
+  decide
 
 private theorem sha512K_eq_coreK (i : Fin 80) :
     sha512K[i.1]! = CryptoHash.SHA512.K[i] := by
@@ -622,13 +626,33 @@ private theorem coreScheduleExtendLoop_eq_prefix (msg : Fin 16 → Word) :
 -- Rco List Helpers
 -- ==========================================
 
+/-- The kernel cannot reduce `Std.Rco.toList` (it is defined by well-founded
+recursion over an iterator), so `decide`/`rfl` fail and only `native_decide`
+used to close these. This general characterisation replaces the range's
+iterator `toList` with the fully-computable `List.range'`, proven by a clean
+induction that peels one element at a time — no `ofReduceBool`. -/
+private theorem rco_toList_range' (n s : Nat) :
+    (s...(s + n)).toList = List.range' s n 1 := by
+  induction n generalizing s with
+  | zero => simp [Std.Rco.toList_eq_nil_iff]
+  | succ k ih =>
+    rw [Std.Rco.toList_eq_if_roo]
+    have hlt : (s...(s + (k + 1))).lower < (s...(s + (k + 1))).upper := by simp
+    rw [if_pos hlt]
+    show s :: (s<...(s + (k + 1))).toList = List.range' s (k + 1) 1
+    have hshift : (s<...(s + (k + 1))).toList = ((s + 1)...(s + (k + 1))).toList := rfl
+    rw [hshift]
+    have heq : s + (k + 1) = (s + 1) + k := by omega
+    rw [heq, ih (s + 1)]
+    simp [List.range'_succ]
+
 private theorem rcoToList_0_16 :
     (((0 : Nat)...16).toList) = List.range' 0 16 1 := by
-  native_decide
+  have := rco_toList_range' 16 0; simpa using this
 
 private theorem rcoToList_16_80 :
     (((16 : Nat)...80).toList) = List.range' 16 64 1 := by
-  native_decide
+  have := rco_toList_range' 64 16; norm_num at this; exact this
 
 -- ==========================================
 -- expandMessageSchedule Bridge

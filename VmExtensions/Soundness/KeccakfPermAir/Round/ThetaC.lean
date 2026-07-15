@@ -104,11 +104,11 @@ We prove this by exhaustive case analysis on the five boolean inputs and P. -/
 
 /-- 3 ≠ 0 in BabyBear.  Used to close invalid parity cases where the
     cubic product evaluates to ±3 (mod BB_prime). -/
-private lemma fbb_ne_zero_3 : ¬ (3 : FBB) = 0 := by native_decide
+private lemma fbb_ne_zero_3 : ¬ (3 : FBB) = 0 := by decide
 
 /-- 15 ≠ 0 in BabyBear.  Used to close invalid parity cases where the
     cubic product evaluates to ±15 (mod BB_prime). -/
-private lemma fbb_ne_zero_15 : ¬ (15 : FBB) = 0 := by native_decide
+private lemma fbb_ne_zero_15 : ¬ (15 : FBB) = 0 := by decide
 
 set_option maxHeartbeats 1600000 in
 /-- When five boolean BabyBear values sum to S and P is boolean with

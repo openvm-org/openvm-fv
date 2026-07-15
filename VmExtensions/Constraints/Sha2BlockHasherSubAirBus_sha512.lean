@@ -108,6 +108,12 @@ section bitwise_bus_trace
 
 variable {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
 
+private theorem range_loop_four : List.range.loop 4 [] = [0, 1, 2, 3] := by
+  decide
+
+private theorem range_loop_eight : List.range.loop 8 [] = [0, 1, 2, 3, 4, 5, 6, 7] := by
+  decide
+
 /-- The flattened extracted bitwise-bus trace: all per-row bitwise entries on
     the SHA-512 extracted bitwise bus. -/
 @[Sha2BlockHasherVmAir_Sha512Config_constraint_and_interaction_simplification]
@@ -121,7 +127,10 @@ lemma bitwiseBus_trace_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions c) :
     Circuit.buses c Sha2BitwiseBus = bitwiseBus_trace c := by
-  sorry
+  unfold Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions at h
+  have hbus := congrArg (fun buses => buses Sha2BitwiseBus) h
+  simpa [Sha2BitwiseBus, bitwiseBus_trace, bitwiseBus_row, bitwiseBus_carry_entry,
+    bitwiseBus_digest_entry, List.range, range_loop_four, range_loop_eight] using hbus
 end bitwise_bus_trace
 
 /-! ## Bus 2: Private Bus (block chaining via PermutationCheckBus)
@@ -198,12 +207,6 @@ section private_bus_trace
 
 variable {C : Type → Type → Type} {F ExtF : Type} [Field F] [Field ExtF] [Circuit F ExtF C]
 
-private theorem range_loop_four : List.range.loop 4 [] = [0, 1, 2, 3] := by
-  decide
-
-private theorem range_loop_eight : List.range.loop 8 [] = [0, 1, 2, 3, 4, 5, 6, 7] := by
-  decide
-
 /-- The flattened extracted private-bus trace: all per-row private-bus entries on
     `Sha2PrivateBus`. -/
 @[Sha2BlockHasherVmAir_Sha512Config_constraint_and_interaction_simplification]
@@ -217,7 +220,17 @@ lemma privateBus_trace_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions c) :
     Circuit.buses c Sha2PrivateBus = privateBus_trace c := by
-  sorry
+  unfold Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions at h
+  have hbus := congrArg (fun buses => buses Sha2PrivateBus) h
+  show Circuit.buses c Sha2PrivateBus =
+    (List.range (Circuit.last_row c + 1)).flatMap (fun row => privateBus_row c row)
+  simp [Sha2PrivateBus, privateBus_row, privateBus_send_entry, privateBus_recv_entry,
+    privateBus_send_data, privateBus_recv_data, composed_hash_u16, compose_a_u16, compose_e_u16,
+    private_bus_next_gbi, next_padding_flag, global_block_idx,
+    Finset.sum_range_succ, Finset.sum_range_zero, zero_add, mul_one, pow_succ, pow_zero, one_mul,
+    List.range, range_loop_four, range_loop_eight] at hbus ⊢
+  norm_num at hbus ⊢
+  exact hbus
 end private_bus_trace
 
 section wrapper_bus
@@ -368,7 +381,16 @@ lemma wrapperBus_trace_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions c) :
     Circuit.buses c Sha2WrapperBus = wrapperBus_trace c := by
-  sorry
+  unfold Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions at h
+  have hbus := congrArg (fun buses => buses Sha2WrapperBus) h
+  show Circuit.buses c Sha2WrapperBus =
+    (List.range (Circuit.last_row c + 1)).flatMap (fun row => wrapperBus_row c row)
+  simp [Sha2WrapperBus, wrapperBus_row, wrapperStateEntry, wrapperMsg1Entry, wrapperMsg2Entry,
+    compose_schedule_byte, compose_next_schedule_byte,
+    Finset.sum_range_succ, Finset.sum_range_zero, zero_add, mul_one, pow_succ, pow_zero, one_mul,
+    List.range, range_loop_four, range_loop_eight] at hbus ⊢
+  norm_num at hbus ⊢
+  exact hbus
 
 /-- A SHA-side interaction map aligned with the extracted SHA-512 bus numbering:
     bitwise lookup at `Sha2BitwiseBus`, wrapper communication at `Sha2WrapperBus`,
@@ -387,7 +409,19 @@ lemma constrain_interactions_of_extraction
     (c : C F ExtF)
     (h : Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions c) :
     constrain_interactions c := by
-  sorry
+  unfold constrain_interactions
+  funext index
+  rcases eq_or_ne index Sha2BitwiseBus with h1 | h1
+  · simp [h1, ← bitwiseBus_trace_of_extraction c h]
+  · rcases eq_or_ne index Sha2WrapperBus with h2 | h2
+    · simp [h1, h2, ← wrapperBus_trace_of_extraction c h]
+    · rcases eq_or_ne index Sha2PrivateBus with h3 | h3
+      · simp [h1, h2, h3, ← privateBus_trace_of_extraction c h]
+      · unfold Sha2BlockHasherVmAir_Sha512Config.extraction.constrain_interactions at h
+        have hidx := congrArg (fun buses => buses index) h
+        simp only [Sha2BitwiseBus, Sha2WrapperBus, Sha2PrivateBus] at h1 h2 h3
+        simp [h1, h2, h3] at hidx
+        simp [h1, h2, h3, hidx]
 
 /-- The bitwise-bus projection of `constrain_interactions`. -/
 @[Sha2BlockHasherVmAir_Sha512Config_air_simplification]
